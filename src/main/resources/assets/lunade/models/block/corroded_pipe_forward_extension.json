@@ -1,0 +1,8 @@
+{
+	"parent": "lunade:block/template_pipe_forward_extension",
+	"textures": {
+		"particle": "lunade:block/corroded_pipe",
+		"side": "lunade:block/corroded_pipe",
+		"front": "lunade:block/corroded_pipe_front"
+	}
+}

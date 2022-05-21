@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "colored_fitting",
+  "ingredients": [
+    {
+      "item": "lunade:corroded_fitting"
+    },
+    {
+      "item": "lunade:corroded_fitting"
+    },
+    {
+      "item": "lunade:corroded_fitting"
+    },
+    {
+      "item": "minecraft:orange_dye"
+    }
+  ],
+  "result": {
+    "item": "lunade:orange_fitting",
+    "count": 3
+  }
+}

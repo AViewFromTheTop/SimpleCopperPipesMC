@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "copper_pipe",
+  "version": "1.10",
+
+  "name": "Simple Copper Pipes",
+  "description": "Adds copper pipes with unique mechanics to Minecraft.",
+  "authors": [
+  ],
+  "contact": {
+  },
+
+  "license": "MIT",
+  "icon": "assets/lunade/copper_icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.lunade.copper.Main"
+    ],
+    "client": [
+      "net.lunade.copper.MainClient"
+    ]
+  },
+  "mixins": [
+    "copper.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.19.x",
+    "java": ">=17"
+  },
+  "suggests": {
+  }
+}

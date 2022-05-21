@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "colored_fitting",
+  "ingredients": [
+    {
+      "item": "lunade:corroded_fitting"
+    },
+    {
+      "item": "lunade:corroded_fitting"
+    },
+    {
+      "item": "lunade:corroded_fitting"
+    },
+    {
+      "item": "minecraft:yellow_dye"
+    }
+  ],
+  "result": {
+    "item": "lunade:yellow_fitting",
+    "count": 3
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "glowing_fitting",
+  "ingredients": [
+    {
+      "item": "lunade:light_gray_fitting"
+    },
+    {
+      "item": "minecraft:glow_ink_sac"
+    }
+  ],
+  "result": {
+    "item": "lunade:glowing_light_gray_fitting"
+  }
+}

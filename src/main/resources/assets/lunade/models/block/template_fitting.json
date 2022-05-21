@@ -1,0 +1,19 @@
+{
+	"parent": "block/block",
+	"elements": [
+		{
+			"name": "fitting",
+			"from": [2.5, 2.5, 2.5],
+			"to": [13.5, 13.5, 13.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [3, 3, 13, 13], "texture": "#texture"},
+				"east": {"uv": [3, 3, 13, 13], "texture": "#texture"},
+				"south": {"uv": [3, 3, 13, 13], "texture": "#texture"},
+				"west": {"uv": [3, 3, 13, 13], "texture": "#texture"},
+				"up": {"uv": [3, 3, 13, 13], "texture": "#texture"},
+				"down": {"uv": [3, 3, 13, 13], "texture": "#texture"}
+			}
+		}
+	]
+}

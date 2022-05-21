@@ -1,0 +1,7 @@
+{
+	"parent": "lunade:block/template_smooth_pipe",
+	"textures": {
+		"particle": "lunade:block/brown_pipe",
+		"side": "lunade:block/brown_pipe"
+	}
+}

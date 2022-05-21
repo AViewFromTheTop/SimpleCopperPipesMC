@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.lunade.copper.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "AxeItemMixin",
+    "CampfireBlockMixin",
+    "CoralBlockBlockMixin",
+    "CoralParentBlockMixin",
+    "EntityMixin",
+    "FarmlandBlockMixin",
+    "HoeItemMixin",
+    "HoneyCombItemMixin",
+    "ItemMixin",
+    "SugarCaneBlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

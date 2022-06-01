@@ -27,7 +27,7 @@ import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.math.random.AbstractRandom;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
@@ -35,6 +35,7 @@ import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import static net.lunade.copper.blocks.CopperPipe.FACING;
 
@@ -117,7 +118,7 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
 
     public boolean canPathfindThrough(BlockState blockState, BlockView blockView, BlockPos blockPos, NavigationType navigationType) { return false; }
 
-    public void randomTick(BlockState blockState, ServerWorld serverWorld, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerWorld serverWorld, BlockPos blockPos, AbstractRandom random) {
         if (random.nextFloat() < 0.05688889F) {
             if (random.nextFloat() < 0.15F) {
                 if (getNextStage(serverWorld, blockPos) != null) {
@@ -231,7 +232,7 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
     }
 
     @Override
-    public void randomDisplayTick(BlockState blockState, World world, BlockPos blockPos, Random random) {
+    public void randomDisplayTick(BlockState blockState, World world, BlockPos blockPos, AbstractRandom random) {
         if (blockState.get(HAS_ELECTRICITY)) {
             ParticleUtil.spawnParticle(Direction.UP.getAxis(), world, blockPos, 0.55D, ParticleTypes.ELECTRIC_SPARK, UniformIntProvider.create(1, 2));
         }

@@ -23,8 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(HoneycombItem.class)
 public class HoneyCombItemMixin {
 
-    @Inject(at = @At("TAIL"), method = "useOnBlock", cancellable = true)
-    public void useOnBlock(ItemUsageContext itemUsageContext, CallbackInfoReturnable<ActionResult> info) {
+    @Inject(at = @At("TAIL"), method = "useOnBlock")
+    public ActionResult useOnBlock(ItemUsageContext itemUsageContext, CallbackInfoReturnable info) {
         World world = itemUsageContext.getWorld();
         BlockPos blockPos = itemUsageContext.getBlockPos();
         PlayerEntity playerEntity = itemUsageContext.getPlayer();
@@ -64,8 +64,7 @@ public class HoneyCombItemMixin {
             }
             itemStack.decrement(1);
 
-            info.setReturnValue(ActionResult.success(world.isClient));
-            info.cancel();
+            return ActionResult.success(world.isClient);
         } else if (fit) {
             if (playerEntity instanceof ServerPlayerEntity) {
                 Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack);
@@ -80,11 +79,9 @@ public class HoneyCombItemMixin {
             }
             itemStack.decrement(1);
 
-            info.setReturnValue(ActionResult.success(world.isClient));
-            info.cancel();
+            return ActionResult.success(world.isClient);
         } else {
-            info.setReturnValue(ActionResult.PASS);
-            info.cancel();
+            return ActionResult.PASS;
         }
     }
 

@@ -2,6 +2,7 @@ package net.lunade.copper.block_entity;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.lunade.copper.Main;
 import net.minecraft.particle.VibrationParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.dynamic.Codecs;
@@ -26,37 +27,33 @@ public class CopperPipeListener
                 return vibrationListener.range;
             }), VibrationListener.Vibration.CODEC.optionalFieldOf("event").forGetter((vibrationListener) -> {
                 return Optional.ofNullable(vibrationListener.vibration);
-            }), Codec.floatRange(0.0F, 3.4028235E38F).fieldOf("event_distance").orElse(0.0F).forGetter((vibrationListener) -> {
+            }), Codecs.NONNEGATIVE_INT.fieldOf("event_distance").orElse(0).forGetter((vibrationListener) -> {
                 return vibrationListener.distance;
             }), Codecs.NONNEGATIVE_INT.fieldOf("event_delay").orElse(0).forGetter((vibrationListener) -> {
                 return vibrationListener.delay;
-            })).apply(instance, (positionSource, integer, optional, float_, integer2) -> {
-                return new CopperPipeListener(positionSource, integer, callback, optional.orElse(null), float_, integer2);
+            })).apply(instance, (positionSource, integer, optional, integer2, integer3) -> {
+                return new CopperPipeListener(positionSource, integer, callback, optional.orElse(null), integer2, integer3);
             });
         });
     }
 
-    public boolean listen(ServerWorld serverWorld, GameEvent.Message message) {
+    @Override
+    public boolean listen(ServerWorld serverWorld, GameEvent gameEvent, GameEvent.Emitter emitter, Vec3d vec3d) {
         if (this.vibration != null) {
             return false;
+        } else if (!this.callback.canAccept(gameEvent, emitter)) {
+            return false;
         } else {
-            GameEvent gameEvent = message.getEvent();
-            GameEvent.Emitter emitter = message.getEmitter();
-            if (!this.callback.canAccept(gameEvent, emitter)) {
+            Optional<Vec3d> optional = this.positionSource.getPos(serverWorld);
+            if (optional.isEmpty()) {
                 return false;
             } else {
-                Optional<Vec3d> optional = this.positionSource.getPos(serverWorld);
-                if (optional.isEmpty()) {
+                Vec3d vec3d2 = optional.get();
+                if (!this.callback.accepts(serverWorld, this, new BlockPos(vec3d), gameEvent, emitter)) {
                     return false;
                 } else {
-                    Vec3d vec3d = message.getEmitterPos();
-                    Vec3d vec3d2 = optional.get();
-                    if (!this.callback.accepts(serverWorld, this, new BlockPos(vec3d), gameEvent, emitter)) {
-                        return false;
-                    } else {
-                        this.listen(serverWorld, gameEvent, emitter, vec3d, vec3d2);
-                        return true;
-                    }
+                    this.listen(serverWorld, gameEvent, emitter, vec3d, vec3d2);
+                    return true;
                 }
             }
         }
@@ -64,9 +61,9 @@ public class CopperPipeListener
 
     private void listen(ServerWorld serverWorld, GameEvent gameEvent, GameEvent.Emitter emitter, Vec3d vec3d, Vec3d vec3d2) {
         this.distance = MathHelper.floor(vec3d.distanceTo(vec3d2));
-        this.vibration = new VibrationListener.Vibration(gameEvent, this.distance, vec3d, emitter.comp_713());
+        this.vibration = new VibrationListener.Vibration(gameEvent, this.distance, vec3d, emitter.sourceEntity());
         if (gameEvent!=GameEvent.NOTE_BLOCK_PLAY) {
-            this.delay = MathHelper.floor(this.distance);
+            this.delay = this.distance;
             serverWorld.spawnParticles(new VibrationParticleEffect(this.positionSource, this.delay), vec3d.x, vec3d.y, vec3d.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         } else {
             this.delay = 1;
@@ -75,8 +72,8 @@ public class CopperPipeListener
         this.callback.onListen();
     }
 
-    public CopperPipeListener(PositionSource positionSource, int i, Callback callback, @Nullable VibrationListener.Vibration vibration, float f, int j) {
-        super(positionSource, i, callback, vibration, f, j);
+    public CopperPipeListener(PositionSource positionSource, int i, Callback callback, @Nullable VibrationListener.Vibration vibration, int j, int k) {
+        super(positionSource, i, callback, vibration, j, k);
     }
 }
 

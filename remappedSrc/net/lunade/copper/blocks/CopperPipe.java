@@ -29,7 +29,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.math.random.AbstractRandom;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
@@ -332,7 +332,7 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
 
     public static boolean isFitting(BlockState state) {return state.getBlock() instanceof CopperFitting;}
 
-    public void randomTick(BlockState blockState, ServerWorld serverWorld, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerWorld serverWorld, BlockPos blockPos, AbstractRandom random) {
         if (blockState.get(HAS_WATER) && blockState.get(FACING)!=Direction.UP) {
             Direction direction = blockState.get(FACING);
             BlockPos pos = blockPos;
@@ -481,7 +481,7 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
     }
 
     @Override
-    public void randomDisplayTick(BlockState blockState, World world, BlockPos blockPos, Random random) {
+    public void randomDisplayTick(BlockState blockState, World world, BlockPos blockPos, AbstractRandom random) {
         if (blockState.get(HAS_WATER) && blockState.get(FACING)!=Direction.UP) {
             world.addParticle(ParticleTypes.DRIPPING_WATER, blockPos.getX()+getDripX(blockState), blockPos.getY()+getDripY(blockState), blockPos.getZ()+getDripZ(blockState),0,0,0);
             if ((world.getBlockState(blockPos.offset(blockState.get(FACING))).getBlock()!=Blocks.AIR &&
@@ -515,9 +515,9 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
         }
     }
 
-    public double getRan(Random random) { return UniformIntProvider.create(-25,25).get(random) * 0.01; }
+    public double getRan(AbstractRandom random) { return UniformIntProvider.create(-25,25).get(random) * 0.01; }
 
-    public double getDripX(BlockState state, Random random) {
+    public double getDripX(BlockState state, AbstractRandom random) {
         return switch (state.get(FACING)) {
             case DOWN, SOUTH, NORTH -> 0.5 + getRan(random);
             case UP -> 0.5;
@@ -525,14 +525,14 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
             case WEST -> -0.05;
         };
     }
-    public double getDripY(BlockState state, Random random) {
+    public double getDripY(BlockState state, AbstractRandom random) {
         return switch (state.get(FACING)) {
             case DOWN -> -0.05;
             case UP -> 1.05;
             case NORTH, WEST, EAST, SOUTH -> 0.5 + getRan(random);
         };
     }
-    public double getDripZ(BlockState state, Random random) {
+    public double getDripZ(BlockState state, AbstractRandom random) {
         return switch (state.get(FACING)) {
             case DOWN, EAST, WEST -> 0.5 + getRan(random);
             case UP -> 0.5;
@@ -623,8 +623,8 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
             if (entity!=null) {
                 if (entity instanceof CopperPipeEntity pipe) {
                     if (blockState.get(WATERLOGGED) && !pipe.wasPreviouslyWaterlogged) {
-                        if (world.random.nextFloat() < 0.05688889F) {
-                            if (world.random.nextFloat() < 0.36F) {
+                        if (CopperPipeEntity.RANDOM.nextFloat() < 0.05688889F) {
+                            if (CopperPipeEntity.RANDOM.nextFloat() < 0.36F) {
                                 if (getNextStage(blockState.getBlock()) != null) {
                                     blockState = makeCopyOf(blockState, getNextStage(blockState.getBlock()));
                                     pipe.wasPreviouslyWaterlogged=true;

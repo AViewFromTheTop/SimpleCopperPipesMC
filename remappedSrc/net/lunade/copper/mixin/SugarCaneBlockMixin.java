@@ -14,16 +14,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SugarCaneBlock.class)
 public class SugarCaneBlockMixin {
-
-    @Inject(at = @At("TAIL"), method = "canPlaceAt", cancellable = true)
-    public void canPlaceAt(BlockState blockState, WorldView worldView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
+    /** Check if leaking pipe is nearby
+     * @author Mojang (original code) Lunade (added leaking pipe check)
+     * @reason actually make pipes work */
+    @Inject(at = @At("TAIL"), method = "canPlaceAt")
+    public boolean canPlaceAt(BlockState blockState, WorldView worldView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
         BlockState blockState2 = worldView.getBlockState(blockPos.down());
         if (blockState2.isOf(Blocks.SUGAR_CANE)) {
-            info.setReturnValue(true);
-            info.cancel();
+            return true;
         } else if (blockState2.isIn(BlockTags.DIRT) || blockState2.isOf(Blocks.SAND) || blockState2.isOf(Blocks.RED_SAND)) {
-            info.setReturnValue(CopperPipe.isWaterPipeNearby(worldView, blockPos, 3));
-            info.cancel();
+            return CopperPipe.isWaterPipeNearby(worldView, blockPos, 3);
         }
+        return info.getReturnValueZ();
     }
 }

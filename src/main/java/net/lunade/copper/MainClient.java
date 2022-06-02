@@ -183,8 +183,8 @@ public class MainClient implements ClientModInitializer {
     public void receiveEasyPipeInkPacket() {
         ClientPlayNetworking.registerGlobalReceiver(Main.PIPE_INK_PACKET, (ctx, handler, byteBuf, responseSender) -> {
             Vec3d pos = new Vec3d(byteBuf.readDouble(), byteBuf.readDouble(), byteBuf.readDouble());
-            double xVel = byteBuf.readVarInt();
-            double yVel = byteBuf.readVarInt();
+            double xVel = byteBuf.readDouble();
+            double yVel = byteBuf.readDouble();
             double zVel = byteBuf.readDouble();
             int count = byteBuf.readVarInt();
             int color = byteBuf.readVarInt();

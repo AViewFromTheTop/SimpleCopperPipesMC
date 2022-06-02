@@ -4,37 +4,76 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.blocks.PipeInkParticle;
+import net.lunade.copper.particle.PipeInkParticle;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.particle.DefaultParticleType;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
 
 public class MainClient implements ClientModInitializer {
 
     public static final Identifier NOTE_PACKET = new Identifier("lunade","note_packet");
 
+    //PIPE INK PARTICLES
+    public static final DefaultParticleType RED_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType GREEN_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType BROWN_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType BLUE_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType PURPLE_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType CYAN_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType LIGHT_GRAY_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType GRAY_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType PINK_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType LIME_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType YELLOW_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType LIGHT_BLUE_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType MAGENTA_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType ORANGE_INK = FabricParticleTypes.simple();
+    public static final DefaultParticleType WHITE_INK = FabricParticleTypes.simple();
+
     @Override
     public void onInitializeClient() {
 
-        ParticleFactoryRegistry.getInstance().register(Main.RED_INK, PipeInkParticle.RedFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.GREEN_INK, PipeInkParticle.GreenFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.BROWN_INK, PipeInkParticle.BrownFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.BLUE_INK, PipeInkParticle.BlueFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.PURPLE_INK, PipeInkParticle.PurpleFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.CYAN_INK, PipeInkParticle.CyanFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.LIGHT_GRAY_INK, PipeInkParticle.LightGrayFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.GRAY_INK, PipeInkParticle.GrayFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.PINK_INK, PipeInkParticle.PinkFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.LIME_INK, PipeInkParticle.LimeFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.YELLOW_INK, PipeInkParticle.YellowFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.LIGHT_BLUE_INK, PipeInkParticle.LightBlueFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.MAGENTA_INK, PipeInkParticle.MagentaFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.ORANGE_INK, PipeInkParticle.OrangeFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.WHITE_INK, PipeInkParticle.WhiteFactory::new);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "red_ink"), RED_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "green_ink"), GREEN_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "brown_ink"), BROWN_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "blue_ink"), BLUE_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "purple_ink"), PURPLE_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "cyan_ink"), CYAN_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "light_gray_ink"), LIGHT_GRAY_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "gray_ink"), GRAY_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "pink_ink"), PINK_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "lime_ink"), LIME_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "yellow_ink"), YELLOW_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "light_blue_ink"), LIGHT_BLUE_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "magenta_ink"), MAGENTA_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "orange_ink"), ORANGE_INK);
+        Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "white_ink"), WHITE_INK);
+
+        ParticleFactoryRegistry.getInstance().register(RED_INK, PipeInkParticle.RedFactory::new);
+        ParticleFactoryRegistry.getInstance().register(GREEN_INK, PipeInkParticle.GreenFactory::new);
+        ParticleFactoryRegistry.getInstance().register(BROWN_INK, PipeInkParticle.BrownFactory::new);
+        ParticleFactoryRegistry.getInstance().register(BLUE_INK, PipeInkParticle.BlueFactory::new);
+        ParticleFactoryRegistry.getInstance().register(PURPLE_INK, PipeInkParticle.PurpleFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CYAN_INK, PipeInkParticle.CyanFactory::new);
+        ParticleFactoryRegistry.getInstance().register(LIGHT_GRAY_INK, PipeInkParticle.LightGrayFactory::new);
+        ParticleFactoryRegistry.getInstance().register(GRAY_INK, PipeInkParticle.GrayFactory::new);
+        ParticleFactoryRegistry.getInstance().register(PINK_INK, PipeInkParticle.PinkFactory::new);
+        ParticleFactoryRegistry.getInstance().register(LIME_INK, PipeInkParticle.LimeFactory::new);
+        ParticleFactoryRegistry.getInstance().register(YELLOW_INK, PipeInkParticle.YellowFactory::new);
+        ParticleFactoryRegistry.getInstance().register(LIGHT_BLUE_INK, PipeInkParticle.LightBlueFactory::new);
+        ParticleFactoryRegistry.getInstance().register(MAGENTA_INK, PipeInkParticle.MagentaFactory::new);
+        ParticleFactoryRegistry.getInstance().register(ORANGE_INK, PipeInkParticle.OrangeFactory::new);
+        ParticleFactoryRegistry.getInstance().register(WHITE_INK, PipeInkParticle.WhiteFactory::new);
 
         BlockRenderLayerMap.INSTANCE.putBlock(CopperPipe.COPPER_PIPE, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(CopperPipe.EXPOSED_PIPE, RenderLayer.getCutout());
@@ -127,7 +166,7 @@ public class MainClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(NOTE_PACKET, (client, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();
             int k = buf.readInt();
-            double i = buf.readDouble();
+            int i = buf.readInt();
             Direction direction = getDirection(i);
             client.execute(() -> {
                 assert client.world != null;
@@ -137,9 +176,51 @@ public class MainClient implements ClientModInitializer {
                 client.world.addParticle(ParticleTypes.NOTE, (double)pos.getX() + 0.5D + x, (double)pos.getY() + 0.5D + y, (double)pos.getZ() + 0.5D + z, (double)k / 24.0D, 0.0D, 0.0D);
             });
         });
+
+        receiveEasyPipeInkPacket();
     }
 
-    public static Direction getDirection(double i) {
+    public void receiveEasyPipeInkPacket() {
+        ClientPlayNetworking.registerGlobalReceiver(Main.PIPE_INK_PACKET, (ctx, handler, byteBuf, responseSender) -> {
+            Vec3d pos = new Vec3d(byteBuf.readDouble(), byteBuf.readDouble(), byteBuf.readDouble());
+            double xVel = byteBuf.readVarInt();
+            double yVel = byteBuf.readVarInt();
+            double zVel = byteBuf.readDouble();
+            int count = byteBuf.readVarInt();
+            int color = byteBuf.readVarInt();
+            ctx.execute(() -> {
+                if (MinecraftClient.getInstance().world == null)
+                    throw new IllegalStateException("why is your world null");
+                for (int i=0; i<count; i++) {
+                    MinecraftClient.getInstance().world.addParticle(intToParticle(color), pos.x, pos.y, pos.z, xVel, yVel, zVel);
+                }
+            });
+        });
+    }
+
+    public static ParticleEffect intToParticle(int i) {
+        return switch (i) {
+            case 1 -> ParticleTypes.GLOW_SQUID_INK;
+            case 2 -> RED_INK;
+            case 3 -> GREEN_INK;
+            case 4 -> BROWN_INK;
+            case 5 -> BLUE_INK;
+            case 6 -> PURPLE_INK;
+            case 7 -> CYAN_INK;
+            case 8 -> LIGHT_GRAY_INK;
+            case 9 -> GRAY_INK;
+            case 10 -> PINK_INK;
+            case 11 -> LIME_INK;
+            case 12 -> YELLOW_INK;
+            case 13 -> LIGHT_BLUE_INK;
+            case 14 -> MAGENTA_INK;
+            case 15 -> ORANGE_INK;
+            case 16 -> WHITE_INK;
+            default -> ParticleTypes.SQUID_INK;
+        };
+    }
+
+    public static Direction getDirection(int i) {
         if (i==1) {return Direction.UP;}
         if (i==2) {return Direction.DOWN;}
         if (i==3) {return Direction.NORTH;}

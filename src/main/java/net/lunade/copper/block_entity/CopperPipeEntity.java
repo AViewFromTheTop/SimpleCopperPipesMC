@@ -10,6 +10,7 @@ import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.particle.server.EasyParticlePacket;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -36,8 +37,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.VibrationParticleEffect;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.screen.HopperScreenHandler;
@@ -394,14 +393,10 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         boolean genericInkSac = itemStack.isOf(Items.INK_SAC);
         if (genericInkSac || itemStack.isOf(Items.GLOW_INK_SAC)) {
             if (state.getBlock() instanceof CopperPipe pipe) {
-                ParticleEffect ink = genericInkSac ? pipe.inkParticle : ParticleTypes.GLOW_SQUID_INK;
+                int ink = genericInkSac ? pipe.inkInt : 1;
                 if (world.getBlockState(pos.offset(state.get(FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
-                    if (ink!=ParticleTypes.GLOW_SQUID_INK && ink==ParticleTypes.SQUID_INK) {
-                        ink = fitting.inkParticle;
-                    }
-                    for (int o = 0; o < 30; ++o) {
-                        world.spawnParticles(ink, d + ran1, e + ran2, f + ran3, 0, velX, velY, velZ, 0.10000000149011612D);
-                    }
+                    if (ink == 0) { ink = fitting.inkInt; }
+                    EasyParticlePacket.createParticle(world, new Vec3d(d + ran1, e + ran2, f + ran3), 30, velX, velY, velZ, ink);
                 }
             }
         }
@@ -559,7 +554,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         }
     }
 
-    public static double getDirection(BlockState state) {
+    public static int getDirection(BlockState state) {
         if (state.get(FACING)==Direction.UP) {return 1;}
         if (state.get(FACING)==Direction.DOWN) {return 2;}
         if (state.get(FACING)==Direction.NORTH) {return 3;}
@@ -666,7 +661,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                             PacketByteBuf buf = PacketByteBufs.create();
                             buf.writeBlockPos(output);
                             buf.writeInt(k);
-                            buf.writeDouble(getDirection(serverWorld.getBlockState(output)));
+                            buf.writeInt(getDirection(serverWorld.getBlockState(output)));
                             for (ServerPlayerEntity player : PlayerLookup.tracking(serverWorld, output)) {
                                 ServerPlayNetworking.send(player, Main.NOTE_PACKET, buf);
                             }

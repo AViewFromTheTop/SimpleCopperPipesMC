@@ -397,7 +397,9 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                 int ink = genericInkSac ? pipe.inkInt : 1;
                 if (world.getBlockState(pos.offset(state.get(FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
                     if (ink == 0) { ink = fitting.inkInt; }
-                    EasyParticlePacket.createParticle(world, new Vec3d(d + ran1.get(world.random)*0.1, e + ran2.get(world.random)*0.1, f + ran3.get(world.random)*0.1), 30, velX, velY, velZ, ink);
+                    for (int o=0; o<30; o++) {
+                        EasyParticlePacket.createParticle(world, new Vec3d(d + ran1.get(world.random) * 0.1, e + ran2.get(world.random) * 0.1, f + ran3.get(world.random) * 0.1), 1, velX * 0.1, velY * 0.1, velZ * 0.1, ink);
+                    }
                 }
             }
         }

@@ -136,21 +136,21 @@ public class Main implements ModInitializer {
 	public static final SoundEvent CORRODED_COPPER_HIT = new SoundEvent(new Identifier("lunade", "block.corroded_copper.hit"));
 
 	//PIPE INK PARTICLES
-	public static final DefaultParticleType RED_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType GREEN_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType BROWN_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType BLUE_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType PURPLE_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType CYAN_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType LIGHT_GRAY_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType GRAY_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType PINK_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType LIME_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType YELLOW_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType LIGHT_BLUE_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType MAGENTA_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType ORANGE_INK = FabricParticleTypes.simple();
-	public static final DefaultParticleType WHITE_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType RED_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "red_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType GREEN_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "green_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType BROWN_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "brown_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType BLUE_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "blue_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType PURPLE_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "purple_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType CYAN_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "cyan_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType LIGHT_GRAY_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "light_gray_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType GRAY_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "gray_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType PINK_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "pink_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType LIME_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "lime_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType YELLOW_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "yellow_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType LIGHT_BLUE_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "light_blue_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType MAGENTA_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "magenta_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType ORANGE_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "orange_ink"), FabricParticleTypes.simple());
+	public static final DefaultParticleType WHITE_INK = Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "white_ink"), FabricParticleTypes.simple());
 
 	//NOTE BLOCK
 	public static final Identifier NOTE_PACKET = new Identifier("lunade","note_packet");

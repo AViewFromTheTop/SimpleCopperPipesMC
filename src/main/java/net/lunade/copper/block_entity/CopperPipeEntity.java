@@ -336,8 +336,9 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         double velX = 0;
         double velY = 0;
         double velZ = 0;
-        double random1 = (world.random.nextDouble()*0.6) - 0.3;
-        double random2 = (world.random.nextDouble()*0.6) - 0.3;
+        Random random = world.random;
+        double random1 = (random.nextDouble()*0.6) - 0.3;
+        double random2 = (random.nextDouble()*0.6) - 0.3;
         Entity shotEntity = null;
         Direction.Axis axis = state.get(CopperPipeProperties.FACING).getAxis();
         velX = axis == Direction.Axis.X ? (i * state.get(FACING).getOffsetX()) * 0.1 : corroded ? (axis == Direction.Axis.Z ? random2 : random1) : velX;
@@ -381,22 +382,22 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
             world.spawnEntity(shotEntity);
         }
         //PARTICLES
-        random1 = (world.random.nextDouble()*7) - 3.5;
-        random2 = (world.random.nextDouble()*7) - 3.5;
-        velX = axis == Direction.Axis.X ? (i * state.get(FACING).getOffsetX()) * 2 : (axis==Direction.Axis.Z ? random2 : random1);
-        velY = axis == Direction.Axis.Y ? (i * state.get(FACING).getOffsetY()) * 2 : random1;
-        velZ = axis == Direction.Axis.Z ? (i * state.get(FACING).getOffsetZ()) * 2 : random2;
+        random1 = (random.nextDouble()*7) - 3.5;
+        random2 = (random.nextDouble()*7) - 3.5;
+        velX = axis == Direction.Axis.X ? (i * state.get(FACING).getOffsetX()) * 2 : (axis==Direction.Axis.Z ? corroded ? random2 : random2*0.1 : corroded ? random1 : random1*0.1);
+        velY = axis == Direction.Axis.Y ? (i * state.get(FACING).getOffsetY()) * 2 : corroded ? random1 : random1*0.1;
+        velZ = axis == Direction.Axis.Z ? (i * state.get(FACING).getOffsetZ()) * 2 : corroded ? random2 : random2*0.1;
 
-        double ran1 = UniformIntProvider.create(-3,3).get(world.random)*0.1;
-        double ran2 = UniformIntProvider.create(-1,1).get(world.random)*0.1;
-        double ran3 = UniformIntProvider.create(-3,3).get(world.random)*0.1;
+        UniformIntProvider ran1 = UniformIntProvider.create(-3,3);
+        UniformIntProvider ran2 = UniformIntProvider.create(-1,1);
+        UniformIntProvider ran3 = UniformIntProvider.create(-3,3);
         boolean genericInkSac = itemStack.isOf(Items.INK_SAC);
         if (genericInkSac || itemStack.isOf(Items.GLOW_INK_SAC)) {
             if (state.getBlock() instanceof CopperPipe pipe) {
                 int ink = genericInkSac ? pipe.inkInt : 1;
                 if (world.getBlockState(pos.offset(state.get(FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
                     if (ink == 0) { ink = fitting.inkInt; }
-                    EasyParticlePacket.createParticle(world, new Vec3d(d + ran1, e + ran2, f + ran3), 30, velX, velY, velZ, ink);
+                    EasyParticlePacket.createParticle(world, new Vec3d(d + ran1.get(world.random)*0.1, e + ran2.get(world.random)*0.1, f + ran3.get(world.random)*0.1), 30, velX, velY, velZ, ink);
                 }
             }
         }
@@ -404,8 +405,8 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
             double vibX=position.getX();
             double vibY=position.getY();
             double vibZ=position.getZ();
-            random1 = (world.random.nextDouble()*6) - 3;
-            random2 = (world.random.nextDouble()*6) - 3;
+            random1 = (random.nextDouble()*6) - 3;
+            random2 = (random.nextDouble()*6) - 3;
             vibX = axis == Direction.Axis.X ? vibX+(10 * state.get(FACING).getOffsetX()) : corroded ? (axis==Direction.Axis.Z ? vibX+random2 : vibX+random1) : vibX;
             vibY = axis == Direction.Axis.Y ? vibY+(10 * state.get(FACING).getOffsetY()) : corroded ? vibY+random1 : vibY;
             vibZ = axis == Direction.Axis.Z ? vibZ+(10 * state.get(FACING).getOffsetZ()) * 2 : corroded ? vibZ+random2 : vibZ;

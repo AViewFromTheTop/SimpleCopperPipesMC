@@ -1,4 +1,4 @@
-package net.lunade.copper.particle;
+package net.lunade.copper.blocks;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

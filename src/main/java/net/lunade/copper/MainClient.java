@@ -140,47 +140,6 @@ public class MainClient implements ClientModInitializer {
     }
 
     public static Direction getDirection(double i) {
-    public void receiveEasyPipeInkPacket() {
-        ClientPlayNetworking.registerGlobalReceiver(Main.PIPE_INK_PACKET, (ctx, handler, byteBuf, responseSender) -> {
-            Vec3d pos = new Vec3d(byteBuf.readDouble(), byteBuf.readDouble(), byteBuf.readDouble());
-            double xVel = byteBuf.readDouble();
-            double yVel = byteBuf.readDouble();
-            double zVel = byteBuf.readDouble();
-            int count = byteBuf.readVarInt();
-            int color = byteBuf.readVarInt();
-            ctx.execute(() -> {
-                if (MinecraftClient.getInstance().world == null)
-                    throw new IllegalStateException("why is your world null");
-                for (int i=0; i<count; i++) {
-                    MinecraftClient.getInstance().world.addParticle(intToParticle(color), pos.x, pos.y, pos.z, xVel, yVel, zVel);
-                }
-            });
-        });
-    }
-
-    public static ParticleEffect intToParticle(int i) {
-        return switch (i) {
-            case 1 -> ParticleTypes.GLOW_SQUID_INK;
-            case 2 -> RED_INK;
-            case 3 -> GREEN_INK;
-            case 4 -> BROWN_INK;
-            case 5 -> BLUE_INK;
-            case 6 -> PURPLE_INK;
-            case 7 -> CYAN_INK;
-            case 8 -> LIGHT_GRAY_INK;
-            case 9 -> GRAY_INK;
-            case 10 -> PINK_INK;
-            case 11 -> LIME_INK;
-            case 12 -> YELLOW_INK;
-            case 13 -> LIGHT_BLUE_INK;
-            case 14 -> MAGENTA_INK;
-            case 15 -> ORANGE_INK;
-            case 16 -> WHITE_INK;
-            default -> ParticleTypes.SQUID_INK;
-        };
-    }
-
-    public static Direction getDirection(int i) {
         if (i==1) {return Direction.UP;}
         if (i==2) {return Direction.DOWN;}
         if (i==3) {return Direction.NORTH;}

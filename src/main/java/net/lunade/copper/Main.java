@@ -8,6 +8,7 @@ import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.blocks.CopperPipeProperties;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.EntityType;
@@ -142,6 +143,7 @@ public class Main implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		CopperPipeProperties.init();
 
 		//PIPE
 		Registry.register(Registry.BLOCK, COPPER_PIPE, CopperPipe.COPPER_PIPE);

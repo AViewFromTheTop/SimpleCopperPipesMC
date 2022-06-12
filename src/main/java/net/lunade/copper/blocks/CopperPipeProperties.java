@@ -1,9 +1,8 @@
 package net.lunade.copper.blocks;
 
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.Properties;
 
-public class CopperPipeProperties extends Properties {
+public class CopperPipeProperties {
 
     public static final BooleanProperty FRONT_CONNECTED = BooleanProperty.of("front_connected");
     public static final BooleanProperty BACK_CONNECTED = BooleanProperty.of("back_connected");
@@ -13,4 +12,5 @@ public class CopperPipeProperties extends Properties {
     public static final BooleanProperty HAS_ELECTRICITY = BooleanProperty.of("has_electricity");
     public static final BooleanProperty HAS_ITEM = BooleanProperty.of("has_item");
 
+    public static void init() {}
 }

@@ -210,7 +210,7 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
                     }
                 }
             }
-        }return exits;
+        } return exits;
     }
 
     public boolean hasRandomTicks(BlockState blockState) {

@@ -70,7 +70,7 @@ public class CopperPipeListener
             serverWorld.spawnParticles(new VibrationParticleEffect(this.positionSource, this.delay), vec3d.x, vec3d.y, vec3d.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         } else {
             this.delay = 1;
-            serverWorld.spawnParticles(new VibrationParticleEffect(this.positionSource, 5), vec3d.x, vec3d.y, vec3d.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            //serverWorld.spawnParticles(new VibrationParticleEffect(this.positionSource, 5), vec3d.x, vec3d.y, vec3d.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
         this.callback.onListen();
     }

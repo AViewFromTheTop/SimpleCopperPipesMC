@@ -96,9 +96,6 @@ public class AxeItemMixin {
 
             info.setReturnValue(ActionResult.success(world.isClient));
             info.cancel();
-        } else {
-            info.setReturnValue(ActionResult.PASS);
-            info.cancel();
         }
     }
 

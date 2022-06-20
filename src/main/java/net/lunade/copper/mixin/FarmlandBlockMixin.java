@@ -14,8 +14,10 @@ public class FarmlandBlockMixin {
 
     @Inject(at = @At("TAIL"), method = "isWaterNearby", cancellable = true)
     private static void isWaterNearby(WorldView worldView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
-        info.setReturnValue(CopperPipe.isWaterPipeNearby(worldView, blockPos, 6));
-        info.cancel();
+        if (!info.getReturnValue()) {
+            info.setReturnValue(CopperPipe.isWaterPipeNearby(worldView, blockPos, 6));
+            info.cancel();
+        }
     }
 
 }

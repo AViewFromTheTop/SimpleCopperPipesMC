@@ -202,7 +202,7 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState blockState, BlockEntityType<T> blockEntityType) {
         if (!world.isClient) {
-            return CopperPipe.checkType(blockEntityType, Main.COPPER_PIPE_ENTITY, (world1, blockPos, blockState1, copperPipeEntity) -> copperPipeEntity.serverTick(world1, blockPos, blockState1, (CopperPipeEntity) Objects.requireNonNull(world1.getBlockEntity(blockPos))));
+            return CopperPipe.checkType(blockEntityType, Main.COPPER_PIPE_ENTITY, (world1, blockPos, blockState1, copperPipeEntity) -> copperPipeEntity.serverTick(world1, blockPos, blockState1));
         } return null;
     }
 
@@ -211,20 +211,6 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
         if (blockEntity instanceof CopperPipeEntity pipeEntity) {
             return pipeEntity.getGameEventListener();
         } return null;
-    }
-
-    public static boolean shouldEmitEvent(BlockPos pos, World world) {
-        if (tagInSphere(pos, 8, Main.BLOCK_LISTENERS, world)) {return true;}
-        List<LivingEntity> entities = world.getNonSpectatingEntities(LivingEntity.class, new Box(
-                pos.getX() -18, pos.getY() -18, pos.getZ() -18,
-                pos.getX() +18, pos.getY() +18, pos.getZ() +18)
-        );
-        Iterator<LivingEntity> var11 = entities.iterator();
-        LivingEntity entity;
-        while(var11.hasNext()) {
-            entity = var11.next();
-            if(Math.floor(Math.sqrt(entity.getBlockPos().getSquaredDistance(pos))) <= 16 && entity.getType().isIn(Main.ENTITY_LISTENERS)) { return true; }
-        } return false;
     }
 
     public static boolean tagInSphere(BlockPos pos, int radius, TagKey<Block> block, World world) {

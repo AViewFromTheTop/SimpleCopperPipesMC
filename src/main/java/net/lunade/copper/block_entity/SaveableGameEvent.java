@@ -54,7 +54,7 @@ public class SaveableGameEvent {
         //this.blockState = emitter.comp_714();
     }
 
-    public SaveableGameEvent(GameEvent event, Vec3d originPos, @Nullable Entity entity, BlockState blockState) {
+    public SaveableGameEvent(GameEvent event, Vec3d originPos, @Nullable Entity entity) {
         this.event = Registry.GAME_EVENT.getId(event);
         this.originPos = originPos;
         if (entity!=null) {

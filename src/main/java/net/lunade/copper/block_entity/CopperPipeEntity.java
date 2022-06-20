@@ -626,8 +626,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
             Objects.requireNonNull(var10001);
             var10000.resultOrPartial(var10001::error).ifPresent((vibrationListener) -> this.listener = (CopperPipeListener) vibrationListener);
         }
-        Optional<SaveableGameEvent> saveableGameEventOptional = SaveableGameEvent.readNbt(nbtCompound);
-        this.savedEvent = saveableGameEventOptional.orElse(null);
+        this.savedEvent = SaveableGameEvent.readNbt(nbtCompound).orElse(null);
     }
 
     protected void writeNbt(NbtCompound nbtCompound) {

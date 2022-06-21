@@ -1,0 +1,73 @@
+{
+    "parent": "minecraft:recipes/root",
+    "rewards": {
+      "recipes": [
+        "lunade:make_corroded_fitting"
+      ]
+    },
+    "criteria": {
+      "has_copper_fitting": {
+        "trigger": "minecraft:inventory_changed",
+        "conditions": {
+          "items": [
+            {
+              "items": [
+                "lunade:copper_fitting"
+              ]
+            }
+          ]
+        }
+      },
+      "has_exposed_copper_fitting": {
+        "trigger": "minecraft:inventory_changed",
+        "conditions": {
+          "items": [
+            {
+              "items": [
+                "lunade:exposed_copper_fitting"
+              ]
+            }
+          ]
+        }
+      },
+      "has_weathered_copper_fitting": {
+        "trigger": "minecraft:inventory_changed",
+        "conditions": {
+          "items": [
+            {
+              "items": [
+                "lunade:weathered_copper_fitting"
+              ]
+            }
+          ]
+        }
+      },
+      "has_oxidized_copper_fitting": {
+        "trigger": "minecraft:inventory_changed",
+        "conditions": {
+          "items": [
+            {
+              "items": [
+                "lunade:oxidized_copper_fitting"
+              ]
+            }
+          ]
+        }
+      },
+      "has_the_recipe": {
+        "trigger": "minecraft:recipe_unlocked",
+        "conditions": {
+          "recipe": "lunade:make_corroded_fitting"
+        }
+      }
+    },
+    "requirements": [
+      [
+        "has_copper_fitting",
+        "has_exposed_copper_fitting",
+        "has_weathered_copper_fitting",
+        "has_oxidized_copper_fitting",
+        "has_the_recipe"
+      ]
+    ]
+  }

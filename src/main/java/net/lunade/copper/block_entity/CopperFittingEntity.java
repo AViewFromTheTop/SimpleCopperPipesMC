@@ -3,9 +3,7 @@ package net.lunade.copper.block_entity;
 import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -15,14 +13,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.HopperScreenHandler;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
-import java.util.Optional;
 
 import static net.lunade.copper.blocks.CopperFitting.sendElectricity;
 import static net.lunade.copper.blocks.CopperPipe.FACING;
@@ -37,7 +32,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
     public int electricityCooldown;
     public int gameEventCooldown;
 
-    public SaveableGameEvent savedEvent;
+    public SaveablePipeGameEvent savedEvent;
 
     public CopperFittingEntity(BlockPos blockPos, BlockState blockState) {
         super(Main.COPPER_FITTING_ENTITY, blockPos, blockState);
@@ -60,10 +55,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         this.smokeLevel = nbtCompound.getInt("smokeLevel");
         this.electricityCooldown = nbtCompound.getInt("electricityCooldown");
         this.gameEventCooldown = nbtCompound.getInt("gameEventCooldown");
-        if (nbtCompound.contains("savedGameEvent", 10)) {
-            Optional<SaveableGameEvent> saveableGameEventOptional = SaveableGameEvent.readNbt(nbtCompound);
-            this.savedEvent = saveableGameEventOptional.orElse(null);
-        }
+        this.savedEvent = SaveablePipeGameEvent.readNbt(nbtCompound);
     }
 
     protected void writeNbt(NbtCompound nbtCompound) {
@@ -76,13 +68,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         nbtCompound.putInt("smokeLevel", this.smokeLevel);
         nbtCompound.putInt("electricityCooldown", this.electricityCooldown);
         nbtCompound.putInt("gameEventCooldown", this.gameEventCooldown);
-        if (this.savedEvent!=null) {
-            SaveableGameEvent.writeNbt(nbtCompound, this.savedEvent);
-        } else {
-            if (nbtCompound.contains("savedGameEvent", 10)) {
-                nbtCompound.remove("savedGameEvent");
-            }
-        }
+        SaveablePipeGameEvent.writeNbt(nbtCompound, this.savedEvent);
     }
 
     @Override
@@ -105,7 +91,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
     public static void serverTick(World world, BlockPos blockPos, BlockState blockState, CopperFittingEntity copperFittingEntity) {
         BlockState state = blockState;
         if (copperFittingEntity.gameEventCooldown>0) { --copperFittingEntity.gameEventCooldown; } else {
-            moveGameEvents(world, blockPos, blockState, copperFittingEntity);
+            moveGameEvents(world, blockPos, copperFittingEntity);
         }
         if (copperFittingEntity.waterCooldown>0) {
             --copperFittingEntity.waterCooldown;
@@ -155,7 +141,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         return new HopperScreenHandler(i, playerInventory, this);
     }
 
-    public static void moveGameEvents(World world, BlockPos blockPos, BlockState blockState, CopperFittingEntity fittingEntity) {
+    public static void moveGameEvents(World world, BlockPos blockPos, CopperFittingEntity fittingEntity) {
         if (!world.isClient) {
             if (fittingEntity.gameEventCooldown <= 0 && fittingEntity.savedEvent!=null) {
                 for (Direction direction : Direction.values()) {
@@ -167,8 +153,6 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
                                 BlockEntity entity = world.getBlockEntity(newPos);
                                 if (entity instanceof CopperPipeEntity pipeEntity) {
                                     if (pipeEntity.gameEventCooldown <= 0) {
-                                        System.out.println("MOVED");
-                                        //setGameEventCooldown(world, newPos);
                                         pipeEntity.savedEvent = fittingEntity.savedEvent.copyOf();
                                     }
                                 }
@@ -177,7 +161,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
                     }
                 }
                 fittingEntity.savedEvent = null;
-                fittingEntity.gameEventCooldown = 1;
+                //fittingEntity.gameEventCooldown = 1;
                 fittingEntity.markDirty();
             }
         }

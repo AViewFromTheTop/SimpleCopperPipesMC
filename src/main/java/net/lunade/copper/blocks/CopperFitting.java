@@ -33,8 +33,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-
 import static net.lunade.copper.blocks.CopperPipe.FACING;
 
 public class CopperFitting extends BlockWithEntity implements Waterloggable {
@@ -194,23 +192,6 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
         for (int i : list.elements()) {
             highest = Math.max(i, highest);
         } return highest;
-    }
-
-    public static ArrayList<BlockPos> getOutputPipe(World world, BlockPos blockPos, ArrayList<BlockPos> poses) {
-        BlockPos p;
-        ArrayList<BlockPos> exits = new ArrayList<>();
-        for (Direction direction : Direction.values()) {
-            p = blockPos.offset(direction);
-            if (world.isChunkLoaded(p) && !poses.contains(p)) {
-                if (world.getBlockState(p).getBlock() instanceof CopperPipe) {
-                    if (world.getBlockState(p).get(FACING) == direction) {
-                        poses.add(p);
-                        ArrayList<BlockPos> news = CopperPipe.getOutputPipeFitting(world, p, world.getBlockState(p), poses);
-                        exits.addAll(news);
-                    }
-                }
-            }
-        } return exits;
     }
 
     public boolean hasRandomTicks(BlockState blockState) {

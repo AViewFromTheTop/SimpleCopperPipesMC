@@ -23,7 +23,6 @@ import net.minecraft.state.StateManager.Builder;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.tag.TagKey;
 import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
@@ -38,10 +37,7 @@ import net.minecraft.world.WorldView;
 import net.minecraft.world.event.listener.GameEventListener;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 
 public class CopperPipe extends BlockWithEntity implements Waterloggable {
 
@@ -211,24 +207,6 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
         if (blockEntity instanceof CopperPipeEntity pipeEntity) {
             return pipeEntity.getGameEventListener();
         } return null;
-    }
-
-    public static boolean tagInSphere(BlockPos pos, int radius, TagKey<Block> block, World world) {
-        if (pos == null) { return false; }
-        int bx = pos.getX();
-        int by = pos.getY();
-        int bz = pos.getZ();
-        for(int x = bx - radius; x <= bx + radius; x++) {
-            for(int y = by - radius; y <= by + radius; y++) {
-                for(int z = bz - radius; z <= bz + radius; z++) {
-                    double distance = ((bx-x) * (bx-x) + ((bz-z) * (bz-z)) + ((by-y) * (by-y)));
-                    if(distance < radius * radius) {
-                        BlockPos l = new BlockPos(x, y, z);
-                        if (world.getBlockState(l).isIn(block)) { return true; }
-                    }
-                }
-            }
-        } return false;
     }
 
     public void onPlaced(World world, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
@@ -406,70 +384,6 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
             if (!world.isChunkLoaded(pos)) {return 0;}
             return smokeLevel(world, pos);
         } return 0;
-    }
-
-    public static ArrayList<BlockPos> getOutputPipe(World world, BlockPos blockPos, BlockState blockState) {
-        BlockPos p = blockPos;
-        BlockState b = blockState;
-        ArrayList<BlockPos> poses = new ArrayList<>();
-        ArrayList<BlockPos> exits = new ArrayList<>();
-        if (b.getBlock() instanceof CopperPipe) {
-            BlockState offsetState = world.getBlockState(p.offset(b.get(FACING)));
-            if (offsetState.isAir() || offsetState.getBlock()==Blocks.WATER) {
-                exits.add(p);
-                return exits;
-            }
-            BlockState offsetState1;
-            for (int l = 0; l < 36; l++) {
-                if (b.getBlock() instanceof CopperPipe) {
-                    p = p.offset(b.get(FACING));
-                    b = world.getBlockState(p);
-                    if (world.isChunkLoaded(p) && !poses.contains(p)) {
-                        poses.add(p);
-                        if (b.getBlock() instanceof CopperFitting) {
-                            ArrayList<BlockPos> news = CopperFitting.getOutputPipe(world, p, poses);
-                            exits.addAll(news);
-                        } else if (b.getBlock() instanceof CopperPipe) {
-                            offsetState1 = world.getBlockState(p.offset(b.get(FACING)));
-                            if (offsetState1.isAir() || offsetState1.getBlock() == Blocks.WATER) {
-                                exits.add(p);
-                            }
-                        }
-                    }
-                }
-            }
-        } return exits;
-    }
-    public static ArrayList<BlockPos> getOutputPipeFitting(World world, BlockPos blockPos, BlockState blockState, ArrayList<BlockPos> poses) {
-        BlockPos p = blockPos;
-        BlockState b = blockState;
-        ArrayList<BlockPos> exits = new ArrayList<>();
-        if (b.getBlock() instanceof CopperPipe) {
-            BlockState offsetState = world.getBlockState(p.offset(b.get(FACING)));
-            if (offsetState.isAir() || offsetState.getBlock()==Blocks.WATER) {
-                exits.add(p);
-                return exits;
-            }
-            BlockState offsetState1;
-            for (int l = 0; l < 36; l++) {
-                if (b.getBlock() instanceof CopperPipe) {
-                    p = p.offset(b.get(FACING));
-                    b = world.getBlockState(p);
-                    if (world.isChunkLoaded(p) && !poses.contains(p)) {
-                        poses.add(p);
-                        if (b.getBlock() instanceof CopperFitting) {
-                            ArrayList<BlockPos> news = CopperFitting.getOutputPipe(world, p, poses);
-                            exits.addAll(news);
-                        } else if (b.getBlock() instanceof CopperPipe) {
-                            offsetState1 = world.getBlockState(p.offset(b.get(FACING)));
-                            if (offsetState1.isAir() || offsetState1.getBlock() == Blocks.WATER) {
-                                exits.add(p);
-                            }
-                        }
-                    }
-                }
-            }
-        } return exits;
     }
 
     public boolean hasRandomTicks(BlockState blockState) {

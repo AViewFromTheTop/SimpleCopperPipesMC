@@ -6,42 +6,6 @@
       ]
     },
     "criteria": {
-      "has_waxed_copper_pipe": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:waxed_copper_pipe"
-              ]
-            }
-          ]
-        }
-      },
-      "has_waxed_exposed_copper_pipe": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:waxed_exposed_copper_pipe"
-              ]
-            }
-          ]
-        }
-      },
-      "has_waxed_weathered_copper_pipe": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:waxed_weathered_copper_pipe"
-              ]
-            }
-          ]
-        }
-      },
       "has_waxed_oxidized_copper_pipe": {
         "trigger": "minecraft:inventory_changed",
         "conditions": {
@@ -63,9 +27,6 @@
     },
     "requirements": [
       [
-        "has_waxed_copper_pipe",
-        "has_waxed_exposed_copper_pipe",
-        "has_waxed_weathered_copper_pipe",
         "has_waxed_oxidized_copper_pipe",
         "has_the_recipe"
       ]

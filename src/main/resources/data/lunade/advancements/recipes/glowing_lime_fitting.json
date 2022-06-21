@@ -6,102 +6,6 @@
       ]
     },
     "criteria": {
-      "has_black_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:black_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_blue_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:blue_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_brown_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:brown_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_cyan_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:cyan_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_gray_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:gray_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_green_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:green_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_light_blue_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:light_blue_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_light_gray_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:light_gray_fitting"
-              ]
-            }
-          ]
-        }
-      },
       "has_lime_fitting": {
         "trigger": "minecraft:inventory_changed",
         "conditions": {
@@ -109,90 +13,6 @@
             {
               "items": [
                 "lunade:lime_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_magenta_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:magenta_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_orange_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:orange_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_pink_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:pink_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_purple_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:purple_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_red_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:red_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_white_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:white_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_yellow_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:yellow_fitting"
               ]
             }
           ]
@@ -207,22 +27,7 @@
     },
     "requirements": [
       [
-        "has_black_fitting",
-        "has_blue_fitting",
-        "has_brown_fitting",
-        "has_cyan_fitting",
-        "has_gray_fitting",
-        "has_green_fitting",
-        "has_light_blue_fitting",
-        "has_light_gray_fitting",
         "has_lime_fitting",
-        "has_magenta_fitting",
-        "has_orange_fitting",
-        "has_pink_fitting",
-        "has_purple_fitting",
-        "has_red_fitting",
-        "has_white_fitting",
-        "has_yellow_fitting",
         "has_the_recipe"
       ]
     ]

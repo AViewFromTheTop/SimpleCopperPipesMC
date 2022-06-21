@@ -6,42 +6,6 @@
       ]
     },
     "criteria": {
-      "has_copper_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:copper_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_exposed_copper_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:exposed_copper_fitting"
-              ]
-            }
-          ]
-        }
-      },
-      "has_weathered_copper_fitting": {
-        "trigger": "minecraft:inventory_changed",
-        "conditions": {
-          "items": [
-            {
-              "items": [
-                "lunade:weathered_copper_fitting"
-              ]
-            }
-          ]
-        }
-      },
       "has_oxidized_copper_fitting": {
         "trigger": "minecraft:inventory_changed",
         "conditions": {
@@ -63,9 +27,6 @@
     },
     "requirements": [
       [
-        "has_copper_fitting",
-        "has_exposed_copper_fitting",
-        "has_weathered_copper_fitting",
         "has_oxidized_copper_fitting",
         "has_the_recipe"
       ]

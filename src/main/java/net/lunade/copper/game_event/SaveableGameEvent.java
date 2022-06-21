@@ -1,4 +1,4 @@
-package net.lunade.copper.block_entity;
+package net.lunade.copper.game_event;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;

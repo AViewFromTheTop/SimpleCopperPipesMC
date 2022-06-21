@@ -91,8 +91,10 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
 
     public static void serverTick(World world, BlockPos blockPos, BlockState blockState, CopperFittingEntity copperFittingEntity) {
         BlockState state = blockState;
-        if (copperFittingEntity.gameEventCooldown>0) { --copperFittingEntity.gameEventCooldown; } else {
-            moveGameEvents(world, blockPos, copperFittingEntity);
+        if (!world.isClient) {
+            //if (copperFittingEntity.gameEventCooldown>0) { --copperFittingEntity.gameEventCooldown; } else {
+            moveGameEvent(world, blockPos, copperFittingEntity);
+            //}
         }
         if (copperFittingEntity.waterCooldown>0) {
             --copperFittingEntity.waterCooldown;
@@ -142,29 +144,25 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         return new HopperScreenHandler(i, playerInventory, this);
     }
 
-    public static void moveGameEvents(World world, BlockPos blockPos, CopperFittingEntity fittingEntity) {
-        if (!world.isClient) {
-            if (fittingEntity.gameEventCooldown <= 0 && fittingEntity.savedEvent!=null) {
-                for (Direction direction : Direction.values()) {
-                    BlockPos newPos = blockPos.offset(direction);
-                    if (world.isChunkLoaded(newPos)) {
-                        BlockState state = world.getBlockState(newPos);
-                        if (state.getBlock() instanceof CopperPipe) {
-                            if (state.get(FACING) == direction) {
-                                BlockEntity entity = world.getBlockEntity(newPos);
-                                if (entity instanceof CopperPipeEntity pipeEntity) {
-                                    if (pipeEntity.gameEventCooldown <= 0) {
-                                        pipeEntity.savedEvent = fittingEntity.savedEvent.copyOf();
-                                    }
-                                }
+    public static void moveGameEvent(World world, BlockPos blockPos, CopperFittingEntity fittingEntity) {
+        if (fittingEntity.savedEvent!=null) {
+            for (Direction direction : Direction.values()) {
+                BlockPos newPos = blockPos.offset(direction);
+                if (world.isChunkLoaded(newPos)) {
+                    BlockState state = world.getBlockState(newPos);
+                    if (state.getBlock() instanceof CopperPipe) {
+                        if (state.get(FACING) == direction) {
+                            BlockEntity entity = world.getBlockEntity(newPos);
+                            if (entity instanceof CopperPipeEntity pipeEntity) {
+                                pipeEntity.savedEvent = fittingEntity.savedEvent;
                             }
                         }
                     }
                 }
-                fittingEntity.savedEvent = null;
-                //fittingEntity.gameEventCooldown = 1;
-                fittingEntity.markDirty();
             }
+            fittingEntity.savedEvent = null;
+            //fittingEntity.gameEventCooldown = 1;
+            fittingEntity.markDirty();
         }
     }
 

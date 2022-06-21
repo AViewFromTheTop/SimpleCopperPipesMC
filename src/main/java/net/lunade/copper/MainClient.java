@@ -10,6 +10,7 @@ import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.particle.PipeInkParticle;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -189,10 +190,11 @@ public class MainClient implements ClientModInitializer {
             int count = byteBuf.readVarInt();
             int color = byteBuf.readVarInt();
             ctx.execute(() -> {
-                if (MinecraftClient.getInstance().world == null)
-                    throw new IllegalStateException("why is your world null");
+                ClientWorld world = MinecraftClient.getInstance().world;
+                if (world == null)
+                    throw new IllegalStateException("Client World is null, cannot spawn particles.");
                 for (int i=0; i<count; i++) {
-                    MinecraftClient.getInstance().world.addParticle(intToParticle(color), pos.x, pos.y, pos.z, xVel, yVel, zVel);
+                    world.addParticle(intToParticle(color), pos.x, pos.y, pos.z, xVel, yVel, zVel);
                 }
             });
         });

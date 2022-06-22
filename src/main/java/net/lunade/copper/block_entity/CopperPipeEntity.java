@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.game_event.ExtraPipeData;
 import net.lunade.copper.game_event.SaveablePipeGameEvent;
 import net.lunade.copper.particle.server.EasyParticlePacket;
 import net.minecraft.block.*;
@@ -83,11 +84,12 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
     public int waterLevel;
     public int smokeLevel;
     public int electricityCooldown;
-    public int gameEventCooldown;
+    public int noteBlockCooldown;
     public boolean wasPreviouslyWaterlogged;
     private CopperPipeListener listener;
 
     public SaveablePipeGameEvent savedEvent;
+    public ExtraPipeData extraPipeData;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
         super(Main.COPPER_PIPE_ENTITY, blockPos, blockState);
@@ -96,10 +98,11 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         this.electricityCooldown = -1;
         this.waterLevel = 0;
         this.smokeLevel = 0;
-        this.gameEventCooldown = 0;
+        this.noteBlockCooldown = 0;
         this.wasPreviouslyWaterlogged = false;
         this.listener = new CopperPipeListener(new BlockPositionSource(this.pos), 8, this, null, 0,0);
         this.savedEvent = null;
+        this.extraPipeData = null;
     }
 
     @Override
@@ -124,9 +127,8 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         BlockState state = blockState;
         if (!world.isClient) {
             dispenseGameEvent((ServerWorld) world, blockPos, blockState);
-            //if (this.gameEventCooldown>0) { --this.gameEventCooldown; } else {
-                moveGameEvent(world, blockPos, blockState);
-            //}
+            moveGameEvent(world, blockPos, blockState);
+            if (this.noteBlockCooldown>0) { --this.noteBlockCooldown; }
             if (this.dispenseCooldown>0) {
                 --this.dispenseCooldown;
             } else { //Dispense & Set DispenseCooldown
@@ -619,7 +621,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         this.waterLevel = nbtCompound.getInt("waterLevel");
         this.smokeLevel = nbtCompound.getInt("smokeLevel");
         this.electricityCooldown = nbtCompound.getInt("electricityCooldown");
-        this.gameEventCooldown = nbtCompound.getInt("gameEventCooldown");
+        this.noteBlockCooldown = nbtCompound.getInt("noteBlockCooldown");
         this.wasPreviouslyWaterlogged = nbtCompound.getBoolean("wasPreviouslyWaterlogged");
         if (nbtCompound.contains("listener", 10)) {
             DataResult<?> var10000 = CopperPipeListener.createPipeCodec(this).parse(new Dynamic<>(NbtOps.INSTANCE, nbtCompound.getCompound("listener")));
@@ -628,6 +630,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
             var10000.resultOrPartial(var10001::error).ifPresent((vibrationListener) -> this.listener = (CopperPipeListener) vibrationListener);
         }
         this.savedEvent = SaveablePipeGameEvent.readNbt(nbtCompound);
+        this.extraPipeData = ExtraPipeData.readNbt(nbtCompound);
     }
 
     protected void writeNbt(NbtCompound nbtCompound) {
@@ -641,13 +644,14 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         nbtCompound.putInt("waterLevel", this.waterLevel);
         nbtCompound.putInt("smokeLevel", this.smokeLevel);
         nbtCompound.putInt("electricityCooldown", this.electricityCooldown);
-        nbtCompound.putInt("gameEventCooldown", this.gameEventCooldown);
+        nbtCompound.putInt("noteBlockCooldown", this.noteBlockCooldown);
         nbtCompound.putBoolean("wasPreviouslyWaterlogged", this.wasPreviouslyWaterlogged);
         DataResult<?> var10000 = CopperPipeListener.createPipeCodec(this).encodeStart(NbtOps.INSTANCE, this.listener);
         Logger var10001 = LOGGER;
         Objects.requireNonNull(var10001);
         var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbtCompound.put("listener", (NbtElement)nbtElement));
         SaveablePipeGameEvent.writeNbt(nbtCompound, this.savedEvent);
+        ExtraPipeData.writeNbt(nbtCompound, this.extraPipeData);
     }
 
     public static boolean notCubeNorPipe(ServerWorld world, BlockPos pos) {
@@ -706,21 +710,22 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
 
     public void moveGameEvent(World world, BlockPos blockPos, BlockState blockState) {
         if (this.savedEvent!=null) {
-            Direction except = blockState.get(FACING).getOpposite();
+            Direction facing = blockState.get(FACING);
+            Direction except = facing.getOpposite();
             for (Direction direction : Direction.values()) {
                 if (direction != except) {
                     BlockPos newPos = blockPos.offset(direction);
                     if (world.isChunkLoaded(newPos)) {
                         BlockState state = world.getBlockState(newPos);
                         if (state.getBlock() instanceof CopperPipe) {
-                            if (state.get(FACING) == direction) {
+                            if (state.get(FACING) == direction || direction == facing) {
                                 BlockEntity entity = world.getBlockEntity(newPos);
                                 if (entity instanceof CopperPipeEntity pipeEntity) {
                                     pipeEntity.savedEvent = this.savedEvent;
                                 }
                             }
                         }
-                        if (direction==except.getOpposite()) {
+                        if (direction==facing) {
                             if (state.getBlock() instanceof CopperFitting) {
                                 BlockEntity entity = world.getBlockEntity(newPos);
                                 if (entity instanceof CopperFittingEntity fittingEntity) {
@@ -732,7 +737,6 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                 }
             }
             this.savedEvent = null;
-            //this.gameEventCooldown = 1;
             this.markDirty();
         }
     }
@@ -750,6 +754,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         if ((bl1 || bl3) && (bl2 && bl4)) {
             if (this.savedEvent!=null) {
                 if (this.savedEvent.getGameEvent() == GameEvent.NOTE_BLOCK_PLAY) { //Run Regardless Of Listeners ONLY If Event Is NoteBlock Sounds
+                    this.noteBlockCooldown = 40;
                     boolean corroded;
                     float volume = 3.0F;
                     if (blockState.getBlock() instanceof CopperPipe) { //Corroded Pipes Increase Instrument Sound Volume
@@ -776,7 +781,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                     }
                 }
                 this.savedEvent.emitGameEvent(serverWorld, blockPos);
-                if (noteBlock || listenersNearby(serverWorld, blockPos)) {
+                if (noteBlock || this.noteBlockCooldown>0 || listenersNearby(serverWorld, blockPos)) {
                     this.savedEvent.spawnPipeVibrationParticles(serverWorld);
                 }
                 moveGameEvent(world, blockPos, blockState);
@@ -785,10 +790,28 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         }
     }
 
-    public static boolean listenersNearby(World world, BlockPos pos) {
-        if (tagInSphere(pos, 8, Main.BLOCK_LISTENERS, world)) {
-            return true;
+    public boolean listenersNearby(World world, BlockPos pos) {
+        if (this.extraPipeData!=null) {
+            if (world.getBlockState(this.extraPipeData.listenerPos).isIn(Main.BLOCK_LISTENERS)) { return true; }
         }
+        int bx = pos.getX();
+        int by = pos.getY();
+        int bz = pos.getZ();
+        for(int x = bx - 8; x <= bx + 8; x++) {
+            for(int y = by - 8; y <= by + 8; y++) {
+                for(int z = bz - 8; z <= bz + 8; z++) {
+                    double distance = ((bx-x) * (bx-x) + ((bz-z) * (bz-z)) + ((by-y) * (by-y)));
+                    if(distance < 64) {
+                        BlockPos l = new BlockPos(x, y, z);
+                        if (world.getBlockState(l).isIn(Main.BLOCK_LISTENERS)) {
+                            this.extraPipeData = new ExtraPipeData(l);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        this.extraPipeData = null;
         List<LivingEntity> entities = world.getNonSpectatingEntities(LivingEntity.class, new Box(pos.add(-18, -18, -18), pos.add(18, 18, 18)));
         for (Entity entity : entities) {
             if (entity.getType().isIn(Main.ENTITY_LISTENERS) && Math.floor(Math.sqrt(entity.getBlockPos().getSquaredDistance(pos))) <= 16) {
@@ -796,24 +819,6 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
             }
         }
         return false;
-    }
-
-    public static boolean tagInSphere(BlockPos pos, int radius, TagKey<Block> block, World world) {
-        if (pos == null) { return false; }
-        int bx = pos.getX();
-        int by = pos.getY();
-        int bz = pos.getZ();
-        for(int x = bx - radius; x <= bx + radius; x++) {
-            for(int y = by - radius; y <= by + radius; y++) {
-                for(int z = bz - radius; z <= bz + radius; z++) {
-                    double distance = ((bx-x) * (bx-x) + ((bz-z) * (bz-z)) + ((by-y) * (by-y)));
-                    if(distance < radius * radius) {
-                        BlockPos l = new BlockPos(x, y, z);
-                        if (world.getBlockState(l).isIn(block)) { return true; }
-                    }
-                }
-            }
-        } return false;
     }
 
 }

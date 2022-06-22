@@ -31,7 +31,6 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
     public int waterLevel;
     public int smokeLevel;
     public int electricityCooldown;
-    public int gameEventCooldown;
 
     public SaveablePipeGameEvent savedEvent;
 
@@ -42,7 +41,6 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         this.waterLevel = 0;
         this.smokeLevel = 0;
         this.electricityCooldown = -1;
-        this.gameEventCooldown = 0;
     }
 
     public void readNbt(NbtCompound nbtCompound) {
@@ -55,7 +53,6 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         this.waterLevel = nbtCompound.getInt("waterLevel");
         this.smokeLevel = nbtCompound.getInt("smokeLevel");
         this.electricityCooldown = nbtCompound.getInt("electricityCooldown");
-        this.gameEventCooldown = nbtCompound.getInt("gameEventCooldown");
         this.savedEvent = SaveablePipeGameEvent.readNbt(nbtCompound);
     }
 
@@ -68,7 +65,6 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         nbtCompound.putInt("waterLevel", this.waterLevel);
         nbtCompound.putInt("smokeLevel", this.smokeLevel);
         nbtCompound.putInt("electricityCooldown", this.electricityCooldown);
-        nbtCompound.putInt("gameEventCooldown", this.gameEventCooldown);
         SaveablePipeGameEvent.writeNbt(nbtCompound, this.savedEvent);
     }
 
@@ -92,9 +88,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
     public static void serverTick(World world, BlockPos blockPos, BlockState blockState, CopperFittingEntity copperFittingEntity) {
         BlockState state = blockState;
         if (!world.isClient) {
-            //if (copperFittingEntity.gameEventCooldown>0) { --copperFittingEntity.gameEventCooldown; } else {
             moveGameEvent(world, blockPos, copperFittingEntity);
-            //}
         }
         if (copperFittingEntity.waterCooldown>0) {
             --copperFittingEntity.waterCooldown;
@@ -161,7 +155,6 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
                 }
             }
             fittingEntity.savedEvent = null;
-            //fittingEntity.gameEventCooldown = 1;
             fittingEntity.markDirty();
         }
     }

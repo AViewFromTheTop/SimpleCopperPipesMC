@@ -9,8 +9,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.game_event.ExtraPipeData;
-import net.lunade.copper.game_event.SaveablePipeGameEvent;
+import net.lunade.copper.pipe_nbt.ExtraPipeData;
+import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
 import net.lunade.copper.particle.server.EasyParticlePacket;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -47,7 +47,6 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.GameEventTags;
 import net.minecraft.tag.ItemTags;
-import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.util.collection.DefaultedList;
@@ -801,7 +800,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
             for(int y = by - 8; y <= by + 8; y++) {
                 for(int z = bz - 8; z <= bz + 8; z++) {
                     double distance = ((bx-x) * (bx-x) + ((bz-z) * (bz-z)) + ((by-y) * (by-y)));
-                    if(distance < 64) {
+                    if(distance < 81) {
                         BlockPos l = new BlockPos(x, y, z);
                         if (world.getBlockState(l).isIn(Main.BLOCK_LISTENERS)) {
                             this.extraPipeData = new ExtraPipeData(l);

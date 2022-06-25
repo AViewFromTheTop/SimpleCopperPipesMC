@@ -1,4 +1,4 @@
-package net.lunade.copper.game_event;
+package net.lunade.copper.pipe_nbt;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;

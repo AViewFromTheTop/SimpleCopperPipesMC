@@ -9,9 +9,9 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.particle.server.EasyParticlePacket;
 import net.lunade.copper.pipe_nbt.ExtraPipeData;
 import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
-import net.lunade.copper.particle.server.EasyParticlePacket;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
@@ -44,6 +44,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.state.property.Properties;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.GameEventTags;
 import net.minecraft.tag.ItemTags;
@@ -163,10 +164,10 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         if (this.electricityCooldown>=0) {--this.electricityCooldown;}
         if (this.electricityCooldown==-1 && state.get(HAS_ELECTRICITY)) {
             this.electricityCooldown=80;
-            if (state.getBlock() instanceof CopperPipe pipe) {
-                Block prevState = CopperPipe.getPreviousStage(world, blockPos);
-                if (prevState != null && !pipe.waxed) { //De-Oxidize W/ Electricity If Possible
-                    state = CopperPipe.makeCopyOf(state, prevState);
+            Block stateGetBlock = state.getBlock();
+            if (stateGetBlock instanceof CopperPipe pipe) {
+                if (CopperPipe.PREVIOUS_STAGE.containsKey(stateGetBlock) && !pipe.waxed) {
+                    state = CopperPipe.makeCopyOf(state, CopperPipe.PREVIOUS_STAGE.get(stateGetBlock));
                 }
             }
         }
@@ -186,16 +187,16 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                 markDirty(world, blockPos, blockState);
             }
             if (bl2 == 1 || bl2 == 3) {
-
                 world.playSound(null, blockPos, Main.ITEM_IN, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
             }
         }
     }
 
-    public static boolean canTransfer(World world, BlockPos pos) {
+    public static boolean canTransfer(World world, BlockPos pos, boolean out) {
         BlockEntity entity = world.getBlockEntity(pos);
         if (entity != null) {
             if (entity instanceof CopperPipeEntity pipe) { return pipe.transferCooldown<=0; }
+            if (entity instanceof CopperFittingEntity) { return out || !world.getBlockState(pos).get(Properties.POWERED); }
         } return true;
     }
 
@@ -203,7 +204,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         Inventory inventory2 = getSecretInventory(world, blockPos, blockState);
         if (inventory2 != null) {
             Direction direction = blockState.get(FACING);
-            if (!isInventoryFull(inventory, direction) && canTransfer(world, blockPos.offset(direction.getOpposite()))) {
+            if (!isInventoryFull(inventory, direction) && canTransfer(world, blockPos.offset(direction.getOpposite()), false)) {
                 for (int i = 0; i < inventory2.size(); ++i) {
                     if (!inventory2.getStack(i).isEmpty()) {
                         pipe.setCooldown(blockState);
@@ -225,7 +226,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
     private static boolean moveOut(World world, BlockPos blockPos, BlockState blockState, Inventory inventory) {
         Inventory inventory2 = getOutputInventory(world, blockPos, blockState);
         Direction direction = blockState.get(FACING);
-        if (inventory2 != null && canTransfer(world, blockPos.offset(direction))) {
+        if (inventory2 != null && canTransfer(world, blockPos.offset(direction), true)) {
             direction = direction.getOpposite();
             if (!isPipe(world, blockPos, direction) && !isInventoryFull(inventory2, direction)) {
                 for (int i = 0; i < inventory.size(); ++i) {

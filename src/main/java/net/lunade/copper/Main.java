@@ -14,6 +14,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.stat.StatFormatter;
+import net.minecraft.stat.Stats;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -21,6 +23,8 @@ import net.minecraft.util.registry.Registry;
 public class Main implements ModInitializer {
 
 	public static final Identifier PIPE_INK_PACKET = new Identifier("lunade","seed_particle_packet");
+
+	public static final Identifier INSPECT_PIPE = new Identifier("lunade", "inspect_copper_pipe");
 
 	//COPPER PIPE
 	public static final Identifier COPPER_PIPE = new Identifier("lunade", "copper_pipe");
@@ -142,6 +146,9 @@ public class Main implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		CopperPipeProperties.init();
+
+		Registry.register(Registry.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
+		Stats.CUSTOM.getOrCreateStat(INSPECT_PIPE, StatFormatter.DEFAULT);
 
 		//PIPE
 		Registry.register(Registry.BLOCK, COPPER_PIPE, CopperPipe.COPPER_PIPE);

@@ -1,6 +1,7 @@
 package net.lunade.copper.blocks;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.objects.*;
 import net.lunade.copper.Main;
 import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
@@ -23,6 +24,7 @@ import net.minecraft.state.StateManager.Builder;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ItemScatterer;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
@@ -116,9 +118,51 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
 
     public void randomTick(BlockState blockState, ServerWorld serverWorld, BlockPos blockPos, Random random) {
         if (random.nextFloat() < 0.05688889F) {
-            if (random.nextFloat() < 0.15F) {
-                if (getNextStage(serverWorld, blockPos) != null) {
-                    makeCopyOf(blockState, serverWorld, blockPos, getNextStage(serverWorld, blockPos));
+            this.tryDegrade(blockState, serverWorld, blockPos, random);
+        }
+    }
+
+    public void tryDegrade(BlockState blockState, ServerWorld serverWorld, BlockPos blockPos, Random random) {
+        Block first = blockState.getBlock();
+        if (OXIDIZATION_INT.containsKey(first)) {
+            int i = OXIDIZATION_INT.getInt(first);
+            int j = 0;
+            int k = 0;
+            float degradationChance = i == 0 ? 0.75F : 1.0F;
+            for (BlockPos blockPos2 : BlockPos.iterateOutwards(blockPos, 4, 4, 4)) {
+                int l = blockPos2.getManhattanDistance(blockPos);
+                if (l > 4) { break; }
+
+                if (!blockPos2.equals(blockPos)) {
+                    BlockState blockState2 = serverWorld.getBlockState(blockPos2);
+                    Block block = blockState2.getBlock();
+                    if (block instanceof Degradable) {
+                        Enum<?> enum_ = ((Degradable<?>) block).getDegradationLevel();
+                        if (enum_.getClass() == Oxidizable.OxidationLevel.class) {
+                            int m = enum_.ordinal();
+                            if (m < i) { return; }
+                            if (m > i) { ++k;} else { ++j; }
+                        }
+                    } else if (block instanceof CopperPipe) {
+                        if (CopperPipe.OXIDIZATION_INT.containsKey(block)) {
+                            int m = CopperPipe.OXIDIZATION_INT.getInt(block);
+                            if (m < i) { return; }
+                            if (m > i) { ++k; } else { ++j; }
+                        }
+                    } else if (block instanceof CopperFitting) {
+                        if (OXIDIZATION_INT.containsKey(block)) {
+                            int m = OXIDIZATION_INT.getInt(block);
+                            if (m < i) { return; }
+                            if (m > i) { ++k; } else { ++j; }
+                        }
+                    }
+                }
+            }
+            float f = (float) (k + 1) / (float) (k + j + 1);
+            float g = f * f * degradationChance;
+            if (random.nextFloat() < g) {
+                if (NEXT_STAGE.containsKey(first)) {
+                    serverWorld.setBlockState(blockPos, makeCopyOf(blockState, NEXT_STAGE.get(first)));
                 }
             }
         }
@@ -231,61 +275,6 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
         } else return null;
     }
 
-    public static Block getNextStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperFitting pipe) {
-            if (pipe == COPPER_FITTING) { return EXPOSED_FITTING; }
-            if (pipe == EXPOSED_FITTING) { return WEATHERED_FITTING; }
-            if (pipe == WEATHERED_FITTING) { return OXIDIZED_FITTING; }
-        }
-        return null;
-    }
-
-    public static Block getWaxStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperFitting pipe) {
-            if (pipe == COPPER_FITTING) { return WAXED_COPPER_FITTING; }
-            if (pipe == EXPOSED_FITTING) { return WAXED_EXPOSED_FITTING; }
-            if (pipe == WEATHERED_FITTING) { return WAXED_WEATHERED_FITTING; }
-            if (pipe == OXIDIZED_FITTING) { return WAXED_OXIDIZED_FITTING; }
-        }
-        return null;
-    }
-
-    public static Block getPreviousStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperFitting pipe) {
-            if (pipe == EXPOSED_FITTING) { return COPPER_FITTING; }
-            if (pipe == WEATHERED_FITTING) { return EXPOSED_FITTING; }
-            if (pipe == OXIDIZED_FITTING) { return WEATHERED_FITTING; }
-            if (pipe == CORRODED_FITTING) { return OXIDIZED_FITTING; }
-            if (pipe == WAXED_COPPER_FITTING) { return COPPER_FITTING; }
-            if (pipe == WAXED_EXPOSED_FITTING) { return EXPOSED_FITTING; }
-            if (pipe == WAXED_WEATHERED_FITTING) { return WEATHERED_FITTING; }
-            if (pipe == WAXED_OXIDIZED_FITTING) { return OXIDIZED_FITTING; }
-        }
-        return null;
-    }
-
-    public static Block getGlowingStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperFitting pipe) {
-            if (pipe == RED_FITTING) {return GLOWING_RED_FITTING;}
-            if (pipe == ORANGE_FITTING) {return GLOWING_ORANGE_FITTING;}
-            if (pipe == YELLOW_FITTING) {return GLOWING_YELLOW_FITTING;}
-            if (pipe == LIME_FITTING) {return GLOWING_LIME_FITTING;}
-            if (pipe == GREEN_FITTING) {return GLOWING_GREEN_FITTING;}
-            if (pipe == CYAN_FITTING) {return GLOWING_CYAN_FITTING;}
-            if (pipe == LIGHT_BLUE_FITTING) {return GLOWING_LIGHT_BLUE_FITTING;}
-            if (pipe == BLUE_FITTING) {return GLOWING_BLUE_FITTING;}
-            if (pipe == PURPLE_FITTING) {return GLOWING_PURPLE_FITTING;}
-            if (pipe == MAGENTA_FITTING) {return GLOWING_MAGENTA_FITTING;}
-            if (pipe == PINK_FITTING) {return GLOWING_PINK_FITTING;}
-            if (pipe == WHITE_FITTING) {return GLOWING_WHITE_FITTING;}
-            if (pipe == LIGHT_GRAY_FITTING) {return GLOWING_LIGHT_GRAY_FITTING;}
-            if (pipe == GRAY_FITTING) {return GLOWING_GRAY_FITTING;}
-            if (pipe == BLACK_FITTING) {return GLOWING_BLACK_FITTING;}
-            if (pipe == BROWN_FITTING) {return GLOWING_BROWN_FITTING;}
-        }
-        return null;
-    }
-
     static {
         WATERLOGGED = Properties.WATERLOGGED;
         POWERED = Properties.POWERED;
@@ -351,5 +340,51 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
     public static final Block GLOWING_MAGENTA_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.MAGENTA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("magenta"));
     public static final Block GLOWING_ORANGE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("orange"));
     public static final Block GLOWING_WHITE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.WHITE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("white"));
+
+    public static final Object2ObjectMap<Block, Block> NEXT_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(COPPER_FITTING, EXPOSED_FITTING);
+        object2IntOpenHashMap.put(EXPOSED_FITTING, WEATHERED_FITTING);
+        object2IntOpenHashMap.put(WEATHERED_FITTING, OXIDIZED_FITTING);
+        object2IntOpenHashMap.put(OXIDIZED_FITTING, CORRODED_FITTING);
+    }));
+    public static final Object2ObjectMap<Block, Block> PREVIOUS_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(CORRODED_FITTING, OXIDIZED_FITTING);
+        object2IntOpenHashMap.put(OXIDIZED_FITTING, WEATHERED_FITTING);
+        object2IntOpenHashMap.put(WEATHERED_FITTING, EXPOSED_FITTING);
+        object2IntOpenHashMap.put(EXPOSED_FITTING, COPPER_FITTING);
+        object2IntOpenHashMap.put(WAXED_COPPER_FITTING, COPPER_FITTING);
+        object2IntOpenHashMap.put(WAXED_EXPOSED_FITTING, EXPOSED_FITTING);
+        object2IntOpenHashMap.put(WAXED_WEATHERED_FITTING, WEATHERED_FITTING);
+        object2IntOpenHashMap.put(WAXED_OXIDIZED_FITTING, OXIDIZED_FITTING);
+    }));
+    public static final Object2ObjectMap<Block, Block> WAX_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(COPPER_FITTING, WAXED_COPPER_FITTING);
+        object2IntOpenHashMap.put(EXPOSED_FITTING, WAXED_EXPOSED_FITTING);
+        object2IntOpenHashMap.put(WEATHERED_FITTING, WAXED_WEATHERED_FITTING);
+        object2IntOpenHashMap.put(OXIDIZED_FITTING, WAXED_OXIDIZED_FITTING);
+    }));
+    public static final Object2ObjectMap<Block, Block> GLOW_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(RED_FITTING, GLOWING_RED_FITTING);
+        object2IntOpenHashMap.put(ORANGE_FITTING, GLOWING_ORANGE_FITTING);
+        object2IntOpenHashMap.put(YELLOW_FITTING, GLOWING_YELLOW_FITTING);
+        object2IntOpenHashMap.put(GREEN_FITTING, GLOWING_GREEN_FITTING);
+        object2IntOpenHashMap.put(CYAN_FITTING, GLOWING_CYAN_FITTING);
+        object2IntOpenHashMap.put(LIGHT_BLUE_FITTING, GLOWING_LIGHT_BLUE_FITTING);
+        object2IntOpenHashMap.put(BLUE_FITTING, GLOWING_BLUE_FITTING);
+        object2IntOpenHashMap.put(PURPLE_FITTING, GLOWING_PURPLE_FITTING);
+        object2IntOpenHashMap.put(MAGENTA_FITTING, GLOWING_MAGENTA_FITTING);
+        object2IntOpenHashMap.put(PINK_FITTING, GLOWING_PINK_FITTING);
+        object2IntOpenHashMap.put(WHITE_FITTING, GLOWING_WHITE_FITTING);
+        object2IntOpenHashMap.put(LIGHT_GRAY_FITTING, GLOWING_LIGHT_GRAY_FITTING);
+        object2IntOpenHashMap.put(GRAY_FITTING, GLOWING_GRAY_FITTING);
+        object2IntOpenHashMap.put(BLACK_FITTING, GLOWING_BLACK_FITTING);
+        object2IntOpenHashMap.put(BROWN_FITTING, GLOWING_BROWN_FITTING);
+    }));
+    public static final Object2IntMap<Block> OXIDIZATION_INT = Object2IntMaps.unmodifiable(Util.make(new Object2IntOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(COPPER_FITTING, 0);
+        object2IntOpenHashMap.put(EXPOSED_FITTING, 1);
+        object2IntOpenHashMap.put(WEATHERED_FITTING, 2);
+        object2IntOpenHashMap.put(OXIDIZED_FITTING, 3);
+    }));
 
 }

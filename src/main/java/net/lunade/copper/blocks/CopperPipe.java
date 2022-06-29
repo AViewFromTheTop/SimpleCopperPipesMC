@@ -1,5 +1,6 @@
 package net.lunade.copper.blocks;
 
+import it.unimi.dsi.fastutil.objects.*;
 import net.lunade.copper.Main;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.minecraft.block.*;
@@ -12,6 +13,7 @@ import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
@@ -38,6 +40,8 @@ import net.minecraft.world.event.listener.GameEventListener;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
+
+import static net.lunade.copper.Main.INSPECT_PIPE;
 
 public class CopperPipe extends BlockWithEntity implements Waterloggable {
 
@@ -224,13 +228,18 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
     }
 
     public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
+        if (playerEntity.getStackInHand(hand).getItem() instanceof BlockItem blockItem) {
+            if (blockItem.getBlock() instanceof CopperPipe || blockItem.getBlock() instanceof CopperFitting) {
+                return  ActionResult.PASS;
+            }
+        }
         if (world.isClient) {
             return ActionResult.SUCCESS;
         } else {
             BlockEntity blockEntity = world.getBlockEntity(blockPos);
             if (blockEntity instanceof CopperPipeEntity) {
                 playerEntity.openHandledScreen((CopperPipeEntity) blockEntity);
-                playerEntity.incrementStat(Stats.INSPECT_HOPPER);
+                playerEntity.incrementStat(Stats.CUSTOM.getOrCreateStat(INSPECT_PIPE));
             } return ActionResult.CONSUME;
         }
     }
@@ -327,10 +336,51 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
         }
 
         if (random.nextFloat() < 0.05688889F) {
-            if (random.nextFloat() < 0.15F) {
-                Block nextStage = getNextStage(serverWorld, blockPos);
-                if (nextStage != null) {
-                    makeCopyOf(blockState, serverWorld, blockPos, nextStage);
+            this.tryDegrade(blockState, serverWorld, blockPos, random);
+        }
+    }
+
+    public void tryDegrade(BlockState blockState, ServerWorld serverWorld, BlockPos blockPos, Random random) {
+        Block first = blockState.getBlock();
+        if (OXIDIZATION_INT.containsKey(first)) {
+            int i = OXIDIZATION_INT.getInt(first);
+            int j = 0;
+            int k = 0;
+            float degradationChance = i == 0 ? 0.75F : 1.0F;
+            for (BlockPos blockPos2 : BlockPos.iterateOutwards(blockPos, 4, 4, 4)) {
+                int l = blockPos2.getManhattanDistance(blockPos);
+                if (l > 4) { break; }
+
+                if (!blockPos2.equals(blockPos)) {
+                    BlockState blockState2 = serverWorld.getBlockState(blockPos2);
+                    Block block = blockState2.getBlock();
+                    if (block instanceof Degradable) {
+                        Enum<?> enum_ = ((Degradable<?>) block).getDegradationLevel();
+                        if (enum_.getClass() == Oxidizable.OxidationLevel.class) {
+                            int m = enum_.ordinal();
+                            if (m < i) { return; }
+                            if (m > i) { ++k;} else { ++j; }
+                        }
+                    } else if (block instanceof CopperPipe) {
+                        if (OXIDIZATION_INT.containsKey(block)) {
+                            int m = OXIDIZATION_INT.getInt(block);
+                            if (m < i) { return; }
+                            if (m > i) { ++k; } else { ++j; }
+                        }
+                    } else if (block instanceof CopperFitting) {
+                        if (CopperFitting.OXIDIZATION_INT.containsKey(block)) {
+                            int m = CopperFitting.OXIDIZATION_INT.getInt(block);
+                            if (m < i) { return; }
+                            if (m > i) { ++k; } else { ++j; }
+                        }
+                    }
+                }
+            }
+            float f = (float) (k + 1) / (float) (k + j + 1);
+            float g = f * f * degradationChance;
+            if (random.nextFloat() < g) {
+                if (NEXT_STAGE.containsKey(first)) {
+                    serverWorld.setBlockState(blockPos, makeCopyOf(blockState, NEXT_STAGE.get(first)));
                 }
             }
         }
@@ -540,10 +590,11 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
                     if (waterlogged && !pipe.wasPreviouslyWaterlogged) {
                         if (world.random.nextFloat() < 0.05688889F) {
                             if (world.random.nextFloat() < 0.36F) {
-                                Block nextStage = getNextStage(blockState.getBlock());
-                                if (nextStage != null) {
+                                Block stateBlock = blockState.getBlock();
+                                if (NEXT_STAGE.containsKey(stateBlock)) {
+                                    Block nextStage = NEXT_STAGE.get(blockState.getBlock());
                                     blockState = makeCopyOf(blockState, nextStage);
-                                    pipe.wasPreviouslyWaterlogged=true;
+                                    pipe.wasPreviouslyWaterlogged = true;
                                     world.setBlockState(blockPos, blockState);
                                 }
                             }
@@ -575,61 +626,6 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
                     .with(HAS_WATER, state.get(HAS_WATER)).with(SMOOTH, state.get(SMOOTH))
                     .with(HAS_ITEM, state.get(HAS_ITEM)).with(HAS_SMOKE, state.get(HAS_SMOKE)).with(HAS_ELECTRICITY, state.get(HAS_ELECTRICITY)).with(POWERED, state.get(POWERED));
         } else return null;
-    }
-    public static Block getNextStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperPipe pipe) {
-            if (pipe==COPPER_PIPE) { return EXPOSED_PIPE; }
-            if (pipe==EXPOSED_PIPE) { return WEATHERED_PIPE; }
-            if (pipe==WEATHERED_PIPE) { return OXIDIZED_PIPE; }
-            if (pipe==OXIDIZED_PIPE) { return CORRODED_PIPE; }
-        } return null;
-    }
-    public static Block getNextStage(Block pipe) {
-        if (pipe==COPPER_PIPE) { return EXPOSED_PIPE; }
-        if (pipe==EXPOSED_PIPE) { return WEATHERED_PIPE; }
-        if (pipe==WEATHERED_PIPE) { return OXIDIZED_PIPE; }
-        if (pipe==OXIDIZED_PIPE) { return CORRODED_PIPE; }
-        return null;
-    }
-    public static Block getWaxStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperPipe pipe) {
-            if (pipe==COPPER_PIPE) { return WAXED_COPPER_PIPE; }
-            if (pipe==EXPOSED_PIPE) { return WAXED_EXPOSED_PIPE; }
-            if (pipe==WEATHERED_PIPE) { return WAXED_WEATHERED_PIPE; }
-            if (pipe==OXIDIZED_PIPE) { return WAXED_OXIDIZED_PIPE; }
-        } return null;
-    }
-    public static Block getPreviousStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperPipe pipe) {
-            if (pipe==EXPOSED_PIPE) { return COPPER_PIPE; }
-            if (pipe==WEATHERED_PIPE) { return EXPOSED_PIPE; }
-            if (pipe==OXIDIZED_PIPE) { return WEATHERED_PIPE; }
-            if (pipe==CORRODED_PIPE) { return OXIDIZED_PIPE; }
-            if (pipe==WAXED_COPPER_PIPE) { return COPPER_PIPE; }
-            if (pipe==WAXED_EXPOSED_PIPE) { return EXPOSED_PIPE; }
-            if (pipe==WAXED_WEATHERED_PIPE) { return WEATHERED_PIPE; }
-            if (pipe==WAXED_OXIDIZED_PIPE) { return OXIDIZED_PIPE; }
-        } return null;
-    }
-    public static Block getGlowingStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperPipe pipe) {
-            if (pipe==RED_PIPE) { return GLOWING_RED_PIPE; }
-            if (pipe==ORANGE_PIPE) { return GLOWING_ORANGE_PIPE; }
-            if (pipe==YELLOW_PIPE) { return GLOWING_YELLOW_PIPE; }
-            if (pipe==LIME_PIPE) { return GLOWING_LIME_PIPE; }
-            if (pipe==GREEN_PIPE) { return GLOWING_GREEN_PIPE; }
-            if (pipe==CYAN_PIPE) { return GLOWING_CYAN_PIPE; }
-            if (pipe==LIGHT_BLUE_PIPE) { return GLOWING_LIGHT_BLUE_PIPE; }
-            if (pipe==BLUE_PIPE) { return GLOWING_BLUE_PIPE; }
-            if (pipe==PURPLE_PIPE) { return GLOWING_PURPLE_PIPE; }
-            if (pipe==MAGENTA_PIPE) { return GLOWING_MAGENTA_PIPE; }
-            if (pipe==PINK_PIPE) { return GLOWING_PINK_PIPE; }
-            if (pipe==WHITE_PIPE) { return GLOWING_WHITE_PIPE; }
-            if (pipe==LIGHT_GRAY_PIPE) { return GLOWING_LIGHT_GRAY_PIPE; }
-            if (pipe==GRAY_PIPE) { return GLOWING_GRAY_PIPE; }
-            if (pipe==BLACK_PIPE) { return GLOWING_BLACK_PIPE; }
-            if (pipe==BROWN_PIPE) { return GLOWING_BROWN_PIPE; }
-        } return null;
     }
 
     static {
@@ -736,5 +732,51 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
     public static final Block GLOWING_LIGHT_GRAY_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,20, Main.colorToInt("light_gray"));
     public static final Block GLOWING_GRAY_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,21, Main.colorToInt("gray"));
     public static final Block GLOWING_BROWN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BROWN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,22, Main.colorToInt("brown"));
+
+    public static final Object2ObjectMap<Block, Block> NEXT_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(COPPER_PIPE, EXPOSED_PIPE);
+        object2IntOpenHashMap.put(EXPOSED_PIPE, WEATHERED_PIPE);
+        object2IntOpenHashMap.put(WEATHERED_PIPE, OXIDIZED_PIPE);
+        object2IntOpenHashMap.put(OXIDIZED_PIPE, CORRODED_PIPE);
+    }));
+    public static final Object2ObjectMap<Block, Block> PREVIOUS_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(CORRODED_PIPE, OXIDIZED_PIPE);
+        object2IntOpenHashMap.put(OXIDIZED_PIPE, WEATHERED_PIPE);
+        object2IntOpenHashMap.put(WEATHERED_PIPE, EXPOSED_PIPE);
+        object2IntOpenHashMap.put(EXPOSED_PIPE, COPPER_PIPE);
+        object2IntOpenHashMap.put(WAXED_COPPER_PIPE, COPPER_PIPE);
+        object2IntOpenHashMap.put(WAXED_EXPOSED_PIPE, EXPOSED_PIPE);
+        object2IntOpenHashMap.put(WAXED_WEATHERED_PIPE, WEATHERED_PIPE);
+        object2IntOpenHashMap.put(WAXED_OXIDIZED_PIPE, OXIDIZED_PIPE);
+    }));
+    public static final Object2ObjectMap<Block, Block> WAX_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(COPPER_PIPE, WAXED_COPPER_PIPE);
+        object2IntOpenHashMap.put(EXPOSED_PIPE, WAXED_EXPOSED_PIPE);
+        object2IntOpenHashMap.put(WEATHERED_PIPE, WAXED_WEATHERED_PIPE);
+        object2IntOpenHashMap.put(OXIDIZED_PIPE, WAXED_OXIDIZED_PIPE);
+    }));
+    public static final Object2ObjectMap<Block, Block> GLOW_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(RED_PIPE, GLOWING_RED_PIPE);
+        object2IntOpenHashMap.put(ORANGE_PIPE, GLOWING_ORANGE_PIPE);
+        object2IntOpenHashMap.put(YELLOW_PIPE, GLOWING_YELLOW_PIPE);
+        object2IntOpenHashMap.put(GREEN_PIPE, GLOWING_GREEN_PIPE);
+        object2IntOpenHashMap.put(CYAN_PIPE, GLOWING_CYAN_PIPE);
+        object2IntOpenHashMap.put(LIGHT_BLUE_PIPE, GLOWING_LIGHT_BLUE_PIPE);
+        object2IntOpenHashMap.put(BLUE_PIPE, GLOWING_BLUE_PIPE);
+        object2IntOpenHashMap.put(PURPLE_PIPE, GLOWING_PURPLE_PIPE);
+        object2IntOpenHashMap.put(MAGENTA_PIPE, GLOWING_MAGENTA_PIPE);
+        object2IntOpenHashMap.put(PINK_PIPE, GLOWING_PINK_PIPE);
+        object2IntOpenHashMap.put(WHITE_PIPE, GLOWING_WHITE_PIPE);
+        object2IntOpenHashMap.put(LIGHT_GRAY_PIPE, GLOWING_LIGHT_GRAY_PIPE);
+        object2IntOpenHashMap.put(GRAY_PIPE, GLOWING_GRAY_PIPE);
+        object2IntOpenHashMap.put(BLACK_PIPE, GLOWING_BLACK_PIPE);
+        object2IntOpenHashMap.put(BROWN_PIPE, GLOWING_BROWN_PIPE);
+    }));
+    public static final Object2IntMap<Block> OXIDIZATION_INT = Object2IntMaps.unmodifiable(Util.make(new Object2IntOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(COPPER_PIPE, 0);
+        object2IntOpenHashMap.put(EXPOSED_PIPE, 1);
+        object2IntOpenHashMap.put(WEATHERED_PIPE, 2);
+        object2IntOpenHashMap.put(OXIDIZED_PIPE, 3);
+    }));
 
 }

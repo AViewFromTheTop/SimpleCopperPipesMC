@@ -1,9 +1,10 @@
 package net.lunade.copper.block_entity;
 
-import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
 import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
@@ -108,9 +109,10 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         if (copperFittingEntity.electricityCooldown>=0) {--copperFittingEntity.electricityCooldown;}
         if (copperFittingEntity.electricityCooldown==-1 && state.get(CopperFitting.HAS_ELECTRICITY)) {
             copperFittingEntity.electricityCooldown=80;
-            if (state.getBlock() instanceof CopperFitting fitting) {
-                if (CopperFitting.getPreviousStage(world, blockPos) != null && !fitting.waxed) {
-                    state = CopperFitting.makeCopyOf(state, CopperFitting.getPreviousStage(world, blockPos));
+            Block stateGetBlock = state.getBlock();
+            if (stateGetBlock instanceof CopperFitting fitting) {
+                if (CopperFitting.PREVIOUS_STAGE.containsKey(stateGetBlock) && !fitting.waxed) {
+                    state = CopperFitting.makeCopyOf(state, CopperFitting.PREVIOUS_STAGE.get(stateGetBlock));
                 }
             }
         }

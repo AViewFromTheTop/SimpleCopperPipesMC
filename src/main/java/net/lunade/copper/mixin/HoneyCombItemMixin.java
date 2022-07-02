@@ -32,18 +32,17 @@ public class HoneyCombItemMixin {
         ItemStack itemStack = itemUsageContext.getStack();
         boolean go = false;
         boolean fit = false;
-        if (blockState!=null && blockState.getBlock() instanceof CopperPipe pipe) {
-            if (CopperPipe.getWaxStage(world, blockPos)!=null) {
-                if (!pipe.waxed) {
+        if (blockState!=null) {
+            Block block = blockState.getBlock();
+            if (block instanceof CopperPipe) {
+                if (CopperPipe.WAX_STAGE.containsKey(block)) {
                     world.playSound(playerEntity, blockPos, SoundEvents.ITEM_HONEYCOMB_WAX_ON, SoundCategory.BLOCKS, 1.0F, 1.0F);
                     world.syncWorldEvent(playerEntity, 3003, blockPos, 0);
                     go = true;
                 }
             }
-        }
-        if (blockState!=null && blockState.getBlock() instanceof CopperFitting fitting) {
-            if (CopperFitting.getWaxStage(world, blockPos)!=null) {
-                if (!fitting.waxed) {
+            if (block instanceof CopperFitting) {
+                if (CopperFitting.WAX_STAGE.containsKey(block)) {
                     world.playSound(playerEntity, blockPos, SoundEvents.ITEM_HONEYCOMB_WAX_ON, SoundCategory.BLOCKS, 1.0F, 1.0F);
                     world.syncWorldEvent(playerEntity, 3003, blockPos, 0);
                     fit = true;
@@ -56,11 +55,8 @@ public class HoneyCombItemMixin {
             }
 
             Block block = blockState.getBlock();
-            if (block instanceof CopperPipe) {
-                Block waxStage = CopperPipe.getWaxStage(world, blockPos);
-                if (waxStage!=null) {
-                    CopperPipe.makeCopyOf(blockState, world, blockPos, waxStage);
-                }
+            if (CopperPipe.WAX_STAGE.containsKey(block)) {
+                CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.WAX_STAGE.get(block));
             }
             itemStack.decrement(1);
 
@@ -72,11 +68,8 @@ public class HoneyCombItemMixin {
             }
 
             Block block = blockState.getBlock();
-            if (block instanceof CopperFitting) {
-                Block waxStage = CopperFitting.getWaxStage(world, blockPos);
-                if (waxStage!=null) {
-                    CopperFitting.makeCopyOf(blockState, world, blockPos, waxStage);
-                }
+            if (CopperFitting.WAX_STAGE.containsKey(block)) {
+                CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.WAX_STAGE.get(block));
             }
             itemStack.decrement(1);
 

@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.blocks.PipeInkParticle;
+import net.lunade.copper.particle.PipeInkParticle;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.Identifier;
@@ -127,7 +127,7 @@ public class MainClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(NOTE_PACKET, (client, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();
             int k = buf.readInt();
-            double i = buf.readDouble();
+            int i = buf.readInt();
             Direction direction = getDirection(i);
             client.execute(() -> {
                 assert client.world != null;
@@ -139,7 +139,7 @@ public class MainClient implements ClientModInitializer {
         });
     }
 
-    public static Direction getDirection(double i) {
+    public static Direction getDirection(int i) {
         if (i==1) {return Direction.UP;}
         if (i==2) {return Direction.DOWN;}
         if (i==3) {return Direction.NORTH;}

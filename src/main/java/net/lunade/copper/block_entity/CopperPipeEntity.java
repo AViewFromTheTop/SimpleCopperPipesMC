@@ -9,16 +9,15 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.blocks.CopperPipeProperties;
-import net.lunade.copper.particle.server.EasyParticlePacket;
-import net.minecraft.advancement.criterion.Criteria;
+import net.lunade.copper.pipe_nbt.ExtraPipeData;
+import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
@@ -37,6 +36,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.VibrationParticleEffect;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.screen.HopperScreenHandler;
@@ -44,6 +45,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.state.property.Properties;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.GameEventTags;
 import net.minecraft.tag.ItemTags;
@@ -61,7 +63,6 @@ import net.minecraft.world.event.listener.VibrationListener;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -69,11 +70,10 @@ import java.util.stream.IntStream;
 
 import static net.lunade.copper.blocks.CopperFitting.CORRODED_FITTING;
 import static net.lunade.copper.blocks.CopperFitting.sendElectricity;
-import static net.lunade.copper.blocks.CopperPipe.CORRODED_PIPE;
-import static net.lunade.copper.blocks.CopperPipe.FACING;
 import static net.lunade.copper.blocks.CopperPipeProperties.*;
 import static net.minecraft.block.NoteBlock.INSTRUMENT;
 import static net.minecraft.block.NoteBlock.NOTE;
+import static net.minecraft.state.property.Properties.FACING;
 
 public class CopperPipeEntity extends LootableContainerBlockEntity implements Inventory, VibrationListener.Callback {
     private DefaultedList<ItemStack> inventory;
@@ -85,8 +85,12 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
     public int waterLevel;
     public int smokeLevel;
     public int electricityCooldown;
+    public int noteBlockCooldown;
     public boolean wasPreviouslyWaterlogged;
     private CopperPipeListener listener;
+
+    public SaveablePipeGameEvent savedEvent;
+    public ExtraPipeData extraPipeData;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
         super(Main.COPPER_PIPE_ENTITY, blockPos, blockState);
@@ -95,8 +99,11 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         this.electricityCooldown = -1;
         this.waterLevel = 0;
         this.smokeLevel = 0;
+        this.noteBlockCooldown = 0;
         this.wasPreviouslyWaterlogged = false;
-        this.listener = new CopperPipeListener(new BlockPositionSource(this.pos), 16, this, null, 0,0);
+        this.listener = new CopperPipeListener(new BlockPositionSource(this.pos), 8, this, null, 0,0);
+        this.savedEvent = null;
+        this.extraPipeData = null;
     }
 
     @Override
@@ -116,14 +123,17 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         }
     }
 
-    public void serverTick(World world, BlockPos blockPos, BlockState blockState, CopperPipeEntity copperPipeEntity) {
+    public void serverTick(World world, BlockPos blockPos, BlockState blockState) {
         this.listener.tick(world);
         BlockState state = blockState;
         if (!world.isClient) {
-            if (copperPipeEntity.dispenseCooldown>0) {
-                --copperPipeEntity.dispenseCooldown;
+            dispenseGameEvent((ServerWorld) world, blockPos, blockState);
+            moveGameEvent(world, blockPos, blockState);
+            if (this.noteBlockCooldown>0) { --this.noteBlockCooldown; }
+            if (this.dispenseCooldown>0) {
+                --this.dispenseCooldown;
             } else { //Dispense & Set DispenseCooldown
-                dispense((ServerWorld) world, blockPos, state, copperPipeEntity);
+                dispense((ServerWorld) world, blockPos, state, this);
                 int i = 0;
                 if (world.getBlockState(blockPos.offset(state.get(FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
                     i = fitting.cooldown;
@@ -131,39 +141,39 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                 this.dispenseCooldown=i;
             }
         }
-        if (copperPipeEntity.listenCooldown>0) {
-            --copperPipeEntity.listenCooldown;
+        if (this.listenCooldown>0) {
+            --this.listenCooldown;
         }
-        if (copperPipeEntity.waterCooldown>0) {
-            --copperPipeEntity.waterCooldown;
+        if (this.waterCooldown>0) {
+            --this.waterCooldown;
         } else { //Check Water&Smoke Every 60 Ticks
-            copperPipeEntity.waterCooldown=60;
+            this.waterCooldown=60;
             int water = CopperPipe.canWater(world, blockPos, state);
             int smoke = CopperPipe.canSmoke(world, blockPos, state);
             boolean canWater = water>0;
             boolean canSmoke = smoke>0;
-            copperPipeEntity.waterLevel=water;
-            copperPipeEntity.smokeLevel=smoke;
+            this.waterLevel=water;
+            this.smokeLevel=smoke;
             if (canWater != state.get(HAS_WATER) || canSmoke != state.get(HAS_SMOKE)) {
                 state = state.with(HAS_WATER, canWater).with(HAS_SMOKE, canSmoke);
             }
         }
-        if (copperPipeEntity.transferCooldown>0) {
-            --copperPipeEntity.transferCooldown;
-        } else { pipeMove(world, blockPos, blockState, copperPipeEntity); } //Run Pipe Transfer In&Out
-        if (copperPipeEntity.isEmpty() == state.get(CopperPipe.HAS_ITEM)) {state = state.with(CopperPipe.HAS_ITEM, !this.isEmpty());}
-        if (copperPipeEntity.electricityCooldown>=0) {--copperPipeEntity.electricityCooldown;}
-        if (copperPipeEntity.electricityCooldown==-1 && state.get(HAS_ELECTRICITY)) {
-            copperPipeEntity.electricityCooldown=80;
-            if (state.getBlock() instanceof CopperPipe pipe) {
-                Block prevState = CopperPipe.getPreviousStage(world, blockPos);
-                if (prevState != null && !pipe.waxed) { //De-Oxidize W/ Electricity If Possible
-                    state = CopperPipe.makeCopyOf(state, prevState);
+        if (this.transferCooldown>0) {
+            --this.transferCooldown;
+        } else { pipeMove(world, blockPos, blockState, this); } //Run Pipe Transfer In&Out
+        if (this.isEmpty() == state.get(CopperPipe.HAS_ITEM)) {state = state.with(CopperPipe.HAS_ITEM, !this.isEmpty());}
+        if (this.electricityCooldown>=0) {--this.electricityCooldown;}
+        if (this.electricityCooldown==-1 && state.get(HAS_ELECTRICITY)) {
+            this.electricityCooldown=80;
+            Block stateGetBlock = state.getBlock();
+            if (stateGetBlock instanceof CopperPipe pipe) {
+                if (CopperPipe.PREVIOUS_STAGE.containsKey(stateGetBlock) && !pipe.waxed) {
+                    state = CopperPipe.makeCopyOf(state, CopperPipe.PREVIOUS_STAGE.get(stateGetBlock));
                 }
             }
         }
-        if (copperPipeEntity.electricityCooldown==79) { sendElectricity(world, blockPos); }
-        if (copperPipeEntity.electricityCooldown==0) {
+        if (this.electricityCooldown==79) { sendElectricity(world, blockPos); }
+        if (this.electricityCooldown==0) {
             assert state != null;
             state=state.with(HAS_ELECTRICITY, false);
         }
@@ -174,20 +184,20 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         if (!world.isClient) {
             boolean bl1 = moveOut(world, blockPos, blockState, copperPipeEntity);
             int bl2 = moveIn(world, blockPos, blockState, copperPipeEntity, copperPipeEntity);
-            if (bl1 || bl2>=2) {
+            if (bl1 || bl2 >= 2) {
                 markDirty(world, blockPos, blockState);
             }
-            if (bl2==1 || bl2 == 3) {
-
-                world.playSound(null, blockPos, Main.ITEM_IN, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat()*0.25F) + 0.8F);
+            if (bl2 == 1 || bl2 == 3) {
+                world.playSound(null, blockPos, Main.ITEM_IN, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
             }
         }
     }
 
-    public static boolean canTransfer(World world, BlockPos pos) {
+    public static boolean canTransfer(World world, BlockPos pos, boolean out) {
         BlockEntity entity = world.getBlockEntity(pos);
         if (entity != null) {
             if (entity instanceof CopperPipeEntity pipe) { return pipe.transferCooldown<=0; }
+            if (entity instanceof CopperFittingEntity) { return out || !world.getBlockState(pos).get(Properties.POWERED); }
         } return true;
     }
 
@@ -195,7 +205,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         Inventory inventory2 = getSecretInventory(world, blockPos, blockState);
         if (inventory2 != null) {
             Direction direction = blockState.get(FACING);
-            if (!isInventoryFull(inventory, direction) && canTransfer(world, blockPos.offset(direction.getOpposite()))) {
+            if (!isInventoryFull(inventory, direction) && canTransfer(world, blockPos.offset(direction.getOpposite()), false)) {
                 for (int i = 0; i < inventory2.size(); ++i) {
                     if (!inventory2.getStack(i).isEmpty()) {
                         pipe.setCooldown(blockState);
@@ -217,7 +227,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
     private static boolean moveOut(World world, BlockPos blockPos, BlockState blockState, Inventory inventory) {
         Inventory inventory2 = getOutputInventory(world, blockPos, blockState);
         Direction direction = blockState.get(FACING);
-        if (inventory2 != null && canTransfer(world, blockPos.offset(direction))) {
+        if (inventory2 != null && canTransfer(world, blockPos.offset(direction), true)) {
             direction = direction.getOpposite();
             if (!isPipe(world, blockPos, direction) && !isInventoryFull(inventory2, direction)) {
                 for (int i = 0; i < inventory.size(); ++i) {
@@ -245,11 +255,11 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         boolean bl1 = dirBlock == Blocks.AIR;
         boolean bl2 = oppBlock != Blocks.AIR;
         boolean bl3 = dirBlock == Blocks.WATER;
-        boolean bl4 = oppBlock !=Blocks.WATER;
+        boolean bl4 = oppBlock != Blocks.WATER;
         boolean powered = blockState.get(CopperPipe.POWERED);
         boolean shootsSpecial = oppBlock == Blocks.DISPENSER;
         boolean shootsControlled = oppBlock == Blocks.DROPPER;
-        boolean corroded = oppBlock == CopperFitting.CORRODED_FITTING || blockState.getBlock() == CORRODED_PIPE;
+        boolean corroded = oppBlock == CopperFitting.CORRODED_FITTING || blockState.getBlock() == CopperPipe.CORRODED_PIPE;
         if ((bl1 || bl3) && (bl2 && bl4)) {
             BlockPointerImpl blockPointerImpl = new BlockPointerImpl(serverWorld, blockPos);
             CopperPipeEntity copperPipeEntity = blockPointerImpl.getBlockEntity();
@@ -405,11 +415,11 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         boolean genericInkSac = itemStack.isOf(Items.INK_SAC);
         if (genericInkSac || itemStack.isOf(Items.GLOW_INK_SAC)) {
             if (state.getBlock() instanceof CopperPipe pipe) {
-                int ink = genericInkSac ? pipe.inkInt : 1;
+                ParticleEffect ink = genericInkSac ? pipe.ink : ParticleTypes.SQUID_INK;
                 if (world.getBlockState(pos.offset(state.get(FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
-                    if (ink == 0) { ink = fitting.inkInt; }
+                    if (ink == ParticleTypes.SQUID_INK) { ink = fitting.ink; }
                     for (int o=0; o<30; o++) {
-                        EasyParticlePacket.createParticle(world, new Vec3d(d + ran1.get(world.random) * 0.1, e + ran2.get(world.random) * 0.1, f + ran3.get(world.random) * 0.1), 1, velX * 0.1, velY * 0.1, velZ * 0.1, ink);
+                        world.spawnParticles(ink, d + ran1.get(world.random) * 0.1, e + ran2.get(world.random) * 0.1, f + ran3.get(world.random) * 0.1, 0, velX, velY, velZ, 0.10000000149011612D);
                     }
                 }
             }
@@ -612,6 +622,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         this.waterLevel = nbtCompound.getInt("waterLevel");
         this.smokeLevel = nbtCompound.getInt("smokeLevel");
         this.electricityCooldown = nbtCompound.getInt("electricityCooldown");
+        this.noteBlockCooldown = nbtCompound.getInt("noteBlockCooldown");
         this.wasPreviouslyWaterlogged = nbtCompound.getBoolean("wasPreviouslyWaterlogged");
         if (nbtCompound.contains("listener", 10)) {
             DataResult<?> var10000 = CopperPipeListener.createPipeCodec(this).parse(new Dynamic<>(NbtOps.INSTANCE, nbtCompound.getCompound("listener")));
@@ -619,6 +630,8 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
             Objects.requireNonNull(var10001);
             var10000.resultOrPartial(var10001::error).ifPresent((vibrationListener) -> this.listener = (CopperPipeListener) vibrationListener);
         }
+        this.savedEvent = SaveablePipeGameEvent.readNbt(nbtCompound);
+        this.extraPipeData = ExtraPipeData.readNbt(nbtCompound);
     }
 
     protected void writeNbt(NbtCompound nbtCompound) {
@@ -632,11 +645,14 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         nbtCompound.putInt("waterLevel", this.waterLevel);
         nbtCompound.putInt("smokeLevel", this.smokeLevel);
         nbtCompound.putInt("electricityCooldown", this.electricityCooldown);
+        nbtCompound.putInt("noteBlockCooldown", this.noteBlockCooldown);
         nbtCompound.putBoolean("wasPreviouslyWaterlogged", this.wasPreviouslyWaterlogged);
         DataResult<?> var10000 = CopperPipeListener.createPipeCodec(this).encodeStart(NbtOps.INSTANCE, this.listener);
         Logger var10001 = LOGGER;
         Objects.requireNonNull(var10001);
         var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbtCompound.put("listener", (NbtElement)nbtElement));
+        SaveablePipeGameEvent.writeNbt(nbtCompound, this.savedEvent);
+        ExtraPipeData.writeNbt(nbtCompound, this.extraPipeData);
     }
 
     public static boolean notCubeNorPipe(ServerWorld world, BlockPos pos) {
@@ -647,78 +663,163 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
 
     @Override
     public boolean accepts(ServerWorld serverWorld, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Emitter emitter) {
-        boolean exit = false;
         BlockState thisState = serverWorld.getBlockState(this.getPos());
         if (serverWorld.getBlockState(blockPos).getBlock() instanceof CopperPipe) { return false; }
         if (thisState.getBlock() instanceof CopperPipe) {
             boolean bl = gameEvent == GameEvent.BLOCK_DESTROY && blockPos.equals(this.getPos());
             boolean bl2 = gameEvent == GameEvent.BLOCK_PLACE && blockPos.equals(this.getPos());
             boolean bl3 = notCubeNorPipe(serverWorld, this.getPos().offset(thisState.get(FACING).getOpposite()));
-            ArrayList<BlockPos> outputs = CopperPipe.getOutputPipe(serverWorld, this.getPos(), thisState);
             if (!bl && !bl2 && bl3) {
-                for (BlockPos output : outputs) { //Check All Outputs To See If Listener Is Nearby
-                    if (gameEvent != GameEvent.NOTE_BLOCK_PLAY && CopperPipe.shouldEmitEvent(output, serverWorld)) {
-                        exit = true;
-                    }
-                    if (gameEvent == GameEvent.NOTE_BLOCK_PLAY) { //Run Regardless Of Listeners ONLY If Event Is NoteBlock Sounds
-                        boolean corroded;
-                        float volume = 3.0F;
-                        if (serverWorld.getBlockState(output).getBlock() instanceof CopperPipe) { //Corroded Pipes Increase Instrument Sound Volume
-                            corroded = serverWorld.getBlockState(output).getBlock()==CORRODED_PIPE || serverWorld.getBlockState(output.offset(serverWorld.getBlockState(output).get(FACING).getOpposite())).getBlock()==CORRODED_FITTING;
-                            if (corroded) {volume=4.5F;}
-                        }
-                        if (serverWorld.getBlockState(blockPos).getBlock() instanceof NoteBlock) {
-                            BlockState state = serverWorld.getBlockState(blockPos);
-                            int k = state.get(NOTE);
-                            float f = (float) Math.pow(2.0D, (double) (k - 12) / 12.0D);
-                            serverWorld.playSound(null, output, state.get(INSTRUMENT).getSound(), SoundCategory.RECORDS, volume, f);
-                            //Send NoteBlock Particle Packet To Client
-                            PacketByteBuf buf = PacketByteBufs.create();
-                            buf.writeBlockPos(output);
-                            buf.writeInt(k);
-                            buf.writeInt(getDirection(serverWorld.getBlockState(output).get(FACING)));
-                            for (ServerPlayerEntity player : PlayerLookup.tracking(serverWorld, output)) {
-                                ServerPlayNetworking.send(player, Main.NOTE_PACKET, buf);
-                            }
-                            exit = true; //Can Accept GameEvent If At Least One Output Has Met Criteria
-                        }
-                    }
-                }
+                this.savedEvent = new SaveablePipeGameEvent(gameEvent, Vec3d.ofCenter(blockPos), emitter, this.getPos());
+                return true;
             }
-        } return exit;
+        } return false;
     }
 
     @Override
     public void accept(ServerWorld serverWorld, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, float f) {
-        if (gameEvent!=GameEvent.NOTE_BLOCK_PLAY) {
-            ArrayList<BlockPos> exits = CopperPipe.getOutputPipe(serverWorld, this.getPos(), serverWorld.getBlockState(this.getPos()));
-            for (BlockPos newPos : exits) { serverWorld.emitGameEvent(entity, gameEvent, newPos); }
-        }
+
     }
 
     @Override
     public boolean canAccept(GameEvent gameEvent, GameEvent.Emitter emitter) {
         Entity entity = emitter.comp_713();
         if (entity != null) {
-            if (entity.isSpectator()) { return false; }
-            if (entity.getType()==EntityType.WARDEN) { return false; }
-            if (entity.bypassesSteppingEffects() && gameEvent.isIn(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)) {
-                //Criteria.AVOID_VIBRATION.trigger(serverPlayerEntity);
+            if (entity.isSpectator()) {
                 return false;
             }
 
-            if (entity.occludeVibrationSignals()) { return false; }
+            if (entity.bypassesSteppingEffects() && gameEvent.isIn(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)) {
+                return false;
+            }
 
-            if (emitter.comp_714() != null) {
-                return !emitter.comp_714().isIn(BlockTags.DAMPENS_VIBRATIONS);
-            } else {
-                return true;
+            if (entity.occludeVibrationSignals()) {
+                return false;
             }
         }
-        return true;
+
+        if (emitter.comp_714() != null) {
+            return !emitter.comp_714().isIn(BlockTags.DAMPENS_VIBRATIONS);
+        } else {
+            return true;
+        }
     }
 
     public void onListen() {
         this.markDirty();
     }
+
+    public void moveGameEvent(World world, BlockPos blockPos, BlockState blockState) {
+        if (this.savedEvent!=null) {
+            Direction facing = blockState.get(FACING);
+            Direction except = facing.getOpposite();
+            for (Direction direction : Direction.values()) {
+                if (direction != except) {
+                    BlockPos newPos = blockPos.offset(direction);
+                    if (world.isChunkLoaded(newPos)) {
+                        BlockState state = world.getBlockState(newPos);
+                        if (state.getBlock() instanceof CopperPipe) {
+                            if (state.get(FACING) == direction || direction == facing) {
+                                BlockEntity entity = world.getBlockEntity(newPos);
+                                if (entity instanceof CopperPipeEntity pipeEntity) {
+                                    pipeEntity.savedEvent = this.savedEvent;
+                                }
+                            }
+                        }
+                        if (direction==facing) {
+                            if (state.getBlock() instanceof CopperFitting) {
+                                BlockEntity entity = world.getBlockEntity(newPos);
+                                if (entity instanceof CopperFittingEntity fittingEntity) {
+                                    fittingEntity.savedEvent = this.savedEvent;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            this.savedEvent = null;
+            this.markDirty();
+        }
+    }
+
+    private void dispenseGameEvent(ServerWorld serverWorld, BlockPos blockPos, BlockState blockState) {
+        Direction direction = blockState.get(FACING);
+        Direction directionOpp = direction.getOpposite();
+        Block dirBlock = serverWorld.getBlockState(blockPos.offset(direction)).getBlock();
+        Block oppBlock = serverWorld.getBlockState(blockPos.offset(directionOpp)).getBlock();
+        boolean bl1 = dirBlock == Blocks.AIR;
+        boolean bl2 = oppBlock != Blocks.AIR;
+        boolean bl3 = dirBlock == Blocks.WATER;
+        boolean bl4 = oppBlock != Blocks.WATER;
+        boolean noteBlock = false;
+        if ((bl1 || bl3) && (bl2 && bl4)) {
+            if (this.savedEvent!=null) {
+                if (this.savedEvent.getGameEvent() == GameEvent.NOTE_BLOCK_PLAY) { //Run Regardless Of Listeners ONLY If Event Is NoteBlock Sounds
+                    this.noteBlockCooldown = 40;
+                    boolean corroded;
+                    float volume = 3.0F;
+                    if (blockState.getBlock() instanceof CopperPipe) { //Corroded Pipes Increase Instrument Sound Volume
+                        corroded = blockState.getBlock() == CopperPipe.CORRODED_PIPE || serverWorld.getBlockState(blockPos.offset(directionOpp)).getBlock() == CORRODED_FITTING;
+                        if (corroded) {
+                            volume = 4.5F;
+                        }
+                    }
+                    BlockPos originPos = new BlockPos(this.savedEvent.originPos);
+                    noteBlock = serverWorld.getBlockState(originPos).isOf(Blocks.NOTE_BLOCK);
+                    if (noteBlock) {
+                        BlockState state = serverWorld.getBlockState(originPos);
+                        int k = state.get(NOTE);
+                        float f = (float) Math.pow(2.0D, (double) (k - 12) / 12.0D);
+                        serverWorld.playSound(null, blockPos, state.get(INSTRUMENT).getSound(), SoundCategory.RECORDS, volume, f);
+                        //Send NoteBlock Particle Packet To Client
+                        PacketByteBuf buf = PacketByteBufs.create();
+                        buf.writeBlockPos(blockPos);
+                        buf.writeInt(k);
+                        buf.writeInt(getDirection(serverWorld.getBlockState(blockPos).get(FACING)));
+                        for (ServerPlayerEntity player : PlayerLookup.tracking(serverWorld, blockPos)) {
+                            ServerPlayNetworking.send(player, Main.NOTE_PACKET, buf);
+                        }
+                    }
+                }
+                this.savedEvent.emitGameEvent(serverWorld, blockPos);
+                if (noteBlock || this.noteBlockCooldown>0 || listenersNearby(serverWorld, blockPos)) {
+                    this.savedEvent.spawnPipeVibrationParticles(serverWorld);
+                }
+                moveGameEvent(world, blockPos, blockState);
+                this.savedEvent = null;
+            }
+        }
+    }
+
+    public boolean listenersNearby(World world, BlockPos pos) {
+        if (this.extraPipeData!=null) {
+            if (world.getBlockState(this.extraPipeData.listenerPos).isIn(Main.BLOCK_LISTENERS)) { return true; }
+        }
+        int bx = pos.getX();
+        int by = pos.getY();
+        int bz = pos.getZ();
+        for(int x = bx - 8; x <= bx + 8; x++) {
+            for(int y = by - 8; y <= by + 8; y++) {
+                for(int z = bz - 8; z <= bz + 8; z++) {
+                    double distance = ((bx-x) * (bx-x) + ((bz-z) * (bz-z)) + ((by-y) * (by-y)));
+                    if(distance < 81) {
+                        BlockPos l = new BlockPos(x, y, z);
+                        if (world.getBlockState(l).isIn(Main.BLOCK_LISTENERS)) {
+                            this.extraPipeData = new ExtraPipeData(l);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        this.extraPipeData = null;
+        List<LivingEntity> entities = world.getNonSpectatingEntities(LivingEntity.class, new Box(pos.add(-18, -18, -18), pos.add(18, 18, 18)));
+        for (Entity entity : entities) {
+            if (entity.getType().isIn(Main.ENTITY_LISTENERS) && Math.floor(Math.sqrt(entity.getBlockPos().getSquaredDistance(pos))) <= 16) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

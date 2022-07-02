@@ -23,8 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(AxeItem.class)
 public class AxeItemMixin {
 
-    @Inject(at = @At("TAIL"), method = "useOnBlock")
-    public ActionResult useOnBlock(ItemUsageContext itemUsageContext, CallbackInfoReturnable info) {
+    @Inject(at = @At("TAIL"), method = "useOnBlock", cancellable = true)
+    public void useOnBlock(ItemUsageContext itemUsageContext, CallbackInfoReturnable<ActionResult> info) {
         World world = itemUsageContext.getWorld();
         BlockPos blockPos = itemUsageContext.getBlockPos();
         PlayerEntity playerEntity = itemUsageContext.getPlayer();
@@ -32,28 +32,29 @@ public class AxeItemMixin {
         ItemStack itemStack = itemUsageContext.getStack();
         boolean go = false;
         boolean fit = false;
-        if (blockState!=null && blockState.getBlock() instanceof CopperPipe pipe) {
-            if (CopperPipe.getPreviousStage(world, blockPos)!=null) {
-                if (!pipe.waxed && blockState.getBlock() != CopperPipe.COPPER_PIPE && blockState.getBlock() != CopperPipe.CORRODED_PIPE) {
-                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                    go = true;
-                } else if (pipe.waxed) {
-                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_WAX_OFF, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    world.syncWorldEvent(playerEntity, 3004, blockPos, 0);
+        if (blockState!=null) {
+            Block block = blockState.getBlock();
+            if (block instanceof CopperPipe pipe) {
+                if (CopperPipe.PREVIOUS_STAGE.containsKey(block)) {
+                    if (!pipe.waxed) {
+                        world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                        world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
+                    } else {
+                        world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_WAX_OFF, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                        world.syncWorldEvent(playerEntity, 3004, blockPos, 0);
+                    }
                     go = true;
                 }
             }
-        }
-        if (blockState!=null && blockState.getBlock() instanceof CopperFitting fitting) {
-            if (CopperFitting.getPreviousStage(world, blockPos)!=null) {
-                if (!fitting.waxed && blockState.getBlock() != CopperFitting.COPPER_FITTING && blockState.getBlock() != CopperFitting.CORRODED_FITTING) {
-                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                    fit = true;
-                } else if (fitting.waxed) {
-                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_WAX_OFF, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    world.syncWorldEvent(playerEntity, 3004, blockPos, 0);
+            if (block instanceof CopperFitting fitting) {
+                if (CopperFitting.PREVIOUS_STAGE.containsKey(block)) {
+                    if (!fitting.waxed) {
+                        world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                        world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
+                    } else {
+                        world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_WAX_OFF, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                        world.syncWorldEvent(playerEntity, 3004, blockPos, 0);
+                    }
                     fit = true;
                 }
             }
@@ -64,38 +65,30 @@ public class AxeItemMixin {
             }
 
             Block block = blockState.getBlock();
-            if (block instanceof CopperPipe) {
-                if (CopperPipe.getPreviousStage(world, blockPos)!=null) {
-                    CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.getPreviousStage(world, blockPos));
-                }
+            if (CopperPipe.PREVIOUS_STAGE.containsKey(block)) {
+                CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.PREVIOUS_STAGE.get(block));
             }
             if (playerEntity != null) {
-                itemStack.damage(1, playerEntity, (playerEntityx) -> {
-                    playerEntityx.sendToolBreakStatus(itemUsageContext.getHand());
-                });
+                itemStack.damage(1, playerEntity, (playerEntityx) -> playerEntityx.sendToolBreakStatus(itemUsageContext.getHand()));
             }
 
-            return ActionResult.success(world.isClient);
+            info.setReturnValue(ActionResult.success(world.isClient));
+            info.cancel();
         } else if (fit) {
             if (playerEntity instanceof ServerPlayerEntity) {
                 Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack);
             }
 
             Block block = blockState.getBlock();
-            if (block instanceof CopperFitting) {
-                if (CopperFitting.getPreviousStage(world, blockPos)!=null) {
-                    CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.getPreviousStage(world, blockPos));
-                }
+            if (CopperFitting.PREVIOUS_STAGE.containsKey(block)) {
+                CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.PREVIOUS_STAGE.get(block));
             }
             if (playerEntity != null) {
-                itemStack.damage(1, playerEntity, (playerEntityx) -> {
-                    playerEntityx.sendToolBreakStatus(itemUsageContext.getHand());
-                });
+                itemStack.damage(1, playerEntity, (playerEntityx) -> playerEntityx.sendToolBreakStatus(itemUsageContext.getHand()));
             }
 
-            return ActionResult.success(world.isClient);
-        } else {
-            return ActionResult.PASS;
+            info.setReturnValue(ActionResult.success(world.isClient));
+            info.cancel();
         }
     }
 

@@ -1,6 +1,7 @@
 package net.lunade.copper.blocks;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.objects.*;
 import net.lunade.copper.Main;
 import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
@@ -15,6 +16,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
@@ -23,6 +25,7 @@ import net.minecraft.state.StateManager.Builder;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ItemScatterer;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
@@ -33,14 +36,12 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-
 import static net.lunade.copper.blocks.CopperPipe.FACING;
 
 public class CopperFitting extends BlockWithEntity implements Waterloggable {
 
     public boolean waxed;
-    public int inkInt;
+    public ParticleEffect ink;
     public int cooldown;
 
     public static final BooleanProperty WATERLOGGED;
@@ -51,11 +52,11 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
     public static final BooleanProperty HAS_ITEM;
     private static final VoxelShape FITTING_SHAPE;
 
-    public CopperFitting(Settings settings, boolean waxed, int cooldown, int ink) {
+    public CopperFitting(Settings settings, boolean waxed, int cooldown, ParticleEffect ink) {
         super(settings);
         this.waxed = waxed;
         this.cooldown = cooldown;
-        this.inkInt = ink;
+        this.ink = ink;
         this.setDefaultState(this.stateManager.getDefaultState().with(POWERED, false).with(WATERLOGGED, false).with(HAS_WATER, false).with(HAS_SMOKE, false).with(HAS_ELECTRICITY, false).with(HAS_ITEM, false));
     }
 
@@ -118,9 +119,51 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
 
     public void randomTick(BlockState blockState, ServerWorld serverWorld, BlockPos blockPos, Random random) {
         if (random.nextFloat() < 0.05688889F) {
-            if (random.nextFloat() < 0.15F) {
-                if (getNextStage(serverWorld, blockPos) != null) {
-                    makeCopyOf(blockState, serverWorld, blockPos, getNextStage(serverWorld, blockPos));
+            this.tryDegrade(blockState, serverWorld, blockPos, random);
+        }
+    }
+
+    public void tryDegrade(BlockState blockState, ServerWorld serverWorld, BlockPos blockPos, Random random) {
+        Block first = blockState.getBlock();
+        if (OXIDIZATION_INT.containsKey(first)) {
+            int i = OXIDIZATION_INT.getInt(first);
+            int j = 0;
+            int k = 0;
+            float degradationChance = i == 0 ? 0.75F : 1.0F;
+            for (BlockPos blockPos2 : BlockPos.iterateOutwards(blockPos, 4, 4, 4)) {
+                int l = blockPos2.getManhattanDistance(blockPos);
+                if (l > 4) { break; }
+
+                if (!blockPos2.equals(blockPos)) {
+                    BlockState blockState2 = serverWorld.getBlockState(blockPos2);
+                    Block block = blockState2.getBlock();
+                    if (block instanceof Degradable) {
+                        Enum<?> enum_ = ((Degradable<?>) block).getDegradationLevel();
+                        if (enum_.getClass() == Oxidizable.OxidationLevel.class) {
+                            int m = enum_.ordinal();
+                            if (m < i) { return; }
+                            if (m > i) { ++k;} else { ++j; }
+                        }
+                    } else if (block instanceof CopperPipe) {
+                        if (CopperPipe.OXIDIZATION_INT.containsKey(block)) {
+                            int m = CopperPipe.OXIDIZATION_INT.getInt(block);
+                            if (m < i) { return; }
+                            if (m > i) { ++k; } else { ++j; }
+                        }
+                    } else if (block instanceof CopperFitting) {
+                        if (OXIDIZATION_INT.containsKey(block)) {
+                            int m = OXIDIZATION_INT.getInt(block);
+                            if (m < i) { return; }
+                            if (m > i) { ++k; } else { ++j; }
+                        }
+                    }
+                }
+            }
+            float f = (float) (k + 1) / (float) (k + j + 1);
+            float g = f * f * degradationChance;
+            if (random.nextFloat() < g) {
+                if (NEXT_STAGE.containsKey(first)) {
+                    serverWorld.setBlockState(blockPos, makeCopyOf(blockState, NEXT_STAGE.get(first)));
                 }
             }
         }
@@ -196,23 +239,6 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
         } return highest;
     }
 
-    public static ArrayList<BlockPos> getOutputPipe(World world, BlockPos blockPos, ArrayList<BlockPos> poses) {
-        BlockPos p;
-        ArrayList<BlockPos> exits = new ArrayList<>();
-        for (Direction direction : Direction.values()) {
-            p = blockPos.offset(direction);
-            if (world.isChunkLoaded(p) && !poses.contains(p)) {
-                if (world.getBlockState(p).getBlock() instanceof CopperPipe) {
-                    if (world.getBlockState(p).get(FACING) == direction) {
-                        poses.add(p);
-                        ArrayList<BlockPos> news = CopperPipe.getOutputPipeFitting(world, p, world.getBlockState(p), poses);
-                        exits.addAll(news);
-                    }
-                }
-            }
-        } return exits;
-    }
-
     public boolean hasRandomTicks(BlockState blockState) {
         Block block = blockState.getBlock();
         return block == CopperFitting.COPPER_FITTING || block == CopperFitting.EXPOSED_FITTING || block == CopperFitting.WEATHERED_FITTING;
@@ -250,61 +276,6 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
         } else return null;
     }
 
-    public static Block getNextStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperFitting pipe) {
-            if (pipe == COPPER_FITTING) { return EXPOSED_FITTING; }
-            if (pipe == EXPOSED_FITTING) { return WEATHERED_FITTING; }
-            if (pipe == WEATHERED_FITTING) { return OXIDIZED_FITTING; }
-        }
-        return null;
-    }
-
-    public static Block getWaxStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperFitting pipe) {
-            if (pipe == COPPER_FITTING) { return WAXED_COPPER_FITTING; }
-            if (pipe == EXPOSED_FITTING) { return WAXED_EXPOSED_FITTING; }
-            if (pipe == WEATHERED_FITTING) { return WAXED_WEATHERED_FITTING; }
-            if (pipe == OXIDIZED_FITTING) { return WAXED_OXIDIZED_FITTING; }
-        }
-        return null;
-    }
-
-    public static Block getPreviousStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperFitting pipe) {
-            if (pipe == EXPOSED_FITTING) { return COPPER_FITTING; }
-            if (pipe == WEATHERED_FITTING) { return EXPOSED_FITTING; }
-            if (pipe == OXIDIZED_FITTING) { return WEATHERED_FITTING; }
-            if (pipe == CORRODED_FITTING) { return OXIDIZED_FITTING; }
-            if (pipe == WAXED_COPPER_FITTING) { return COPPER_FITTING; }
-            if (pipe == WAXED_EXPOSED_FITTING) { return EXPOSED_FITTING; }
-            if (pipe == WAXED_WEATHERED_FITTING) { return WEATHERED_FITTING; }
-            if (pipe == WAXED_OXIDIZED_FITTING) { return OXIDIZED_FITTING; }
-        }
-        return null;
-    }
-
-    public static Block getGlowingStage(World world, BlockPos blockPos) {
-        if (world.getBlockState(blockPos).getBlock() instanceof CopperFitting pipe) {
-            if (pipe == RED_FITTING) {return GLOWING_RED_FITTING;}
-            if (pipe == ORANGE_FITTING) {return GLOWING_ORANGE_FITTING;}
-            if (pipe == YELLOW_FITTING) {return GLOWING_YELLOW_FITTING;}
-            if (pipe == LIME_FITTING) {return GLOWING_LIME_FITTING;}
-            if (pipe == GREEN_FITTING) {return GLOWING_GREEN_FITTING;}
-            if (pipe == CYAN_FITTING) {return GLOWING_CYAN_FITTING;}
-            if (pipe == LIGHT_BLUE_FITTING) {return GLOWING_LIGHT_BLUE_FITTING;}
-            if (pipe == BLUE_FITTING) {return GLOWING_BLUE_FITTING;}
-            if (pipe == PURPLE_FITTING) {return GLOWING_PURPLE_FITTING;}
-            if (pipe == MAGENTA_FITTING) {return GLOWING_MAGENTA_FITTING;}
-            if (pipe == PINK_FITTING) {return GLOWING_PINK_FITTING;}
-            if (pipe == WHITE_FITTING) {return GLOWING_WHITE_FITTING;}
-            if (pipe == LIGHT_GRAY_FITTING) {return GLOWING_LIGHT_GRAY_FITTING;}
-            if (pipe == GRAY_FITTING) {return GLOWING_GRAY_FITTING;}
-            if (pipe == BLACK_FITTING) {return GLOWING_BLACK_FITTING;}
-            if (pipe == BROWN_FITTING) {return GLOWING_BROWN_FITTING;}
-        }
-        return null;
-    }
-
     static {
         WATERLOGGED = Properties.WATERLOGGED;
         POWERED = Properties.POWERED;
@@ -315,15 +286,15 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
         FITTING_SHAPE = Block.createCuboidShape(2.5D, 2.5D, 2.5D, 13.5D, 13.5D, 13.5D);
     }
 
-    public static final Block OXIDIZED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.TEAL).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,1, 0);
-    public static final Block WEATHERED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.DARK_AQUA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,1, 0);
-    public static final Block EXPOSED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.TERRACOTTA_LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,1, 0);
-    public static final Block COPPER_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,1, 0);
+    public static final Block OXIDIZED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.TEAL).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,1, ParticleTypes.SQUID_INK);
+    public static final Block WEATHERED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.DARK_AQUA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,1, ParticleTypes.SQUID_INK);
+    public static final Block EXPOSED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.TERRACOTTA_LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,1, ParticleTypes.SQUID_INK);
+    public static final Block COPPER_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,1, ParticleTypes.SQUID_INK);
 
-    public static final Block WAXED_OXIDIZED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.TEAL).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), true,0, 0);
-    public static final Block WAXED_WEATHERED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.DARK_AQUA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), true,0, 0);
-    public static final Block WAXED_EXPOSED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.TERRACOTTA_LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), true,0, 0);
-    public static final Block WAXED_COPPER_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), true,0, 0);
+    public static final Block WAXED_OXIDIZED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.TEAL).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), true,0, ParticleTypes.SQUID_INK);
+    public static final Block WAXED_WEATHERED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.DARK_AQUA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), true,0, ParticleTypes.SQUID_INK);
+    public static final Block WAXED_EXPOSED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.TERRACOTTA_LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), true,0, ParticleTypes.SQUID_INK);
+    public static final Block WAXED_COPPER_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), true,0, ParticleTypes.SQUID_INK);
 
     public static final Block CORRODED_FITTING = new CopperFitting(Settings
             .of(Material.METAL, MapColor.OFF_WHITE)
@@ -335,40 +306,86 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable {
                     Main.CORRODED_COPPER_BREAK,
                     Main.CORRODED_COPPER_FALL,
                     Main.CORRODED_COPPER_HIT
-    )), false,4, 0);
+    )), false,4, ParticleTypes.SQUID_INK);
 
-    public static final Block BLACK_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BLACK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, 0);
-    public static final Block RED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.RED).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("red"));
-    public static final Block GREEN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.GREEN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("green"));
-    public static final Block BROWN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BROWN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("brown"));
-    public static final Block BLUE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("blue"));
-    public static final Block PURPLE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.PURPLE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("purple"));
-    public static final Block CYAN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.CYAN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("cyan"));
-    public static final Block LIGHT_GRAY_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("light_gray"));
-    public static final Block GRAY_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("gray"));
-    public static final Block PINK_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.PINK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("pink"));
-    public static final Block LIME_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIME).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("lime"));
-    public static final Block YELLOW_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.YELLOW).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("yellow"));
-    public static final Block LIGHT_BLUE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIGHT_BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("light_blue"));
-    public static final Block MAGENTA_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.MAGENTA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("magenta"));
-    public static final Block ORANGE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("orange"));
-    public static final Block WHITE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.WHITE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.colorToInt("white"));
+    public static final Block BLACK_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BLACK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, ParticleTypes.SQUID_INK);
+    public static final Block RED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.RED).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.RED_INK);
+    public static final Block GREEN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.GREEN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.GREEN_INK);
+    public static final Block BROWN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BROWN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.BROWN_INK);
+    public static final Block BLUE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.BLUE_INK);
+    public static final Block PURPLE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.PURPLE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.PURPLE_INK);
+    public static final Block CYAN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.CYAN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.CYAN_INK);
+    public static final Block LIGHT_GRAY_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.LIGHT_GRAY_INK);
+    public static final Block GRAY_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.GRAY_INK);
+    public static final Block PINK_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.PINK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.PINK_INK);
+    public static final Block LIME_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIME).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.LIME_INK);
+    public static final Block YELLOW_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.YELLOW).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.YELLOW_INK);
+    public static final Block LIGHT_BLUE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIGHT_BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.LIGHT_BLUE_INK);
+    public static final Block MAGENTA_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.MAGENTA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.MAGENTA_INK);
+    public static final Block ORANGE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.ORANGE_INK);
+    public static final Block WHITE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.WHITE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), false,2, Main.WHITE_INK);
 
-    public static final Block GLOWING_BLACK_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BLACK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, 0);
-    public static final Block GLOWING_RED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.RED).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("red"));
-    public static final Block GLOWING_GREEN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.GREEN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("green"));
-    public static final Block GLOWING_BROWN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BROWN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("brown"));
-    public static final Block GLOWING_BLUE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("blue"));
-    public static final Block GLOWING_PURPLE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.PURPLE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("purple"));
-    public static final Block GLOWING_CYAN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.CYAN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("cyan"));
-    public static final Block GLOWING_LIGHT_GRAY_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("light_gray"));
-    public static final Block GLOWING_GRAY_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("gray"));
-    public static final Block GLOWING_PINK_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.PINK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("pink"));
-    public static final Block GLOWING_LIME_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIME).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("lime"));
-    public static final Block GLOWING_YELLOW_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.YELLOW).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("yellow"));
-    public static final Block GLOWING_LIGHT_BLUE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIGHT_BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("light_blue"));
-    public static final Block GLOWING_MAGENTA_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.MAGENTA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("magenta"));
-    public static final Block GLOWING_ORANGE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("orange"));
-    public static final Block GLOWING_WHITE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.WHITE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.colorToInt("white"));
+    public static final Block GLOWING_BLACK_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BLACK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, ParticleTypes.SQUID_INK);
+    public static final Block GLOWING_RED_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.RED).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.RED_INK);
+    public static final Block GLOWING_GREEN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.GREEN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.GREEN_INK);
+    public static final Block GLOWING_BROWN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BROWN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.BROWN_INK);
+    public static final Block GLOWING_BLUE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.BLUE_INK);
+    public static final Block GLOWING_PURPLE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.PURPLE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.PURPLE_INK);
+    public static final Block GLOWING_CYAN_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.CYAN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.CYAN_INK);
+    public static final Block GLOWING_LIGHT_GRAY_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.LIGHT_GRAY_INK);
+    public static final Block GLOWING_GRAY_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.GRAY_INK);
+    public static final Block GLOWING_PINK_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.PINK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.PINK_INK);
+    public static final Block GLOWING_LIME_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIME).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.LIME_INK);
+    public static final Block GLOWING_YELLOW_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.YELLOW).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.YELLOW_INK);
+    public static final Block GLOWING_LIGHT_BLUE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.LIGHT_BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.LIGHT_BLUE_INK);
+    public static final Block GLOWING_MAGENTA_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.MAGENTA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.MAGENTA_INK);
+    public static final Block GLOWING_ORANGE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.ORANGE_INK);
+    public static final Block GLOWING_WHITE_FITTING = new CopperFitting(Settings.of(Material.METAL, MapColor.WHITE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), false,2, Main.WHITE_INK);
+
+    public static final Object2ObjectMap<Block, Block> NEXT_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(COPPER_FITTING, EXPOSED_FITTING);
+        object2IntOpenHashMap.put(EXPOSED_FITTING, WEATHERED_FITTING);
+        object2IntOpenHashMap.put(WEATHERED_FITTING, OXIDIZED_FITTING);
+        object2IntOpenHashMap.put(OXIDIZED_FITTING, CORRODED_FITTING);
+    }));
+    public static final Object2ObjectMap<Block, Block> PREVIOUS_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(CORRODED_FITTING, OXIDIZED_FITTING);
+        object2IntOpenHashMap.put(OXIDIZED_FITTING, WEATHERED_FITTING);
+        object2IntOpenHashMap.put(WEATHERED_FITTING, EXPOSED_FITTING);
+        object2IntOpenHashMap.put(EXPOSED_FITTING, COPPER_FITTING);
+        object2IntOpenHashMap.put(WAXED_COPPER_FITTING, COPPER_FITTING);
+        object2IntOpenHashMap.put(WAXED_EXPOSED_FITTING, EXPOSED_FITTING);
+        object2IntOpenHashMap.put(WAXED_WEATHERED_FITTING, WEATHERED_FITTING);
+        object2IntOpenHashMap.put(WAXED_OXIDIZED_FITTING, OXIDIZED_FITTING);
+    }));
+    public static final Object2ObjectMap<Block, Block> WAX_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(COPPER_FITTING, WAXED_COPPER_FITTING);
+        object2IntOpenHashMap.put(EXPOSED_FITTING, WAXED_EXPOSED_FITTING);
+        object2IntOpenHashMap.put(WEATHERED_FITTING, WAXED_WEATHERED_FITTING);
+        object2IntOpenHashMap.put(OXIDIZED_FITTING, WAXED_OXIDIZED_FITTING);
+    }));
+    public static final Object2ObjectMap<Block, Block> GLOW_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(RED_FITTING, GLOWING_RED_FITTING);
+        object2IntOpenHashMap.put(ORANGE_FITTING, GLOWING_ORANGE_FITTING);
+        object2IntOpenHashMap.put(YELLOW_FITTING, GLOWING_YELLOW_FITTING);
+        object2IntOpenHashMap.put(GREEN_FITTING, GLOWING_GREEN_FITTING);
+        object2IntOpenHashMap.put(CYAN_FITTING, GLOWING_CYAN_FITTING);
+        object2IntOpenHashMap.put(LIGHT_BLUE_FITTING, GLOWING_LIGHT_BLUE_FITTING);
+        object2IntOpenHashMap.put(BLUE_FITTING, GLOWING_BLUE_FITTING);
+        object2IntOpenHashMap.put(PURPLE_FITTING, GLOWING_PURPLE_FITTING);
+        object2IntOpenHashMap.put(MAGENTA_FITTING, GLOWING_MAGENTA_FITTING);
+        object2IntOpenHashMap.put(PINK_FITTING, GLOWING_PINK_FITTING);
+        object2IntOpenHashMap.put(WHITE_FITTING, GLOWING_WHITE_FITTING);
+        object2IntOpenHashMap.put(LIGHT_GRAY_FITTING, GLOWING_LIGHT_GRAY_FITTING);
+        object2IntOpenHashMap.put(GRAY_FITTING, GLOWING_GRAY_FITTING);
+        object2IntOpenHashMap.put(BLACK_FITTING, GLOWING_BLACK_FITTING);
+        object2IntOpenHashMap.put(BROWN_FITTING, GLOWING_BROWN_FITTING);
+    }));
+    public static final Object2IntMap<Block> OXIDIZATION_INT = Object2IntMaps.unmodifiable(Util.make(new Object2IntOpenHashMap<>(), (object2IntOpenHashMap) -> {
+        object2IntOpenHashMap.put(COPPER_FITTING, 0);
+        object2IntOpenHashMap.put(EXPOSED_FITTING, 1);
+        object2IntOpenHashMap.put(WEATHERED_FITTING, 2);
+        object2IntOpenHashMap.put(OXIDIZED_FITTING, 3);
+    }));
 
 }

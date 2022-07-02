@@ -24,8 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Item.class)
 public class ItemMixin {
 
-    @Inject(at = @At("TAIL"), method = "useOnBlock")
-    public ActionResult useOnBlock(ItemUsageContext itemUsageContext, CallbackInfoReturnable info) {
+    @Inject(at = @At("TAIL"), method = "useOnBlock", cancellable = true)
+    public void useOnBlock(ItemUsageContext itemUsageContext, CallbackInfoReturnable<ActionResult> info) {
         World world = itemUsageContext.getWorld();
         BlockPos blockPos = itemUsageContext.getBlockPos();
         PlayerEntity playerEntity = itemUsageContext.getPlayer();
@@ -33,44 +33,46 @@ public class ItemMixin {
         ItemStack itemStack = itemUsageContext.getStack();
         boolean glowPipe = false;
         boolean glowFitting = false;
-        if (blockState!=null && blockState.getBlock() instanceof CopperPipe && itemStack.isOf(Items.GLOW_INK_SAC)) {
-            if (CopperPipe.getGlowingStage(world, blockPos)!=null) {
-                world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                glowPipe = true;
+        if (itemStack.isOf(Items.GLOW_INK_SAC) && blockState != null) {
+            Block block = blockState.getBlock();
+            if (block instanceof CopperPipe) {
+                if (CopperPipe.GLOW_STAGE.containsKey(block)) {
+                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
+                    glowPipe = true;
+                }
             }
-        }
-        if (blockState!=null && blockState.getBlock() instanceof CopperFitting && itemStack.isOf(Items.GLOW_INK_SAC)) {
-            if (CopperFitting.getGlowingStage(world, blockPos)!=null) {
-                world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                glowFitting = true;
+            if (block instanceof CopperFitting) {
+                if (CopperFitting.GLOW_STAGE.containsKey(block)) {
+                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
+                    glowFitting = true;
+                }
             }
         }
         if (glowPipe) {
             if (playerEntity instanceof ServerPlayerEntity) { Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack); }
 
             Block block = blockState.getBlock();
-            if (block instanceof CopperPipe) {
-                if (CopperPipe.getGlowingStage(world, blockPos)!=null) {
-                    CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.getGlowingStage(world, blockPos));
-                }
+            if (CopperPipe.GLOW_STAGE.containsKey(block)) {
+                CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.GLOW_STAGE.get(block));
             }
             if (playerEntity != null) { itemStack.decrement(1); }
-            return ActionResult.success(world.isClient);
+            info.setReturnValue(ActionResult.success(world.isClient));
+            info.cancel();
         } else if (glowFitting) {
             if (playerEntity instanceof ServerPlayerEntity) { Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack); }
             Block block = blockState.getBlock();
-            if (block instanceof CopperFitting) {
-                if (CopperFitting.getGlowingStage(world, blockPos)!=null) {
-                    CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.getGlowingStage(world, blockPos));
-                }
+            if (CopperFitting.GLOW_STAGE.containsKey(block)) {
+                CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.GLOW_STAGE.get(block));
             }
             if (playerEntity != null) { itemStack.decrement(1); }
 
-            return ActionResult.success(world.isClient);
+            info.setReturnValue(ActionResult.success(world.isClient));
+            info.cancel();
         } else {
-            return ActionResult.PASS;
+            info.setReturnValue(ActionResult.PASS);
+            info.cancel();
         }
     }
 

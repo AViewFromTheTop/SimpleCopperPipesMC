@@ -80,10 +80,7 @@ public class HoeItemMixin {
             }
 
             return ActionResult.success(world.isClient);
-        }*/ else {
-            info.setReturnValue(ActionResult.PASS);
-            info.cancel();
-        }
+        }*/
     }
 
 }

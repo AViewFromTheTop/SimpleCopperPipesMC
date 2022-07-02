@@ -3,6 +3,7 @@ package net.lunade.copper;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
@@ -13,6 +14,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.stat.StatFormatter;
 import net.minecraft.stat.Stats;
@@ -143,12 +145,46 @@ public class Main implements ModInitializer {
 	//NOTE BLOCK
 	public static final Identifier NOTE_PACKET = new Identifier("lunade","note_packet");
 
+	//PIPE INK PARTICLES
+	public static final DefaultParticleType RED_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType GREEN_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType BROWN_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType BLUE_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType PURPLE_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType CYAN_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType LIGHT_GRAY_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType GRAY_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType PINK_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType LIME_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType YELLOW_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType LIGHT_BLUE_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType MAGENTA_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType ORANGE_INK = FabricParticleTypes.simple();
+	public static final DefaultParticleType WHITE_INK = FabricParticleTypes.simple();
+
 	@Override
 	public void onInitialize() {
 		CopperPipeProperties.init();
 
 		Registry.register(Registry.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
 		Stats.CUSTOM.getOrCreateStat(INSPECT_PIPE, StatFormatter.DEFAULT);
+
+		//PARTICLE
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "red_ink"), RED_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "green_ink"), GREEN_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "brown_ink"), BROWN_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "blue_ink"), BLUE_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "purple_ink"), PURPLE_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "cyan_ink"), CYAN_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "light_gray_ink"), LIGHT_GRAY_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "gray_ink"), GRAY_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "pink_ink"), PINK_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "lime_ink"), LIME_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "yellow_ink"), YELLOW_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "light_blue_ink"), LIGHT_BLUE_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "magenta_ink"), MAGENTA_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "orange_ink"), ORANGE_INK);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier("lunade", "white_ink"), WHITE_INK);
 
 		//PIPE
 		Registry.register(Registry.BLOCK, COPPER_PIPE, CopperPipe.COPPER_PIPE);

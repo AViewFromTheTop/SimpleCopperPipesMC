@@ -2,7 +2,6 @@ package net.lunade.copper.block_entity;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.particle.VibrationParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.BlockPos;
@@ -67,10 +66,10 @@ public class CopperPipeListener
         this.vibration = new VibrationListener.Vibration(gameEvent, this.distance, vec3d, emitter.sourceEntity());
         if (gameEvent!=GameEvent.NOTE_BLOCK_PLAY) {
             this.delay = MathHelper.floor(this.distance);
-            serverWorld.spawnParticles(new VibrationParticleEffect(this.positionSource, this.delay), vec3d.x, vec3d.y, vec3d.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            //serverWorld.spawnParticles(new VibrationParticleEffect(this.positionSource, this.delay), vec3d.x, vec3d.y, vec3d.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         } else {
-            this.delay = 1;
-            serverWorld.spawnParticles(new VibrationParticleEffect(this.positionSource, 5), vec3d.x, vec3d.y, vec3d.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            this.delay = 0;
+            //serverWorld.spawnParticles(new VibrationParticleEffect(this.positionSource, 5), vec3d.x, vec3d.y, vec3d.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
         this.callback.onListen();
     }

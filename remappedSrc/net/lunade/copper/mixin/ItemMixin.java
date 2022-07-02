@@ -33,28 +33,29 @@ public class ItemMixin {
         ItemStack itemStack = itemUsageContext.getStack();
         boolean glowPipe = false;
         boolean glowFitting = false;
-        if (blockState!=null && blockState.getBlock() instanceof CopperPipe && itemStack.isOf(Items.GLOW_INK_SAC)) {
-            if (CopperPipe.getGlowingStage(world, blockPos)!=null) {
-                world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                glowPipe = true;
+        if (itemStack.isOf(Items.GLOW_INK_SAC) && blockState != null) {
+            Block block = blockState.getBlock();
+            if (block instanceof CopperPipe) {
+                if (CopperPipe.GLOW_STAGE.containsKey(block)) {
+                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
+                    glowPipe = true;
+                }
             }
-        }
-        if (blockState!=null && blockState.getBlock() instanceof CopperFitting && itemStack.isOf(Items.GLOW_INK_SAC)) {
-            if (CopperFitting.getGlowingStage(world, blockPos)!=null) {
-                world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                glowFitting = true;
+            if (block instanceof CopperFitting) {
+                if (CopperFitting.GLOW_STAGE.containsKey(block)) {
+                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
+                    glowFitting = true;
+                }
             }
         }
         if (glowPipe) {
             if (playerEntity instanceof ServerPlayerEntity) { Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack); }
 
             Block block = blockState.getBlock();
-            if (block instanceof CopperPipe) {
-                if (CopperPipe.getGlowingStage(world, blockPos)!=null) {
-                    CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.getGlowingStage(world, blockPos));
-                }
+            if (CopperPipe.GLOW_STAGE.containsKey(block)) {
+                CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.GLOW_STAGE.get(block));
             }
             if (playerEntity != null) { itemStack.decrement(1); }
             info.setReturnValue(ActionResult.success(world.isClient));
@@ -62,10 +63,8 @@ public class ItemMixin {
         } else if (glowFitting) {
             if (playerEntity instanceof ServerPlayerEntity) { Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack); }
             Block block = blockState.getBlock();
-            if (block instanceof CopperFitting) {
-                if (CopperFitting.getGlowingStage(world, blockPos)!=null) {
-                    CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.getGlowingStage(world, blockPos));
-                }
+            if (CopperFitting.GLOW_STAGE.containsKey(block)) {
+                CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.GLOW_STAGE.get(block));
             }
             if (playerEntity != null) { itemStack.decrement(1); }
 

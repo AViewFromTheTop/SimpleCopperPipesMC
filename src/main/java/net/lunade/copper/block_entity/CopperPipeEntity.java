@@ -9,7 +9,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.particle.server.EasyParticlePacket;
 import net.lunade.copper.pipe_nbt.ExtraPipeData;
 import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
 import net.minecraft.block.*;
@@ -37,6 +36,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.VibrationParticleEffect;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.screen.HopperScreenHandler;
@@ -414,11 +415,11 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         boolean genericInkSac = itemStack.isOf(Items.INK_SAC);
         if (genericInkSac || itemStack.isOf(Items.GLOW_INK_SAC)) {
             if (state.getBlock() instanceof CopperPipe pipe) {
-                int ink = genericInkSac ? pipe.inkInt : 1;
+                ParticleEffect ink = genericInkSac ? pipe.ink : ParticleTypes.SQUID_INK;
                 if (world.getBlockState(pos.offset(state.get(FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
-                    if (ink == 0) { ink = fitting.inkInt; }
+                    if (ink == ParticleTypes.SQUID_INK) { ink = fitting.ink; }
                     for (int o=0; o<30; o++) {
-                        EasyParticlePacket.createParticle(world, new Vec3d(d + ran1.get(world.random) * 0.1, e + ran2.get(world.random) * 0.1, f + ran3.get(world.random) * 0.1), 1, velX * 0.1, velY * 0.1, velZ * 0.1, ink);
+                        world.spawnParticles(ink, d + ran1.get(world.random) * 0.1, e + ran2.get(world.random) * 0.1, f + ran3.get(world.random) * 0.1, 0, velX, velY, velZ, 0.10000000149011612D);
                     }
                 }
             }

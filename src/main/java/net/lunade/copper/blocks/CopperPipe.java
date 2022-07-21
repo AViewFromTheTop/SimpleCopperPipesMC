@@ -315,24 +315,30 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
                     pos = pos.offset(direction);
                     hasOffset = true;
                 }
-                pos=pos.down();
+                pos = pos.down();
                 BlockState state = serverWorld.getBlockState(pos);
-                if (state.getBlock() == Blocks.CAULDRON) {
-                    i=99; //Stop loop if viable Cauldron is found
-                    serverWorld.setBlockState(pos, Blocks.WATER_CAULDRON.getDefaultState().with(Properties.LEVEL_3, 1));
-                }
-                if (state.getBlock() == Blocks.WATER_CAULDRON) {
-                    if (state.get(Properties.LEVEL_3)!=3) { //Ignores filled Cauldrons
-                        i=99; //Stop loop if viable Cauldron is found
-                        serverWorld.setBlockState(pos, Blocks.WATER_CAULDRON.getDefaultState().with(Properties.LEVEL_3, state.get(Properties.LEVEL_3)+1));
+                if (serverWorld.getFluidState(pos).isEmpty()) {
+                    if (state.getBlock() == Blocks.CAULDRON) {
+                        i = 99; //Stop loop if viable Cauldron is found
+                        serverWorld.setBlockState(pos, Blocks.WATER_CAULDRON.getDefaultState().with(Properties.LEVEL_3, 1));
                     }
+                    if (state.getBlock() == Blocks.WATER_CAULDRON) {
+                        if (state.get(Properties.LEVEL_3) != 3) { //Ignores filled Cauldrons
+                            i = 99; //Stop loop if viable Cauldron is found
+                            serverWorld.setBlockState(pos, Blocks.WATER_CAULDRON.getDefaultState().with(Properties.LEVEL_3, state.get(Properties.LEVEL_3) + 1));
+                        }
+                    }
+                    if (state.getBlock() == Blocks.DIRT) {
+                        i = 99; //Stop loop if viable Block is found
+                        serverWorld.setBlockState(pos, Blocks.MUD.getDefaultState());
+                    }
+                    if (state.getBlock() == Blocks.FIRE) {
+                        serverWorld.breakBlock(pos, false);
+                    }
+                    if (state.isSolidBlock(serverWorld, pos)) {
+                        i = 99;
+                    } //Water will "pass through" all non-full blocks (I.E. ladders, stairs). This also allows for water to "overflow" from Cauldrons down into one below if they're full or have Lava.
                 }
-                if (state.getBlock() == Blocks.DIRT) {
-                    i=99; //Stop loop if viable Block is found
-                    serverWorld.setBlockState(pos, Blocks.MUD.getDefaultState());
-                }
-                if (state.getBlock() == Blocks.FIRE) { serverWorld.breakBlock(pos, false); }
-                if (state.isSolidBlock(serverWorld, pos)) {i=99;} //Water will "pass through" all non-full blocks (I.E. ladders, stairs). This also allows for water to "overflow" from Cauldrons down into one below if they're full or have Lava.
             }
         }
 

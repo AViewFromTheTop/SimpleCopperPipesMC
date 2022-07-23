@@ -707,7 +707,8 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         if (!nbtList.isEmpty()) {
             Direction facing = blockState.get(FACING);
             Direction except = facing.getOpposite();
-            for (Direction direction : Direction.values()) {
+            List<Direction> dirs = Main.shuffledDirections(world.getRandom());
+            for (Direction direction : dirs) {
                 if (direction != except) {
                     BlockPos newPos = blockPos.offset(direction);
                     if (world.isChunkLoaded(newPos)) {

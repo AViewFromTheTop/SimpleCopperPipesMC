@@ -22,6 +22,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static net.lunade.copper.blocks.CopperFitting.sendElectricity;
 import static net.lunade.copper.blocks.CopperPipe.FACING;
@@ -146,7 +147,8 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
     public void moveMoveableNbt(World world, BlockPos blockPos) {
         ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = this.moveablePipeDataHandler.getSavedNbtList();
         if (!nbtList.isEmpty()) {
-            for (Direction direction : Direction.values()) {
+            List<Direction> dirs = Main.shuffledDirections(world.getRandom());
+            for (Direction direction : dirs) {
                 BlockPos newPos = blockPos.offset(direction);
                 if (world.isChunkLoaded(newPos)) {
                     BlockState state = world.getBlockState(newPos);

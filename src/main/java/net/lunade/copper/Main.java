@@ -20,7 +20,13 @@ import net.minecraft.stat.StatFormatter;
 import net.minecraft.stat.Stats;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
+
+import java.util.List;
 
 public class Main implements ModInitializer {
 
@@ -399,6 +405,10 @@ public class Main implements ModInitializer {
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_HIT.getId(), CORRODED_COPPER_HIT);
 
 		RegisterPipeNbtMethods.init();
+	}
+
+	public static List<Direction> shuffledDirections(Random random) {
+		return Util.copyShuffled(Direction.values(), random);
 	}
 
 }

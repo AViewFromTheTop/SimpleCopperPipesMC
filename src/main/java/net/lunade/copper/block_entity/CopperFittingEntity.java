@@ -4,7 +4,6 @@ import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
-import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -22,7 +21,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-import static net.lunade.copper.block_entity.CopperPipeEntity.SaveableGameEventID;
+import java.util.ArrayList;
+
 import static net.lunade.copper.blocks.CopperFitting.sendElectricity;
 import static net.lunade.copper.blocks.CopperPipe.FACING;
 import static net.lunade.copper.blocks.CopperPipeProperties.HAS_SMOKE;
@@ -92,7 +92,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
     public static void serverTick(World world, BlockPos blockPos, BlockState blockState, CopperFittingEntity copperFittingEntity) {
         BlockState state = blockState;
         if (!world.isClient) {
-            moveGameEvent(world, blockPos, copperFittingEntity);
+            copperFittingEntity.moveMoveableNbt(world, blockPos);
         }
         if (copperFittingEntity.waterCooldown>0) {
             --copperFittingEntity.waterCooldown;
@@ -143,8 +143,9 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         return new HopperScreenHandler(i, playerInventory, this);
     }
 
-    public static void moveGameEvent(World world, BlockPos blockPos, CopperFittingEntity fittingEntity) {
-        if (fittingEntity.moveablePipeDataHandler.getMoveablePipeNbt(SaveableGameEventID)!=null) {
+    public void moveMoveableNbt(World world, BlockPos blockPos) {
+        ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = this.moveablePipeDataHandler.getSavedNbtList();
+        if (!nbtList.isEmpty()) {
             for (Direction direction : Direction.values()) {
                 BlockPos newPos = blockPos.offset(direction);
                 if (world.isChunkLoaded(newPos)) {
@@ -153,14 +154,16 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
                         if (state.get(FACING) == direction) {
                             BlockEntity entity = world.getBlockEntity(newPos);
                             if (entity instanceof CopperPipeEntity pipeEntity) {
-                                pipeEntity.moveablePipeDataHandler.setMoveablePipeNbt(SaveableGameEventID, fittingEntity.moveablePipeDataHandler.getMoveablePipeNbt(SaveableGameEventID));
+                                for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
+                                    pipeEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtId(), nbt);
+                                }
                             }
                         }
                     }
                 }
             }
-            fittingEntity.moveablePipeDataHandler.removeMoveablePipeNbt(SaveableGameEventID);
-            fittingEntity.markDirty();
+            this.moveablePipeDataHandler.clear();
+            this.markDirty();
         }
     }
 

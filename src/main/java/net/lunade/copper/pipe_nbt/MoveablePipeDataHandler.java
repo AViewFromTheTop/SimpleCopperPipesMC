@@ -5,7 +5,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.lunade.copper.Main;
+import net.lunade.copper.RegisterPipeNbtMethods;
+import net.lunade.copper.block_entity.CopperPipeEntity;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -49,8 +51,7 @@ public class MoveablePipeDataHandler {
 
             if (list.isPresent()) {
                 for (SaveableMovablePipeNbt saveableMovablePipeNbt : list.get()) {
-                    Class<? extends SaveableMovablePipeNbt> properClass = Main.getProperClass(saveableMovablePipeNbt);
-                    this.addSaveableMoveablePipeNbt(properClass.cast(saveableMovablePipeNbt));
+                    this.addSaveableMoveablePipeNbt(saveableMovablePipeNbt);
                 }
             }
         }
@@ -94,6 +95,15 @@ public class MoveablePipeDataHandler {
             this.savedIds.add(id);
             this.savedList.add(nbt);
         }
+    }
+
+    public void clear() {
+        this.savedList.clear();
+        this.savedIds.clear();
+    }
+
+    public ArrayList<SaveableMovablePipeNbt> getSavedNbtList() {
+        return this.savedList;
     }
 
     public static class SaveableMovablePipeNbt {
@@ -161,18 +171,12 @@ public class MoveablePipeDataHandler {
             this.nbtId = new Identifier("lunade", "default");
         }
 
-        public void dispense(World world, BlockPos exitPos) {
-
-        }
-
-        public void dispense(World world, Vec3d exitPos) {
-
-        }
-
-        public void spawnPipeVibrationParticles(ServerWorld world) {
-            if (!this.hasEmittedParticle) {
-                world.spawnParticles(new VibrationParticleEffect(new BlockPositionSource(this.pipePos), 5), this.originPos.x, this.originPos.y, this.originPos.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-                this.hasEmittedParticle = true;
+        public void dispense(ServerWorld world, BlockPos pos, BlockState state, CopperPipeEntity pipeEntity) {
+            RegisterPipeNbtMethods.DispenseMethod<?> method = RegisterPipeNbtMethods.getDispense(this.nbtId);
+            if (method!=null) {
+                method.dispense(this, world, pos, state, pipeEntity);
+            } else {
+                LOGGER.error("Unable to find dispense method for Moveable Pipe Nbt " + this.getNbtId() + "!");
             }
         }
 
@@ -226,8 +230,8 @@ public class MoveablePipeDataHandler {
             this.nbtId = id;
         }
 
-        public SaveablePipeGameEvent copyOf() {
-            return new SaveablePipeGameEvent(this.id, this.originPos, this.uuid, this.hasEmittedParticle, this.pipePos);
+        public SaveableMovablePipeNbt copyOf() {
+            return new SaveableMovablePipeNbt(this.id, this.originPos, this.uuid, this.hasEmittedParticle, this.pipePos, this.nbtId);
         }
     }
 }

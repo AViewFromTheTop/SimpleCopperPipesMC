@@ -9,8 +9,6 @@ import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
-import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
-import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.EntityType;
@@ -23,8 +21,6 @@ import net.minecraft.stat.Stats;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-
-import java.util.ArrayList;
 
 public class Main implements ModInitializer {
 
@@ -402,20 +398,7 @@ public class Main implements ModInitializer {
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_FALL.getId(), CORRODED_COPPER_FALL);
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_HIT.getId(), CORRODED_COPPER_HIT);
 
-		SAVEABLE_PIPE_NBT_IDS.add(CopperPipeEntity.SaveableGameEventID);
-		SAVEABLE_PIPE_NBT_CLASSES.add(SaveablePipeGameEvent.class);
-		SAVEABLE_PIPE_NBT_IDS.add(new Identifier("lunade", "default"));
-		SAVEABLE_PIPE_NBT_CLASSES.add(MoveablePipeDataHandler.SaveableMovablePipeNbt.class);
-	}
-
-	public static ArrayList<Identifier> SAVEABLE_PIPE_NBT_IDS = new ArrayList<>();
-	public static ArrayList<Class<? extends MoveablePipeDataHandler.SaveableMovablePipeNbt>> SAVEABLE_PIPE_NBT_CLASSES = new ArrayList<>();
-
-	public static Class<? extends MoveablePipeDataHandler.SaveableMovablePipeNbt> getProperClass(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt) {
-		if (SAVEABLE_PIPE_NBT_IDS.contains(nbt.getNbtId())) {
-			return (SAVEABLE_PIPE_NBT_CLASSES.get(SAVEABLE_PIPE_NBT_IDS.indexOf(nbt.getNbtId())));
-		}
-		return MoveablePipeDataHandler.SaveableMovablePipeNbt.class;
+		RegisterPipeNbtMethods.init();
 	}
 
 }

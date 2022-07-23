@@ -1,12 +1,8 @@
 package net.lunade.copper.pipe_nbt;
 
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.Dynamic;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.particle.VibrationParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -21,38 +17,26 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.List;
-import java.util.Optional;
 
-public class SaveablePipeGameEvent {
-
+public class SaveablePipeGameEvent extends MoveablePipeDataHandler.SaveableMovablePipeNbt {
     private static final Logger LOGGER = LogUtils.getLogger();
-    public Identifier event;
-    public Vec3d originPos;
-    public String uuid;
-    public boolean hasEmittedParticle;
-    public BlockPos pipePos;
 
     //TEMP STORAGE
     public Entity foundEntity;
 
-    public static final Codec<SaveablePipeGameEvent> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-            Identifier.CODEC.fieldOf("eventID").forGetter(SaveablePipeGameEvent::getEventID),
-            Vec3d.CODEC.fieldOf("originPos").forGetter(SaveablePipeGameEvent::getOriginPos),
-            Codec.STRING.fieldOf("uuid").forGetter(SaveablePipeGameEvent::getUUID),
-            Codec.BOOL.fieldOf("hasEmittedParticle").forGetter(SaveablePipeGameEvent::getHasEmittedParticle),
-            BlockPos.CODEC.fieldOf("pipePos").forGetter(SaveablePipeGameEvent::getPipePos)
-    ).apply(instance, SaveablePipeGameEvent::new));
-
     public SaveablePipeGameEvent(Identifier event, Vec3d originPos, String uuid, boolean hasEmittedParticle, BlockPos pipePos) {
-        this.event = event;
+        super(event, originPos, uuid, hasEmittedParticle, pipePos);
+        this.id = event;
         this.originPos = originPos;
         this.uuid = uuid;
         this.hasEmittedParticle = hasEmittedParticle;
         this.pipePos = pipePos;
+        this.setNbtId(CopperPipeEntity.SaveableGameEventID);
     }
 
     public SaveablePipeGameEvent(GameEvent event, Vec3d originPos, GameEvent.Emitter emitter, BlockPos pipePos) {
-        this.event = Registry.GAME_EVENT.getId(event);
+        super(event, originPos, emitter, pipePos);
+        this.id = Registry.GAME_EVENT.getId(event);
         this.originPos = originPos;
         if (emitter.comp_713() != null) {
             this.uuid = emitter.comp_713().getUuid().toString();
@@ -61,10 +45,12 @@ public class SaveablePipeGameEvent {
         }
         this.hasEmittedParticle = false;
         this.pipePos = pipePos;
+        this.setNbtId(CopperPipeEntity.SaveableGameEventID);
     }
 
     public SaveablePipeGameEvent(GameEvent event, Vec3d originPos, @Nullable Entity entity, BlockPos pipePos) {
-        this.event = Registry.GAME_EVENT.getId(event);
+        super(event, originPos, entity, pipePos);
+        this.id = Registry.GAME_EVENT.getId(event);
         this.originPos = originPos;
         if (entity != null) {
             this.uuid = entity.getUuid().toString();
@@ -73,13 +59,14 @@ public class SaveablePipeGameEvent {
         }
         this.hasEmittedParticle = false;
         this.pipePos = pipePos;
+        this.setNbtId(CopperPipeEntity.SaveableGameEventID);
     }
 
-    public void emitGameEvent(World world, BlockPos exitPos) {
+    public void dispense(World world, BlockPos exitPos) {
         world.emitGameEvent(this.getEntity(world), this.getGameEvent(), exitPos);
     }
 
-    public void emitGameEvent(World world, Vec3d exitPos) {
+    public void dispense(World world, Vec3d exitPos) {
         world.emitGameEvent(this.getEntity(world), this.getGameEvent(), exitPos);
     }
 
@@ -91,7 +78,7 @@ public class SaveablePipeGameEvent {
     }
 
     public GameEvent getGameEvent() {
-        return Registry.GAME_EVENT.get(this.event);
+        return Registry.GAME_EVENT.get(this.id);
     }
 
     @Nullable
@@ -116,50 +103,8 @@ public class SaveablePipeGameEvent {
         return null;
     }
 
-    public Identifier getEventID() {
-        return this.event;
-    }
-
-    public Vec3d getOriginPos() {
-        return this.originPos;
-    }
-
-    public String getUUID() {
-        return this.uuid;
-    }
-
-    public boolean getHasEmittedParticle() {
-        return this.hasEmittedParticle;
-    }
-
-    public BlockPos getPipePos() {
-        return this.pipePos;
-    }
-
-    public static SaveablePipeGameEvent readNbt(NbtCompound nbt) {
-        Optional<SaveablePipeGameEvent> event = Optional.empty();
-        if (nbt.contains("savedPipeGameEvent", 10)) {
-            event = SaveablePipeGameEvent.CODEC
-                    .parse(new Dynamic<>(NbtOps.INSTANCE, nbt.getCompound("savedPipeGameEvent")))
-                    .resultOrPartial(LOGGER::error);
-        }
-        return event.orElse(null);
-    }
-
-    public static void writeNbt(NbtCompound nbt, @Nullable SaveablePipeGameEvent saveableGameEvent) {
-        if (saveableGameEvent != null) {
-            SaveablePipeGameEvent.CODEC
-                    .encodeStart(NbtOps.INSTANCE, saveableGameEvent)
-                    .resultOrPartial(LOGGER::error)
-                    .ifPresent(saveableGameEventNbt -> nbt.put("savedPipeGameEvent", saveableGameEventNbt));
-        } else {
-            if (nbt.contains("savedPipeGameEvent", 10)) {
-                nbt.remove("savedPipeGameEvent");
-            }
-        }
-    }
 
     public SaveablePipeGameEvent copyOf() {
-        return new SaveablePipeGameEvent(this.event, this.originPos, this.uuid, this.hasEmittedParticle, this.pipePos);
+        return new SaveablePipeGameEvent(this.id, this.originPos, this.uuid, this.hasEmittedParticle, this.pipePos);
     }
 }

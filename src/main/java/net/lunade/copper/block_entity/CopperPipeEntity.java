@@ -10,6 +10,7 @@ import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.pipe_nbt.ExtraPipeData;
+import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -50,6 +51,7 @@ import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.GameEventTags;
 import net.minecraft.tag.ItemTags;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.*;
@@ -78,6 +80,7 @@ import static net.minecraft.state.property.Properties.FACING;
 public class CopperPipeEntity extends LootableContainerBlockEntity implements Inventory, VibrationListener.Callback {
     private DefaultedList<ItemStack> inventory;
     private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Identifier SaveableGameEventID = new Identifier("lunade", "savedpipegameeventnbt");
     public int transferCooldown;
     public int dispenseCooldown;
     private int waterCooldown;
@@ -89,7 +92,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
     public boolean wasPreviouslyWaterlogged;
     private CopperPipeListener listener;
 
-    public SaveablePipeGameEvent savedEvent;
+    public MoveablePipeDataHandler moveablePipeDataHandler;
     public ExtraPipeData extraPipeData;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
@@ -102,7 +105,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         this.noteBlockCooldown = 0;
         this.wasPreviouslyWaterlogged = false;
         this.listener = new CopperPipeListener(new BlockPositionSource(this.pos), 8, this, null, 0,0);
-        this.savedEvent = null;
+        this.moveablePipeDataHandler = new MoveablePipeDataHandler();
         this.extraPipeData = null;
     }
 
@@ -630,7 +633,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
             Objects.requireNonNull(var10001);
             var10000.resultOrPartial(var10001::error).ifPresent((vibrationListener) -> this.listener = (CopperPipeListener) vibrationListener);
         }
-        this.savedEvent = SaveablePipeGameEvent.readNbt(nbtCompound);
+        this.moveablePipeDataHandler.readNbt(nbtCompound);
         this.extraPipeData = ExtraPipeData.readNbt(nbtCompound);
     }
 
@@ -651,7 +654,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         Logger var10001 = LOGGER;
         Objects.requireNonNull(var10001);
         var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbtCompound.put("listener", (NbtElement)nbtElement));
-        SaveablePipeGameEvent.writeNbt(nbtCompound, this.savedEvent);
+        this.moveablePipeDataHandler.writeNbt(nbtCompound);
         ExtraPipeData.writeNbt(nbtCompound, this.extraPipeData);
     }
 
@@ -670,7 +673,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
             boolean bl2 = gameEvent == GameEvent.BLOCK_PLACE && blockPos.equals(this.getPos());
             boolean bl3 = notCubeNorPipe(serverWorld, this.getPos().offset(thisState.get(FACING).getOpposite()));
             if (!bl && !bl2 && bl3) {
-                this.savedEvent = new SaveablePipeGameEvent(gameEvent, Vec3d.ofCenter(blockPos), emitter, this.getPos());
+                this.moveablePipeDataHandler.addSaveableMoveablePipeNbt(new SaveablePipeGameEvent(gameEvent, Vec3d.ofCenter(blockPos), emitter, this.getPos()));
                 return true;
             }
         } return false;
@@ -710,7 +713,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
     }
 
     public void moveGameEvent(World world, BlockPos blockPos, BlockState blockState) {
-        if (this.savedEvent!=null) {
+        if (this.moveablePipeDataHandler.getMoveablePipeNbt(SaveableGameEventID)!=null) {
             Direction facing = blockState.get(FACING);
             Direction except = facing.getOpposite();
             for (Direction direction : Direction.values()) {
@@ -722,7 +725,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                             if (state.get(FACING) == direction || direction == facing) {
                                 BlockEntity entity = world.getBlockEntity(newPos);
                                 if (entity instanceof CopperPipeEntity pipeEntity) {
-                                    pipeEntity.savedEvent = this.savedEvent;
+                                    pipeEntity.moveablePipeDataHandler.setMoveablePipeNbt(SaveableGameEventID, this.moveablePipeDataHandler.getMoveablePipeNbt(SaveableGameEventID));
                                 }
                             }
                         }
@@ -730,14 +733,14 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                             if (state.getBlock() instanceof CopperFitting) {
                                 BlockEntity entity = world.getBlockEntity(newPos);
                                 if (entity instanceof CopperFittingEntity fittingEntity) {
-                                    fittingEntity.savedEvent = this.savedEvent;
+                                    fittingEntity.moveablePipeDataHandler.setMoveablePipeNbt(SaveableGameEventID, this.moveablePipeDataHandler.getMoveablePipeNbt(SaveableGameEventID));
                                 }
                             }
                         }
                     }
                 }
             }
-            this.savedEvent = null;
+            this.moveablePipeDataHandler.removeMoveablePipeNbt(SaveableGameEventID);
             this.markDirty();
         }
     }
@@ -753,8 +756,10 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
         boolean bl4 = oppBlock != Blocks.WATER;
         boolean noteBlock = false;
         if ((bl1 || bl3) && (bl2 && bl4)) {
-            if (this.savedEvent!=null) {
-                if (this.savedEvent.getGameEvent() == GameEvent.NOTE_BLOCK_PLAY) { //Run Regardless Of Listeners ONLY If Event Is NoteBlock Sounds
+            MoveablePipeDataHandler.SaveableMovablePipeNbt movablePipeNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(SaveableGameEventID);
+            if (movablePipeNbt!=null) {
+                SaveablePipeGameEvent savedEvent = ((SaveablePipeGameEvent)movablePipeNbt);
+                if (savedEvent.getGameEvent() == GameEvent.NOTE_BLOCK_PLAY) { //Run Regardless Of Listeners ONLY If Event Is NoteBlock Sounds
                     this.noteBlockCooldown = 40;
                     boolean corroded;
                     float volume = 3.0F;
@@ -764,7 +769,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                             volume = 4.5F;
                         }
                     }
-                    BlockPos originPos = new BlockPos(this.savedEvent.originPos);
+                    BlockPos originPos = new BlockPos(savedEvent.originPos);
                     noteBlock = serverWorld.getBlockState(originPos).isOf(Blocks.NOTE_BLOCK);
                     if (noteBlock) {
                         BlockState state = serverWorld.getBlockState(originPos);
@@ -781,12 +786,12 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                         }
                     }
                 }
-                this.savedEvent.emitGameEvent(serverWorld, blockPos);
+                savedEvent.dispense(serverWorld, blockPos);
                 if (noteBlock || this.noteBlockCooldown>0 || listenersNearby(serverWorld, blockPos)) {
-                    this.savedEvent.spawnPipeVibrationParticles(serverWorld);
+                    savedEvent.spawnPipeVibrationParticles(serverWorld);
                 }
                 moveGameEvent(world, blockPos, blockState);
-                this.savedEvent = null;
+                this.moveablePipeDataHandler.removeMoveablePipeNbt(SaveableGameEventID);
             }
         }
     }

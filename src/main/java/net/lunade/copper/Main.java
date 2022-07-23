@@ -9,6 +9,8 @@ import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
+import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.EntityType;
@@ -21,6 +23,8 @@ import net.minecraft.stat.Stats;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+
+import java.util.ArrayList;
 
 public class Main implements ModInitializer {
 
@@ -397,28 +401,21 @@ public class Main implements ModInitializer {
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_BREAK.getId(), CORRODED_COPPER_BREAK);
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_FALL.getId(), CORRODED_COPPER_FALL);
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_HIT.getId(), CORRODED_COPPER_HIT);
+
+		SAVEABLE_PIPE_NBT_IDS.add(CopperPipeEntity.SaveableGameEventID);
+		SAVEABLE_PIPE_NBT_CLASSES.add(SaveablePipeGameEvent.class);
+		SAVEABLE_PIPE_NBT_IDS.add(new Identifier("lunade", "default"));
+		SAVEABLE_PIPE_NBT_CLASSES.add(MoveablePipeDataHandler.SaveableMovablePipeNbt.class);
 	}
 
-	public static int colorToInt(String string) {
-		return switch (string) {
-			case "glow" -> 1;
-			case "red" -> 2;
-			case "green" -> 3;
-			case "brown" -> 4;
-			case "blue" -> 5;
-			case "purple" -> 6;
-			case "cyan" -> 7;
-			case "light_gray" -> 8;
-			case "gray" -> 9;
-			case "pink" -> 10;
-			case "lime" -> 11;
-			case "yellow" -> 12;
-			case "light_blue" -> 13;
-			case "magenta" -> 14;
-			case "orange" -> 15;
-			case "white" -> 16;
-			default -> 0;
-		};
+	public static ArrayList<Identifier> SAVEABLE_PIPE_NBT_IDS = new ArrayList<>();
+	public static ArrayList<Class<? extends MoveablePipeDataHandler.SaveableMovablePipeNbt>> SAVEABLE_PIPE_NBT_CLASSES = new ArrayList<>();
+
+	public static Class<? extends MoveablePipeDataHandler.SaveableMovablePipeNbt> getProperClass(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt) {
+		if (SAVEABLE_PIPE_NBT_IDS.contains(nbt.getNbtId())) {
+			return (SAVEABLE_PIPE_NBT_CLASSES.get(SAVEABLE_PIPE_NBT_IDS.indexOf(nbt.getNbtId())));
+		}
+		return MoveablePipeDataHandler.SaveableMovablePipeNbt.class;
 	}
 
 }

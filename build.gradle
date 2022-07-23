@@ -11,13 +11,18 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-
+	maven {
+		url = "https://minecraft.guntram.de/maven/"
+	}
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	modImplementation "de.guntram.mcmod:crowdin-translate:1.4+1.19"
+	//include "de.guntram.mcmod:crowdin-translate:1.4+1.19"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }

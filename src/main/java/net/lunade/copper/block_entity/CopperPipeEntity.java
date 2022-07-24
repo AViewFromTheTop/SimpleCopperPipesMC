@@ -697,7 +697,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                                 BlockEntity entity = world.getBlockEntity(newPos);
                                 if (entity instanceof CopperPipeEntity pipeEntity) {
                                     for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
-                                        if (!nbt.getCanOnlyGoThroughOnePipe() && !usedNbts.contains(nbt)) {
+                                        if (!nbt.getCanOnlyGoThroughOnePipe() || !usedNbts.contains(nbt)) {
                                             pipeEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtId(), nbt);
                                             if (!usedNbts.contains(nbt)) {
                                                 usedNbts.add(nbt);
@@ -712,7 +712,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                                 BlockEntity entity = world.getBlockEntity(newPos);
                                 if (entity instanceof CopperFittingEntity fittingEntity) {
                                     for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
-                                        if (!nbt.getCanOnlyGoThroughOnePipe() && !usedNbts.contains(nbt)) {
+                                        if (!nbt.getCanOnlyGoThroughOnePipe() || !usedNbts.contains(nbt)) {
                                             fittingEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtId(), nbt);
                                             if (!usedNbts.contains(nbt)) {
                                                 usedNbts.add(nbt);

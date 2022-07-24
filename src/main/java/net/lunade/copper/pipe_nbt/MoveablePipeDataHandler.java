@@ -114,6 +114,7 @@ public class MoveablePipeDataHandler {
         public int useCount;
         public BlockPos pipePos;
         private boolean canOnlyBeUsedOnce;
+        private boolean canOnlyGoThroughOnePipe;
         private Identifier nbtId;
 
         //TEMP STORAGE
@@ -128,10 +129,11 @@ public class MoveablePipeDataHandler {
                 Codec.INT.fieldOf("useCount").forGetter(SaveableMovablePipeNbt::getUseCount),
                 BlockPos.CODEC.fieldOf("pipePos").forGetter(SaveableMovablePipeNbt::getPipePos),
                 Codec.BOOL.fieldOf("canOnlyBeUsedOnce").forGetter(SaveableMovablePipeNbt::getCanOnlyBeUsedOnce),
+                Codec.BOOL.fieldOf("canOnlyGoThroughOnePipe").forGetter(SaveableMovablePipeNbt::getCanOnlyGoThroughOnePipe),
                 Identifier.CODEC.fieldOf("nbtId").forGetter(SaveableMovablePipeNbt::getNbtId)
         ).apply(instance, SaveableMovablePipeNbt::new));
 
-        public SaveableMovablePipeNbt(Identifier id, double x, double y, double z, String uuid, int useCount, BlockPos pipePos, boolean canOnlyBeUsedOnce, Identifier nbtID) {
+        public SaveableMovablePipeNbt(Identifier id, double x, double y, double z, String uuid, int useCount, BlockPos pipePos, boolean canOnlyBeUsedOnce, boolean canOnlyGoThroughOnePipe, Identifier nbtID) {
             this.id = id;
             this.originX = x;
             this.originY = y;
@@ -140,6 +142,7 @@ public class MoveablePipeDataHandler {
             this.useCount = useCount;
             this.pipePos = pipePos;
             this.canOnlyBeUsedOnce = canOnlyBeUsedOnce;
+            this.canOnlyGoThroughOnePipe = canOnlyGoThroughOnePipe;
             this.nbtId = nbtID;
         }
 
@@ -261,12 +264,16 @@ public class MoveablePipeDataHandler {
             return this.canOnlyBeUsedOnce;
         }
 
+        public boolean getCanOnlyGoThroughOnePipe() {
+            return this.canOnlyGoThroughOnePipe;
+        }
+
         public void setNbtId(Identifier id) {
             this.nbtId = id;
         }
 
         public SaveableMovablePipeNbt copyOf() {
-            return new SaveableMovablePipeNbt(this.id, this.originX, this.originY, this.originZ, this.uuid, this.useCount, this.pipePos, this.canOnlyBeUsedOnce, this.nbtId);
+            return new SaveableMovablePipeNbt(this.id, this.originX, this.originY, this.originZ, this.uuid, this.useCount, this.pipePos, this.canOnlyBeUsedOnce, this.canOnlyGoThroughOnePipe, this.nbtId);
         }
     }
 }

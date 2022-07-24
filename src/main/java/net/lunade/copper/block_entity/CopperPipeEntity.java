@@ -682,6 +682,7 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
 
     public void moveMoveableNbt(World world, BlockPos blockPos, BlockState blockState) {
         ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = this.moveablePipeDataHandler.getSavedNbtList();
+        ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> usedNbts = new ArrayList<>();
         if (!nbtList.isEmpty()) {
             Direction facing = blockState.get(FACING);
             Direction except = facing.getOpposite();
@@ -696,8 +697,12 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                                 BlockEntity entity = world.getBlockEntity(newPos);
                                 if (entity instanceof CopperPipeEntity pipeEntity) {
                                     for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
-                                        pipeEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtId(), nbt);
-
+                                        if (!nbt.getCanOnlyGoThroughOnePipe() && !usedNbts.contains(nbt)) {
+                                            pipeEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtId(), nbt);
+                                            if (!usedNbts.contains(nbt)) {
+                                                usedNbts.add(nbt);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -707,7 +712,12 @@ public class CopperPipeEntity extends LootableContainerBlockEntity implements In
                                 BlockEntity entity = world.getBlockEntity(newPos);
                                 if (entity instanceof CopperFittingEntity fittingEntity) {
                                     for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
-                                        fittingEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtId(), nbt);
+                                        if (!nbt.getCanOnlyGoThroughOnePipe() && !usedNbts.contains(nbt)) {
+                                            fittingEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtId(), nbt);
+                                            if (!usedNbts.contains(nbt)) {
+                                                usedNbts.add(nbt);
+                                            }
+                                        }
                                     }
                                 }
                             }

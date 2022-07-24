@@ -30,7 +30,6 @@ import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
@@ -41,6 +40,7 @@ import net.minecraft.world.event.listener.GameEventListener;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
+import java.util.Random;
 
 import static net.lunade.copper.Main.INSPECT_PIPE;
 
@@ -327,10 +327,6 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
                             i = 99; //Stop loop if viable Cauldron is found
                             serverWorld.setBlockState(pos, Blocks.WATER_CAULDRON.getDefaultState().with(Properties.LEVEL_3, state.get(Properties.LEVEL_3) + 1));
                         }
-                    }
-                    if (state.getBlock() == Blocks.DIRT) {
-                        i = 99; //Stop loop if viable Block is found
-                        serverWorld.setBlockState(pos, Blocks.MUD.getDefaultState());
                     }
                     if (state.getBlock() == Blocks.FIRE) {
                         serverWorld.breakBlock(pos, false);

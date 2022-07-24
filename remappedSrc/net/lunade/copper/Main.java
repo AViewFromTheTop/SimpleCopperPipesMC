@@ -20,7 +20,13 @@ import net.minecraft.stat.StatFormatter;
 import net.minecraft.stat.Stats;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
+
+import java.util.List;
 
 public class Main implements ModInitializer {
 
@@ -397,28 +403,12 @@ public class Main implements ModInitializer {
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_BREAK.getId(), CORRODED_COPPER_BREAK);
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_FALL.getId(), CORRODED_COPPER_FALL);
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_HIT.getId(), CORRODED_COPPER_HIT);
+
+		RegisterPipeNbtMethods.init();
 	}
 
-	public static int colorToInt(String string) {
-		return switch (string) {
-			case "glow" -> 1;
-			case "red" -> 2;
-			case "green" -> 3;
-			case "brown" -> 4;
-			case "blue" -> 5;
-			case "purple" -> 6;
-			case "cyan" -> 7;
-			case "light_gray" -> 8;
-			case "gray" -> 9;
-			case "pink" -> 10;
-			case "lime" -> 11;
-			case "yellow" -> 12;
-			case "light_blue" -> 13;
-			case "magenta" -> 14;
-			case "orange" -> 15;
-			case "white" -> 16;
-			default -> 0;
-		};
+	public static List<Direction> shuffledDirections(Random random) {
+		return Util.copyShuffled(Direction.values(), random);
 	}
 
 }

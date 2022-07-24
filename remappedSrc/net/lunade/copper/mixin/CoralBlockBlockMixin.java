@@ -14,7 +14,9 @@ public class CoralBlockBlockMixin {
 
     @Inject(at = @At("TAIL"), method = "isInWater", cancellable = true)
     protected void isInWater(BlockView blockView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
-        info.setReturnValue(CopperPipe.isWaterPipeNearby(blockView, blockPos, 2));
-        info.cancel();
+        if (CopperPipe.isWaterPipeNearby(blockView, blockPos, 2)) {
+            info.setReturnValue(true);
+            info.cancel();
+        }
     }
 }

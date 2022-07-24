@@ -9,16 +9,17 @@ import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.VibrationParticleEffect;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.Vibration;
+import net.minecraft.world.World;
 import net.minecraft.world.event.BlockPositionSource;
-import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class RegisterPipeNbtMethods {
             Direction direction = blockState.get(FACING);
             Direction directionOpp = direction.getOpposite();
             boolean noteBlock = false;
-            if (Registry.GAME_EVENT.get(nbt.id) == GameEvent.NOTE_BLOCK_PLAY) {
+            if (Registry.GAME_EVENT.get(nbt.id) == Main.NOTE_BLOCK_PLAY) {
                 pipe.noteBlockCooldown = 40;
                 boolean corroded;
                 float volume = 3.0F;
@@ -90,14 +91,26 @@ public class RegisterPipeNbtMethods {
             }
             world.emitGameEvent(nbt.getEntity(world), Registry.GAME_EVENT.get(nbt.id), pos);
             if (noteBlock || pipe.noteBlockCooldown > 0 || pipe.listenersNearby(world, pos)) {
-                if (!nbt.hasEmittedParticle) {
-                    world.spawnParticles(new VibrationParticleEffect(new BlockPositionSource(nbt.pipePos), 5), nbt.originPos.x, nbt.originPos.y, nbt.originPos.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-                    nbt.hasEmittedParticle = true;
+                if (nbt.useCount == 0) {
+                    spawnDelayedVibration(world, new BlockPos(nbt.getOriginPos()), nbt.getPipePos(), 5);
+                    nbt.useCount = 1;
                 }
             }
         });
 
         }
 
+    public static void spawnVibration(World world, BlockPos blockPos, BlockPos target) {
+        if (world instanceof ServerWorld server) {
+            int delay = MathHelper.floor(Math.sqrt(blockPos.getSquaredDistance(target)));
+            server.sendVibrationPacket(new Vibration(blockPos, new BlockPositionSource(target), delay));
+        }
+    }
+
+    public static void spawnDelayedVibration(World world, BlockPos blockPos, BlockPos target, int delay) {
+        if (world instanceof ServerWorld server) {
+            server.sendVibrationPacket(new Vibration(blockPos, new BlockPositionSource(target), delay));
+        }
+    }
 
 }

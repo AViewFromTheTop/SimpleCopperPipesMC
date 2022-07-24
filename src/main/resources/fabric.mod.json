@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "copper_pipe",
-  "version": "1.11-a5b",
+  "version": "1.11-a1.18.2",
 
   "name": "Simple Copper Pipes",
   "description": "Adds copper pipes with unique mechanics to Minecraft.",
@@ -27,9 +27,9 @@
   ],
 
   "depends": {
-    "fabricloader": ">=0.14.6",
+    "fabricloader": ">=0.14.2",
     "fabric": ">=0.57.0",
-    "minecraft": "1.19.x",
+    "minecraft": "1.18.2",
     "java": ">=17"
   },
   "suggests": {

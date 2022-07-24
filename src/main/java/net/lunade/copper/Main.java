@@ -22,11 +22,12 @@ import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.event.GameEvent;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Main implements ModInitializer {
 
@@ -168,6 +169,7 @@ public class Main implements ModInitializer {
 	public static final DefaultParticleType ORANGE_INK = FabricParticleTypes.simple();
 	public static final DefaultParticleType WHITE_INK = FabricParticleTypes.simple();
 
+	public static final GameEvent NOTE_BLOCK_PLAY = new GameEvent("lunade_note_block_play", 16);
 	@Override
 	public void onInitialize() {
 		CopperPipeProperties.init();
@@ -404,11 +406,20 @@ public class Main implements ModInitializer {
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_FALL.getId(), CORRODED_COPPER_FALL);
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_HIT.getId(), CORRODED_COPPER_HIT);
 
+		Registry.register(Registry.GAME_EVENT, new Identifier("lunade", "note_block_play"), NOTE_BLOCK_PLAY);
+
 		RegisterPipeNbtMethods.init();
 	}
 
 	public static List<Direction> shuffledDirections(Random random) {
-		return Util.copyShuffled(Direction.values(), random);
+		ArrayList<Direction> chosenDirs = new ArrayList<>();
+		ArrayList<Direction> dirs = new ArrayList<>() {{ addAll(List.of(Direction.values())); }};
+		while (!dirs.isEmpty()) {
+			Direction direction = Util.getRandom(dirs, random);
+			chosenDirs.add(direction);
+			dirs.remove(direction);
+		}
+		return chosenDirs;
 	}
 
 }

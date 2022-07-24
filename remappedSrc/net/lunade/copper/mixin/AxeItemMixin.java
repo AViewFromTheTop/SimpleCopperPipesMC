@@ -35,7 +35,7 @@ public class AxeItemMixin {
         if (blockState!=null) {
             Block block = blockState.getBlock();
             if (block instanceof CopperPipe pipe) {
-                if (CopperPipe.PREVIOUS_STAGE.containsKey(block)) {
+                if (CopperPipe.PREVIOUS_STAGE.containsKey(block) && block!=CopperPipe.CORRODED_PIPE) {
                     if (!pipe.waxed) {
                         world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
                         world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
@@ -47,7 +47,7 @@ public class AxeItemMixin {
                 }
             }
             if (block instanceof CopperFitting fitting) {
-                if (CopperFitting.PREVIOUS_STAGE.containsKey(block)) {
+                if (CopperFitting.PREVIOUS_STAGE.containsKey(block) && block!=CopperFitting.CORRODED_FITTING) {
                     if (!fitting.waxed) {
                         world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
                         world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
@@ -65,7 +65,7 @@ public class AxeItemMixin {
             }
 
             Block block = blockState.getBlock();
-            if (CopperPipe.PREVIOUS_STAGE.containsKey(block)) {
+            if (CopperPipe.PREVIOUS_STAGE.containsKey(block) && block!=CopperPipe.CORRODED_PIPE) {
                 CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.PREVIOUS_STAGE.get(block));
             }
             if (playerEntity != null) {
@@ -80,7 +80,7 @@ public class AxeItemMixin {
             }
 
             Block block = blockState.getBlock();
-            if (CopperFitting.PREVIOUS_STAGE.containsKey(block)) {
+            if (CopperFitting.PREVIOUS_STAGE.containsKey(block) && block!=CopperFitting.CORRODED_FITTING) {
                 CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.PREVIOUS_STAGE.get(block));
             }
             if (playerEntity != null) {

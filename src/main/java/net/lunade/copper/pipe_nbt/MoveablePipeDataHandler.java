@@ -12,7 +12,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.particle.VibrationParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -20,7 +19,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
-import net.minecraft.world.event.BlockPositionSource;
 import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -108,67 +106,88 @@ public class MoveablePipeDataHandler {
 
     public static class SaveableMovablePipeNbt {
 
-        private Identifier nbtId;
         public Identifier id;
-        public Vec3d originPos;
+        public double originX;
+        public double originY;
+        public double originZ;
         public String uuid;
-        public boolean hasEmittedParticle;
+        public int useCount;
         public BlockPos pipePos;
+        private boolean canOnlyBeUsedOnce;
+        private Identifier nbtId;
 
         //TEMP STORAGE
         public Entity foundEntity;
 
         public static final Codec<SaveableMovablePipeNbt> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
                 Identifier.CODEC.fieldOf("eventID").forGetter(SaveableMovablePipeNbt::getId),
-                Vec3d.CODEC.fieldOf("originPos").forGetter(SaveableMovablePipeNbt::getOriginPos),
+                Codec.DOUBLE.fieldOf("originX").forGetter(SaveableMovablePipeNbt::getX),
+                Codec.DOUBLE.fieldOf("originY").forGetter(SaveableMovablePipeNbt::getY),
+                Codec.DOUBLE.fieldOf("originZ").forGetter(SaveableMovablePipeNbt::getZ),
                 Codec.STRING.fieldOf("uuid").forGetter(SaveableMovablePipeNbt::getUUID),
-                Codec.BOOL.fieldOf("hasEmittedParticle").forGetter(SaveableMovablePipeNbt::getHasEmittedParticle),
+                Codec.INT.fieldOf("useCount").forGetter(SaveableMovablePipeNbt::getUseCount),
                 BlockPos.CODEC.fieldOf("pipePos").forGetter(SaveableMovablePipeNbt::getPipePos),
+                Codec.BOOL.fieldOf("canOnlyBeUsedOnce").forGetter(SaveableMovablePipeNbt::getCanOnlyBeUsedOnce),
                 Identifier.CODEC.fieldOf("nbtId").forGetter(SaveableMovablePipeNbt::getNbtId)
         ).apply(instance, SaveableMovablePipeNbt::new));
 
-        public SaveableMovablePipeNbt(Identifier id, Vec3d originPos, String uuid, boolean hasEmittedParticle, BlockPos pipePos) {
+        public SaveableMovablePipeNbt(Identifier id, double x, double y, double z, String uuid, int useCount, BlockPos pipePos, boolean canOnlyBeUsedOnce, Identifier nbtID) {
             this.id = id;
-            this.originPos = originPos;
+            this.originX = x;
+            this.originY = y;
+            this.originZ = z;
             this.uuid = uuid;
-            this.hasEmittedParticle = hasEmittedParticle;
+            this.useCount = useCount;
+            this.pipePos = pipePos;
+            this.canOnlyBeUsedOnce = canOnlyBeUsedOnce;
+            this.nbtId = nbtID;
+        }
+
+        public SaveableMovablePipeNbt(Identifier id, Vec3d originPos, String uuid, BlockPos pipePos) {
+            this.id = id;
+            this.originX = originPos.x;
+            this.originY = originPos.y;
+            this.originZ = originPos.z;
+            this.uuid = uuid;
+            this.useCount = 0;
             this.pipePos = pipePos;
             this.nbtId = new Identifier("lunade", "default");
         }
 
-        public SaveableMovablePipeNbt(Identifier id, Vec3d originPos, String uuid, boolean hasEmittedParticle, BlockPos pipePos, Identifier nbtId) {
+        public SaveableMovablePipeNbt(Identifier id, Vec3d originPos, String uuid, BlockPos pipePos, Identifier nbtId) {
             this.id = id;
-            this.originPos = originPos;
+            this.originX = originPos.x;
+            this.originY = originPos.y;
+            this.originZ = originPos.z;
             this.uuid = uuid;
-            this.hasEmittedParticle = hasEmittedParticle;
+            this.useCount = 0;
             this.pipePos = pipePos;
             this.nbtId = nbtId;
         }
 
-        public SaveableMovablePipeNbt(GameEvent event, Vec3d originPos, GameEvent.Emitter emitter, BlockPos pipePos) {
-            this.id = Registry.GAME_EVENT.getId(event);
-            this.originPos = originPos;
-            if (emitter.comp_713() != null) {
-                this.uuid = emitter.comp_713().getUuid().toString();
-            } else {
-                this.uuid = "noEntity";
-            }
-            this.hasEmittedParticle = false;
-            this.pipePos = pipePos;
-            this.nbtId = new Identifier("lunade", "default");
-        }
-
         public SaveableMovablePipeNbt(GameEvent event, Vec3d originPos, @Nullable Entity entity, BlockPos pipePos) {
             this.id = Registry.GAME_EVENT.getId(event);
-            this.originPos = originPos;
+            this.originX = originPos.x;
+            this.originY = originPos.y;
+            this.originZ = originPos.z;
             if (entity != null) {
                 this.uuid = entity.getUuid().toString();
             } else {
                 this.uuid = "noEntity";
             }
-            this.hasEmittedParticle = false;
+            this.useCount = 0;
             this.pipePos = pipePos;
             this.nbtId = new Identifier("lunade", "default");
+        }
+
+        public SaveableMovablePipeNbt withId(Identifier id) {
+            this.setNbtId(id);
+            return this;
+        }
+
+        public SaveableMovablePipeNbt withOnlyUseableOnce() {
+            this.canOnlyBeUsedOnce = true;
+            return this;
         }
 
         public void dispense(ServerWorld world, BlockPos pos, BlockState state, CopperPipeEntity pipeEntity) {
@@ -178,6 +197,10 @@ public class MoveablePipeDataHandler {
             } else {
                 LOGGER.error("Unable to find dispense method for Moveable Pipe Nbt " + this.getNbtId() + "!");
             }
+        }
+
+        public Vec3d getOriginPos() {
+            return new Vec3d(this.originX, this.originY, this.originZ);
         }
 
         @Nullable
@@ -190,7 +213,7 @@ public class MoveablePipeDataHandler {
                         this.foundEntity = null;
                     }
                 }
-                Box box = new Box(this.originPos.add(-32, -32, -32), this.originPos.add(32, 32, 32));
+                Box box = new Box(this.getOriginPos().add(-32, -32, -32), this.getOriginPos().add(32, 32, 32));
                 List<Entity> entities = world.getNonSpectatingEntities(Entity.class, box);
                 for (Entity entity : entities) {
                     if (entity.getUuid().toString().equals(this.uuid)) {
@@ -206,16 +229,24 @@ public class MoveablePipeDataHandler {
             return this.id;
         }
 
-        public Vec3d getOriginPos() {
-            return this.originPos;
+        public double getX() {
+            return this.originX;
+        }
+
+        public double getY() {
+            return this.originY;
+        }
+
+        public double getZ() {
+            return this.originZ;
         }
 
         public String getUUID() {
             return this.uuid;
         }
 
-        public boolean getHasEmittedParticle() {
-            return this.hasEmittedParticle;
+        public int getUseCount() {
+            return this.useCount;
         }
 
         public BlockPos getPipePos() {
@@ -226,12 +257,16 @@ public class MoveablePipeDataHandler {
             return this.nbtId;
         }
 
+        public boolean getCanOnlyBeUsedOnce() {
+            return this.canOnlyBeUsedOnce;
+        }
+
         public void setNbtId(Identifier id) {
             this.nbtId = id;
         }
 
         public SaveableMovablePipeNbt copyOf() {
-            return new SaveableMovablePipeNbt(this.id, this.originPos, this.uuid, this.hasEmittedParticle, this.pipePos, this.nbtId);
+            return new SaveableMovablePipeNbt(this.id, this.originX, this.originY, this.originZ, this.uuid, this.useCount, this.pipePos, this.canOnlyBeUsedOnce, this.nbtId);
         }
     }
 }

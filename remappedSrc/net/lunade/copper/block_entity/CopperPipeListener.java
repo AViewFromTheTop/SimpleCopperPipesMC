@@ -63,7 +63,7 @@ public class CopperPipeListener
 
     private void listen(ServerWorld serverWorld, GameEvent gameEvent, GameEvent.Emitter emitter, Vec3d vec3d, Vec3d vec3d2) {
         this.distance = MathHelper.floor(vec3d.distanceTo(vec3d2));
-        this.vibration = new VibrationListener.Vibration(gameEvent, this.distance, vec3d, emitter.sourceEntity());
+        this.vibration = new VibrationListener.Vibration(gameEvent, this.distance, vec3d, emitter.comp_713());
         if (gameEvent!=GameEvent.NOTE_BLOCK_PLAY) {
             this.delay = MathHelper.floor(this.distance);
             //serverWorld.spawnParticles(new VibrationParticleEffect(this.positionSource, this.delay), vec3d.x, vec3d.y, vec3d.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);

@@ -8,7 +8,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockStateRaycastContext;
-import net.minecraft.world.Vibration;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import net.minecraft.world.event.PositionSource;
@@ -80,9 +79,7 @@ public class CopperPipeListener implements GameEventListener {
         if (world instanceof ServerWorld) {
             this.distance = MathHelper.floor(Math.sqrt(blockPos.getSquaredDistance(blockPos2)));
             this.delay = this.distance;
-            ((ServerWorld)world).sendVibrationPacket(new Vibration(blockPos, this.positionSource, this.delay));
         }
-
     }
 
     private boolean isOccluded(World world, BlockPos blockPos, BlockPos blockPos2) {

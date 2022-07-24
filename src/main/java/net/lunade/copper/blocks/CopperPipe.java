@@ -7,6 +7,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.entity.SculkSensorBlockEntity;
 import net.minecraft.client.util.ParticleUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
@@ -208,11 +209,14 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
     }
 
     @Nullable
-    public <T extends BlockEntity> GameEventListener getGameEventListener(ServerWorld world, T blockEntity) {
-        if (blockEntity instanceof CopperPipeEntity pipeEntity) {
-            return pipeEntity.getGameEventListener();
-        } return null;
+    public <T extends BlockEntity> GameEventListener getGameEventListener(World world, T blockEntity) {
+        if (world instanceof ServerWorld serverWorld) {
+            if (blockEntity instanceof CopperPipeEntity pipeEntity) {
+                return pipeEntity.getGameEventListener();
+            }
+        }return null;
     }
+
 
     public void onPlaced(World world, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
         if (itemStack.hasCustomName()) {

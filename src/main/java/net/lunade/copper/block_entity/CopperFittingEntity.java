@@ -146,6 +146,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
 
     public void moveMoveableNbt(World world, BlockPos blockPos) {
         ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = this.moveablePipeDataHandler.getSavedNbtList();
+        ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> usedNbts = new ArrayList<>();
         if (!nbtList.isEmpty()) {
             List<Direction> dirs = Main.shuffledDirections(world.getRandom());
             for (Direction direction : dirs) {
@@ -157,7 +158,12 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
                             BlockEntity entity = world.getBlockEntity(newPos);
                             if (entity instanceof CopperPipeEntity pipeEntity) {
                                 for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
-                                    pipeEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtId(), nbt);
+                                    if (!nbt.getCanOnlyGoThroughOnePipe() || !usedNbts.contains(nbt)) {
+                                        pipeEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtId(), nbt);
+                                        if (!usedNbts.contains(nbt)) {
+                                            usedNbts.add(nbt);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -165,6 +171,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
                 }
             }
             this.moveablePipeDataHandler.clear();
+            usedNbts.clear();
             this.markDirty();
         }
     }

@@ -108,12 +108,14 @@ public class MoveablePipeDataHandler {
 
     public static class SaveableMovablePipeNbt {
 
-        private Identifier nbtId;
         public Identifier id;
         public Vec3d originPos;
         public String uuid;
-        public boolean hasEmittedParticle;
+        public int useCount;
         public BlockPos pipePos;
+        private boolean canOnlyBeUsedOnce;
+        private boolean canOnlyGoThroughOnePipe;
+        private Identifier nbtId;
 
         //TEMP STORAGE
         public Entity foundEntity;
@@ -122,26 +124,21 @@ public class MoveablePipeDataHandler {
                 Identifier.CODEC.fieldOf("eventID").forGetter(SaveableMovablePipeNbt::getId),
                 Vec3d.CODEC.fieldOf("originPos").forGetter(SaveableMovablePipeNbt::getOriginPos),
                 Codec.STRING.fieldOf("uuid").forGetter(SaveableMovablePipeNbt::getUUID),
-                Codec.BOOL.fieldOf("hasEmittedParticle").forGetter(SaveableMovablePipeNbt::getHasEmittedParticle),
+                Codec.INT.fieldOf("useCount").forGetter(SaveableMovablePipeNbt::getUseCount),
                 BlockPos.CODEC.fieldOf("pipePos").forGetter(SaveableMovablePipeNbt::getPipePos),
+                Codec.BOOL.fieldOf("canOnlyBeUsedOnce").forGetter(SaveableMovablePipeNbt::getCanOnlyBeUsedOnce),
+                Codec.BOOL.fieldOf("canOnlyGoThroughOnePipe").forGetter(SaveableMovablePipeNbt::getCanOnlyGoThroughOnePipe),
                 Identifier.CODEC.fieldOf("nbtId").forGetter(SaveableMovablePipeNbt::getNbtId)
         ).apply(instance, SaveableMovablePipeNbt::new));
 
-        public SaveableMovablePipeNbt(Identifier id, Vec3d originPos, String uuid, boolean hasEmittedParticle, BlockPos pipePos) {
+        public SaveableMovablePipeNbt(Identifier id, Vec3d originPos, String uuid, int useCount, BlockPos pipePos, boolean canOnlyBeUsedOnce, boolean canOnlyGoThroughOnePipe, Identifier nbtId) {
             this.id = id;
             this.originPos = originPos;
             this.uuid = uuid;
-            this.hasEmittedParticle = hasEmittedParticle;
+            this.useCount = useCount;
             this.pipePos = pipePos;
-            this.nbtId = new Identifier("lunade", "default");
-        }
-
-        public SaveableMovablePipeNbt(Identifier id, Vec3d originPos, String uuid, boolean hasEmittedParticle, BlockPos pipePos, Identifier nbtId) {
-            this.id = id;
-            this.originPos = originPos;
-            this.uuid = uuid;
-            this.hasEmittedParticle = hasEmittedParticle;
-            this.pipePos = pipePos;
+            this.canOnlyBeUsedOnce = canOnlyBeUsedOnce;
+            this.canOnlyGoThroughOnePipe = canOnlyGoThroughOnePipe;
             this.nbtId = nbtId;
         }
 
@@ -153,9 +150,11 @@ public class MoveablePipeDataHandler {
             } else {
                 this.uuid = "noEntity";
             }
-            this.hasEmittedParticle = false;
             this.pipePos = pipePos;
             this.nbtId = new Identifier("lunade", "default");
+            this.useCount = 0;
+            this.canOnlyGoThroughOnePipe = false;
+            this.canOnlyBeUsedOnce = false;
         }
 
         public SaveableMovablePipeNbt(GameEvent event, Vec3d originPos, @Nullable Entity entity, BlockPos pipePos) {
@@ -166,9 +165,37 @@ public class MoveablePipeDataHandler {
             } else {
                 this.uuid = "noEntity";
             }
-            this.hasEmittedParticle = false;
             this.pipePos = pipePos;
             this.nbtId = new Identifier("lunade", "default");
+            this.useCount = 0;
+            this.canOnlyGoThroughOnePipe = false;
+            this.canOnlyBeUsedOnce = false;
+        }
+
+        public SaveableMovablePipeNbt(Identifier id, Vec3d originPos, String uuid, BlockPos pipePos) {
+            this.id = id;
+            this.originPos = originPos;
+            this.uuid = uuid;
+            this.pipePos = pipePos;
+            this.nbtId = new Identifier("lunade", "default");
+            this.useCount = 0;
+            this.canOnlyGoThroughOnePipe = false;
+            this.canOnlyBeUsedOnce = false;
+        }
+
+        public SaveableMovablePipeNbt withId(Identifier id) {
+            this.setNbtId(id);
+            return this;
+        }
+
+        public SaveableMovablePipeNbt withOnlyUseableOnce() {
+            this.canOnlyBeUsedOnce = true;
+            return this;
+        }
+
+        public SaveableMovablePipeNbt withOnlyThroughOnePipe() {
+            this.canOnlyGoThroughOnePipe = true;
+            return this;
         }
 
         public void dispense(ServerWorld world, BlockPos pos, BlockState state, CopperPipeEntity pipeEntity) {
@@ -214,8 +241,8 @@ public class MoveablePipeDataHandler {
             return this.uuid;
         }
 
-        public boolean getHasEmittedParticle() {
-            return this.hasEmittedParticle;
+        public int getUseCount() {
+            return this.useCount;
         }
 
         public BlockPos getPipePos() {
@@ -226,12 +253,20 @@ public class MoveablePipeDataHandler {
             return this.nbtId;
         }
 
+        public boolean getCanOnlyBeUsedOnce() {
+            return this.canOnlyBeUsedOnce;
+        }
+
+        public boolean getCanOnlyGoThroughOnePipe() {
+            return this.canOnlyGoThroughOnePipe;
+        }
+
         public void setNbtId(Identifier id) {
             this.nbtId = id;
         }
 
         public SaveableMovablePipeNbt copyOf() {
-            return new SaveableMovablePipeNbt(this.id, this.originPos, this.uuid, this.hasEmittedParticle, this.pipePos, this.nbtId);
+            return new SaveableMovablePipeNbt(this.id, this.originPos, this.uuid, this.useCount, this.pipePos, this.canOnlyBeUsedOnce, this.canOnlyGoThroughOnePipe, this.nbtId);
         }
     }
 }

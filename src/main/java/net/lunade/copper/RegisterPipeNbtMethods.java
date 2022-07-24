@@ -90,9 +90,9 @@ public class RegisterPipeNbtMethods {
             }
             world.emitGameEvent(nbt.getEntity(world), Registry.GAME_EVENT.get(nbt.id), pos);
             if (noteBlock || pipe.noteBlockCooldown > 0 || pipe.listenersNearby(world, pos)) {
-                if (!nbt.hasEmittedParticle) {
+                if (nbt.useCount == 0) {
                     world.spawnParticles(new VibrationParticleEffect(new BlockPositionSource(nbt.pipePos), 5), nbt.originPos.x, nbt.originPos.y, nbt.originPos.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-                    nbt.hasEmittedParticle = true;
+                    nbt.useCount = 1;
                 }
             }
         });

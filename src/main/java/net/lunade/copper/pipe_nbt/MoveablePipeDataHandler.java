@@ -193,6 +193,11 @@ public class MoveablePipeDataHandler {
             return this;
         }
 
+        public SaveableMovablePipeNbt withOnlyThroughOnePipe() {
+            this.canOnlyGoThroughOnePipe = true;
+            return this;
+        }
+
         public void dispense(ServerWorld world, BlockPos pos, BlockState state, CopperPipeEntity pipeEntity) {
             RegisterPipeNbtMethods.DispenseMethod<?> method = RegisterPipeNbtMethods.getDispense(this.nbtId);
             if (method!=null) {

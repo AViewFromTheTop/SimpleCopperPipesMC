@@ -19,7 +19,7 @@ public class MainClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-
+        //CrowdinTranslate.downloadTranslations("simple-copper-pipes", "lunade");
         ParticleFactoryRegistry.getInstance().register(Main.RED_INK, PipeInkParticle.RedFactory::new);
         ParticleFactoryRegistry.getInstance().register(Main.GREEN_INK, PipeInkParticle.GreenFactory::new);
         ParticleFactoryRegistry.getInstance().register(Main.BROWN_INK, PipeInkParticle.BrownFactory::new);

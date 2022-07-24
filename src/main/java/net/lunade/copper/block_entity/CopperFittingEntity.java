@@ -3,7 +3,7 @@ package net.lunade.copper.block_entity;
 import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.pipe_nbt.SaveablePipeGameEvent;
+import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -21,6 +21,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static net.lunade.copper.blocks.CopperFitting.sendElectricity;
 import static net.lunade.copper.blocks.CopperPipe.FACING;
 import static net.lunade.copper.blocks.CopperPipeProperties.HAS_SMOKE;
@@ -33,7 +36,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
     public int smokeLevel;
     public int electricityCooldown;
 
-    public SaveablePipeGameEvent savedEvent;
+    public MoveablePipeDataHandler moveablePipeDataHandler;
 
     public CopperFittingEntity(BlockPos blockPos, BlockState blockState) {
         super(Main.COPPER_FITTING_ENTITY, blockPos, blockState);
@@ -42,6 +45,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         this.waterLevel = 0;
         this.smokeLevel = 0;
         this.electricityCooldown = -1;
+        this.moveablePipeDataHandler = new MoveablePipeDataHandler();
     }
 
     public void readNbt(NbtCompound nbtCompound) {
@@ -54,7 +58,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         this.waterLevel = nbtCompound.getInt("waterLevel");
         this.smokeLevel = nbtCompound.getInt("smokeLevel");
         this.electricityCooldown = nbtCompound.getInt("electricityCooldown");
-        this.savedEvent = SaveablePipeGameEvent.readNbt(nbtCompound);
+        this.moveablePipeDataHandler.readNbt(nbtCompound);
     }
 
     protected void writeNbt(NbtCompound nbtCompound) {
@@ -66,7 +70,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         nbtCompound.putInt("waterLevel", this.waterLevel);
         nbtCompound.putInt("smokeLevel", this.smokeLevel);
         nbtCompound.putInt("electricityCooldown", this.electricityCooldown);
-        SaveablePipeGameEvent.writeNbt(nbtCompound, this.savedEvent);
+        this.moveablePipeDataHandler.writeNbt(nbtCompound);
     }
 
     @Override
@@ -89,7 +93,7 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
     public static void serverTick(World world, BlockPos blockPos, BlockState blockState, CopperFittingEntity copperFittingEntity) {
         BlockState state = blockState;
         if (!world.isClient) {
-            moveGameEvent(world, blockPos, copperFittingEntity);
+            copperFittingEntity.moveMoveableNbt(world, blockPos);
         }
         if (copperFittingEntity.waterCooldown>0) {
             --copperFittingEntity.waterCooldown;
@@ -140,9 +144,11 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
         return new HopperScreenHandler(i, playerInventory, this);
     }
 
-    public static void moveGameEvent(World world, BlockPos blockPos, CopperFittingEntity fittingEntity) {
-        if (fittingEntity.savedEvent!=null) {
-            for (Direction direction : Direction.values()) {
+    public void moveMoveableNbt(World world, BlockPos blockPos) {
+        ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = this.moveablePipeDataHandler.getSavedNbtList();
+        if (!nbtList.isEmpty()) {
+            List<Direction> dirs = Main.shuffledDirections(world.getRandom());
+            for (Direction direction : dirs) {
                 BlockPos newPos = blockPos.offset(direction);
                 if (world.isChunkLoaded(newPos)) {
                     BlockState state = world.getBlockState(newPos);
@@ -150,14 +156,16 @@ public class CopperFittingEntity extends LootableContainerBlockEntity implements
                         if (state.get(FACING) == direction) {
                             BlockEntity entity = world.getBlockEntity(newPos);
                             if (entity instanceof CopperPipeEntity pipeEntity) {
-                                pipeEntity.savedEvent = fittingEntity.savedEvent;
+                                for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
+                                    pipeEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtId(), nbt);
+                                }
                             }
                         }
                     }
                 }
             }
-            fittingEntity.savedEvent = null;
-            fittingEntity.markDirty();
+            this.moveablePipeDataHandler.clear();
+            this.markDirty();
         }
     }
 

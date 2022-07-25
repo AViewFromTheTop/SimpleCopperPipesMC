@@ -1,7 +1,7 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.blocks.CopperFitting;
-import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.Main;
+import net.lunade.copper.blocks.Copyable;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -31,47 +31,27 @@ public class ItemMixin {
         PlayerEntity playerEntity = itemUsageContext.getPlayer();
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getStack();
-        boolean glowPipe = false;
-        boolean glowFitting = false;
+        boolean canGlow = false;
         if (itemStack.isOf(Items.GLOW_INK_SAC) && blockState != null) {
             Block block = blockState.getBlock();
-            if (block instanceof CopperPipe) {
-                if (CopperPipe.GLOW_STAGE.containsKey(block)) {
-                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                    glowPipe = true;
-                }
-            }
-            if (block instanceof CopperFitting) {
-                if (CopperFitting.GLOW_STAGE.containsKey(block)) {
-                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                    glowFitting = true;
-                }
+            if (Main.GLOW_STAGE.containsKey(block)) {
+                world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
+                canGlow = true;
             }
         }
-        if (glowPipe) {
+        if (canGlow) {
             if (playerEntity instanceof ServerPlayerEntity) { Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack); }
 
             Block block = blockState.getBlock();
-            if (CopperPipe.GLOW_STAGE.containsKey(block)) {
-                CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.GLOW_STAGE.get(block));
+            if (Main.GLOW_STAGE.containsKey(block)) {
+                Block glowStage = Main.GLOW_STAGE.get(block);
+                if (block instanceof Copyable copyable) {
+                    copyable.makeCopyOf(blockState, world, blockPos, glowStage);
+                }
             }
             if (playerEntity != null) { itemStack.decrement(1); }
             info.setReturnValue(ActionResult.success(world.isClient));
-            info.cancel();
-        } else if (glowFitting) {
-            if (playerEntity instanceof ServerPlayerEntity) { Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack); }
-            Block block = blockState.getBlock();
-            if (CopperFitting.GLOW_STAGE.containsKey(block)) {
-                CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.GLOW_STAGE.get(block));
-            }
-            if (playerEntity != null) { itemStack.decrement(1); }
-
-            info.setReturnValue(ActionResult.success(world.isClient));
-            info.cancel();
-        } else {
-            info.setReturnValue(ActionResult.PASS);
             info.cancel();
         }
     }

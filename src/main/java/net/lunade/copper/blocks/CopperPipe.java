@@ -1,7 +1,7 @@
 package net.lunade.copper.blocks;
 
-import it.unimi.dsi.fastutil.objects.*;
 import net.lunade.copper.Main;
+import net.lunade.copper.block_entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -44,10 +44,9 @@ import java.util.Random;
 
 import static net.lunade.copper.Main.INSPECT_PIPE;
 
-public class CopperPipe extends BlockWithEntity implements Waterloggable {
+public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyable {
 
     public int cooldown;
-    public boolean waxed;
     public int dispenserShotLength;
     public ParticleEffect ink;
 
@@ -98,10 +97,9 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
     private static final VoxelShape WEST_BACK_SMOOTH;
     private static final VoxelShape UP_BACK_SMOOTH;
 
-    public CopperPipe(Settings settings, int cooldown, boolean waxed, int dispenserShotLength, ParticleEffect ink) {
+    public CopperPipe(Settings settings, int cooldown, int dispenserShotLength, ParticleEffect ink) {
         super(settings);
         this.cooldown=cooldown;
-        this.waxed=waxed;
         this.dispenserShotLength=dispenserShotLength;
         this.ink=ink;
         this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.DOWN).with(SMOOTH, false).with(WATERLOGGED, false).with(HAS_WATER, false).with(HAS_SMOKE, false).with(HAS_ELECTRICITY, false).with(HAS_ITEM, false).with(POWERED, false));
@@ -203,19 +201,16 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState blockState, BlockEntityType<T> blockEntityType) {
         if (!world.isClient) {
-            return CopperPipe.checkType(blockEntityType, Main.COPPER_PIPE_ENTITY, (world1, blockPos, blockState1, copperPipeEntity) -> copperPipeEntity.serverTick(world1, blockPos, blockState1));
+            return checkType(blockEntityType, Main.COPPER_PIPE_ENTITY, (world1, blockPos, blockState1, copperPipeEntity) -> copperPipeEntity.serverTick(world1, blockPos, blockState1));
         } return null;
     }
 
     @Nullable
-    public <T extends BlockEntity> GameEventListener getGameEventListener(World world, T blockEntity) {
-        if (world instanceof ServerWorld serverWorld) {
-            if (blockEntity instanceof CopperPipeEntity pipeEntity) {
-                return pipeEntity.getGameEventListener();
-            }
-        }return null;
+    public <T extends BlockEntity> GameEventListener getGameEventListener(ServerWorld world, T blockEntity) {
+        if (blockEntity instanceof CopperPipeEntity pipeEntity) {
+            return pipeEntity.getGameEventListener();
+        } return null;
     }
-
 
     public void onPlaced(World world, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
         if (itemStack.hasCustomName()) {
@@ -348,8 +343,8 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
 
     public void tryDegrade(BlockState blockState, ServerWorld serverWorld, BlockPos blockPos, Random random) {
         Block first = blockState.getBlock();
-        if (OXIDIZATION_INT.containsKey(first)) {
-            int i = OXIDIZATION_INT.getInt(first);
+        if (Main.OXIDIZATION_INT.containsKey(first)) {
+            int i = Main.OXIDIZATION_INT.getInt(first);
             int j = 0;
             int k = 0;
             float degradationChance = i == 0 ? 0.75F : 1.0F;
@@ -367,26 +362,18 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
                             if (m < i) { return; }
                             if (m > i) { ++k;} else { ++j; }
                         }
-                    } else if (block instanceof CopperPipe) {
-                        if (OXIDIZATION_INT.containsKey(block)) {
-                            int m = OXIDIZATION_INT.getInt(block);
-                            if (m < i) { return; }
-                            if (m > i) { ++k; } else { ++j; }
-                        }
-                    } else if (block instanceof CopperFitting) {
-                        if (CopperFitting.OXIDIZATION_INT.containsKey(block)) {
-                            int m = CopperFitting.OXIDIZATION_INT.getInt(block);
-                            if (m < i) { return; }
-                            if (m > i) { ++k; } else { ++j; }
-                        }
+                    } else if (Main.OXIDIZATION_INT.containsKey(block)) {
+                        int m = Main.OXIDIZATION_INT.getInt(block);
+                        if (m < i) { return; }
+                        if (m > i) { ++k; } else { ++j; }
                     }
                 }
             }
             float f = (float) (k + 1) / (float) (k + j + 1);
             float g = f * f * degradationChance;
             if (random.nextFloat() < g) {
-                if (NEXT_STAGE.containsKey(first)) {
-                    serverWorld.setBlockState(blockPos, makeCopyOf(blockState, NEXT_STAGE.get(first)));
+                if (Main.NEXT_STAGE.containsKey(first)) {
+                    serverWorld.setBlockState(blockPos, makeCopyOf(blockState, Main.NEXT_STAGE.get(first)));
                 }
             }
         }
@@ -396,43 +383,32 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
         if (block == Blocks.WATER) { return 12; }
-        if (state.contains(WATERLOGGED)) { if (state.get(WATERLOGGED)) { return 12; } }
-        if (block instanceof CopperPipe) {
-            if (world.getBlockEntity(pos) instanceof CopperPipeEntity pipe) { return MathHelper.clamp(pipe.waterLevel-1,0,12); }
+        if (state.contains(WATERLOGGED)) {
+            if (state.get(WATERLOGGED)) {
+                return 12;
+            }
         }
-        if (block instanceof CopperFitting) { if (state.get(HAS_WATER)) { return 12; } }
-        return 0;
-    }
-    public static int smokeLevel(World world, BlockPos pos) {
-        BlockState state = world.getBlockState(pos);
-        Block block = state.getBlock();
-        if (block instanceof CampfireBlock) { if (state.get(Properties.LIT)) {return 12;} }
-        if (block instanceof CopperPipe) {
-            if (world.getBlockEntity(pos) instanceof CopperPipeEntity pipe) { return MathHelper.clamp(pipe.smokeLevel-1,0,12); }
-        }
-        if (block instanceof CopperFitting) { if (state.get(HAS_SMOKE)) { return 12; } }
+        if (world.getBlockEntity(pos) instanceof AbstractSimpleCopperBlockEntity entity) { return entity.getDecreasedWater(); }
         return 0;
     }
 
-    public static int canWater(World world, BlockPos blockPos, BlockState blockState) {
-        if (blockState.get(WATERLOGGED)) {return 12;}
-        BlockPos p = blockPos.offset(blockState.get(FACING).getOpposite());
-        if (!world.isChunkLoaded(p)) { return 0; }
-        return waterLevel(world, p);
+    public static int smokeLevel(World world, BlockPos pos) {
+        BlockState state = world.getBlockState(pos);
+        Block block = state.getBlock();
+        if (block instanceof CampfireBlock) {
+            if (state.get(Properties.LIT)) {
+                return 12;
+            }
+        }
+        if (world.getBlockEntity(pos) instanceof AbstractSimpleCopperBlockEntity entity) { return entity.getDecreasedSmoke(); }
+        return 0;
     }
 
     public static int canWaterFitting(World world, BlockPos pos, BlockState state) {
         if (state.get(WATERLOGGED)) {return 12;}
         if (state.getBlock() instanceof CopperPipe) {
-            if (!world.isChunkLoaded(pos)) {return 0;}
             return waterLevel(world, pos);
         } return 0;
-    }
-
-    public static int canSmoke(World world, BlockPos blockPos, BlockState blockState) {
-        BlockPos p = blockPos.offset(blockState.get(FACING).getOpposite());
-        if (!world.isChunkLoaded(p)) { return 0; }
-        return smokeLevel(world, p);
     }
 
     public static int canSmokeFitting(World world, BlockPos pos, BlockState state) {
@@ -588,26 +564,6 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
                 ItemScatterer.spawn(world, blockPos, (CopperPipeEntity)blockEntity);
                 world.updateComparators(blockPos, this);
             } world.removeBlockEntity(blockPos);
-        } else {
-            BlockEntity entity = world.getBlockEntity(blockPos);
-            if (entity!=null) {
-                if (entity instanceof CopperPipeEntity pipe) {
-                    boolean waterlogged = blockState.get(WATERLOGGED);
-                    if (waterlogged && !pipe.wasPreviouslyWaterlogged) {
-                        if (world.random.nextFloat() < 0.05688889F) {
-                            if (world.random.nextFloat() < 0.36F) {
-                                Block stateBlock = blockState.getBlock();
-                                if (NEXT_STAGE.containsKey(stateBlock)) {
-                                    Block nextStage = NEXT_STAGE.get(blockState.getBlock());
-                                    blockState = makeCopyOf(blockState, nextStage);
-                                    pipe.wasPreviouslyWaterlogged = true;
-                                    world.setBlockState(blockPos, blockState);
-                                }
-                            }
-                        }
-                    } else { if (!waterlogged) {pipe.wasPreviouslyWaterlogged=false;} }
-                }
-            }
         }
     }
 
@@ -617,7 +573,7 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
         } return false;
     }
 
-    public static void makeCopyOf(BlockState state, World world, BlockPos blockPos, Block block) {
+    public void makeCopyOf(BlockState state, World world, BlockPos blockPos, Block block) {
         if (block instanceof CopperPipe) {
             world.setBlockState(blockPos, block.getDefaultState().with(FACING, state.get(FACING)).with(FRONT_CONNECTED, state.get(FRONT_CONNECTED))
                     .with(BACK_CONNECTED, state.get(BACK_CONNECTED)).with(WATERLOGGED, state.get(WATERLOGGED))
@@ -625,7 +581,7 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
                     .with(HAS_ITEM, state.get(HAS_ITEM)).with(HAS_SMOKE, state.get(HAS_SMOKE)).with(HAS_ELECTRICITY, state.get(HAS_ELECTRICITY)).with(POWERED, state.get(POWERED)));
         }
     }
-    public static BlockState makeCopyOf(BlockState state, Block block) {
+    public BlockState makeCopyOf(BlockState state, Block block) {
         if (block instanceof CopperPipe) {
             return block.getDefaultState().with(FACING, state.get(FACING)).with(FRONT_CONNECTED, state.get(FRONT_CONNECTED))
                     .with(BACK_CONNECTED, state.get(BACK_CONNECTED)).with(WATERLOGGED, state.get(WATERLOGGED))
@@ -683,15 +639,15 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
         DOWN_SMOOTH = Block.createCuboidShape(4.0D, 0.0D, 4.0D, 12.0D, 16.0D, 12.0D);
     }
 
-    public static final Block OXIDIZED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.TEAL).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 2,false,12, ParticleTypes.SQUID_INK);
-    public static final Block WEATHERED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.DARK_AQUA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 2,false,15, ParticleTypes.SQUID_INK);
-    public static final Block EXPOSED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.TERRACOTTA_LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 2,false,18, ParticleTypes.SQUID_INK);
-    public static final Block COPPER_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 2,false, 20, ParticleTypes.SQUID_INK);
+    public static final Block OXIDIZED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.TEAL).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 2,12, ParticleTypes.SQUID_INK);
+    public static final Block WEATHERED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.DARK_AQUA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 2,15, ParticleTypes.SQUID_INK);
+    public static final Block EXPOSED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.TERRACOTTA_LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 2,18, ParticleTypes.SQUID_INK);
+    public static final Block COPPER_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 2, 20, ParticleTypes.SQUID_INK);
 
-    public static final Block WAXED_OXIDIZED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.TEAL).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 1,true,12, ParticleTypes.SQUID_INK);
-    public static final Block WAXED_WEATHERED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.DARK_AQUA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 1,true,15, ParticleTypes.SQUID_INK);
-    public static final Block WAXED_EXPOSED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.TERRACOTTA_LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 1,true,18, ParticleTypes.SQUID_INK);
-    public static final Block WAXED_COPPER_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 1,true,20, ParticleTypes.SQUID_INK);
+    public static final Block WAXED_OXIDIZED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.TEAL).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 1,12, ParticleTypes.SQUID_INK);
+    public static final Block WAXED_WEATHERED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.DARK_AQUA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 1,15, ParticleTypes.SQUID_INK);
+    public static final Block WAXED_EXPOSED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.TERRACOTTA_LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 1,18, ParticleTypes.SQUID_INK);
+    public static final Block WAXED_COPPER_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 1,20, ParticleTypes.SQUID_INK);
 
     public static final Block CORRODED_PIPE = new CopperPipe(Settings
             .of(Material.METAL, MapColor.TERRACOTTA_ORANGE)
@@ -703,86 +659,40 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable {
                     Main.CORRODED_COPPER_BREAK,
                     Main.CORRODED_COPPER_FALL,
                     Main.CORRODED_COPPER_HIT
-    )), 8,false,7, ParticleTypes.SQUID_INK);
+            )), 7,7, ParticleTypes.SQUID_INK);
 
-    public static final Block BLACK_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BLACK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,8, ParticleTypes.SQUID_INK);
-    public static final Block RED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.RED).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,9, Main.RED_INK);
-    public static final Block ORANGE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,10, Main.ORANGE_INK);
-    public static final Block YELLOW_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.YELLOW).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,11, Main.YELLOW_INK);
-    public static final Block LIME_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIME).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,12, Main.LIME_INK);
-    public static final Block GREEN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.GREEN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,13, Main.GREEN_INK);
-    public static final Block CYAN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.CYAN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,14, Main.CYAN_INK);
-    public static final Block LIGHT_BLUE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIGHT_BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,15, Main.LIGHT_BLUE_INK);
-    public static final Block BLUE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,16, Main.BLUE_INK);
-    public static final Block PURPLE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.PURPLE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,17, Main.PURPLE_INK);
-    public static final Block MAGENTA_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.MAGENTA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,18, Main.MAGENTA_INK);
-    public static final Block PINK_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.PINK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,19, Main.PINK_INK);
-    public static final Block WHITE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.WHITE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,20, Main.WHITE_INK);
-    public static final Block LIGHT_GRAY_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,21, Main.LIGHT_GRAY_INK);
-    public static final Block GRAY_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,22, Main.GRAY_INK);
-    public static final Block BROWN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BROWN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,false,23, Main.BROWN_INK);
+    public static final Block BLACK_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BLACK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,8, ParticleTypes.SQUID_INK);
+    public static final Block RED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.RED).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,9, Main.RED_INK);
+    public static final Block ORANGE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,10, Main.ORANGE_INK);
+    public static final Block YELLOW_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.YELLOW).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,11, Main.YELLOW_INK);
+    public static final Block LIME_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIME).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,12, Main.LIME_INK);
+    public static final Block GREEN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.GREEN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,13, Main.GREEN_INK);
+    public static final Block CYAN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.CYAN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,14, Main.CYAN_INK);
+    public static final Block LIGHT_BLUE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIGHT_BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,15, Main.LIGHT_BLUE_INK);
+    public static final Block BLUE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,16, Main.BLUE_INK);
+    public static final Block PURPLE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.PURPLE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,17, Main.PURPLE_INK);
+    public static final Block MAGENTA_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.MAGENTA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,18, Main.MAGENTA_INK);
+    public static final Block PINK_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.PINK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,19, Main.PINK_INK);
+    public static final Block WHITE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.WHITE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,20, Main.WHITE_INK);
+    public static final Block LIGHT_GRAY_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,21, Main.LIGHT_GRAY_INK);
+    public static final Block GRAY_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,22, Main.GRAY_INK);
+    public static final Block BROWN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BROWN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,23, Main.BROWN_INK);
 
-    public static final Block GLOWING_BLACK_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BLACK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,7, ParticleTypes.SQUID_INK);
-    public static final Block GLOWING_RED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.RED).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,8, Main.RED_INK);
-    public static final Block GLOWING_ORANGE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,9, Main.ORANGE_INK);
-    public static final Block GLOWING_YELLOW_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.YELLOW).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,10, Main.YELLOW_INK);
-    public static final Block GLOWING_LIME_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIME).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,11, Main.LIME_INK);
-    public static final Block GLOWING_GREEN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.GREEN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,12, Main.GREEN_INK);
-    public static final Block GLOWING_CYAN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.CYAN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,13, Main.CYAN_INK);
-    public static final Block GLOWING_LIGHT_BLUE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIGHT_BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false, 14, Main.LIGHT_BLUE_INK);
-    public static final Block GLOWING_BLUE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,15, Main.BLUE_INK);
-    public static final Block GLOWING_PURPLE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.PURPLE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,16, Main.PURPLE_INK);
-    public static final Block GLOWING_MAGENTA_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.MAGENTA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,17, Main.MAGENTA_INK);
-    public static final Block GLOWING_PINK_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.PINK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,18, Main.PINK_INK);
-    public static final Block GLOWING_WHITE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.WHITE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,19, Main.WHITE_INK);
-    public static final Block GLOWING_LIGHT_GRAY_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,20, Main.LIGHT_GRAY_INK);
-    public static final Block GLOWING_GRAY_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,21, Main.GRAY_INK);
-    public static final Block GLOWING_BROWN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BROWN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,false,22, Main.BROWN_INK);
-
-    public static final Object2ObjectMap<Block, Block> NEXT_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
-        object2IntOpenHashMap.put(COPPER_PIPE, EXPOSED_PIPE);
-        object2IntOpenHashMap.put(EXPOSED_PIPE, WEATHERED_PIPE);
-        object2IntOpenHashMap.put(WEATHERED_PIPE, OXIDIZED_PIPE);
-        object2IntOpenHashMap.put(OXIDIZED_PIPE, CORRODED_PIPE);
-    }));
-    public static final Object2ObjectMap<Block, Block> PREVIOUS_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
-        object2IntOpenHashMap.put(CORRODED_PIPE, OXIDIZED_PIPE);
-        object2IntOpenHashMap.put(OXIDIZED_PIPE, WEATHERED_PIPE);
-        object2IntOpenHashMap.put(WEATHERED_PIPE, EXPOSED_PIPE);
-        object2IntOpenHashMap.put(EXPOSED_PIPE, COPPER_PIPE);
-        object2IntOpenHashMap.put(WAXED_COPPER_PIPE, COPPER_PIPE);
-        object2IntOpenHashMap.put(WAXED_EXPOSED_PIPE, EXPOSED_PIPE);
-        object2IntOpenHashMap.put(WAXED_WEATHERED_PIPE, WEATHERED_PIPE);
-        object2IntOpenHashMap.put(WAXED_OXIDIZED_PIPE, OXIDIZED_PIPE);
-    }));
-    public static final Object2ObjectMap<Block, Block> WAX_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
-        object2IntOpenHashMap.put(COPPER_PIPE, WAXED_COPPER_PIPE);
-        object2IntOpenHashMap.put(EXPOSED_PIPE, WAXED_EXPOSED_PIPE);
-        object2IntOpenHashMap.put(WEATHERED_PIPE, WAXED_WEATHERED_PIPE);
-        object2IntOpenHashMap.put(OXIDIZED_PIPE, WAXED_OXIDIZED_PIPE);
-    }));
-    public static final Object2ObjectMap<Block, Block> GLOW_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
-        object2IntOpenHashMap.put(RED_PIPE, GLOWING_RED_PIPE);
-        object2IntOpenHashMap.put(ORANGE_PIPE, GLOWING_ORANGE_PIPE);
-        object2IntOpenHashMap.put(YELLOW_PIPE, GLOWING_YELLOW_PIPE);
-        object2IntOpenHashMap.put(GREEN_PIPE, GLOWING_GREEN_PIPE);
-        object2IntOpenHashMap.put(CYAN_PIPE, GLOWING_CYAN_PIPE);
-        object2IntOpenHashMap.put(LIGHT_BLUE_PIPE, GLOWING_LIGHT_BLUE_PIPE);
-        object2IntOpenHashMap.put(BLUE_PIPE, GLOWING_BLUE_PIPE);
-        object2IntOpenHashMap.put(PURPLE_PIPE, GLOWING_PURPLE_PIPE);
-        object2IntOpenHashMap.put(MAGENTA_PIPE, GLOWING_MAGENTA_PIPE);
-        object2IntOpenHashMap.put(PINK_PIPE, GLOWING_PINK_PIPE);
-        object2IntOpenHashMap.put(WHITE_PIPE, GLOWING_WHITE_PIPE);
-        object2IntOpenHashMap.put(LIGHT_GRAY_PIPE, GLOWING_LIGHT_GRAY_PIPE);
-        object2IntOpenHashMap.put(GRAY_PIPE, GLOWING_GRAY_PIPE);
-        object2IntOpenHashMap.put(BLACK_PIPE, GLOWING_BLACK_PIPE);
-        object2IntOpenHashMap.put(BROWN_PIPE, GLOWING_BROWN_PIPE);
-    }));
-    public static final Object2IntMap<Block> OXIDIZATION_INT = Object2IntMaps.unmodifiable(Util.make(new Object2IntOpenHashMap<>(), (object2IntOpenHashMap) -> {
-        object2IntOpenHashMap.put(COPPER_PIPE, 0);
-        object2IntOpenHashMap.put(EXPOSED_PIPE, 1);
-        object2IntOpenHashMap.put(WEATHERED_PIPE, 2);
-        object2IntOpenHashMap.put(OXIDIZED_PIPE, 3);
-    }));
+    public static final Block GLOWING_BLACK_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BLACK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,7, ParticleTypes.SQUID_INK);
+    public static final Block GLOWING_RED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.RED).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,8, Main.RED_INK);
+    public static final Block GLOWING_ORANGE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.ORANGE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,9, Main.ORANGE_INK);
+    public static final Block GLOWING_YELLOW_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.YELLOW).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,10, Main.YELLOW_INK);
+    public static final Block GLOWING_LIME_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIME).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,11, Main.LIME_INK);
+    public static final Block GLOWING_GREEN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.GREEN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,12, Main.GREEN_INK);
+    public static final Block GLOWING_CYAN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.CYAN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,13, Main.CYAN_INK);
+    public static final Block GLOWING_LIGHT_BLUE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIGHT_BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4, 14, Main.LIGHT_BLUE_INK);
+    public static final Block GLOWING_BLUE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BLUE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,15, Main.BLUE_INK);
+    public static final Block GLOWING_PURPLE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.PURPLE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,16, Main.PURPLE_INK);
+    public static final Block GLOWING_MAGENTA_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.MAGENTA).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,17, Main.MAGENTA_INK);
+    public static final Block GLOWING_PINK_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.PINK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,18, Main.PINK_INK);
+    public static final Block GLOWING_WHITE_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.WHITE).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,19, Main.WHITE_INK);
+    public static final Block GLOWING_LIGHT_GRAY_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.LIGHT_GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,20, Main.LIGHT_GRAY_INK);
+    public static final Block GLOWING_GRAY_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.GRAY).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,21, Main.GRAY_INK);
+    public static final Block GLOWING_BROWN_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BROWN).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER).luminance(CopperPipe::getLuminance).emissiveLighting((state, world, pos) -> CopperPipe.hasItem(state)), 4,22, Main.BROWN_INK);
 
 }

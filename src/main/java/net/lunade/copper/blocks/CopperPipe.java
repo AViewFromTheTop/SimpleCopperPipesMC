@@ -663,7 +663,7 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
                     Main.CORRODED_COPPER_BREAK,
                     Main.CORRODED_COPPER_FALL,
                     Main.CORRODED_COPPER_HIT
-    )), 8,7, ParticleTypes.SQUID_INK);
+    )), 7,7, ParticleTypes.SQUID_INK);
 
     public static final Block BLACK_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BLACK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,8, ParticleTypes.SQUID_INK);
     public static final Block RED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.RED).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,9, Main.RED_INK);

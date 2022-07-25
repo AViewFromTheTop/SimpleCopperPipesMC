@@ -66,6 +66,7 @@ public class Main implements ModInitializer {
 	public static final TagKey<Block> BLOCK_LISTENERS = TagKey.of(Registry.BLOCK_KEY, new Identifier("lunade", "block_event_listeners"));
 	public static final TagKey<Block> UNSCRAPEABLE = TagKey.of(Registry.BLOCK_KEY, new Identifier("lunade", "unscrapeable"));
 	public static final TagKey<Block> WAXED = TagKey.of(Registry.BLOCK_KEY, new Identifier("lunade", "waxed"));
+	public static final TagKey<Block> SILENT_PIPES = TagKey.of(Registry.BLOCK_KEY, new Identifier("lunade", "silent_pipes"));
 	public static final TagKey<EntityType<?>> ENTITY_LISTENERS = TagKey.of(Registry.ENTITY_TYPE_KEY, new Identifier("lunade", "entity_event_listeners"));
 
 	//COLORED PIPE

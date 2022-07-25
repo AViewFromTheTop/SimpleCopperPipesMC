@@ -143,6 +143,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                         Block block = world.getBlockState(blockPos.offset(direction.getOpposite())).getBlock();
                         if (itemStack2.isEmpty()) {
                             inventory.markDirty();
+                            if (blockState.isIn(Main.SILENT_PIPES)) { return 2; }
                             if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) {return 3;}
                             return 2;
                         }
@@ -207,10 +208,11 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                             serverWorld.playSound(null, blockPos, Main.LAUNCH, SoundCategory.BLOCKS, 0.2F, (serverWorld.random.nextFloat()*0.25F) + 0.8F);
                         } else {o=12;}
                     }
+                    boolean silent = blockState.isIn(Main.SILENT_PIPES);
                     if (serverWorld.getBlockState(blockPos.offset(directionOpp)).getBlock() instanceof CopperFitting) {
-                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, true, corroded, entity);
+                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, true, silent, corroded, entity);
                     } else {
-                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, false, corroded, entity);
+                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, false, silent, corroded, entity);
                         blockPointerImpl.getWorld().syncWorldEvent(2000, blockPointerImpl.getPos(), direction.getId());
                     }
                     copperPipeEntity.setStack(i, itemStack2);
@@ -221,7 +223,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return false;
     }
 
-    private static ItemStack canonShoot(BlockPointer blockPointer, ItemStack itemStack, BlockState state, int i, boolean powered, boolean fitting, boolean corroded, CopperPipeEntity entity) {
+    private static ItemStack canonShoot(BlockPointer blockPointer, ItemStack itemStack, BlockState state, int i, boolean powered, boolean fitting, boolean silent, boolean corroded, CopperPipeEntity entity) {
         ServerWorld world = blockPointer.getWorld();
         BlockPos pos = blockPointer.getPos();
         Direction direction = blockPointer.getBlockState().get(Properties.FACING);
@@ -232,7 +234,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                     itemStack2.isOf(Items.EGG) || itemStack2.isOf(Items.EXPERIENCE_BOTTLE) || itemStack2.isOf(Items.SPLASH_POTION) || itemStack2.isOf(Items.LINGERING_POTION) || itemStack2.isOf(Items.FIRE_CHARGE)) {
                 itemStack2=itemStack.split(1);
                 spawnThrowable(world, itemStack2, i, direction, position, state, corroded, pos, entity);
-                if (!fitting) {world.playSound(null, pos, Main.ITEM_OUT, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat()*0.25F) + 0.8F);}
+                if (!fitting && !silent) {
+                    world.playSound(null, pos, Main.ITEM_OUT, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat()*0.25F) + 0.8F);
+                    world.emitGameEvent(null, GameEvent.ENTITY_PLACE, pos);
+                }
                 return itemStack;
             }
         }
@@ -249,7 +254,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             itemStack2=itemStack.split(1);
             blockPointer.getWorld().syncWorldEvent(2000, blockPointer.getPos(), state.get(Properties.FACING).getId());
             spawnItem(blockPointer.getWorld(), itemStack2, i, direction, position, state, corroded);
-            blockPointer.getWorld().playSound(null, blockPointer.getPos(), Main.ITEM_OUT, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat()*0.25F) + 0.8F);
+            if (!silent) {
+                world.emitGameEvent(null, GameEvent.ENTITY_PLACE, pos);
+                blockPointer.getWorld().playSound(null, blockPointer.getPos(), Main.ITEM_OUT, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
+            }
             return itemStack;
         }
     }

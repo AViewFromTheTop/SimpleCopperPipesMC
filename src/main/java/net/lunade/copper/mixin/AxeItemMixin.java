@@ -1,7 +1,7 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.blocks.CopperFitting;
-import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.Main;
+import net.lunade.copper.blocks.Copyable;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -30,58 +30,31 @@ public class AxeItemMixin {
         PlayerEntity playerEntity = itemUsageContext.getPlayer();
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getStack();
-        boolean go = false;
-        boolean fit = false;
+        boolean canRun = false;
         if (blockState!=null) {
             Block block = blockState.getBlock();
-            if (block instanceof CopperPipe pipe) {
-                if (CopperPipe.PREVIOUS_STAGE.containsKey(block) && block!=CopperPipe.CORRODED_PIPE) {
-                    if (!pipe.waxed) {
-                        world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                        world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                    } else {
-                        world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_WAX_OFF, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                        world.syncWorldEvent(playerEntity, 3004, blockPos, 0);
-                    }
-                    go = true;
+            if (Main.PREVIOUS_STAGE.containsKey(block) && !blockState.isIn(Main.UNSCRAPEABLE)) {
+                if (!blockState.isIn(Main.WAXED)) {
+                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
+                } else {
+                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_WAX_OFF, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    world.syncWorldEvent(playerEntity, 3004, blockPos, 0);
                 }
-            }
-            if (block instanceof CopperFitting fitting) {
-                if (CopperFitting.PREVIOUS_STAGE.containsKey(block) && block!=CopperFitting.CORRODED_FITTING) {
-                    if (!fitting.waxed) {
-                        world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                        world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                    } else {
-                        world.playSound(playerEntity, blockPos, SoundEvents.ITEM_AXE_WAX_OFF, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                        world.syncWorldEvent(playerEntity, 3004, blockPos, 0);
-                    }
-                    fit = true;
-                }
+                canRun = true;
             }
         }
-        if (go) {
+        if (canRun) {
             if (playerEntity instanceof ServerPlayerEntity) {
                 Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack);
             }
 
             Block block = blockState.getBlock();
-            if (CopperPipe.PREVIOUS_STAGE.containsKey(block) && block!=CopperPipe.CORRODED_PIPE) {
-                CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.PREVIOUS_STAGE.get(block));
-            }
-            if (playerEntity != null) {
-                itemStack.damage(1, playerEntity, (playerEntityx) -> playerEntityx.sendToolBreakStatus(itemUsageContext.getHand()));
-            }
-
-            info.setReturnValue(ActionResult.success(world.isClient));
-            info.cancel();
-        } else if (fit) {
-            if (playerEntity instanceof ServerPlayerEntity) {
-                Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack);
-            }
-
-            Block block = blockState.getBlock();
-            if (CopperFitting.PREVIOUS_STAGE.containsKey(block) && block!=CopperFitting.CORRODED_FITTING) {
-                CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.PREVIOUS_STAGE.get(block));
+            if (Main.PREVIOUS_STAGE.containsKey(block)) {
+                Block previousStage = Main.PREVIOUS_STAGE.get(block);
+                if (block instanceof Copyable copyable) {
+                    copyable.makeCopyOf(blockState, world, blockPos, previousStage);
+                }
             }
             if (playerEntity != null) {
                 itemStack.damage(1, playerEntity, (playerEntityx) -> playerEntityx.sendToolBreakStatus(itemUsageContext.getHand()));

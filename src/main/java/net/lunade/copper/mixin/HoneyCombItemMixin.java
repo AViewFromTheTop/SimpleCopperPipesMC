@@ -1,7 +1,7 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.blocks.CopperFitting;
-import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.Main;
+import net.lunade.copper.blocks.Copyable;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -30,53 +30,30 @@ public class HoneyCombItemMixin {
         PlayerEntity playerEntity = itemUsageContext.getPlayer();
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getStack();
-        boolean go = false;
-        boolean fit = false;
+        boolean canWax = false;
         if (blockState!=null) {
             Block block = blockState.getBlock();
-            if (block instanceof CopperPipe) {
-                if (CopperPipe.WAX_STAGE.containsKey(block)) {
-                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_HONEYCOMB_WAX_ON, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    world.syncWorldEvent(playerEntity, 3003, blockPos, 0);
-                    go = true;
-                }
-            }
-            if (block instanceof CopperFitting) {
-                if (CopperFitting.WAX_STAGE.containsKey(block)) {
-                    world.playSound(playerEntity, blockPos, SoundEvents.ITEM_HONEYCOMB_WAX_ON, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    world.syncWorldEvent(playerEntity, 3003, blockPos, 0);
-                    fit = true;
-                }
+            if (Main.WAX_STAGE.containsKey(block)) {
+                world.playSound(playerEntity, blockPos, SoundEvents.ITEM_HONEYCOMB_WAX_ON, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                world.syncWorldEvent(playerEntity, 3003, blockPos, 0);
+                canWax = true;
             }
         }
-        if (go) {
+        if (canWax) {
             if (playerEntity instanceof ServerPlayerEntity) {
                 Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack);
             }
 
             Block block = blockState.getBlock();
-            if (CopperPipe.WAX_STAGE.containsKey(block)) {
-                CopperPipe.makeCopyOf(blockState, world, blockPos, CopperPipe.WAX_STAGE.get(block));
+            if (Main.WAX_STAGE.containsKey(block)) {
+                Block waxStage = Main.WAX_STAGE.get(block);
+                if (block instanceof Copyable copyable) {
+                    copyable.makeCopyOf(blockState, world, blockPos, waxStage);
+                }
             }
             itemStack.decrement(1);
 
             info.setReturnValue(ActionResult.success(world.isClient));
-            info.cancel();
-        } else if (fit) {
-            if (playerEntity instanceof ServerPlayerEntity) {
-                Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack);
-            }
-
-            Block block = blockState.getBlock();
-            if (CopperFitting.WAX_STAGE.containsKey(block)) {
-                CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.WAX_STAGE.get(block));
-            }
-            itemStack.decrement(1);
-
-            info.setReturnValue(ActionResult.success(world.isClient));
-            info.cancel();
-        } else {
-            info.setReturnValue(ActionResult.PASS);
             info.cancel();
         }
     }

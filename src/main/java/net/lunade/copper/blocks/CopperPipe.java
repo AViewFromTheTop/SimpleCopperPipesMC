@@ -206,10 +206,12 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
     }
 
     @Nullable
-    public <T extends BlockEntity> GameEventListener getGameEventListener(ServerWorld world, T blockEntity) {
-        if (blockEntity instanceof CopperPipeEntity pipeEntity) {
-            return pipeEntity.getGameEventListener();
-        } return null;
+    public <T extends BlockEntity> GameEventListener getGameEventListener(World world, T blockEntity) {
+        if (world instanceof ServerWorld serverWorld) {
+            if (blockEntity instanceof CopperPipeEntity pipeEntity) {
+                return pipeEntity.getGameEventListener();
+            }
+        }return null;
     }
 
     public void onPlaced(World world, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {

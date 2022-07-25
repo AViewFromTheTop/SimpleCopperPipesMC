@@ -1,7 +1,5 @@
 package net.lunade.copper.block_entity;
 
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Dynamic;
 import net.lunade.copper.Main;
 import net.lunade.copper.RegisterPipeNbtMethods;
 import net.lunade.copper.blocks.CopperFitting;
@@ -27,11 +25,8 @@ import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.particle.VibrationParticleEffect;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -46,9 +41,11 @@ import net.minecraft.world.event.BlockPositionSource;
 import net.minecraft.world.event.GameEvent;
 import net.minecraft.world.event.listener.GameEventListener;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements CopperPipeListener.Callback {
@@ -57,7 +54,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public int dispenseCooldown;
     public int noteBlockCooldown;
 
-    private CopperPipeListener listener;
+    private final CopperPipeListener listener;
     public ExtraPipeData extraPipeData;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
@@ -365,7 +362,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             vibX = axis == Direction.Axis.X ? vibX+(10 * offX) : corroded ? (axis==Direction.Axis.Z ? vibX+random2 : vibX+random1) : vibX;
             vibY = axis == Direction.Axis.Y ? vibY+(10 * offY) : corroded ? vibY+random1 : vibY;
             vibZ = axis == Direction.Axis.Z ? vibZ+(10 * offZ) * 2 : corroded ? vibZ+random2 : vibZ;
-            BlockPositionSource blockSource = new BlockPositionSource(new BlockPos(vibX, vibY, vibZ));
             RegisterPipeNbtMethods.spawnDelayedVibration(world, new BlockPos(position), new BlockPos(vibX, vibY, vibZ), 32);
         }
     }
@@ -555,8 +551,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         nbtCompound.putInt("transferCooldown", this.transferCooldown);
         nbtCompound.putInt("dispenseCooldown", this.dispenseCooldown);
         nbtCompound.putInt("noteBlockCooldown", this.noteBlockCooldown);
-        Logger var10001 = LOGGER;
-        Objects.requireNonNull(var10001);
         ExtraPipeData.writeNbt(nbtCompound, this.extraPipeData);
     }
 
@@ -632,7 +626,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if ((bl1 || bl3) && (bl2 && bl4)) {
             ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = this.moveablePipeDataHandler.getSavedNbtList();
             if (!nbtList.isEmpty()) {
-                LOGGER.error("dispense");
                 for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
                     if (nbt.getShouldMove()) {
                         nbt.dispense(serverWorld, blockPos, blockState, this);

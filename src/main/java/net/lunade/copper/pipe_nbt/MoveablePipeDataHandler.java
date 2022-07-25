@@ -51,7 +51,7 @@ public class MoveablePipeDataHandler {
 
             if (list.isPresent()) {
                 for (SaveableMovablePipeNbt saveableMovablePipeNbt : list.get()) {
-                    if (saveableMovablePipeNbt.shouldSave) {
+                    if (saveableMovablePipeNbt.getShouldSave()) {
                         this.addSaveableMoveablePipeNbt(saveableMovablePipeNbt);
                     }
                 }
@@ -298,7 +298,6 @@ public class MoveablePipeDataHandler {
         public void onMove(ServerWorld world, BlockPos pos, BlockState state, BlockEntity blockEntity) {
             RegisterPipeNbtMethods.OnMoveMethod<?> method = RegisterPipeNbtMethods.getMove(this.getNbtID());
             if (method!=null) {
-                LOGGER.error("MOVE");
                 method.onMove(this, world, pos, state, blockEntity);
             } else {
                 LOGGER.error("Unable to find oMove method for Moveable Pipe Nbt " + this.getNbtID() + "!");

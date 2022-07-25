@@ -650,7 +650,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if ((bl1 || bl3) && (bl2 && bl4)) {
             ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = this.moveablePipeDataHandler.getSavedNbtList();
             if (!nbtList.isEmpty()) {
-                LOGGER.error("dispense");
                 for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
                     if (nbt.getShouldMove()) {
                         nbt.dispense(serverWorld, blockPos, blockState, this);

@@ -290,12 +290,12 @@ public class MoveablePipeDataHandler {
         }
 
         public SaveableMovablePipeNbt withOnlyThroughOnePipe(boolean bool) {
-            this.shouldCopy = bool;
+            this.canOnlyGoThroughOnePipe = bool;
             return this;
         }
 
         public SaveableMovablePipeNbt withShouldCopy(boolean bool) {
-            this.canOnlyGoThroughOnePipe = bool;
+            this.shouldCopy = bool;
             return this;
         }
 

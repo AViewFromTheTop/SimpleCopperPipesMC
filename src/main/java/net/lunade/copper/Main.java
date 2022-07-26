@@ -25,8 +25,12 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main implements ModInitializer {
 
@@ -504,5 +508,24 @@ public class Main implements ModInitializer {
 		object2IntOpenHashMap.put(CopperFitting.WEATHERED_FITTING, 2);
 		object2IntOpenHashMap.put(CopperFitting.OXIDIZED_FITTING, 3);
 	}));
+
+	public static final Logger LOGGER = LoggerFactory.getLogger("COPPER_PIPES");
+
+	public static Map<Object, Long> instantMap = new HashMap<>();
+
+	public static void startMeasuring(Object object) {
+		long started = System.nanoTime();
+		String name = object.getClass().getName();
+		LOGGER.error("Started measuring {}", name.substring(name.lastIndexOf(".") + 1));
+		instantMap.put(object, started);
+	}
+
+	public static void stopMeasuring(Object object) {
+		if (instantMap.containsKey(object)) {
+			String name = object.getClass().getName();
+			LOGGER.error("{} took {} nanoseconds", name.substring(name.lastIndexOf(".") + 1), System.nanoTime() - instantMap.get(object));
+			instantMap.remove(object);
+		}
+	}
 
 }

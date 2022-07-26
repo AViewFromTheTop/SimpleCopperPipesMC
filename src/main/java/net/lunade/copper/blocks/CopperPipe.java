@@ -367,12 +367,12 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
                             if (m > i) { ++k;} else { ++j; }
                         }
                     } else if (Main.OXIDIZATION_INT.containsKey(block)) {
-                            int m = Main.OXIDIZATION_INT.getInt(block);
-                            if (m < i) { return; }
-                            if (m > i) { ++k; } else { ++j; }
-                        }
+                        int m = Main.OXIDIZATION_INT.getInt(block);
+                        if (m < i) { return; }
+                        if (m > i) { ++k; } else { ++j; }
                     }
                 }
+            }
             float f = (float) (k + 1) / (float) (k + j + 1);
             float g = f * f * degradationChance;
             if (random.nextFloat() < g) {
@@ -512,12 +512,11 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
         };
     }
 
-    public static Position getOutputLocation(BlockPointer blockPointer) {
-        Direction direction = blockPointer.getBlockState().get(CopperPipe.FACING);
+    public static Position getOutputLocation(BlockPointer blockPointer, Direction facing) {
         return new PositionImpl(
-                blockPointer.getX() + 0.7D * (double)direction.getOffsetX(),
-                blockPointer.getY() + 0.7D * (double)direction.getOffsetY(),
-                blockPointer.getZ() + 0.7D * (double)direction.getOffsetZ());
+                blockPointer.getX() + 0.7D * (double)facing.getOffsetX(),
+                blockPointer.getY() + 0.7D * (double)facing.getOffsetY(),
+                blockPointer.getZ() + 0.7D * (double)facing.getOffsetZ());
     }
 
     public static boolean isWaterPipeNearby(WorldView worldView, BlockPos blockPos, int x) {
@@ -663,7 +662,7 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
                     Main.CORRODED_COPPER_BREAK,
                     Main.CORRODED_COPPER_FALL,
                     Main.CORRODED_COPPER_HIT
-    )), 7,7, ParticleTypes.SQUID_INK);
+            )), 7,7, ParticleTypes.SQUID_INK);
 
     public static final Block BLACK_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.BLACK).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,8, ParticleTypes.SQUID_INK);
     public static final Block RED_PIPE = new CopperPipe(Settings.of(Material.METAL, MapColor.RED).requiresTool().strength(1.5F, 3.0F).sounds(BlockSoundGroup.COPPER), 4,9, Main.RED_INK);

@@ -33,7 +33,7 @@ import java.util.List;
 
 public class AbstractSimpleCopperBlockEntity extends LootableContainerBlockEntity implements Inventory {
     public static final Logger LOGGER = LogUtils.getLogger();
-    
+
     public DefaultedList<ItemStack> inventory;
     public int waterCooldown;
     public int waterLevel;
@@ -42,7 +42,7 @@ public class AbstractSimpleCopperBlockEntity extends LootableContainerBlockEntit
 
     public MoveablePipeDataHandler moveablePipeDataHandler;
     public final MoveablePipeDataHandler.MOVE_TYPE moveType;
-    
+
     public AbstractSimpleCopperBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState, MoveablePipeDataHandler.MOVE_TYPE moveType) {
         super(blockEntityType, blockPos, blockState);
         this.inventory = DefaultedList.ofSize(5, ItemStack.EMPTY);
@@ -274,4 +274,5 @@ public class AbstractSimpleCopperBlockEntity extends LootableContainerBlockEntit
     public int size() {
         return this.inventory.size();
     }
+
 }

@@ -74,6 +74,7 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable, Cop
     public void neighborUpdate(BlockState blockState, World world, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
         if (world.isReceivingRedstonePower(blockPos)) { world.setBlockState(blockPos, blockState.with(CopperFitting.POWERED, true));}
         else { world.setBlockState(blockPos, blockState.with(CopperFitting.POWERED, false)); }
+        updateBlockEntityValues(world, blockPos, blockState);
     }
 
     public BlockEntity createBlockEntity(BlockPos blockPos, BlockState blockState) { return new CopperFittingEntity(blockPos, blockState); }
@@ -93,6 +94,7 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable, Cop
             BlockEntity blockEntity = world.getBlockEntity(blockPos);
             if (blockEntity instanceof CopperFittingEntity) { ((CopperFittingEntity) blockEntity).setCustomName(itemStack.getName()); }
         }
+        updateBlockEntityValues(world, blockPos, blockState);
     }
 
     @Override
@@ -164,6 +166,7 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable, Cop
     }
 
     public void onStateReplaced(BlockState blockState, World world, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        updateBlockEntityValues(world, blockPos, blockState);
         if (blockState.hasBlockEntity() && !(blockState2.getBlock() instanceof CopperFitting)) {
             BlockEntity blockEntity = world.getBlockEntity(blockPos);
             if (blockEntity instanceof CopperFittingEntity) {
@@ -171,6 +174,15 @@ public class CopperFitting extends BlockWithEntity implements Waterloggable, Cop
                 world.updateComparators(blockPos, this);
             }
             world.removeBlockEntity(blockPos);
+        }
+    }
+
+    public static void updateBlockEntityValues(World world, BlockPos pos, BlockState state) {
+        if (state.getBlock() instanceof CopperFitting) {
+            BlockEntity entity = world.getBlockEntity(pos);
+            if (entity instanceof CopperFittingEntity fitting) {
+                fitting.canWater = state.get(Properties.WATERLOGGED);
+            }
         }
     }
 

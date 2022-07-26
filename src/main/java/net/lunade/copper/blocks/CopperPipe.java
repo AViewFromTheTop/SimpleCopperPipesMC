@@ -1,7 +1,6 @@
 package net.lunade.copper.blocks;
 
 import net.lunade.copper.Main;
-import net.lunade.copper.block_entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -191,6 +190,27 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
         super.neighborUpdate(blockState, world, blockPos, block, blockPos2, bl);
         boolean powered = isReceivingRedstonePower(blockPos, world);
         if (powered!=blockState.get(POWERED)) {world.setBlockState(blockPos, blockState.with(POWERED, powered));}
+        updateBlockEntityValues(world, blockPos, blockState);
+    }
+
+    public static void updateBlockEntityValues(World world, BlockPos pos, BlockState state) {
+        if (state.getBlock() instanceof CopperPipe) {
+            Direction direction = state.get(Properties.FACING);
+            Direction directionOpp = direction.getOpposite();
+            Block dirBlock = world.getBlockState(pos.offset(direction)).getBlock();
+            BlockState oppState = world.getBlockState(pos.offset(directionOpp));
+            Block oppBlock = oppState.getBlock();
+            BlockEntity entity = world.getBlockEntity(pos);
+            if (entity instanceof CopperPipeEntity pipe) {
+                pipe.canDispense = (dirBlock == Blocks.AIR || dirBlock == Blocks.WATER) && (oppBlock != Blocks.AIR && oppBlock != Blocks.WATER);
+                pipe.corroded = oppBlock == CopperFitting.CORRODED_FITTING || state.getBlock() == CopperPipe.CORRODED_PIPE;
+                pipe.shootsControlled = oppBlock == Blocks.DROPPER;
+                pipe.shootsSpecial = oppBlock == Blocks.DISPENSER;
+                pipe.canAccept = !(oppBlock instanceof CopperPipe) && !(oppBlock instanceof CopperFitting) && !oppState.isSolidBlock(world, pos);
+                pipe.canSmoke = oppBlock instanceof CampfireBlock ? oppState.get(Properties.LIT) : false;
+                pipe.canWater = oppBlock == Blocks.WATER || state.get(Properties.WATERLOGGED) || (oppState.contains(Properties.WATERLOGGED) ? oppState.get(Properties.WATERLOGGED) : false);
+            }
+        }
     }
 
     public BlockEntity createBlockEntity(BlockPos blockPos, BlockState blockState) { return new CopperPipeEntity(blockPos, blockState); }
@@ -207,7 +227,7 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
 
     @Nullable
     public <T extends BlockEntity> GameEventListener getGameEventListener(World world, T blockEntity) {
-        if (world instanceof ServerWorld serverWorld) {
+        if (world instanceof ServerWorld) {
             if (blockEntity instanceof CopperPipeEntity pipeEntity) {
                 return pipeEntity.getGameEventListener();
             }
@@ -215,6 +235,7 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
     }
 
     public void onPlaced(World world, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
+        updateBlockEntityValues(world, blockPos, blockState);
         if (itemStack.hasCustomName()) {
             BlockEntity blockEntity = world.getBlockEntity(blockPos);
             if (blockEntity instanceof CopperPipeEntity) { ((CopperPipeEntity)blockEntity).setCustomName(itemStack.getName()); }
@@ -381,45 +402,6 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
         }
     }
 
-    public static int waterLevel(World world, BlockPos pos) {
-        BlockState state = world.getBlockState(pos);
-        Block block = state.getBlock();
-        if (block == Blocks.WATER) { return 12; }
-        if (state.contains(WATERLOGGED)) {
-            if (state.get(WATERLOGGED)) {
-                return 12;
-            }
-        }
-        if (world.getBlockEntity(pos) instanceof AbstractSimpleCopperBlockEntity entity) { return entity.getDecreasedWater(); }
-        return 0;
-    }
-
-    public static int smokeLevel(World world, BlockPos pos) {
-        BlockState state = world.getBlockState(pos);
-        Block block = state.getBlock();
-        if (block instanceof CampfireBlock) {
-            if (state.get(Properties.LIT)) {
-                return 12;
-            }
-        }
-        if (world.getBlockEntity(pos) instanceof AbstractSimpleCopperBlockEntity entity) { return entity.getDecreasedSmoke(); }
-        return 0;
-    }
-
-    public static int canWaterFitting(World world, BlockPos pos, BlockState state) {
-        if (state.get(WATERLOGGED)) {return 12;}
-        if (state.getBlock() instanceof CopperPipe) {
-            return waterLevel(world, pos);
-        } return 0;
-    }
-
-    public static int canSmokeFitting(World world, BlockPos pos, BlockState state) {
-        if (state.getBlock() instanceof CopperPipe) {
-            if (!world.isChunkLoaded(pos)) {return 0;}
-            return smokeLevel(world, pos);
-        } return 0;
-    }
-
     public boolean hasRandomTicks(BlockState blockState) {
         Block block = blockState.getBlock();
         return block==CopperPipe.COPPER_PIPE || block==CopperPipe.EXPOSED_PIPE || block==CopperPipe.WEATHERED_PIPE || blockState.get(HAS_WATER);
@@ -510,12 +492,11 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
         };
     }
 
-    public static Position getOutputLocation(BlockPointer blockPointer) {
-        Direction direction = blockPointer.getBlockState().get(CopperPipe.FACING);
+    public static Position getOutputLocation(BlockPointer blockPointer, Direction facing) {
         return new PositionImpl(
-                blockPointer.getX() + 0.7D * (double)direction.getOffsetX(),
-                blockPointer.getY() + 0.7D * (double)direction.getOffsetY(),
-                blockPointer.getZ() + 0.7D * (double)direction.getOffsetZ());
+                blockPointer.getX() + 0.7D * (double)facing.getOffsetX(),
+                blockPointer.getY() + 0.7D * (double)facing.getOffsetY(),
+                blockPointer.getZ() + 0.7D * (double)facing.getOffsetZ());
     }
 
     public static boolean isWaterPipeNearby(WorldView worldView, BlockPos blockPos, int x) {
@@ -560,6 +541,7 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
     }
 
     public void onStateReplaced(BlockState blockState, World world, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        updateBlockEntityValues(world, blockPos, blockState);
         if (blockState.hasBlockEntity() && !(blockState2.getBlock() instanceof CopperPipe)) {
             BlockEntity blockEntity = world.getBlockEntity(blockPos);
             if (blockEntity instanceof CopperPipeEntity) {

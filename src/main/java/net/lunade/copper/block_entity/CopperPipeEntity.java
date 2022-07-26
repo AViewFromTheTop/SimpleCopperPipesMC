@@ -1,7 +1,8 @@
 package net.lunade.copper.block_entity;
 
+import net.lunade.copper.FittingPipeDispenses;
 import net.lunade.copper.Main;
-import net.lunade.copper.RegisterPipeNbtMethods;
+import net.lunade.copper.PoweredPipeDispenses;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.pipe_nbt.ExtraPipeData;
@@ -12,30 +13,16 @@ import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
-import net.minecraft.entity.projectile.SmallFireballEntity;
-import net.minecraft.entity.projectile.SpectralArrowEntity;
-import net.minecraft.entity.projectile.thrown.EggEntity;
-import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
-import net.minecraft.entity.projectile.thrown.PotionEntity;
-import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.property.Properties;
 import net.minecraft.tag.GameEventTags;
-import net.minecraft.tag.ItemTags;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.*;
-import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.world.World;
 import net.minecraft.world.event.BlockPositionSource;
 import net.minecraft.world.event.GameEvent;
@@ -53,6 +40,11 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public int transferCooldown;
     public int dispenseCooldown;
     public int noteBlockCooldown;
+    public boolean canDispense;
+    public boolean corroded;
+    public boolean shootsControlled;
+    public boolean shootsSpecial;
+    public boolean canAccept;
 
     private final CopperPipeListener listener;
     public ExtraPipeData extraPipeData;
@@ -75,68 +67,87 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public void serverTick(World world, BlockPos blockPos, BlockState blockState) {
         this.listener.tick(world);
         super.serverTick(world, blockPos, blockState);
-        blockState = world.getBlockState(blockPos);
         if (!world.isClient) {
-            if (this.noteBlockCooldown>0) { --this.noteBlockCooldown; }
-            if (this.dispenseCooldown>0) {
+            if (this.noteBlockCooldown > 0) {
+                --this.noteBlockCooldown;
+            }
+            if (this.dispenseCooldown > 0) {
                 --this.dispenseCooldown;
             } else {
-                dispense((ServerWorld) world, blockPos, blockState, this);
+                this.dispense((ServerWorld) world, blockPos, blockState);
                 int i = 0;
                 if (world.getBlockState(blockPos.offset(blockState.get(Properties.FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
                     i = fitting.cooldown;
                 } else {
                     if (blockState.getBlock() instanceof CopperPipe pipe) {
-                        i = MathHelper.floor(pipe.cooldown*0.5);
+                        i = MathHelper.floor(pipe.cooldown * 0.5);
                     }
                 }
-                this.dispenseCooldown=i;
+                this.dispenseCooldown = i;
             }
-        }
 
-        if (this.transferCooldown>0) {
-            --this.transferCooldown;
-        } else {
-            pipeMove(world, blockPos, blockState, this);
+            if (this.transferCooldown > 0) {
+                --this.transferCooldown;
+            } else {
+                this.pipeMove(world, blockPos, blockState);
+            }
         }
     }
 
-    public static void pipeMove(World world, BlockPos blockPos, BlockState blockState, CopperPipeEntity copperPipeEntity) {
-        if (!world.isClient) {
-            boolean bl1 = moveOut(world, blockPos, blockState, copperPipeEntity);
-            int bl2 = moveIn(world, blockPos, blockState, copperPipeEntity, copperPipeEntity);
-            if (bl1 || bl2 >= 2) {
-                markDirty(world, blockPos, blockState);
-            }
-            if (bl2 == 1 || bl2 == 3) {
-                world.playSound(null, blockPos, Main.ITEM_IN, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
-            }
+    public void updateBlockEntityValues(World world, BlockPos pos, BlockState state) {
+        if (state.getBlock() instanceof CopperPipe) {
+            Direction direction = state.get(Properties.FACING);
+            Direction directionOpp = direction.getOpposite();
+            Block dirBlock = world.getBlockState(pos.offset(direction)).getBlock();
+            BlockState oppState = world.getBlockState(pos.offset(directionOpp));
+            Block oppBlock = oppState.getBlock();
+            this.canDispense = (dirBlock == Blocks.AIR || dirBlock == Blocks.WATER) && (oppBlock != Blocks.AIR && oppBlock != Blocks.WATER);
+            this.corroded = oppBlock == CopperFitting.CORRODED_FITTING || state.getBlock() == CopperPipe.CORRODED_PIPE;
+            this.shootsControlled = oppBlock == Blocks.DROPPER;
+            this.shootsSpecial = oppBlock == Blocks.DISPENSER;
+            this.canAccept = !(oppBlock instanceof CopperPipe) && !(oppBlock instanceof CopperFitting) && !oppState.isSolidBlock(world, pos);
+        }
+    }
+
+    public void pipeMove(World world, BlockPos blockPos, BlockState blockState) {
+        Direction facing = blockState.get(Properties.FACING);
+        boolean bl1 = moveOut(world, blockPos, facing);
+        int bl2 = moveIn(world, blockPos, blockState, facing);
+        if (bl1 || bl2 >= 2) {
+            markDirty(world, blockPos, blockState);
+        }
+        if (bl2 == 1 || bl2 == 3) {
+            world.playSound(null, blockPos, Main.ITEM_IN, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
         }
     }
 
     public static boolean canTransfer(World world, BlockPos pos, boolean out) {
         BlockEntity entity = world.getBlockEntity(pos);
         if (entity != null) {
-            if (entity instanceof CopperPipeEntity pipe) { return pipe.transferCooldown<=0; }
+            if (entity instanceof CopperPipeEntity pipe) { return pipe.transferCooldown <= 0; }
             if (entity instanceof CopperFittingEntity) { return out || !world.getBlockState(pos).get(Properties.POWERED); }
         } return true;
     }
 
-    private static int moveIn(World world, BlockPos blockPos, BlockState blockState, Inventory inventory, CopperPipeEntity pipe) {
-        Inventory inventory2 = getSecretInventory(world, blockPos, blockState);
+    private int moveIn(World world, BlockPos blockPos, BlockState blockState, Direction facing) {
+        BlockPos offsetOppPos = blockPos.offset(facing.getOpposite());
+        Inventory inventory2 = getInventoryAt(world, offsetOppPos);
         if (inventory2 != null) {
-            Direction direction = blockState.get(Properties.FACING);
-            if (!isInventoryFull(inventory, direction) && canTransfer(world, blockPos.offset(direction.getOpposite()), false)) {
+            if (!isInventoryFull(this, facing) && canTransfer(world, offsetOppPos, false)) {
                 for (int i = 0; i < inventory2.size(); ++i) {
                     if (!inventory2.getStack(i).isEmpty()) {
-                        pipe.setCooldown(blockState);
+                        this.setCooldown(blockState);
                         ItemStack itemStack = inventory2.getStack(i).copy();
-                        ItemStack itemStack2 = transfer(inventory, inventory2.removeStack(i, 1), direction);
-                        Block block = world.getBlockState(blockPos.offset(direction.getOpposite())).getBlock();
+                        ItemStack itemStack2 = transfer(this, inventory2.removeStack(i, 1), facing);
                         if (itemStack2.isEmpty()) {
-                            inventory.markDirty();
-                            if (blockState.isIn(Main.SILENT_PIPES)) { return 2; }
-                            if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) {return 3;}
+                            this.markDirty();
+                            if (blockState.isIn(Main.SILENT_PIPES)) {
+                                return 2;
+                            }
+                            Block block = world.getBlockState(offsetOppPos).getBlock();
+                            if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) {
+                                return 3;
+                            }
                             return 2;
                         }
                         inventory2.setStack(i, itemStack);
@@ -146,22 +157,27 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         } return 0;
     }
 
-    private static boolean moveOut(World world, BlockPos blockPos, BlockState blockState, Inventory inventory) {
-        Inventory inventory2 = getOutputInventory(world, blockPos, blockState);
-        Direction direction = blockState.get(Properties.FACING);
-        if (inventory2 != null && canTransfer(world, blockPos.offset(direction), true)) {
-            direction = direction.getOpposite();
-            if (!isPipe(world, blockPos, direction) && !isInventoryFull(inventory2, direction)) {
-                for (int i = 0; i < inventory.size(); ++i) {
-                    if (!inventory.getStack(i).isEmpty()) {
-                        setCooldown(world, blockPos.offset(direction.getOpposite()));
-                        ItemStack itemStack = inventory.getStack(i).copy();
-                        ItemStack itemStack2 = transfer(inventory2, inventory.removeStack(i, 1), direction);
+    private boolean moveOut(World world, BlockPos blockPos, Direction facing) {
+        BlockPos offsetPos = blockPos.offset(facing);
+        Inventory inventory2 = getInventoryAt(world, offsetPos);
+        if (inventory2 != null && canTransfer(world, offsetPos, true)) {
+            Direction opp = facing.getOpposite();
+            boolean canMove = true;
+            BlockState state = world.getBlockState(offsetPos);
+            if (state.getBlock() instanceof CopperPipe) {
+                canMove = state.get(Properties.FACING) != facing;
+            }
+            if (canMove && !isInventoryFull(inventory2, opp)) {
+                for (int i = 0; i < this.size(); ++i) {
+                    if (!this.getStack(i).isEmpty()) {
+                        setCooldown(world, offsetPos);
+                        ItemStack itemStack = this.getStack(i).copy();
+                        ItemStack itemStack2 = transfer(inventory2, this.removeStack(i, 1), opp);
                         if (itemStack2.isEmpty()) {
                             inventory2.markDirty();
                             return true;
                         }
-                        inventory.setStack(i, itemStack);
+                        this.setStack(i, itemStack);
                     }
                 }
 
@@ -169,32 +185,22 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         } return false;
     }
 
-    private static boolean dispense(ServerWorld serverWorld, BlockPos blockPos, BlockState blockState, CopperPipeEntity entity) {
+    private boolean dispense(ServerWorld serverWorld, BlockPos blockPos, BlockState blockState) {
         Direction direction = blockState.get(Properties.FACING);
         Direction directionOpp = direction.getOpposite();
-        Block dirBlock = serverWorld.getBlockState(blockPos.offset(direction)).getBlock();
-        Block oppBlock = serverWorld.getBlockState(blockPos.offset(directionOpp)).getBlock();
-        boolean bl1 = dirBlock == Blocks.AIR;
-        boolean bl2 = oppBlock != Blocks.AIR;
-        boolean bl3 = dirBlock == Blocks.WATER;
-        boolean bl4 = oppBlock != Blocks.WATER;
         boolean powered = blockState.get(CopperPipe.POWERED);
-        boolean shootsSpecial = oppBlock == Blocks.DISPENSER;
-        boolean shootsControlled = oppBlock == Blocks.DROPPER;
-        boolean corroded = oppBlock == CopperFitting.CORRODED_FITTING || blockState.getBlock() == CopperPipe.CORRODED_PIPE;
-        if ((bl1 || bl3) && (bl2 && bl4)) {
+        if (this.canDispense) {
             BlockPointerImpl blockPointerImpl = new BlockPointerImpl(serverWorld, blockPos);
-            CopperPipeEntity copperPipeEntity = blockPointerImpl.getBlockEntity();
-            int i = copperPipeEntity.chooseNonEmptySlot(serverWorld.random);
+            int i = this.chooseNonEmptySlot(serverWorld.random);
             if (!(i < 0)) {
-                ItemStack itemStack = copperPipeEntity.getStack(i);
+                ItemStack itemStack = this.getStack(i);
                 if (!itemStack.isEmpty()) {
                     ItemStack itemStack2;
                     int o=4;
-                    if (shootsControlled) { //If Dropper
+                    if (this.shootsControlled) { //If Dropper
                         o=10;
                         serverWorld.playSound(null, blockPos, Main.LAUNCH, SoundCategory.BLOCKS, 0.2F, (serverWorld.random.nextFloat()*0.25F) + 0.8F);
-                    } else if (shootsSpecial) { //If Dispenser, Use Pipe-Specific Launch Length
+                    } else if (this.shootsSpecial) { //If Dispenser, Use Pipe-Specific Launch Length
                         if (blockState.getBlock() instanceof CopperPipe pipe) {
                             o = pipe.dispenserShotLength;
                             serverWorld.playSound(null, blockPos, Main.LAUNCH, SoundCategory.BLOCKS, 0.2F, (serverWorld.random.nextFloat()*0.25F) + 0.8F);
@@ -202,12 +208,12 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                     }
                     boolean silent = blockState.isIn(Main.SILENT_PIPES);
                     if (serverWorld.getBlockState(blockPos.offset(directionOpp)).getBlock() instanceof CopperFitting) {
-                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, true, silent, corroded, entity);
+                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, true, silent, this.corroded);
                     } else {
-                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, false, silent, corroded, entity);
+                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, false, silent, this.corroded);
                         blockPointerImpl.getWorld().syncWorldEvent(2000, blockPointerImpl.getPos(), direction.getId());
                     }
-                    copperPipeEntity.setStack(i, itemStack2);
+                    this.setStack(i, itemStack2);
                     return true;
                 }
             }
@@ -215,17 +221,17 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return false;
     }
 
-    private static ItemStack canonShoot(BlockPointer blockPointer, ItemStack itemStack, BlockState state, int i, boolean powered, boolean fitting, boolean silent, boolean corroded, CopperPipeEntity entity) {
+    private ItemStack canonShoot(BlockPointer blockPointer, ItemStack itemStack, BlockState state, int i, boolean powered, boolean fitting, boolean silent, boolean corroded) {
         ServerWorld world = blockPointer.getWorld();
         BlockPos pos = blockPointer.getPos();
-        Direction direction = blockPointer.getBlockState().get(Properties.FACING);
-        Position position = CopperPipe.getOutputLocation(blockPointer);
+        Direction direction = state.get(Properties.FACING);
+        Position position = CopperPipe.getOutputLocation(blockPointer, direction);
         ItemStack itemStack2 = itemStack;
         if (powered) { //Special Behavior When Powered
-            if (itemStack2.isOf(Items.TIPPED_ARROW) || itemStack2.isOf(Items.SPECTRAL_ARROW) || itemStack2.isOf(Items.ARROW) || itemStack2.isOf(Items.SNOWBALL) ||
-                    itemStack2.isOf(Items.EGG) || itemStack2.isOf(Items.EXPERIENCE_BOTTLE) || itemStack2.isOf(Items.SPLASH_POTION) || itemStack2.isOf(Items.LINGERING_POTION) || itemStack2.isOf(Items.FIRE_CHARGE)) {
+            PoweredPipeDispenses.PoweredDispense<?> poweredDispense = PoweredPipeDispenses.getDispense(itemStack2.getItem());
+            if (poweredDispense != null) {
                 itemStack2=itemStack.split(1);
-                spawnThrowable(world, itemStack2, i, direction, position, state, corroded, pos, entity);
+                poweredDispense.dispense(world, itemStack2, i, direction, position, state, corroded, pos, this);
                 if (!fitting && !silent) {
                     world.playSound(null, pos, Main.ITEM_OUT, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat()*0.25F) + 0.8F);
                     world.emitGameEvent(null, GameEvent.ENTITY_PLACE, pos);
@@ -234,27 +240,27 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             }
         }
         if (fitting) {
-            if (itemStack2.isOf(Items.GLOW_INK_SAC) || itemStack2.isOf(Items.INK_SAC) || itemStack2.isOf(Items.SCULK_SENSOR)) { //Particle Emitters With Fitting
-                spawnThrowable(world, itemStack2, i, direction, position, state, corroded, pos, entity);
+            FittingPipeDispenses.FittingDispense<?> fittingDispense = FittingPipeDispenses.getDispense(itemStack2.getItem());
+            if (fittingDispense != null) { //Particle Emitters With Fitting
+                fittingDispense.dispense(world, itemStack2, i, direction, position, state, corroded, pos, this);
             } else { //Spawn Item W/O Sound With Fitting
                 itemStack2=itemStack.split(1);
-                spawnItem(world, itemStack2, i, direction, position, state, corroded);
-                world.syncWorldEvent(2000, pos, state.get(Properties.FACING).getId());
+                spawnItem(world, itemStack2, i, direction, position, direction, corroded);
+                world.syncWorldEvent(2000, pos, direction.getId());
             }
-            return itemStack;
         } else {
             itemStack2=itemStack.split(1);
-            blockPointer.getWorld().syncWorldEvent(2000, blockPointer.getPos(), state.get(Properties.FACING).getId());
-            spawnItem(blockPointer.getWorld(), itemStack2, i, direction, position, state, corroded);
+            world.syncWorldEvent(2000, blockPointer.getPos(), direction.getId());
+            spawnItem(world, itemStack2, i, direction, position, direction, corroded);
             if (!silent) {
                 world.emitGameEvent(null, GameEvent.ENTITY_PLACE, pos);
-                blockPointer.getWorld().playSound(null, blockPointer.getPos(), Main.ITEM_OUT, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
+                world.playSound(null, blockPointer.getPos(), Main.ITEM_OUT, SoundCategory.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
             }
-            return itemStack;
         }
+        return itemStack;
     }
 
-    public static void spawnItem(World world, ItemStack itemStack, int i, Direction direction, Position position, BlockState state, boolean corroded) { //Simply Spawn An Item
+    public static void spawnItem(World world, ItemStack itemStack, int i, Direction direction, Position position, Direction facing, boolean corroded) { //Simply Spawn An Item
         double d = position.getX();
         double e = position.getY();
         double f = position.getZ();
@@ -266,104 +272,13 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         double x = 0;
         double y = 0;
         double z = 0;
-        Direction.Axis axis = state.get(Properties.FACING).getAxis();
-        x = axis == Direction.Axis.X ? (i * state.get(Properties.FACING).getOffsetX()) * 0.1 : corroded ? (world.random.nextDouble()*0.6) - 0.3 : x;
-        y = axis == Direction.Axis.Y ? (i * state.get(Properties.FACING).getOffsetY()) * 0.1 : corroded ? (world.random.nextDouble()*0.6) - 0.3 : y;
-        z = axis == Direction.Axis.Z ? (i * state.get(Properties.FACING).getOffsetZ()) * 0.1 : corroded ? (world.random.nextDouble()*0.6) - 0.3 : z;
+        Direction.Axis axis = facing.getAxis();
+        x = axis == Direction.Axis.X ? (i * facing.getOffsetX()) * 0.1 : corroded ? (world.random.nextDouble()*0.6) - 0.3 : x;
+        y = axis == Direction.Axis.Y ? (i * facing.getOffsetY()) * 0.1 : corroded ? (world.random.nextDouble()*0.6) - 0.3 : y;
+        z = axis == Direction.Axis.Z ? (i * facing.getOffsetZ()) * 0.1 : corroded ? (world.random.nextDouble()*0.6) - 0.3 : z;
         ItemEntity itemEntity = new ItemEntity(world, d, e, f, itemStack);
         itemEntity.setVelocity(x, y, z);
         world.spawnEntity(itemEntity);
-    }
-    public static void spawnThrowable(ServerWorld world, ItemStack itemStack, int i, Direction direction, Position position, BlockState state, boolean corroded, BlockPos pos, CopperPipeEntity entity) {
-        double d = position.getX();
-        double e = position.getY();
-        double f = position.getZ();
-        if (direction.getAxis() == Direction.Axis.Y) { e -= 0.125D;} else { e -= 0.15625D; }
-        double velX = 0;
-        double velY = 0;
-        double velZ = 0;
-        Random random = world.random;
-        double random1 = (random.nextDouble()*0.6) - 0.3;
-        double random2 = (random.nextDouble()*0.6) - 0.3;
-        Entity shotEntity = null;
-        Direction dir = state.get(Properties.FACING);
-        Direction.Axis axis = dir.getAxis();
-        int offX = dir.getOffsetX();
-        int offY = dir.getOffsetY();
-        int offZ = dir.getOffsetZ();
-        velX = axis == Direction.Axis.X ? (i * offX) * 0.1 : corroded ? (axis == Direction.Axis.Z ? random2 : random1) : velX;
-        velY = axis == Direction.Axis.Y ? (i * offY) * 0.1 : corroded ? random1 : velY;
-        velZ = axis == Direction.Axis.Z ? (i * offZ) * 0.1 : corroded ? random2 : velZ;
-        if (itemStack.isIn(ItemTags.ARROWS) && !itemStack.isOf(Items.TIPPED_ARROW) && !itemStack.isOf(Items.SPECTRAL_ARROW)) {
-            shotEntity = new ArrowEntity(world,d,e,f);
-            shotEntity.setPos(d, e, f);
-            ((ArrowEntity)shotEntity).pickupType = PersistentProjectileEntity.PickupPermission.ALLOWED;
-        }
-        if (itemStack.isOf(Items.SPECTRAL_ARROW)) {
-            shotEntity = new SpectralArrowEntity(world,d,e,f);
-            shotEntity.setPos(d, e, f);
-            ((SpectralArrowEntity)shotEntity).pickupType = PersistentProjectileEntity.PickupPermission.ALLOWED;
-        }
-        if (itemStack.isOf(Items.TIPPED_ARROW)) {
-            shotEntity = new ArrowEntity(world,d,e,f);
-            ((ArrowEntity)shotEntity).initFromStack(itemStack);
-            ((ArrowEntity)shotEntity).pickupType = PersistentProjectileEntity.PickupPermission.ALLOWED;
-        }
-        if (itemStack.isOf(Items.SNOWBALL)) {
-            shotEntity = new SnowballEntity(world,d,e,f);
-        }
-        if (itemStack.isOf(Items.EGG)) {
-            shotEntity = new EggEntity(world,d,e,f);
-        }
-        if (itemStack.isOf(Items.EXPERIENCE_BOTTLE)) {
-            shotEntity = new ExperienceBottleEntity(world,d,e,f);
-        }
-        if (itemStack.isOf(Items.SPLASH_POTION)) {
-            shotEntity = Util.make(new PotionEntity(world, d, e, f), (potionEntity) -> potionEntity.setItem(itemStack));
-        }
-        if (itemStack.isOf(Items.LINGERING_POTION)) {
-            shotEntity = Util.make(new PotionEntity(world, d, e, f), (potionEntity) -> potionEntity.setItem(itemStack));        }
-        if (itemStack.isOf(Items.FIRE_CHARGE)) {
-            SmallFireballEntity smallFireballEntity = new SmallFireballEntity(world, d, e, f, velX, velY, velZ);
-            world.spawnEntity(Util.make(smallFireballEntity, (smallFireballEntityx) -> smallFireballEntityx.setItem(itemStack)));
-        }
-        if (shotEntity!=null) {
-            shotEntity.setVelocity(velX, velY, velZ);
-            world.spawnEntity(shotEntity);
-        }
-        //PARTICLES
-        random1 = (random.nextDouble()*7) - 3.5;
-        random2 = (random.nextDouble()*7) - 3.5;
-        velX = axis == Direction.Axis.X ? (i * offX) * 2 : (axis==Direction.Axis.Z ? corroded ? random2 : random2*0.1 : corroded ? random1 : random1*0.1);
-        velY = axis == Direction.Axis.Y ? (i * offY) * 2 : corroded ? random1 : random1*0.1;
-        velZ = axis == Direction.Axis.Z ? (i * offZ) * 2 : corroded ? random2 : random2*0.1;
-
-        UniformIntProvider ran1 = UniformIntProvider.create(-3,3);
-        UniformIntProvider ran2 = UniformIntProvider.create(-1,1);
-        UniformIntProvider ran3 = UniformIntProvider.create(-3,3);
-        boolean genericInkSac = itemStack.isOf(Items.INK_SAC);
-        if (genericInkSac || itemStack.isOf(Items.GLOW_INK_SAC)) {
-            if (state.getBlock() instanceof CopperPipe pipe) {
-                ParticleEffect ink = genericInkSac ? pipe.ink : ParticleTypes.SQUID_INK;
-                if (world.getBlockState(pos.offset(state.get(Properties.FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
-                    if (ink == ParticleTypes.SQUID_INK) { ink = fitting.ink; }
-                    for (int o=0; o<30; o++) {
-                        world.spawnParticles(ink, d + ran1.get(world.random) * 0.1, e + ran2.get(world.random) * 0.1, f + ran3.get(world.random) * 0.1, 0, velX, velY, velZ, 0.10000000149011612D);
-                    }
-                }
-            }
-        }
-        if (itemStack.isOf(Items.SCULK_SENSOR)) {
-            double vibX=position.getX();
-            double vibY=position.getY();
-            double vibZ=position.getZ();
-            random1 = (random.nextDouble()*6) - 3;
-            random2 = (random.nextDouble()*6) - 3;
-            vibX = axis == Direction.Axis.X ? vibX+(10 * offX) : corroded ? (axis==Direction.Axis.Z ? vibX+random2 : vibX+random1) : vibX;
-            vibY = axis == Direction.Axis.Y ? vibY+(10 * offY) : corroded ? vibY+random1 : vibY;
-            vibZ = axis == Direction.Axis.Z ? vibZ+(10 * offZ) * 2 : corroded ? vibZ+random2 : vibZ;
-            RegisterPipeNbtMethods.spawnDelayedVibration(world, new BlockPos(position), new BlockPos(vibX, vibY, vibZ), 32);
-        }
     }
 
     public int chooseNonEmptySlot(Random random) {
@@ -425,16 +340,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 inventory2.markDirty();
             }
         } return itemStack;
-    }
-
-    @Nullable
-    private static Inventory getOutputInventory(World world, BlockPos blockPos, BlockState blockState) {
-        return getInventoryAt(world, blockPos.offset(blockState.get(Properties.FACING)));
-    }
-
-    @Nullable
-    private static Inventory getSecretInventory(World world, BlockPos blockPos, BlockState blockState) {
-        return getInventoryAt(world, blockPos.offset(blockState.get(Properties.FACING).getOpposite()));
     }
 
     private boolean isFull() {
@@ -507,33 +412,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         }
     }
 
-    public int canWater(World world, BlockPos blockPos, BlockState blockState) {
-        if (blockState.get(Properties.WATERLOGGED)) {return 12;}
-        BlockPos p = blockPos.offset(blockState.get(Properties.FACING).getOpposite());
-        if (!world.isChunkLoaded(p)) { return 0; }
-        return CopperPipe.waterLevel(world, p);
-    }
-
-    public int canSmoke(World world, BlockPos blockPos, BlockState blockState) {
-        BlockPos p = blockPos.offset(blockState.get(Properties.FACING).getOpposite());
-        if (!world.isChunkLoaded(p)) { return 0; }
-        return CopperPipe.smokeLevel(world, p);
-    }
-
-    public int getDecreasedSmoke() {
-        return Math.max(this.smokeLevel - 1, 0);
-    }
-
-    public int getDecreasedWater() {
-        return Math.max(this.waterLevel - 1, 0);
-    }
-
-    private static boolean isPipe(World world, BlockPos blockPos, Direction direction) {
-        BlockState state = world.getBlockState(blockPos.offset(direction.getOpposite()));
-        if (state.getBlock() instanceof CopperPipe) {return state.get(Properties.FACING) == direction.getOpposite();}
-        return false;
-    }
-
     public GameEventListener getGameEventListener() {
         return this.listener;
     }
@@ -543,6 +421,11 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.transferCooldown = nbtCompound.getInt("transferCooldown");
         this.dispenseCooldown = nbtCompound.getInt("dispenseCooldown");
         this.noteBlockCooldown = nbtCompound.getInt("noteBlockCooldown");
+        this.canDispense = nbtCompound.getBoolean("canDispense");
+        this.corroded = nbtCompound.getBoolean("corroded");
+        this.shootsControlled = nbtCompound.getBoolean("shootsControlled");
+        this.shootsSpecial = nbtCompound.getBoolean("shootsSpecial");
+        this.canAccept = nbtCompound.getBoolean("canAccept");
         this.extraPipeData = ExtraPipeData.readNbt(nbtCompound);
     }
 
@@ -551,6 +434,11 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         nbtCompound.putInt("transferCooldown", this.transferCooldown);
         nbtCompound.putInt("dispenseCooldown", this.dispenseCooldown);
         nbtCompound.putInt("noteBlockCooldown", this.noteBlockCooldown);
+        nbtCompound.putBoolean("canDispense", this.canDispense);
+        nbtCompound.putBoolean("corroded", this.corroded);
+        nbtCompound.putBoolean("shootsControlled", this.shootsControlled);
+        nbtCompound.putBoolean("shootsSpecial", this.shootsSpecial);
+        nbtCompound.putBoolean("canAccept", this.canAccept);
         ExtraPipeData.writeNbt(nbtCompound, this.extraPipeData);
     }
 
@@ -563,20 +451,15 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     @Override
     public boolean accepts(World world, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity) {
         if (world instanceof ServerWorld serverWorld) {
-            BlockState thisState = serverWorld.getBlockState(this.getPos());
-            if (serverWorld.getBlockState(blockPos).getBlock() instanceof CopperPipe) {
+            boolean placeDestroy = gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE;
+            if ((serverWorld.getBlockState(blockPos).getBlock() instanceof CopperPipe || blockPos == this.getPos()) && placeDestroy) {
                 return false;
             }
-            if (thisState.getBlock() instanceof CopperPipe) {
-                boolean bl = gameEvent == GameEvent.BLOCK_DESTROY && blockPos.equals(this.getPos());
-                boolean bl2 = gameEvent == GameEvent.BLOCK_PLACE && blockPos.equals(this.getPos());
-                boolean bl3 = notCubeNorPipe(serverWorld, this.getPos().offset(thisState.get(Properties.FACING).getOpposite()));
-                if (!bl && !bl2 && bl3) {
-                    this.moveablePipeDataHandler.addSaveableMoveablePipeNbt(new MoveablePipeDataHandler.SaveableMovablePipeNbt(gameEvent, Vec3d.ofCenter(blockPos), entity, this.getPos()));
-                    return true;
-                }
-            }
-        }return false;
+            if (this.canAccept) {
+                this.moveablePipeDataHandler.addSaveableMoveablePipeNbt(new MoveablePipeDataHandler.SaveableMovablePipeNbt(gameEvent, Vec3d.ofCenter(blockPos), entity, this.getPos()).withShouldMove(true).withShouldSave(true));
+                return true;
+            } return false;
+        } return false;
     }
 
     @Override
@@ -615,15 +498,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     }
 
     public void dispenseMoveableNbt(ServerWorld serverWorld, BlockPos blockPos, BlockState blockState) {
-        Direction direction = blockState.get(Properties.FACING);
-        Direction directionOpp = direction.getOpposite();
-        Block dirBlock = serverWorld.getBlockState(blockPos.offset(direction)).getBlock();
-        Block oppBlock = serverWorld.getBlockState(blockPos.offset(directionOpp)).getBlock();
-        boolean bl1 = dirBlock == Blocks.AIR;
-        boolean bl2 = oppBlock != Blocks.AIR;
-        boolean bl3 = dirBlock == Blocks.WATER;
-        boolean bl4 = oppBlock != Blocks.WATER;
-        if ((bl1 || bl3) && (bl2 && bl4)) {
+        if (this.canDispense) {
             ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = this.moveablePipeDataHandler.getSavedNbtList();
             if (!nbtList.isEmpty()) {
                 for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
@@ -637,17 +512,21 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     }
 
     public boolean listenersNearby(World world, BlockPos pos) {
-        if (this.extraPipeData!=null) {
-            if (world.getBlockState(this.extraPipeData.listenerPos).isIn(Main.BLOCK_LISTENERS)) { return true; }
+        if (this.extraPipeData != null) {
+            if (world.getBlockState(this.extraPipeData.listenerPos).isIn(Main.BLOCK_LISTENERS)) {
+                return true;
+            } else {
+                this.extraPipeData = null;
+            }
         }
         int bx = pos.getX();
         int by = pos.getY();
         int bz = pos.getZ();
-        for(int x = bx - 8; x <= bx + 8; x++) {
-            for(int y = by - 8; y <= by + 8; y++) {
-                for(int z = bz - 8; z <= bz + 8; z++) {
-                    double distance = ((bx-x) * (bx-x) + ((bz-z) * (bz-z)) + ((by-y) * (by-y)));
-                    if(distance < 81) {
+        for (int x = bx - 8; x <= bx + 8; x++) {
+            for (int y = by - 8; y <= by + 8; y++) {
+                for (int z = bz - 8; z <= bz + 8; z++) {
+                    double distance = ((bx - x) * (bx - x) + ((bz - z) * (bz - z)) + ((by - y) * (by - y)));
+                    if (distance < 81) {
                         BlockPos l = new BlockPos(x, y, z);
                         if (world.getBlockState(l).isIn(Main.BLOCK_LISTENERS)) {
                             this.extraPipeData = new ExtraPipeData(l);

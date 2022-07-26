@@ -34,9 +34,11 @@ import java.util.Map;
 
 public class Main implements ModInitializer {
 
-	public static final Identifier PIPE_INK_PACKET = new Identifier("lunade","seed_particle_packet");
+	public static final int CURRENT_FIX_VERSION = 2;
 
 	public static final Identifier INSPECT_PIPE = new Identifier("lunade", "inspect_copper_pipe");
+	public static final Identifier WATER = new Identifier("lunade", "water");
+	public static final Identifier SMOKE = new Identifier("lunade", "smoke");
 
 	//COPPER PIPE
 	public static final Identifier COPPER_PIPE = new Identifier("lunade", "copper_pipe");
@@ -412,6 +414,8 @@ public class Main implements ModInitializer {
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_HIT.getId(), CORRODED_COPPER_HIT);
 
 		RegisterPipeNbtMethods.init();
+		PoweredPipeDispenses.init();
+		FittingPipeDispenses.init();
 	}
 
 	public static List<Direction> shuffledDirections(Random random) {

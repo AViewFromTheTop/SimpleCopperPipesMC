@@ -1,13 +1,13 @@
 package net.lunade.copper.block_entity;
 
 import net.lunade.copper.Main;
+import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
 
 public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
@@ -27,6 +27,12 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
             return moveDirection == fromState.get(Properties.FACING);
         }
         return false;
+    }
+
+    public void updateBlockEntityValues(World world, BlockPos pos, BlockState state) {
+        if (state.getBlock() instanceof CopperFitting) {
+            this.canWater = state.get(Properties.WATERLOGGED);
+        }
     }
 
 }

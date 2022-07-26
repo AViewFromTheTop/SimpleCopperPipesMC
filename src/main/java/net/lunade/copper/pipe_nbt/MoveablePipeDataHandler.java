@@ -6,9 +6,9 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.lunade.copper.RegisterPipeNbtMethods;
+import net.lunade.copper.block_entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -312,21 +312,31 @@ public class MoveablePipeDataHandler {
             }
         }
 
-        public void onMove(ServerWorld world, BlockPos pos, BlockState state, BlockEntity blockEntity) {
+        public void onMove(ServerWorld world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) {
             RegisterPipeNbtMethods.OnMoveMethod<?> method = RegisterPipeNbtMethods.getMove(this.getNbtID());
             if (method!=null) {
                 method.onMove(this, world, pos, state, blockEntity);
             } else {
-                LOGGER.error("Unable to find oMove method for Moveable Pipe Nbt " + this.getNbtID() + "!");
+                LOGGER.error("Unable to find onMove method for Moveable Pipe Nbt " + this.getNbtID() + "!");
             }
         }
 
-        public void tick(ServerWorld world, BlockPos pos, BlockState state, BlockEntity blockEntity) { //Will be called at the CURRENT location, not the Pipe/Fitting it moves to on that tick - it can run this method and be dispensed on the same tick.
+        public void tick(ServerWorld world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) { //Will be called at the CURRENT location, not the Pipe/Fitting it moves to on that tick - it can run this method and be dispensed on the same tick.
             RegisterPipeNbtMethods.TickMethod<?> method = RegisterPipeNbtMethods.getTick(this.getNbtID());
             if (method!=null) {
                 method.tick(this, world, pos, state, blockEntity);
             } else {
                 LOGGER.error("Unable to find tick method for Moveable Pipe Nbt " + this.getNbtID() + "!");
+            }
+        }
+
+        public boolean canMove(ServerWorld world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) {
+            RegisterPipeNbtMethods.CanMoveMethod<?> method = RegisterPipeNbtMethods.getCanMove(this.getNbtID());
+            if (method!=null) {
+                return method.canMove(this, world, pos, state, blockEntity);
+            } else {
+                LOGGER.error("Unable to find canMove method Pipe Nbt " + this.getNbtID() + "!");
+                return true;
             }
         }
 

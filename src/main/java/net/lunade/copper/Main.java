@@ -416,6 +416,7 @@ public class Main implements ModInitializer {
 		RegisterPipeNbtMethods.init();
 		PoweredPipeDispenses.init();
 		FittingPipeDispenses.init();
+		PipeMovementRestrictions.init();
 	}
 
 	public static List<Direction> shuffledDirections(Random random) {

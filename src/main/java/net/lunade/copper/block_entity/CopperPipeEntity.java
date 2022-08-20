@@ -2,6 +2,7 @@ package net.lunade.copper.block_entity;
 
 import net.lunade.copper.FittingPipeDispenses;
 import net.lunade.copper.Main;
+import net.lunade.copper.PipeMovementRestrictions;
 import net.lunade.copper.PoweredPipeDispenses;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
@@ -121,11 +122,22 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         }
     }
 
-    public static boolean canTransfer(World world, BlockPos pos, boolean out) {
+    public static boolean canTransfer(World world, BlockPos pos, boolean out, CopperPipeEntity copperPipe) {
         BlockEntity entity = world.getBlockEntity(pos);
         if (entity != null) {
             if (entity instanceof CopperPipeEntity pipe) { return pipe.transferCooldown <= 0; }
             if (entity instanceof CopperFittingEntity) { return out || !world.getBlockState(pos).get(Properties.POWERED); }
+            if (out) {
+                PipeMovementRestrictions.CanTransferTo canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
+                if (canTransfer != null) {
+                    return canTransfer.canTransfer((ServerWorld)world, pos, world.getBlockState(pos), copperPipe, entity);
+                }
+            } else {
+                PipeMovementRestrictions.CanTakeFrom canTake = PipeMovementRestrictions.getCanTakeFrom(entity);
+                if (canTake != null) {
+                    return canTake.canTake((ServerWorld)world, pos, world.getBlockState(pos), copperPipe, entity);
+                }
+            }
         } return true;
     }
 
@@ -133,7 +145,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         BlockPos offsetOppPos = blockPos.offset(facing.getOpposite());
         Inventory inventory2 = getInventoryAt(world, offsetOppPos);
         if (inventory2 != null) {
-            if (!isInventoryFull(this, facing) && canTransfer(world, offsetOppPos, false)) {
+            if (!isInventoryFull(this, facing) && canTransfer(world, offsetOppPos, false, this)) {
                 for (int i = 0; i < inventory2.size(); ++i) {
                     if (!inventory2.getStack(i).isEmpty()) {
                         this.setCooldown(blockState);
@@ -160,7 +172,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     private boolean moveOut(World world, BlockPos blockPos, Direction facing) {
         BlockPos offsetPos = blockPos.offset(facing);
         Inventory inventory2 = getInventoryAt(world, offsetPos);
-        if (inventory2 != null && canTransfer(world, offsetPos, true)) {
+        if (inventory2 != null && canTransfer(world, offsetPos, true, this)) {
             Direction opp = facing.getOpposite();
             boolean canMove = true;
             BlockState state = world.getBlockState(offsetPos);

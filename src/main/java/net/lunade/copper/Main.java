@@ -416,6 +416,9 @@ public class Main implements ModInitializer {
 		Registry.register(Registry.GAME_EVENT, new Identifier("lunade", "note_block_play"), NOTE_BLOCK_PLAY);
 
 		RegisterPipeNbtMethods.init();
+		PoweredPipeDispenses.init();
+		FittingPipeDispenses.init();
+		PipeMovementRestrictions.init();
 	}
 
 	public static List<Direction> shuffledDirections(Random random) {

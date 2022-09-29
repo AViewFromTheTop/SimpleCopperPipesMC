@@ -5,6 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
+import net.fabricmc.loader.api.FabricLoader;
 import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
@@ -419,6 +420,18 @@ public class Main implements ModInitializer {
 		PoweredPipeDispenses.init();
 		FittingPipeDispenses.init();
 		PipeMovementRestrictions.init();
+
+		FabricLoader.getInstance().getEntrypointContainers("simplecopperpipes", CopperPipeEntrypoint.class).forEach(entrypoint -> {
+			try {
+				CopperPipeEntrypoint mainPoint = entrypoint.getEntrypoint();
+				mainPoint.init();
+				if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+					mainPoint.initDevOnly();
+				}
+			} catch (Throwable ignored) {
+
+			}
+		});
 	}
 
 	public static List<Direction> shuffledDirections(Random random) {

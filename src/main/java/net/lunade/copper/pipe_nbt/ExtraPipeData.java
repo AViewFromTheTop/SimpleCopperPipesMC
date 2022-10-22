@@ -4,9 +4,9 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -29,7 +29,7 @@ public class ExtraPipeData {
         return this.listenerPos;
     }
 
-    public static ExtraPipeData readNbt(NbtCompound nbt) {
+    public static ExtraPipeData readNbt(CompoundTag nbt) {
         Optional<ExtraPipeData> extraPipeData = Optional.empty();
         if (nbt.contains("savedExtraPipeData", 10)) {
             extraPipeData = ExtraPipeData.CODEC
@@ -39,7 +39,7 @@ public class ExtraPipeData {
         return extraPipeData.orElse(null);
     }
 
-    public static void writeNbt(NbtCompound nbt, @Nullable ExtraPipeData extraPipeData) {
+    public static void writeNbt(CompoundTag nbt, @Nullable ExtraPipeData extraPipeData) {
         if (extraPipeData != null) {
             ExtraPipeData.CODEC
                     .encodeStart(NbtOps.INSTANCE, extraPipeData)

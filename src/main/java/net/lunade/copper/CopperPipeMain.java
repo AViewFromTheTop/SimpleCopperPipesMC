@@ -257,7 +257,6 @@ public class CopperPipeMain implements ModInitializer {
 				entries.accept(item);
 			}
 		});
-		COPPER_PIPE_ITEMS.clear();
 	}
 
 	public static List<Direction> shuffledDirections(RandomSource random) {

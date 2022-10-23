@@ -420,8 +420,4 @@ public class MoveablePipeDataHandler {
         }
     }
 
-    public enum MOVE_TYPE {
-        FROM_PIPE,
-        FROM_FITTING;
-    }
 }

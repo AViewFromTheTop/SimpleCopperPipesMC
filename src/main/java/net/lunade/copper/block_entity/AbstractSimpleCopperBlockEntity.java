@@ -43,9 +43,9 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     public int lastFixVersion;
 
     public MoveablePipeDataHandler moveablePipeDataHandler;
-    public final MoveablePipeDataHandler.MOVE_TYPE moveType;
+    public final MOVE_TYPE moveType;
 
-    public AbstractSimpleCopperBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState, MoveablePipeDataHandler.MOVE_TYPE moveType) {
+    public AbstractSimpleCopperBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState, MOVE_TYPE moveType) {
         super(blockEntityType, blockPos, blockState);
         this.inventory = NonNullList.withSize(5, ItemStack.EMPTY);
         this.waterCooldown = -1;
@@ -134,7 +134,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 
     }
 
-    public boolean canAcceptMoveableNbt(MoveablePipeDataHandler.MOVE_TYPE moveType, Direction moveDirection, BlockState fromState) {
+    public boolean canAcceptMoveableNbt(MOVE_TYPE moveType, Direction moveDirection, BlockState fromState) {
         return true;
     }
 
@@ -241,6 +241,11 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     @Override
     public int getContainerSize() {
         return this.inventory.size();
+    }
+
+    public enum MOVE_TYPE {
+        FROM_PIPE,
+        FROM_FITTING;
     }
 
 }

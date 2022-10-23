@@ -70,7 +70,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public ExtraPipeData extraPipeData;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
-        super(CopperPipeMain.COPPER_PIPE_ENTITY, blockPos, blockState, MoveablePipeDataHandler.MOVE_TYPE.FROM_PIPE);
+        super(CopperPipeMain.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
         this.noteBlockCooldown = 0;
         this.listener = new CopperPipeListener(new BlockPositionSource(this.worldPosition), 8, this);
         this.extraPipeData = null;
@@ -531,8 +531,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.setChanged();
     }
 
-    public boolean canAcceptMoveableNbt(MoveablePipeDataHandler.MOVE_TYPE moveType, Direction moveDirection, BlockState fromState) {
-        if (moveType == MoveablePipeDataHandler.MOVE_TYPE.FROM_FITTING) {
+    public boolean canAcceptMoveableNbt(MOVE_TYPE moveType, Direction moveDirection, BlockState fromState) {
+        if (moveType == MOVE_TYPE.FROM_FITTING) {
             return this.getBlockState().getValue(BlockStateProperties.FACING) == moveDirection;
         }
         return this.getBlockState().getValue(BlockStateProperties.FACING) == moveDirection || moveDirection == fromState.getValue(BlockStateProperties.FACING);

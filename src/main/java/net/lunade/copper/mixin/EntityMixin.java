@@ -12,19 +12,24 @@ public class EntityMixin {
 
     @Inject(at = @At("TAIL"), method = "isInWaterRainOrBubble", cancellable = true)
     public void isInWaterRainOrBubble(CallbackInfoReturnable<Boolean> info) {
+        /*
         Entity entity = Entity.class.cast(this);
         if (CopperPipe.isWaterPipeNearby(entity.level, entity.blockPosition(), 2)) {
             info.setReturnValue(true);
             info.cancel();
         }
+        
+         */
     }
 
     @Inject(at = @At("TAIL"), method = "isInWaterOrBubble", cancellable = true)
     public void isInWaterOrBubble(CallbackInfoReturnable<Boolean> info) {
+        /*
         Entity entity = Entity.class.cast(this);
         if (CopperPipe.isWaterPipeNearby(entity.level, entity.blockPosition(), 2)) {
             info.setReturnValue(true);
             info.cancel();
         }
+         */
     }
 }

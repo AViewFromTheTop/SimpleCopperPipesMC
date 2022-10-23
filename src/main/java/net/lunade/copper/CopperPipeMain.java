@@ -368,7 +368,7 @@ public class CopperPipeMain implements ModInitializer {
 	}
 
 	public static ResourceLocation colourFitting(String colour) {
-		return id(colour + "_copper_fitting");
+		return id(colour + "_fitting");
 	}
 
 	public static ResourceLocation glowingFitting(String colour) {

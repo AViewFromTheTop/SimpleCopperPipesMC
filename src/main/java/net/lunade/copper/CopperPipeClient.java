@@ -15,8 +15,6 @@ import net.minecraft.resources.ResourceLocation;
 
 public class CopperPipeClient implements ClientModInitializer {
 
-    public static final ResourceLocation NOTE_PACKET = new ResourceLocation("lunade","note_packet");
-
     @Override
     public void onInitializeClient() {
         //CrowdinTranslate.downloadTranslations("simple-copper-pipes", "lunade");
@@ -56,7 +54,7 @@ public class CopperPipeClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(CopperFitting.WAXED_WEATHERED_FITTING, RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(CopperFitting.WAXED_OXIDIZED_FITTING, RenderType.cutout());
 
-        ClientPlayNetworking.registerGlobalReceiver(NOTE_PACKET, (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(CopperPipeMain.NOTE_PACKET, (client, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();
             int k = buf.readInt();
             int i = buf.readInt();

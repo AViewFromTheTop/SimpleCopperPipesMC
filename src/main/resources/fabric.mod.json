@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "copper_pipe",
+  "id": "copper_pipes",
   "version": "1.11-simpler",
 
   "name": "Simpler Copper Pipes",
@@ -16,7 +16,7 @@
   },
 
   "license": "MIT",
-  "icon": "assets/lunade/copper_icon.png",
+  "icon": "assets/copper_pipes/copper_icon.png",
 
   "environment": "*",
   "entrypoints": {
@@ -28,10 +28,10 @@
     ]
   },
   "mixins": [
-    "copper_pipe.mixins.json"
+    "copper_pipes.mixins.json"
   ],
 
-  "accessWidener": "copper_pipe.accesswidener",
+  "accessWidener": "copper_pipes.accesswidener",
 
   "depends": {
     "fabricloader": ">=0.14.6",

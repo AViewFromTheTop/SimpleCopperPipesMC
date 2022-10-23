@@ -6,8 +6,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.ClipBlockStateContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gameevent.vibrations.VibrationInfo;
-import net.minecraft.world.level.gameevent.vibrations.VibrationSelector;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,57 +21,67 @@ import net.minecraft.world.phys.Vec3;
 
 public class CopperPipeListener extends VibrationListener {
 
-    public static Codec<CopperPipeListener> createPipeCodec(VibrationListenerConfig vibrationListenerConfig) {
-        return RecordCodecBuilder.create(
-                instance -> instance.group(
-                                PositionSource.CODEC.fieldOf("source").forGetter(vibrationListener -> vibrationListener.listenerSource),
-                                ExtraCodecs.NON_NEGATIVE_INT.fieldOf("range").forGetter(vibrationListener -> vibrationListener.listenerRange),
-                                VibrationInfo.CODEC.optionalFieldOf("event").forGetter(vibrationListener -> Optional.ofNullable(vibrationListener.currentVibration)),
-                                VibrationSelector.CODEC.fieldOf("selector").forGetter(vibrationListener -> vibrationListener.selectionStrategy),
-                                ExtraCodecs.NON_NEGATIVE_INT.fieldOf("event_delay").orElse(0).forGetter(vibrationListener -> vibrationListener.travelTimeInTicks)
-                        )
-                        .apply(
-                                instance,
-                                (positionSource, integer, optional, vibrationSelector, integer2) -> new CopperPipeListener(
-                                        positionSource, integer, vibrationListenerConfig, optional.orElse(null), vibrationSelector, integer2
-                                )
-                        )
-        );
+    public static Codec<CopperPipeListener> createPipeCodec(CopperPipeListener.VibrationListenerConfig callback) {
+        return RecordCodecBuilder.create((instance) -> {
+            return instance.group(PositionSource.CODEC.fieldOf("source").forGetter((vibrationListener) -> {
+                return vibrationListener.listenerSource;
+            }), ExtraCodecs.NON_NEGATIVE_INT.fieldOf("range").forGetter((vibrationListener) -> {
+                return vibrationListener.listenerRange;
+            }), VibrationListener.ReceivingEvent.CODEC.optionalFieldOf("event").forGetter((vibrationListener) -> {
+                return Optional.ofNullable(vibrationListener.receivingEvent);
+            }), Codec.floatRange(0.0F, 3.4028235E38F).fieldOf("event_distance").orElse(0.0F).forGetter((vibrationListener) -> {
+                return vibrationListener.receivingDistance;
+            }), ExtraCodecs.NON_NEGATIVE_INT.fieldOf("event_delay").orElse(0).forGetter((vibrationListener) -> {
+                return vibrationListener.travelTimeInTicks;
+            })).apply(instance, (positionSource, integer, optional, float_, integer2) -> {
+                return new CopperPipeListener(positionSource, integer, callback, optional.orElse(null), float_, integer2);
+            });
+        });
     }
 
-    public CopperPipeListener(
-            PositionSource positionSource,
-            int listenerRange,
-            VibrationListenerConfig vibrationListenerConfig,
-            @Nullable VibrationInfo vibrationInfo,
-            VibrationSelector vibrationSelector,
-            int j
-    ) {
-        super(positionSource, listenerRange, vibrationListenerConfig, vibrationInfo, vibrationSelector, j);
-    }
-
-    public CopperPipeListener(PositionSource positionSource, int i, VibrationListenerConfig callback) {
-        super(positionSource, i, callback);
+    public CopperPipeListener(PositionSource positionSource, int i, VibrationListenerConfig callback, @Nullable VibrationListener.ReceivingEvent vibration, float f, int j) {
+        super(positionSource, i, callback, vibration, f, j);
     }
 
     @Override
-    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
-        if (this.currentVibration != null) {
-            return false;
-        } else if (!this.config.isValidVibration(gameEvent, context)) {
+    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent.Message message) {
+        if (this.receivingEvent != null) {
             return false;
         } else {
-            Optional<Vec3> optional = this.listenerSource.getPosition(serverLevel);
-            if (optional.isEmpty()) {
+            GameEvent gameEvent = message.gameEvent();
+            GameEvent.Context context = message.context();
+            if (!this.config.isValidVibration(gameEvent, context)) {
                 return false;
             } else {
-                Vec3 vec32 = optional.get();
-                //this.scheduleVibration(serverLevel, gameEvent, context, vec3, vec32);
-                if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
+                Optional<Vec3> optional = this.listenerSource.getPosition(serverLevel);
+                if (optional.isEmpty()) {
                     return false;
-                } else return !isOccluded(serverLevel, vec3, vec32);
+                } else {
+                    Vec3 vec3 = message.source();
+                    Vec3 vec32 = (Vec3)optional.get();
+                    if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
+                        return false;
+                    } else if (isOccluded(serverLevel, vec3, vec32)) {
+                        return false;
+                    } else {
+                        this.scheduleSignal(serverLevel, gameEvent, context, vec3, vec32);
+                        return true;
+                    }
+                }
             }
         }
+    }
+
+    private void scheduleSignal(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, Vec3 vec32) {
+        this.receivingDistance = (float)vec3.distanceTo(vec32);
+        this.receivingEvent = new VibrationListener.ReceivingEvent(gameEvent, this.receivingDistance, vec3, context.sourceEntity());
+        if (gameEvent!=GameEvent.NOTE_BLOCK_PLAY) {
+        this.travelTimeInTicks = Mth.floor(this.receivingDistance);
+        } else {
+            this.travelTimeInTicks = 0;
+        }
+        //serverLevel.sendParticles(new VibrationParticleOption(this.listenerSource, this.travelTimeInTicks), vec3.x, vec3.y, vec3.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        this.config.onSignalSchedule();
     }
 
     private static boolean isOccluded(Level level, Vec3 vec3, Vec3 vec32) {

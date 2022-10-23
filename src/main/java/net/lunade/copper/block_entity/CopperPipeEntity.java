@@ -72,7 +72,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
         super(CopperPipeMain.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
         this.noteBlockCooldown = 0;
-        this.listener = new CopperPipeListener(new BlockPositionSource(this.worldPosition), 8, this);
+        this.listener = new CopperPipeListener(new BlockPositionSource(this.worldPosition), 8, this, null, 0, 0);
         this.extraPipeData = null;
     }
 

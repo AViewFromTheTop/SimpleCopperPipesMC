@@ -3,11 +3,11 @@ package net.lunade.copper.block_entity;
 import net.lunade.copper.Main;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
@@ -16,7 +16,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
     }
 
     @Override
-    public void serverTick(World world, BlockPos blockPos, BlockState blockState) {
+    public void serverTick(Level world, BlockPos blockPos, BlockState blockState) {
         super.serverTick(world, blockPos, blockState);
     }
 
@@ -24,14 +24,14 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
         if (moveType == MoveablePipeDataHandler.MOVE_TYPE.FROM_FITTING) {
             return false;
         } else if (moveType == MoveablePipeDataHandler.MOVE_TYPE.FROM_PIPE) {
-            return moveDirection == fromState.get(Properties.FACING);
+            return moveDirection == fromState.getValue(BlockStateProperties.FACING);
         }
         return false;
     }
 
-    public void updateBlockEntityValues(World world, BlockPos pos, BlockState state) {
+    public void updateBlockEntityValues(Level world, BlockPos pos, BlockState state) {
         if (state.getBlock() instanceof CopperFitting) {
-            this.canWater = state.get(Properties.WATERLOGGED);
+            this.canWater = state.getValue(BlockStateProperties.WATERLOGGED);
         }
     }
 

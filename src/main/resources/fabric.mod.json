@@ -26,8 +26,10 @@
     ]
   },
   "mixins": [
-    "copper.mixins.json"
+    "copper_pipe.mixins.json"
   ],
+
+  "accessWidener": "copper_pipe.accesswidener",
 
   "depends": {
     "fabricloader": ">=0.14.6",

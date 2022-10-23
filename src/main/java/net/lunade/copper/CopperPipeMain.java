@@ -34,7 +34,7 @@ public class CopperPipeMain implements ModInitializer {
 
 	public static final int CURRENT_FIX_VERSION = 2;
 
-	public static final String MOD_ID = "copper_pipe";
+	public static final String MOD_ID = "copper_pipes";
 	public static final String BLOCK_ID = "copper_pipes";
 
 	public static final ResourceLocation INSPECT_PIPE = id("inspect_copper_pipe");

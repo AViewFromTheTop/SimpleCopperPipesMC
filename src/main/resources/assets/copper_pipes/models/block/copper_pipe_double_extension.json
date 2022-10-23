@@ -1,7 +1,7 @@
 {
-	"parent": "lunade:block/template_pipe_double_extension",
+	"parent": "copper_pipes:block/template_pipe_double_extension",
 	"textures": {
-		"particle": "lunade:block/copper_pipe",
-		"side": "lunade:block/copper_pipe"
+		"particle": "copper_pipes:block/copper_pipe",
+		"side": "copper_pipes:block/copper_pipe"
 	}
 }

@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "lunade:block/weathered_copper_fitting"
+      "model": "copper_pipes:block/weathered_copper_fitting"
     }
   }
 }

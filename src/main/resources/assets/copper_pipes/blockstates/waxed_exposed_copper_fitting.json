@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "lunade:block/exposed_copper_fitting"
+      "model": "copper_pipes:block/exposed_copper_fitting"
     }
   }
 }

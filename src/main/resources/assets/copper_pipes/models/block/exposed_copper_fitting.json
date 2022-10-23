@@ -1,7 +1,7 @@
 {
-	"parent": "lunade:block/template_fitting",
+	"parent": "copper_pipes:block/template_fitting",
 	"textures": {
-		"particle": "lunade:block/exposed_copper_fitting",
-		"texture": "lunade:block/exposed_copper_fitting"
+		"particle": "copper_pipes:block/exposed_copper_fitting",
+		"texture": "copper_pipes:block/exposed_copper_fitting"
 	}
 }

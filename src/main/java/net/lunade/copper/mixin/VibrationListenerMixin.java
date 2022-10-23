@@ -27,9 +27,10 @@ public class VibrationListenerMixin {
             if (state.getBlock() instanceof CopperPipe) {
                 BlockEntity blockEntity = serverLevel.getBlockEntity(checkPos);
                 if (blockEntity instanceof CopperPipeEntity pipeEntity) {
-                    if (pipeEntity.inputGameEventPos != null && pipeEntity.noteBlockCooldown <= 0) {
+                    if (pipeEntity.inputGameEventPos != null && pipeEntity.gameEventNbtVec3 != null && pipeEntity.noteBlockCooldown <= 0) {
                         serverLevel.sendParticles(new VibrationParticleOption(new BlockPositionSource(checkPos), 5), pipeEntity.gameEventNbtVec3.x(), pipeEntity.gameEventNbtVec3.y(), pipeEntity.gameEventNbtVec3.z(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
                         pipeEntity.inputGameEventPos = null;
+                        pipeEntity.gameEventNbtVec3 = null;
                     }
                 }
             }

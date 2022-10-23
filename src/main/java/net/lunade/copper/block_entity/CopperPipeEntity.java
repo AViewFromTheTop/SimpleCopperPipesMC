@@ -85,7 +85,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     }
 
     public void serverTick(Level world, BlockPos blockPos, BlockState blockState) {
-        this.inputGameEventPos = null;
         this.listener.tick(world);
         super.serverTick(world, blockPos, blockState);
         if (!world.isClientSide) {

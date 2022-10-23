@@ -1,1 +1,3 @@
 accessWidener    v2    named
+accessible    method    net/minecraft/world/level/gameevent/vibrations/VibrationListener    <init>    (Lnet/minecraft/world/level/gameevent/PositionSource;ILnet/minecraft/world/level/gameevent/vibrations/VibrationListener$VibrationListenerConfig;Lnet/minecraft/world/level/gameevent/vibrations/VibrationInfo;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSelector;I)V
+accessible    field    net/minecraft/world/level/gameevent/vibrations/VibrationListener    selectionStrategy    Lnet/minecraft/world/level/gameevent/vibrations/VibrationSelector;

@@ -104,7 +104,7 @@ dependencies {
 	})
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	modImplementation "de.guntram.mcmod:crowdin-translate:1.4+1.19"
+	//modImplementation "de.guntram.mcmod:crowdin-translate:1.4+1.19"
 	//include "de.guntram.mcmod:crowdin-translate:1.4+1.19"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"

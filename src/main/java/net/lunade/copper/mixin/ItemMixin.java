@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.Main;
+import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.Copyable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -34,7 +34,7 @@ public class ItemMixin {
         boolean canGlow = false;
         if (itemStack.is(Items.GLOW_INK_SAC) && blockState != null) {
             Block block = blockState.getBlock();
-            if (Main.GLOW_STAGE.containsKey(block)) {
+            if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {
                 world.playSound(playerEntity, blockPos, SoundEvents.GLOW_INK_SAC_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
                 world.levelEvent(playerEntity, 3005, blockPos, 0);
                 canGlow = true;
@@ -44,8 +44,8 @@ public class ItemMixin {
             if (playerEntity instanceof ServerPlayer) { CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)playerEntity, blockPos, itemStack); }
 
             Block block = blockState.getBlock();
-            if (Main.GLOW_STAGE.containsKey(block)) {
-                Block glowStage = Main.GLOW_STAGE.get(block);
+            if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {
+                Block glowStage = CopperPipeMain.GLOW_STAGE.get(block);
                 if (block instanceof Copyable copyable) {
                     copyable.makeCopyOf(blockState, world, blockPos, glowStage);
                 }

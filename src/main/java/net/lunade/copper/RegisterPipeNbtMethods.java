@@ -138,7 +138,7 @@ public class RegisterPipeNbtMethods {
                     buf.writeInt(k);
                     buf.writeInt(getDirection(world.getBlockState(pos).getValue(FACING)));
                     for (ServerPlayer player : PlayerLookup.tracking(world, pos)) {
-                        ServerPlayNetworking.send(player, Main.NOTE_PACKET, buf);
+                        ServerPlayNetworking.send(player, CopperPipeMain.NOTE_PACKET, buf);
                     }
                 }
             }
@@ -158,7 +158,7 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> true);
 
 
-        register(Main.WATER, (nbt, world, pos, blockState, pipe) -> {
+        register(CopperPipeMain.WATER, (nbt, world, pos, blockState, pipe) -> {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {
             if (blockEntity instanceof CopperFittingEntity) {
@@ -173,7 +173,7 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {
-            MoveablePipeDataHandler.SaveableMovablePipeNbt movablePipeNbt = blockEntity.moveablePipeDataHandler.getMoveablePipeNbt(Main.WATER);
+            MoveablePipeDataHandler.SaveableMovablePipeNbt movablePipeNbt = blockEntity.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.WATER);
             if (movablePipeNbt != null) {
                 return movablePipeNbt.getVec3d() == null || movablePipeNbt.getVec3d().x() <= nbt.getVec3d().x() - 1;
             }
@@ -181,7 +181,7 @@ public class RegisterPipeNbtMethods {
         });
 
 
-        register(Main.SMOKE, (nbt, world, pos, blockState, pipe) -> {
+        register(CopperPipeMain.SMOKE, (nbt, world, pos, blockState, pipe) -> {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {
             if (blockEntity instanceof CopperFittingEntity) {
@@ -196,7 +196,7 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {
-            MoveablePipeDataHandler.SaveableMovablePipeNbt movablePipeNbt = blockEntity.moveablePipeDataHandler.getMoveablePipeNbt(Main.SMOKE);
+            MoveablePipeDataHandler.SaveableMovablePipeNbt movablePipeNbt = blockEntity.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.SMOKE);
             if (movablePipeNbt != null) {
                 return movablePipeNbt.getVec3d() == null || movablePipeNbt.getVec3d().x() <= nbt.getVec3d().x() - 1;
             }

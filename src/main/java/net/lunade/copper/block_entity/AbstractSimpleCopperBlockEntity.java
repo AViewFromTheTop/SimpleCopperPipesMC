@@ -1,7 +1,7 @@
 package net.lunade.copper.block_entity;
 
 import com.mojang.logging.LogUtils;
-import net.lunade.copper.Main;
+import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.blocks.Copyable;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
@@ -57,20 +57,20 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     public void serverTick(Level world, BlockPos blockPos, BlockState blockState) {
         BlockState state = blockState;
         if (!world.isClientSide) {
-            if (this.lastFixVersion < Main.CURRENT_FIX_VERSION) {
+            if (this.lastFixVersion < CopperPipeMain.CURRENT_FIX_VERSION) {
                 this.updateBlockEntityValues(world, blockPos, blockState);
-                this.lastFixVersion = Main.CURRENT_FIX_VERSION;
+                this.lastFixVersion = CopperPipeMain.CURRENT_FIX_VERSION;
             }
             if (this.canWater) {
-                this.moveablePipeDataHandler.setMoveablePipeNbt(Main.WATER, new MoveablePipeDataHandler.SaveableMovablePipeNbt()
-                        .withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withNBTID(Main.WATER));
+                this.moveablePipeDataHandler.setMoveablePipeNbt(CopperPipeMain.WATER, new MoveablePipeDataHandler.SaveableMovablePipeNbt()
+                        .withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withNBTID(CopperPipeMain.WATER));
             }
             if (this.canSmoke) {
-                this.moveablePipeDataHandler.setMoveablePipeNbt(Main.SMOKE, new MoveablePipeDataHandler.SaveableMovablePipeNbt()
-                        .withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withNBTID(Main.SMOKE));
+                this.moveablePipeDataHandler.setMoveablePipeNbt(CopperPipeMain.SMOKE, new MoveablePipeDataHandler.SaveableMovablePipeNbt()
+                        .withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withNBTID(CopperPipeMain.SMOKE));
             }
-            MoveablePipeDataHandler.SaveableMovablePipeNbt waterNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(Main.WATER);
-            MoveablePipeDataHandler.SaveableMovablePipeNbt smokeNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(Main.SMOKE);
+            MoveablePipeDataHandler.SaveableMovablePipeNbt waterNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.WATER);
+            MoveablePipeDataHandler.SaveableMovablePipeNbt smokeNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.SMOKE);
             if (state.hasProperty(CopperPipeProperties.HAS_WATER)) {
                 state = state.setValue(CopperPipeProperties.HAS_WATER, this.canWater || waterNbt != null);
             }
@@ -90,8 +90,8 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
                 this.electricityCooldown = 80;
                 Block stateGetBlock = state.getBlock();
                 if (stateGetBlock instanceof Copyable copyable) {
-                    if (Main.PREVIOUS_STAGE.containsKey(stateGetBlock) && !state.is(Main.WAXED)) {
-                        state = copyable.makeCopyOf(state, Main.PREVIOUS_STAGE.get(stateGetBlock));
+                    if (CopperPipeMain.PREVIOUS_STAGE.containsKey(stateGetBlock) && !state.is(CopperPipeMain.WAXED)) {
+                        state = copyable.makeCopyOf(state, CopperPipeMain.PREVIOUS_STAGE.get(stateGetBlock));
                     }
                 }
             }
@@ -156,7 +156,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = moveablePipeDataHandler.getSavedNbtList();
         ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> usedNbts = new ArrayList<>();
         if (!nbtList.isEmpty()) {
-            List<Direction> dirs = Main.shuffledDirections(world.getRandom());
+            List<Direction> dirs = CopperPipeMain.shuffledDirections(world.getRandom());
             for (Direction direction : dirs) {
                 if (this.canMoveNbtInDirection(direction, blockState)) {
                     BlockPos newPos = blockPos.relative(direction);

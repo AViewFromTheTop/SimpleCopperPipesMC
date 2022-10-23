@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.Main;
+import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.Copyable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -33,8 +33,8 @@ public class AxeItemMixin {
         boolean canRun = false;
         if (blockState!=null) {
             Block block = blockState.getBlock();
-            if (Main.PREVIOUS_STAGE.containsKey(block) && !blockState.is(Main.UNSCRAPEABLE)) {
-                if (!blockState.is(Main.WAXED)) {
+            if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block) && !blockState.is(CopperPipeMain.UNSCRAPEABLE)) {
+                if (!blockState.is(CopperPipeMain.WAXED)) {
                     world.playSound(playerEntity, blockPos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0F, 1.0F);
                     world.levelEvent(playerEntity, 3005, blockPos, 0);
                 } else {
@@ -50,8 +50,8 @@ public class AxeItemMixin {
             }
 
             Block block = blockState.getBlock();
-            if (Main.PREVIOUS_STAGE.containsKey(block)) {
-                Block previousStage = Main.PREVIOUS_STAGE.get(block);
+            if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block)) {
+                Block previousStage = CopperPipeMain.PREVIOUS_STAGE.get(block);
                 if (block instanceof Copyable copyable) {
                     copyable.makeCopyOf(blockState, world, blockPos, previousStage);
                 }

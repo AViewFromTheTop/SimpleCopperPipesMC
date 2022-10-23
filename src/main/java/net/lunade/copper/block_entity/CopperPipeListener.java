@@ -2,8 +2,13 @@ package net.lunade.copper.block_entity;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.ClipBlockStateContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.vibrations.VibrationInfo;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSelector;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -62,15 +67,33 @@ public class CopperPipeListener extends VibrationListener {
             if (optional.isEmpty()) {
                 return false;
             } else {
-                Vec3 vec3d2 = optional.get();
+                Vec3 vec32 = optional.get();
                 if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
                     return false;
+                } else if (isOccluded(serverLevel, vec3, vec32)) {
+                    return false;
                 } else {
-                    this.scheduleVibration(serverLevel, gameEvent, context, vec3, vec3d2);
+                    this.scheduleVibration(serverLevel, gameEvent, context, vec3, vec32);
                     return true;
                 }
             }
         }
     }
+
+    private static boolean isOccluded(Level level, Vec3 vec3, Vec3 vec32) {
+        Vec3 vec33 = new Vec3((double)Mth.floor(vec3.x) + 0.5D, (double)Mth.floor(vec3.y) + 0.5D, (double)Mth.floor(vec3.z) + 0.5D);
+        Vec3 vec34 = new Vec3((double)Mth.floor(vec32.x) + 0.5D, (double)Mth.floor(vec32.y) + 0.5D, (double)Mth.floor(vec32.z) + 0.5D);
+        Direction[] var5 = Direction.values();
+
+        for (Direction direction : var5) {
+            Vec3 vec35 = vec33.relative(direction, 9.999999747378752E-6D);
+            if (level.isBlockInLine(new ClipBlockStateContext(vec35, vec34, (blockState) -> blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))).getType() != HitResult.Type.BLOCK) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }
 

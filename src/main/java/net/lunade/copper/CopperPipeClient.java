@@ -13,28 +13,28 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 
-public class MainClient implements ClientModInitializer {
+public class CopperPipeClient implements ClientModInitializer {
 
     public static final ResourceLocation NOTE_PACKET = new ResourceLocation("lunade","note_packet");
 
     @Override
     public void onInitializeClient() {
         //CrowdinTranslate.downloadTranslations("simple-copper-pipes", "lunade");
-        ParticleFactoryRegistry.getInstance().register(Main.RED_INK, PipeInkParticle.RedFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.GREEN_INK, PipeInkParticle.GreenFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.BROWN_INK, PipeInkParticle.BrownFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.BLUE_INK, PipeInkParticle.BlueFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.PURPLE_INK, PipeInkParticle.PurpleFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.CYAN_INK, PipeInkParticle.CyanFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.LIGHT_GRAY_INK, PipeInkParticle.LightGrayFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.GRAY_INK, PipeInkParticle.GrayFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.PINK_INK, PipeInkParticle.PinkFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.LIME_INK, PipeInkParticle.LimeFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.YELLOW_INK, PipeInkParticle.YellowFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.LIGHT_BLUE_INK, PipeInkParticle.LightBlueFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.MAGENTA_INK, PipeInkParticle.MagentaFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.ORANGE_INK, PipeInkParticle.OrangeFactory::new);
-        ParticleFactoryRegistry.getInstance().register(Main.WHITE_INK, PipeInkParticle.WhiteFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.RED_INK, PipeInkParticle.RedFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.GREEN_INK, PipeInkParticle.GreenFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.BROWN_INK, PipeInkParticle.BrownFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.BLUE_INK, PipeInkParticle.BlueFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.PURPLE_INK, PipeInkParticle.PurpleFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.CYAN_INK, PipeInkParticle.CyanFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.LIGHT_GRAY_INK, PipeInkParticle.LightGrayFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.GRAY_INK, PipeInkParticle.GrayFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.PINK_INK, PipeInkParticle.PinkFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.LIME_INK, PipeInkParticle.LimeFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.YELLOW_INK, PipeInkParticle.YellowFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.LIGHT_BLUE_INK, PipeInkParticle.LightBlueFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.MAGENTA_INK, PipeInkParticle.MagentaFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.ORANGE_INK, PipeInkParticle.OrangeFactory::new);
+        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.WHITE_INK, PipeInkParticle.WhiteFactory::new);
 
         BlockRenderLayerMap.INSTANCE.putBlock(CopperPipe.COPPER_PIPE, RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(CopperPipe.EXPOSED_PIPE, RenderType.cutout());

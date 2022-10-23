@@ -12,5 +12,7 @@ public class CopperPipeProperties {
     public static final BooleanProperty HAS_ELECTRICITY = BooleanProperty.create("has_electricity");
     public static final BooleanProperty HAS_ITEM = BooleanProperty.create("has_item");
 
-    public static void init() {}
+    public static void init() {
+
+    }
 }

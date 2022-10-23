@@ -1,0 +1,34 @@
+{
+    "parent": "minecraft:recipes/root",
+    "rewards": {
+      "recipes": [
+        "copper_pipes:waxed_exposed_copper_pipe"
+      ]
+    },
+    "criteria": {
+      "has_exposed_copper_pipe": {
+        "trigger": "minecraft:inventory_changed",
+        "conditions": {
+          "items": [
+            {
+              "items": [
+                "copper_pipes:exposed_copper_pipe"
+              ]
+            }
+          ]
+        }
+      },
+      "has_the_recipe": {
+        "trigger": "minecraft:recipe_unlocked",
+        "conditions": {
+          "recipe": "copper_pipes:waxed_exposed_copper_pipe"
+        }
+      }
+    },
+    "requirements": [
+      [
+        "has_exposed_copper_pipe",
+        "has_the_recipe"
+      ]
+    ]
+  }

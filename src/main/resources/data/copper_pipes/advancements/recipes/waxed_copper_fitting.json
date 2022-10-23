@@ -1,0 +1,34 @@
+{
+    "parent": "minecraft:recipes/root",
+    "rewards": {
+      "recipes": [
+        "copper_pipes:waxed_copper_fitting"
+      ]
+    },
+    "criteria": {
+      "has_copper_fitting": {
+        "trigger": "minecraft:inventory_changed",
+        "conditions": {
+          "items": [
+            {
+              "items": [
+                "copper_pipes:copper_fitting"
+              ]
+            }
+          ]
+        }
+      },
+      "has_the_recipe": {
+        "trigger": "minecraft:recipe_unlocked",
+        "conditions": {
+          "recipe": "copper_pipes:waxed_copper_fitting"
+        }
+      }
+    },
+    "requirements": [
+      [
+        "has_copper_fitting",
+        "has_the_recipe"
+      ]
+    ]
+  }

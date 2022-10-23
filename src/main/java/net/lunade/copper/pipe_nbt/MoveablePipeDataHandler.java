@@ -42,10 +42,10 @@ public class MoveablePipeDataHandler {
     public void readNbt(CompoundTag nbtCompound) {
         if (nbtCompound.contains("saveableMoveableNbtList", 9)) {
             this.clear();
-            DataResult<?> var10000 = SaveableMovablePipeNbt.CODEC.listOf().parse(new Dynamic<>(NbtOps.INSTANCE, nbtCompound.getList("saveableMoveableNbtList", 10)));
+            DataResult<List<SaveableMovablePipeNbt>> var10000 = SaveableMovablePipeNbt.CODEC.listOf().parse(new Dynamic<>(NbtOps.INSTANCE, nbtCompound.getList("saveableMoveableNbtList", 10)));
             Logger var10001 = LOGGER;
             Objects.requireNonNull(var10001);
-            Optional<List<SaveableMovablePipeNbt>> list = (Optional<List<SaveableMovablePipeNbt>>) var10000.resultOrPartial(var10001::error);
+            Optional<List<SaveableMovablePipeNbt>> list = var10000.resultOrPartial(var10001::error);
 
             if (list.isPresent()) {
                 for (SaveableMovablePipeNbt saveableMovablePipeNbt : list.get()) {
@@ -58,10 +58,10 @@ public class MoveablePipeDataHandler {
     }
 
     public void writeNbt(CompoundTag nbtCompound) {
-        DataResult<?> var10000 = SaveableMovablePipeNbt.CODEC.listOf().encodeStart(NbtOps.INSTANCE, this.savedList);
+        DataResult<Tag> var10000 = SaveableMovablePipeNbt.CODEC.listOf().encodeStart(NbtOps.INSTANCE, this.savedList);
         Logger var10001 = LOGGER;
         Objects.requireNonNull(var10001);
-        var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbtCompound.put("saveableMoveableNbtList", (Tag) nbtElement));
+        var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbtCompound.put("saveableMoveableNbtList", nbtElement));
     }
 
     public void addSaveableMoveablePipeNbt(SaveableMovablePipeNbt nbt) {

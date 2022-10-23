@@ -163,7 +163,7 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> {
             if (blockEntity instanceof CopperFittingEntity) {
                 nbt.vec3d = new Vec3(11, 0, 0);
-            } else if (!blockEntity.canSmoke && blockEntity.moveType == MoveablePipeDataHandler.MOVE_TYPE.FROM_PIPE) {
+            } else if (!blockEntity.canSmoke && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MOVE_TYPE.FROM_PIPE) {
                 nbt.vec3d = nbt.vec3d.add(-1, 0, 0);
                 if (nbt.getVec3d().x() <= 0) {
                     nbt.shouldSave = false;
@@ -186,7 +186,7 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> {
             if (blockEntity instanceof CopperFittingEntity) {
                 nbt.vec3d = new Vec3(11, 0, 0);
-            } else if (!blockEntity.canSmoke && blockEntity.moveType == MoveablePipeDataHandler.MOVE_TYPE.FROM_PIPE) {
+            } else if (!blockEntity.canSmoke && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MOVE_TYPE.FROM_PIPE) {
                 nbt.vec3d = nbt.vec3d.add(-1, 0, 0);
                 if (nbt.getVec3d().x() <= 0) {
                     nbt.shouldSave = false;

@@ -257,7 +257,7 @@ public class CopperPipeMain implements ModInitializer {
 				entries.accept(item);
 			}
 		});
-		COPPER_PIPE_ITEMS.clear();
+
 	}
 
 	public static List<Direction> shuffledDirections(RandomSource random) {
@@ -377,11 +377,9 @@ public class CopperPipeMain implements ModInitializer {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("COPPER_PIPES");
 
-	private static void registerBlock(Block block, ResourceLocation resourceLocation) {
+	public static void registerBlock(Block block, ResourceLocation resourceLocation) {
 		Registry.register(Registry.BLOCK, resourceLocation, block);
-		BlockItem item = new BlockItem(block, new FabricItemSettings());
-		Registry.register(Registry.ITEM, resourceLocation, item);
-		COPPER_PIPE_ITEMS.add(item);
+		COPPER_PIPE_ITEMS.add(Registry.register(Registry.ITEM, resourceLocation, new BlockItem(block, new FabricItemSettings())));
 	}
 
 }

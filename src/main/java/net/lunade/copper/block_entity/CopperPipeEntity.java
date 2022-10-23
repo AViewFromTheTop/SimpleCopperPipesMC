@@ -489,7 +489,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     @Override
     public boolean shouldListen(ServerLevel serverWorld, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context emitter) {
         boolean placeDestroy = gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE;
-        if ((serverWorld.getBlockState(blockPos).getBlock() instanceof CopperPipe || blockPos == this.getBlockPos()) && placeDestroy) {
+        if ((serverWorld.getBlockState(blockPos).getBlock() instanceof CopperPipe) || (blockPos == this.getBlockPos() && placeDestroy)) {
             return false;
         }
         if (this.canAccept) {

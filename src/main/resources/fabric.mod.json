@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "copper_pipe",
-  "version": "1.11",
+  "version": "1.11-simpler",
 
   "name": "Simple Copper Pipes",
   "description": "Adds copper pipes with unique mechanics to Minecraft.",
@@ -19,10 +19,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.lunade.copper.Main"
+      "net.lunade.copper.CopperPipeMain"
     ],
     "client": [
-      "net.lunade.copper.MainClient"
+      "net.lunade.copper.CopperPipeClient"
     ]
   },
   "mixins": [

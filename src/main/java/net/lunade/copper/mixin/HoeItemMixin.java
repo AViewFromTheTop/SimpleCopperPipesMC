@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.Main;
+import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperPipe;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -53,7 +53,7 @@ public class HoeItemMixin {
                             .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(world, blockPos, face));
                     world.setBlockAndUpdate(blockPos, state);
                     //TODO: ADD SOUNDEVENT FOR PIPE TURNING
-                    world.playSound(null, blockPos, Main.TURN, SoundSource.BLOCKS, 0.5F, 1F);
+                    world.playSound(null, blockPos, CopperPipeMain.TURN, SoundSource.BLOCKS, 0.5F, 1F);
                     itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> {
                         playerEntityx.broadcastBreakEvent(itemUsageContext.getHand());
                     });

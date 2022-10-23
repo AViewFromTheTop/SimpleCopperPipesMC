@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.Main;
+import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.Copyable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -33,7 +33,7 @@ public class HoneyCombItemMixin {
         boolean canWax = false;
         if (blockState!=null) {
             Block block = blockState.getBlock();
-            if (Main.WAX_STAGE.containsKey(block)) {
+            if (CopperPipeMain.WAX_STAGE.containsKey(block)) {
                 world.playSound(playerEntity, blockPos, SoundEvents.HONEYCOMB_WAX_ON, SoundSource.BLOCKS, 1.0F, 1.0F);
                 world.levelEvent(playerEntity, 3003, blockPos, 0);
                 canWax = true;
@@ -45,8 +45,8 @@ public class HoneyCombItemMixin {
             }
 
             Block block = blockState.getBlock();
-            if (Main.WAX_STAGE.containsKey(block)) {
-                Block waxStage = Main.WAX_STAGE.get(block);
+            if (CopperPipeMain.WAX_STAGE.containsKey(block)) {
+                Block waxStage = CopperPipeMain.WAX_STAGE.get(block);
                 if (block instanceof Copyable copyable) {
                     copyable.makeCopyOf(blockState, world, blockPos, waxStage);
                 }

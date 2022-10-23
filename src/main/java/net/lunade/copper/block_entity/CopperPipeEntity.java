@@ -2,8 +2,8 @@ package net.lunade.copper.block_entity;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
+import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.FittingPipeDispenses;
-import net.lunade.copper.Main;
 import net.lunade.copper.PipeMovementRestrictions;
 import net.lunade.copper.PoweredPipeDispenses;
 import net.lunade.copper.blocks.CopperFitting;
@@ -70,9 +70,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public ExtraPipeData extraPipeData;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
-        super(Main.COPPER_PIPE_ENTITY, blockPos, blockState, MoveablePipeDataHandler.MOVE_TYPE.FROM_PIPE);
+        super(CopperPipeMain.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
         this.noteBlockCooldown = 0;
-        this.listener = new CopperPipeListener(new BlockPositionSource(this.worldPosition), 8, this, null, 0,0);
+        this.listener = new CopperPipeListener(new BlockPositionSource(this.worldPosition), 8, this);
         this.extraPipeData = null;
     }
 
@@ -137,7 +137,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             setChanged(world, blockPos, blockState);
         }
         if (bl2 == 1 || bl2 == 3) {
-            world.playSound(null, blockPos, Main.ITEM_IN, SoundSource.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
+            world.playSound(null, blockPos, CopperPipeMain.ITEM_IN, SoundSource.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
         }
     }
 
@@ -172,7 +172,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                         ItemStack itemStack2 = transfer(this, inventory2.removeItem(i, 1), facing);
                         if (itemStack2.isEmpty()) {
                             this.setChanged();
-                            if (blockState.is(Main.SILENT_PIPES)) {
+                            if (blockState.is(CopperPipeMain.SILENT_PIPES)) {
                                 return 2;
                             }
                             Block block = world.getBlockState(offsetOppPos).getBlock();
@@ -230,14 +230,14 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                     int o=4;
                     if (this.shootsControlled) { //If Dropper
                         o=10;
-                        serverWorld.playSound(null, blockPos, Main.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverWorld.random.nextFloat()*0.25F) + 0.8F);
+                        serverWorld.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverWorld.random.nextFloat()*0.25F) + 0.8F);
                     } else if (this.shootsSpecial) { //If Dispenser, Use Pipe-Specific Launch Length
                         if (blockState.getBlock() instanceof CopperPipe pipe) {
                             o = pipe.dispenserShotLength;
-                            serverWorld.playSound(null, blockPos, Main.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverWorld.random.nextFloat()*0.25F) + 0.8F);
+                            serverWorld.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverWorld.random.nextFloat()*0.25F) + 0.8F);
                         } else {o=12;}
                     }
-                    boolean silent = blockState.is(Main.SILENT_PIPES);
+                    boolean silent = blockState.is(CopperPipeMain.SILENT_PIPES);
                     if (serverWorld.getBlockState(blockPos.relative(directionOpp)).getBlock() instanceof CopperFitting) {
                         itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, true, silent, this.corroded);
                     } else {
@@ -264,7 +264,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 itemStack2=itemStack.split(1);
                 poweredDispense.dispense(world, itemStack2, i, direction, position, state, corroded, pos, this);
                 if (!fitting && !silent) {
-                    world.playSound(null, pos, Main.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (world.random.nextFloat()*0.25F) + 0.8F);
+                    world.playSound(null, pos, CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (world.random.nextFloat()*0.25F) + 0.8F);
                     world.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
                 }
                 return itemStack;
@@ -285,7 +285,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             spawnItem(world, itemStack2, i, direction, position, direction, corroded);
             if (!silent) {
                 world.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
-                world.playSound(null, blockPointer.getPos(), Main.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
+                world.playSound(null, blockPointer.getPos(), CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
             }
         }
         return itemStack;
@@ -304,9 +304,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         double y = 0;
         double z = 0;
         Direction.Axis axis = facing.getAxis();
-        x = axis == Direction.Axis.X ? (i * facing.getStepX()) * 0.1 : corroded ? (world.random.nextDouble()*0.6) - 0.3 : x;
-        y = axis == Direction.Axis.Y ? (i * facing.getStepY()) * 0.1 : corroded ? (world.random.nextDouble()*0.6) - 0.3 : y;
-        z = axis == Direction.Axis.Z ? (i * facing.getStepZ()) * 0.1 : corroded ? (world.random.nextDouble()*0.6) - 0.3 : z;
+        x = axis == Direction.Axis.X ? (i * facing.getStepX()) * 0.1 : corroded ? (world.random.nextDouble() * 0.6) - 0.3 : x;
+        y = axis == Direction.Axis.Y ? (i * facing.getStepY()) * 0.1 : corroded ? (world.random.nextDouble() * 0.6) - 0.3 : y;
+        z = axis == Direction.Axis.Z ? (i * facing.getStepZ()) * 0.1 : corroded ? (world.random.nextDouble() * 0.6) - 0.3 : z;
         ItemEntity itemEntity = new ItemEntity(world, d, e, f, itemStack);
         itemEntity.setDeltaMovement(x, y, z);
         world.addFreshEntity(itemEntity);
@@ -431,9 +431,11 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     }
 
     public void setCooldown(BlockState state) {
-        int i=2;
-        if (state.getBlock() instanceof CopperPipe pipe) {i=pipe.cooldown;}
-        this.transferCooldown=i;
+        int i = 2;
+        if (state.getBlock() instanceof CopperPipe pipe) {
+            i = pipe.cooldown;
+        }
+        this.transferCooldown = i;
     }
 
     public static void setCooldown(Level world, BlockPos blockPos) {
@@ -487,7 +489,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     @Override
     public boolean shouldListen(ServerLevel serverWorld, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context emitter) {
         boolean placeDestroy = gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE;
-        if ((serverWorld.getBlockState(blockPos).getBlock() instanceof CopperPipe || blockPos == this.getBlockPos()) && placeDestroy) {
+        if ((serverWorld.getBlockState(blockPos).getBlock() instanceof CopperPipe) || (blockPos == this.getBlockPos() && placeDestroy)) {
             return false;
         }
         if (this.canAccept) {
@@ -529,8 +531,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.setChanged();
     }
 
-    public boolean canAcceptMoveableNbt(MoveablePipeDataHandler.MOVE_TYPE moveType, Direction moveDirection, BlockState fromState) {
-        if (moveType == MoveablePipeDataHandler.MOVE_TYPE.FROM_FITTING) {
+    public boolean canAcceptMoveableNbt(MOVE_TYPE moveType, Direction moveDirection, BlockState fromState) {
+        if (moveType == MOVE_TYPE.FROM_FITTING) {
             return this.getBlockState().getValue(BlockStateProperties.FACING) == moveDirection;
         }
         return this.getBlockState().getValue(BlockStateProperties.FACING) == moveDirection || moveDirection == fromState.getValue(BlockStateProperties.FACING);
@@ -556,7 +558,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 
     public boolean listenersNearby(Level world, BlockPos pos) {
         if (this.extraPipeData != null) {
-            if (world.getBlockState(this.extraPipeData.listenerPos).is(Main.BLOCK_LISTENERS)) {
+            if (world.getBlockState(this.extraPipeData.listenerPos).is(CopperPipeMain.BLOCK_LISTENERS)) {
                 return true;
             } else {
                 this.extraPipeData = null;
@@ -571,7 +573,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                     double distance = ((bx - x) * (bx - x) + ((bz - z) * (bz - z)) + ((by - y) * (by - y)));
                     if (distance < 81) {
                         BlockPos l = new BlockPos(x, y, z);
-                        if (world.getBlockState(l).is(Main.BLOCK_LISTENERS)) {
+                        if (world.getBlockState(l).is(CopperPipeMain.BLOCK_LISTENERS)) {
                             this.extraPipeData = new ExtraPipeData(l);
                             return true;
                         }
@@ -582,7 +584,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.extraPipeData = null;
         List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, new AABB(pos.offset(-18, -18, -18), pos.offset(18, 18, 18)));
         for (Entity entity : entities) {
-            if (entity.getType().is(Main.ENTITY_LISTENERS) && Math.floor(Math.sqrt(entity.blockPosition().distSqr(pos))) <= 16) {
+            if (entity.getType().is(CopperPipeMain.ENTITY_LISTENERS) && Math.floor(Math.sqrt(entity.blockPosition().distSqr(pos))) <= 16) {
                 return true;
             }
         }

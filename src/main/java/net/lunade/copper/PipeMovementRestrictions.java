@@ -1,23 +1,23 @@
 package net.lunade.copper;
 
 import net.lunade.copper.block_entity.CopperPipeEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
 public class PipeMovementRestrictions {
 
-    private static final ArrayList<Identifier> blockEntityIds = new ArrayList<>();
+    private static final ArrayList<ResourceLocation> blockEntityIds = new ArrayList<>();
     private static final ArrayList<CanTransferTo> canTransferTos = new ArrayList<>();
     private static final ArrayList<CanTakeFrom> canTakeFroms = new ArrayList<>();
 
-    public static void register(Identifier id, CanTransferTo canTransferTo, CanTakeFrom canTakeFrom) {
+    public static void register(ResourceLocation id, CanTransferTo canTransferTo, CanTakeFrom canTakeFrom) {
         if (!blockEntityIds.contains(id)) {
             blockEntityIds.add(id);
             canTransferTos.add(canTransferTo);
@@ -29,7 +29,7 @@ public class PipeMovementRestrictions {
     }
 
     @Nullable
-    public static CanTransferTo getCanTransferTo(Identifier id) {
+    public static CanTransferTo getCanTransferTo(ResourceLocation id) {
         if (blockEntityIds.contains(id)) {
             int index = blockEntityIds.indexOf(id);
             return canTransferTos.get(index);
@@ -38,7 +38,7 @@ public class PipeMovementRestrictions {
     }
 
     @Nullable
-    public static CanTakeFrom getCanTakeFrom(Identifier id) {
+    public static CanTakeFrom getCanTakeFrom(ResourceLocation id) {
         if (blockEntityIds.contains(id)) {
             int index = blockEntityIds.indexOf(id);
             return canTakeFroms.get(index);
@@ -48,7 +48,7 @@ public class PipeMovementRestrictions {
 
     @Nullable
     public static CanTransferTo getCanTransferTo(BlockEntity entity) {
-        Identifier id = Registry.BLOCK_ENTITY_TYPE.getId(entity.getType());
+        ResourceLocation id = Registry.BLOCK_ENTITY_TYPE.getKey(entity.getType());
         if (blockEntityIds.contains(id)) {
             int index = blockEntityIds.indexOf(id);
             return canTransferTos.get(index);
@@ -58,7 +58,7 @@ public class PipeMovementRestrictions {
 
     @Nullable
     public static CanTakeFrom getCanTakeFrom(BlockEntity entity) {
-        Identifier id = Registry.BLOCK_ENTITY_TYPE.getId(entity.getType());
+        ResourceLocation id = Registry.BLOCK_ENTITY_TYPE.getKey(entity.getType());
         if (blockEntityIds.contains(id)) {
             int index = blockEntityIds.indexOf(id);
             return canTakeFroms.get(index);
@@ -69,12 +69,12 @@ public class PipeMovementRestrictions {
     //Don't forget to cast the BlockEntity to your desired class!
     @FunctionalInterface
     public interface CanTransferTo {
-        boolean canTransfer(ServerWorld world, BlockPos pos, BlockState state, CopperPipeEntity pipe, BlockEntity toEntity);
+        boolean canTransfer(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe, BlockEntity toEntity);
     }
 
     @FunctionalInterface
     public interface CanTakeFrom {
-        boolean canTake(ServerWorld world, BlockPos pos, BlockState state, CopperPipeEntity pipe, BlockEntity toEntity);
+        boolean canTake(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe, BlockEntity toEntity);
     }
 
     public static void init() {

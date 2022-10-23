@@ -2,193 +2,193 @@ package net.lunade.copper.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.particle.AnimatedParticle;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleFactory;
-import net.minecraft.client.particle.SpriteProvider;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.particle.DefaultParticleType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ColorHelper;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.SimpleAnimatedParticle;
+import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.FastColor;
 
-public class PipeInkParticle extends AnimatedParticle {
-    PipeInkParticle(ClientWorld clientWorld, double d, double e, double f, double g, double h, double i, int j, SpriteProvider spriteProvider) {
+public class PipeInkParticle extends SimpleAnimatedParticle {
+    PipeInkParticle(ClientLevel clientWorld, double d, double e, double f, double g, double h, double i, int j, SpriteSet spriteProvider) {
         super(clientWorld, d, e, f, spriteProvider, 0.0F);
-        this.velocityMultiplier = 0.92F;
-        this.scale = 0.5F;
+        this.friction = 0.92F;
+        this.quadSize = 0.5F;
         this.setAlpha(1.0F);
-        this.setColor((float) ColorHelper.Argb.getRed(j), (float) ColorHelper.Argb.getGreen(j), (float) ColorHelper.Argb.getBlue(j));
-        this.maxAge = (int)((double)(this.scale * 12.0F) / (Math.random() * 0.800000011920929D + 0.20000000298023224D));
-        this.setSpriteForAge(spriteProvider);
-        this.collidesWithWorld = false;
-        this.velocityX = g;
-        this.velocityY = h;
-        this.velocityZ = i;
+        this.setColor((float) FastColor.ARGB32.red(j), (float) FastColor.ARGB32.green(j), (float) FastColor.ARGB32.blue(j));
+        this.lifetime = (int)((double)(this.quadSize * 12.0F) / (Math.random() * 0.800000011920929D + 0.20000000298023224D));
+        this.setSpriteFromAge(spriteProvider);
+        this.hasPhysics = false;
+        this.xd = g;
+        this.yd = h;
+        this.zd = i;
     }
 
     public void tick() {
         super.tick();
-        if (!this.dead) {
-            this.setSpriteForAge(this.spriteProvider);
-            if (this.age > this.maxAge / 2) {
-                this.setAlpha(1.0F - ((float)this.age - (float)(this.maxAge / 2)) / (float)this.maxAge);
+        if (!this.removed) {
+            this.setSpriteFromAge(this.sprites);
+            if (this.age > this.lifetime / 2) {
+                this.setAlpha(1.0F - ((float)this.age - (float)(this.lifetime / 2)) / (float)this.lifetime);
             }
 
-            if (this.world.getBlockState(new BlockPos(this.x, this.y, this.z)).isAir()) {
-                this.velocityY -= 0.007400000002235174D;
+            if (this.level.getBlockState(new BlockPos(this.x, this.y, this.z)).isAir()) {
+                this.yd -= 0.007400000002235174D;
             }
         }
 
     }
 
     @Environment(EnvType.CLIENT)
-    public static class RedFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public RedFactory(SpriteProvider spriteProvider) {
+    public static class RedFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public RedFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 93, 216, 221), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 93, 216, 221), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class OrangeFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public OrangeFactory(SpriteProvider spriteProvider) {
+    public static class OrangeFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public OrangeFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 10, 134, 232), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 10, 134, 232), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class YellowFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public YellowFactory(SpriteProvider spriteProvider) {
+    public static class YellowFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public YellowFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 4, 52, 212), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 4, 52, 212), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class LimeFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public LimeFactory(SpriteProvider spriteProvider) {
+    public static class LimeFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public LimeFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 139, 67, 231), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 139, 67, 231), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class GreenFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public GreenFactory(SpriteProvider spriteProvider) {
+    public static class GreenFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public GreenFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 168, 142, 230), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 168, 142, 230), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class CyanFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public CyanFactory(SpriteProvider spriteProvider) {
+    public static class CyanFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public CyanFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 234, 113, 118), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 234, 113, 118), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class LightBlueFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public LightBlueFactory(SpriteProvider spriteProvider) {
+    public static class LightBlueFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public LightBlueFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 129, 70, 33), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 129, 70, 33), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class BlueFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public BlueFactory(SpriteProvider spriteProvider) {
+    public static class BlueFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public BlueFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 200, 197, 95), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 200, 197, 95), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class PurpleFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public PurpleFactory(SpriteProvider spriteProvider) {
+    public static class PurpleFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public PurpleFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 129, 212, 81), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 129, 212, 81), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class MagentaFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public MagentaFactory(SpriteProvider spriteProvider) {
+    public static class MagentaFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public MagentaFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 62, 183, 72), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 62, 183, 72), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class PinkFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public PinkFactory(SpriteProvider spriteProvider) {
+    public static class PinkFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public PinkFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 13, 119, 87), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 13, 119, 87), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class WhiteFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public WhiteFactory(SpriteProvider spriteProvider) {
+    public static class WhiteFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public WhiteFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 5, 4, 4), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 5, 4, 4), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class LightGrayFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public LightGrayFactory(SpriteProvider spriteProvider) {
+    public static class LightGrayFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public LightGrayFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 109, 109, 116), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 109, 109, 116), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class GrayFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public GrayFactory(SpriteProvider spriteProvider) {
+    public static class GrayFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public GrayFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 184, 176, 173), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 184, 176, 173), this.spriteProvider);
         }
     }
     @Environment(EnvType.CLIENT)
-    public static class BrownFactory implements ParticleFactory<DefaultParticleType> {
-        private final SpriteProvider spriteProvider;
-        public BrownFactory(SpriteProvider spriteProvider) {
+    public static class BrownFactory implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet spriteProvider;
+        public BrownFactory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
-        public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
-            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, ColorHelper.Argb.getArgb(255, 140, 183, 214), this.spriteProvider);
+        public Particle createParticle(SimpleParticleType defaultParticleType, ClientLevel clientWorld, double d, double e, double f, double g, double h, double i) {
+            return new PipeInkParticle(clientWorld, d, e, f, g, h, i, FastColor.ARGB32.color(255, 140, 183, 214), this.spriteProvider);
         }
     }
 }

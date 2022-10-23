@@ -8,38 +8,38 @@ import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.VibrationParticleEffect;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.event.BlockPositionSource;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.VibrationParticleOption;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.BlockPositionSource;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
 import static net.lunade.copper.blocks.CopperFitting.CORRODED_FITTING;
-import static net.minecraft.block.NoteBlock.INSTRUMENT;
-import static net.minecraft.block.NoteBlock.NOTE;
-import static net.minecraft.state.property.Properties.FACING;
+import static net.minecraft.world.level.block.NoteBlock.INSTRUMENT;
+import static net.minecraft.world.level.block.NoteBlock.NOTE;
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
 
 public class RegisterPipeNbtMethods {
 
-    private static final ArrayList<Identifier> ids = new ArrayList<>();
+    private static final ArrayList<ResourceLocation> ids = new ArrayList<>();
     private static final ArrayList<DispenseMethod<?>> dispenses = new ArrayList<>();
     private static final ArrayList<OnMoveMethod<?>> moves = new ArrayList<>();
     private static final ArrayList<TickMethod<?>> ticks = new ArrayList<>();
     private static final ArrayList<CanMoveMethod<?>> canMoves = new ArrayList<>();
 
-    public static void register(Identifier id, DispenseMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> dispense, OnMoveMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> move, TickMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> tick, CanMoveMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> canMove) {
+    public static void register(ResourceLocation id, DispenseMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> dispense, OnMoveMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> move, TickMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> tick, CanMoveMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> canMove) {
         if (!ids.contains(id)) {
             ids.add(id);
             dispenses.add(dispense);
@@ -55,7 +55,7 @@ public class RegisterPipeNbtMethods {
     }
 
     @Nullable
-    public static DispenseMethod<?> getDispense(Identifier id) {
+    public static DispenseMethod<?> getDispense(ResourceLocation id) {
         if (ids.contains(id)) {
             int index = ids.indexOf(id);
             return dispenses.get(index);
@@ -64,7 +64,7 @@ public class RegisterPipeNbtMethods {
     }
 
     @Nullable
-    public static OnMoveMethod<?> getMove(Identifier id) {
+    public static OnMoveMethod<?> getMove(ResourceLocation id) {
         if (ids.contains(id)) {
             int index = ids.indexOf(id);
             return moves.get(index);
@@ -73,7 +73,7 @@ public class RegisterPipeNbtMethods {
     }
 
     @Nullable
-    public static TickMethod<?> getTick(Identifier id) {
+    public static TickMethod<?> getTick(ResourceLocation id) {
         if (ids.contains(id)) {
             int index = ids.indexOf(id);
             return ticks.get(index);
@@ -82,7 +82,7 @@ public class RegisterPipeNbtMethods {
     }
 
     @Nullable
-    public static CanMoveMethod<?> getCanMove(Identifier id) {
+    public static CanMoveMethod<?> getCanMove(ResourceLocation id) {
         if (ids.contains(id)) {
             int index = ids.indexOf(id);
             return canMoves.get(index);
@@ -92,27 +92,27 @@ public class RegisterPipeNbtMethods {
 
     @FunctionalInterface
     public interface DispenseMethod<SaveableMovablePipeNbt> {
-        void dispense(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerWorld world, BlockPos pos, BlockState state, CopperPipeEntity pipe);
+        void dispense(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe);
     }
 
     @FunctionalInterface
     public interface OnMoveMethod<SaveableMovablePipeNbt> {
-        void onMove(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerWorld world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
+        void onMove(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
     }
 
     @FunctionalInterface
     public interface TickMethod<SaveableMovablePipeNbt> {
-        void tick(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerWorld world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
+        void tick(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
     }
 
     @FunctionalInterface
     public interface CanMoveMethod<SaveableMovablePipeNbt> {
-        boolean canMove(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerWorld world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
+        boolean canMove(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
     }
 
     public static void init() {
-        register(new Identifier("lunade", "default"), (nbt, world, pos, blockState, pipe) -> {
-            Direction direction = blockState.get(FACING);
+        register(new ResourceLocation("lunade", "default"), (nbt, world, pos, blockState, pipe) -> {
+            Direction direction = blockState.getValue(FACING);
             Direction directionOpp = direction.getOpposite();
             boolean noteBlock = false;
             if (Registry.GAME_EVENT.get(nbt.getSavedID()) == GameEvent.NOTE_BLOCK_PLAY) {
@@ -120,32 +120,32 @@ public class RegisterPipeNbtMethods {
                 boolean corroded;
                 float volume = 3.0F;
                 if (blockState.getBlock() instanceof CopperPipe) { //Corroded Pipes Increase Instrument Sound Volume
-                    corroded = blockState.getBlock() == CopperPipe.CORRODED_PIPE || world.getBlockState(pos.offset(directionOpp)).getBlock() == CORRODED_FITTING;
+                    corroded = blockState.getBlock() == CopperPipe.CORRODED_PIPE || world.getBlockState(pos.relative(directionOpp)).getBlock() == CORRODED_FITTING;
                     if (corroded) {
                         volume = 4.5F;
                     }
                 }
                 BlockPos originPos = new BlockPos(nbt.getVec3d());
-                noteBlock = world.getBlockState(originPos).isOf(Blocks.NOTE_BLOCK);
+                noteBlock = world.getBlockState(originPos).is(Blocks.NOTE_BLOCK);
                 if (noteBlock) {
                     BlockState state = world.getBlockState(originPos);
-                    int k = state.get(NOTE);
+                    int k = state.getValue(NOTE);
                     float f = (float) Math.pow(2.0D, (double) (k - 12) / 12.0D);
-                    world.playSound(null, pos, state.get(INSTRUMENT).getSound(), SoundCategory.RECORDS, volume, f);
+                    world.playSound(null, pos, state.getValue(INSTRUMENT).getSoundEvent(), SoundSource.RECORDS, volume, f);
                     //Send NoteBlock Particle Packet To Client
-                    PacketByteBuf buf = PacketByteBufs.create();
+                    FriendlyByteBuf buf = PacketByteBufs.create();
                     buf.writeBlockPos(pos);
                     buf.writeInt(k);
-                    buf.writeInt(getDirection(world.getBlockState(pos).get(FACING)));
-                    for (ServerPlayerEntity player : PlayerLookup.tracking(world, pos)) {
+                    buf.writeInt(getDirection(world.getBlockState(pos).getValue(FACING)));
+                    for (ServerPlayer player : PlayerLookup.tracking(world, pos)) {
                         ServerPlayNetworking.send(player, Main.NOTE_PACKET, buf);
                     }
                 }
             }
-            world.emitGameEvent(nbt.getEntity(world), Registry.GAME_EVENT.get(nbt.getSavedID()), pos);
+            world.gameEvent(nbt.getEntity(world), Registry.GAME_EVENT.get(nbt.getSavedID()), pos);
             if (noteBlock || pipe.noteBlockCooldown > 0 || pipe.listenersNearby(world, pos)) {
                 if (nbt.useCount == 0) {
-                    world.spawnParticles(new VibrationParticleEffect(new BlockPositionSource(nbt.getBlockPos()), 5), nbt.getVec3d().x, nbt.getVec3d().y, nbt.getVec3d().z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                    world.sendParticles(new VibrationParticleOption(new BlockPositionSource(nbt.getBlockPos()), 5), nbt.getVec3d().x, nbt.getVec3d().y, nbt.getVec3d().z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
                     nbt.useCount = 1;
                 }
             }
@@ -153,7 +153,7 @@ public class RegisterPipeNbtMethods {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {
             if (nbt.foundEntity != null) {
-                nbt.vec3d2 = nbt.foundEntity.getPos();
+                nbt.vec3d2 = nbt.foundEntity.position();
             }
         }, (nbt, world, pos, blockState, blockEntity) -> true);
 
@@ -162,10 +162,10 @@ public class RegisterPipeNbtMethods {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {
             if (blockEntity instanceof CopperFittingEntity) {
-                nbt.vec3d = new Vec3d(11, 0, 0);
+                nbt.vec3d = new Vec3(11, 0, 0);
             } else if (!blockEntity.canSmoke && blockEntity.moveType == MoveablePipeDataHandler.MOVE_TYPE.FROM_PIPE) {
                 nbt.vec3d = nbt.vec3d.add(-1, 0, 0);
-                if (nbt.getVec3d().getX() <= 0) {
+                if (nbt.getVec3d().x() <= 0) {
                     nbt.shouldSave = false;
                     nbt.shouldMove = false;
                 }
@@ -175,7 +175,7 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> {
             MoveablePipeDataHandler.SaveableMovablePipeNbt movablePipeNbt = blockEntity.moveablePipeDataHandler.getMoveablePipeNbt(Main.WATER);
             if (movablePipeNbt != null) {
-                return movablePipeNbt.getVec3d() == null || movablePipeNbt.getVec3d().getX() <= nbt.getVec3d().getX() - 1;
+                return movablePipeNbt.getVec3d() == null || movablePipeNbt.getVec3d().x() <= nbt.getVec3d().x() - 1;
             }
             return true;
         });
@@ -185,10 +185,10 @@ public class RegisterPipeNbtMethods {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {
             if (blockEntity instanceof CopperFittingEntity) {
-                nbt.vec3d = new Vec3d(11, 0, 0);
+                nbt.vec3d = new Vec3(11, 0, 0);
             } else if (!blockEntity.canSmoke && blockEntity.moveType == MoveablePipeDataHandler.MOVE_TYPE.FROM_PIPE) {
                 nbt.vec3d = nbt.vec3d.add(-1, 0, 0);
-                if (nbt.getVec3d().getX() <= 0) {
+                if (nbt.getVec3d().x() <= 0) {
                     nbt.shouldSave = false;
                     nbt.shouldMove = false;
                 }
@@ -198,7 +198,7 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> {
             MoveablePipeDataHandler.SaveableMovablePipeNbt movablePipeNbt = blockEntity.moveablePipeDataHandler.getMoveablePipeNbt(Main.SMOKE);
             if (movablePipeNbt != null) {
-                return movablePipeNbt.getVec3d() == null || movablePipeNbt.getVec3d().getX() <= nbt.getVec3d().getX() - 1;
+                return movablePipeNbt.getVec3d() == null || movablePipeNbt.getVec3d().x() <= nbt.getVec3d().x() - 1;
             }
             return true;
         });

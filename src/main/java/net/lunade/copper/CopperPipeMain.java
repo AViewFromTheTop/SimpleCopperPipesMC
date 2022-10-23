@@ -356,7 +356,7 @@ public class CopperPipeMain implements ModInitializer {
 	}));
 
 	public static ResourceLocation id(String path) {
-		return id(path);
+		return new ResourceLocation(BLOCK_ID, path);
 	}
 
 	public static ResourceLocation colourPipe(String colour) {

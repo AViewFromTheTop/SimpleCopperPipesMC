@@ -143,12 +143,14 @@ public class RegisterPipeNbtMethods {
                 }
             }
             world.gameEvent(nbt.getEntity(world), Registry.GAME_EVENT.get(nbt.getSavedID()), pos);
-            if (noteBlock || pipe.noteBlockCooldown > 0 || pipe.listenersNearby(world, pos)) {
+            if (noteBlock || pipe.noteBlockCooldown > 0) {
                 if (nbt.useCount == 0) {
                     world.sendParticles(new VibrationParticleOption(new BlockPositionSource(nbt.getBlockPos()), 5), nbt.getVec3d().x, nbt.getVec3d().y, nbt.getVec3d().z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
                     nbt.useCount = 1;
                 }
             }
+            pipe.inputGameEventPos = nbt.getBlockPos();
+            pipe.gameEventNbtVec3 = nbt.getVec3d();
         }, (nbt, world, pos, blockState, blockEntity) -> {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {

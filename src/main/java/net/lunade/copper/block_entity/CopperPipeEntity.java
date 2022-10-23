@@ -8,7 +8,6 @@ import net.lunade.copper.PipeMovementRestrictions;
 import net.lunade.copper.PoweredPipeDispenses;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.pipe_nbt.ExtraPipeData;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
@@ -67,13 +66,14 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public boolean canAccept;
 
     private CopperPipeListener listener;
-    public ExtraPipeData extraPipeData;
+
+    public BlockPos inputGameEventPos;
+    public Vec3 gameEventNbtVec3;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
         super(CopperPipeMain.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
         this.noteBlockCooldown = 0;
         this.listener = new CopperPipeListener(new BlockPositionSource(this.worldPosition), 8, this);
-        this.extraPipeData = null;
     }
 
     public void setItem(int i, ItemStack itemStack) {
@@ -85,6 +85,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     }
 
     public void serverTick(Level world, BlockPos blockPos, BlockState blockState) {
+        this.inputGameEventPos = null;
         this.listener.tick(world);
         super.serverTick(world, blockPos, blockState);
         if (!world.isClientSide) {
@@ -466,7 +467,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             Objects.requireNonNull(var10001);
             var10000.resultOrPartial(var10001::error).ifPresent((vibrationListener) -> this.listener = (CopperPipeListener) vibrationListener);
         }
-        this.extraPipeData = ExtraPipeData.readNbt(nbtCompound);
     }
 
     protected void saveAdditional(CompoundTag nbtCompound) {
@@ -483,7 +483,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         Logger var10001 = LOGGER;
         Objects.requireNonNull(var10001);
         var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbtCompound.put("listener", (Tag)nbtElement));
-        ExtraPipeData.writeNbt(nbtCompound, this.extraPipeData);
     }
 
     @Override
@@ -554,41 +553,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 this.moveMoveableNbt(serverWorld, blockPos, blockState);
             }
         }
-    }
-
-    public boolean listenersNearby(Level world, BlockPos pos) {
-        if (this.extraPipeData != null) {
-            if (world.getBlockState(this.extraPipeData.listenerPos).is(CopperPipeMain.BLOCK_LISTENERS)) {
-                return true;
-            } else {
-                this.extraPipeData = null;
-            }
-        }
-        int bx = pos.getX();
-        int by = pos.getY();
-        int bz = pos.getZ();
-        for (int x = bx - 8; x <= bx + 8; x++) {
-            for (int y = by - 8; y <= by + 8; y++) {
-                for (int z = bz - 8; z <= bz + 8; z++) {
-                    double distance = ((bx - x) * (bx - x) + ((bz - z) * (bz - z)) + ((by - y) * (by - y)));
-                    if (distance < 81) {
-                        BlockPos l = new BlockPos(x, y, z);
-                        if (world.getBlockState(l).is(CopperPipeMain.BLOCK_LISTENERS)) {
-                            this.extraPipeData = new ExtraPipeData(l);
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        this.extraPipeData = null;
-        List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, new AABB(pos.offset(-18, -18, -18), pos.offset(18, 18, 18)));
-        for (Entity entity : entities) {
-            if (entity.getType().is(CopperPipeMain.ENTITY_LISTENERS) && Math.floor(Math.sqrt(entity.blockPosition().distSqr(pos))) <= 16) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

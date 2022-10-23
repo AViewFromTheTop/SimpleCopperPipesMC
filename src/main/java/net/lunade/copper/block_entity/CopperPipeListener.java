@@ -68,14 +68,10 @@ public class CopperPipeListener extends VibrationListener {
                 return false;
             } else {
                 Vec3 vec32 = optional.get();
+                //this.scheduleVibration(serverLevel, gameEvent, context, vec3, vec32);
                 if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
                     return false;
-                } else if (isOccluded(serverLevel, vec3, vec32)) {
-                    return false;
-                } else {
-                    this.scheduleVibration(serverLevel, gameEvent, context, vec3, vec32);
-                    return true;
-                }
+                } else return !isOccluded(serverLevel, vec3, vec32);
             }
         }
     }

@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "lunade:corroded_pipe",
-    "lunade:corroded_fitting"
+    "copper_pipes:corroded_pipe",
+    "copper_pipes:corroded_fitting"
   ]
 }

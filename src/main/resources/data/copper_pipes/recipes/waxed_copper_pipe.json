@@ -3,13 +3,13 @@
   "group": "waxed_copper_pipe",
   "ingredients": [
     {
-      "item": "lunade:copper_pipe"
+      "item": "copper_pipes:copper_pipe"
     },
     {
       "item": "minecraft:honeycomb"
     }
   ],
   "result": {
-    "item": "lunade:waxed_copper_pipe"
+    "item": "copper_pipes:waxed_copper_pipe"
   }
 }

@@ -1,13 +1,13 @@
 {
   "replace": false,
   "values": [
-    "lunade:waxed_copper_pipe",
-    "lunade:waxed_exposed_copper_pipe",
-    "lunade:waxed_weathered_copper_pipe",
-    "lunade:waxed_oxidized_copper_pipe",
-    "lunade:waxed_copper_fitting",
-    "lunade:waxed_exposed_copper_fitting",
-    "lunade:waxed_weathered_copper_fitting",
-    "lunade:waxed_oxidized_copper_fitting"
+    "copper_pipes:waxed_copper_pipe",
+    "copper_pipes:waxed_exposed_copper_pipe",
+    "copper_pipes:waxed_weathered_copper_pipe",
+    "copper_pipes:waxed_oxidized_copper_pipe",
+    "copper_pipes:waxed_copper_fitting",
+    "copper_pipes:waxed_exposed_copper_fitting",
+    "copper_pipes:waxed_weathered_copper_fitting",
+    "copper_pipes:waxed_oxidized_copper_fitting"
   ]
 }

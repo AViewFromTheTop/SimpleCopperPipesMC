@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "lunade:waxed_exposed_copper_pipe"
+          "name": "copper_pipes:waxed_exposed_copper_pipe"
         }
       ],
       "conditions": [

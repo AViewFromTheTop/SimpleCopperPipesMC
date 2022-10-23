@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "lunade:corroded_pipe"
+          "name": "copper_pipes:corroded_pipe"
         }
       ],
       "conditions": [

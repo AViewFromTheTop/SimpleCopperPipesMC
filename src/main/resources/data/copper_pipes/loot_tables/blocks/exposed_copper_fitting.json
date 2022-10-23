@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "lunade:exposed_copper_fitting"
+          "name": "copper_pipes:exposed_copper_fitting"
         }
       ],
       "conditions": [

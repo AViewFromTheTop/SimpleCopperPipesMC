@@ -499,34 +499,6 @@ public class CopperPipe extends BlockWithEntity implements Waterloggable, Copyab
                 blockPointer.getZ() + 0.7D * (double)facing.getOffsetZ());
     }
 
-    public static boolean isWaterPipeNearby(WorldView worldView, BlockPos blockPos, int x) {
-        Iterator<BlockPos> var2 = BlockPos.iterate(blockPos.add(-x, 0, -x), blockPos.add(x, 12, x)).iterator();
-        BlockPos blockPos2;
-        do {
-            if (!var2.hasNext()) { return false; }
-            blockPos2 = var2.next();
-        } while(!isWaterPipe(worldView.getBlockState(blockPos2)));
-        return true;
-    }
-
-    public static boolean isWaterPipeNearby(BlockView blockView, BlockPos blockPos, int x) {
-        Iterator<BlockPos> var2 = BlockPos.iterate(blockPos.add(-x, 0, -x), blockPos.add(x, 12, x)).iterator();
-        BlockPos blockPos2;
-        do {
-            if (!var2.hasNext()) {
-                return false;
-            }
-            blockPos2 = var2.next();
-        } while(!isWaterPipe(blockView.getBlockState(blockPos2)));
-        return true;
-    }
-
-    public static boolean isWaterPipe(BlockState state) {
-        if (state.getBlock() instanceof CopperPipe) {
-            return state.get(HAS_WATER);
-        } return false;
-    }
-
     public static boolean hasItem(BlockState state) {
         if (state.getBlock() instanceof CopperPipe || state.getBlock() instanceof CopperFitting) {
             return state.get(HAS_ITEM) || state.get(HAS_ELECTRICITY);

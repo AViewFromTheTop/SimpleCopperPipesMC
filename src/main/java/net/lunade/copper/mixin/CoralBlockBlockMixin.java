@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.block.CoralBlockBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
@@ -14,7 +14,7 @@ public class CoralBlockBlockMixin {
 
     @Inject(at = @At("TAIL"), method = "isInWater", cancellable = true)
     protected void isInWater(BlockView blockView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
-        if (CopperPipe.isWaterPipeNearby(blockView, blockPos, 2)) {
+        if (LeakingPipeManager.isWaterPipeNearbyBlockGetter(blockView, blockPos, 2)) {
             info.setReturnValue(true);
             info.cancel();
         }

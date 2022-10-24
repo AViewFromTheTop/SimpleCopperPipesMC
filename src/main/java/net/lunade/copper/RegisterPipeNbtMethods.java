@@ -144,12 +144,14 @@ public class RegisterPipeNbtMethods {
                 }
             }
             world.emitGameEvent(nbt.getEntity(world), Registry.GAME_EVENT.get(nbt.getSavedID()), pos);
-            if (noteBlock || pipe.noteBlockCooldown > 0 || pipe.listenersNearby(world, pos)) {
+            if (noteBlock || pipe.noteBlockCooldown > 0) {
                 if (nbt.useCount == 0) {
                     spawnDelayedVibration(world, new BlockPos(nbt.getVec3d()), nbt.getBlockPos(), 5);
                     nbt.useCount = 1;
                 }
             }
+            pipe.inputGameEventPos = nbt.getBlockPos();
+            pipe.gameEventNbtVec3 = nbt.getVec3d();
         }, (nbt, world, pos, blockState, blockEntity) -> {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {

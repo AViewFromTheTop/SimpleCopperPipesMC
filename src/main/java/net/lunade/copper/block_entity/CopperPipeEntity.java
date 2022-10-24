@@ -6,14 +6,14 @@ import net.lunade.copper.PipeMovementRestrictions;
 import net.lunade.copper.PoweredPipeDispenses;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.pipe_nbt.ExtraPipeData;
+import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
@@ -48,13 +48,13 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public boolean canAccept;
 
     private final CopperPipeListener listener;
-    public ExtraPipeData extraPipeData;
+    public BlockPos inputGameEventPos;
+    public Vec3d gameEventNbtVec3;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
         super(Main.COPPER_PIPE_ENTITY, blockPos, blockState, MoveablePipeDataHandler.MOVE_TYPE.FROM_PIPE);
         this.noteBlockCooldown = 0;
         this.listener = new CopperPipeListener(new BlockPositionSource(this.pos), 8, this);
-        this.extraPipeData = null;
     }
 
     public void setStack(int i, ItemStack itemStack) {
@@ -91,6 +91,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 --this.transferCooldown;
             } else {
                 this.pipeMove(world, blockPos, blockState);
+            }
+            if (blockState.get(CopperPipeProperties.HAS_WATER) && blockState.get(Properties.FACING) != Direction.UP) {
+                LeakingPipeManager.addPos(world, blockPos);
             }
         }
     }
@@ -438,7 +441,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.shootsControlled = nbtCompound.getBoolean("shootsControlled");
         this.shootsSpecial = nbtCompound.getBoolean("shootsSpecial");
         this.canAccept = nbtCompound.getBoolean("canAccept");
-        this.extraPipeData = ExtraPipeData.readNbt(nbtCompound);
     }
 
     protected void writeNbt(NbtCompound nbtCompound) {
@@ -451,7 +453,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         nbtCompound.putBoolean("shootsControlled", this.shootsControlled);
         nbtCompound.putBoolean("shootsSpecial", this.shootsSpecial);
         nbtCompound.putBoolean("canAccept", this.canAccept);
-        ExtraPipeData.writeNbt(nbtCompound, this.extraPipeData);
     }
 
     public static boolean notCubeNorPipe(ServerWorld world, BlockPos pos) {
@@ -521,41 +522,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 this.moveMoveableNbt(serverWorld, blockPos, blockState);
             }
         }
-    }
-
-    public boolean listenersNearby(World world, BlockPos pos) {
-        if (this.extraPipeData != null) {
-            if (world.getBlockState(this.extraPipeData.listenerPos).isIn(Main.BLOCK_LISTENERS)) {
-                return true;
-            } else {
-                this.extraPipeData = null;
-            }
-        }
-        int bx = pos.getX();
-        int by = pos.getY();
-        int bz = pos.getZ();
-        for (int x = bx - 8; x <= bx + 8; x++) {
-            for (int y = by - 8; y <= by + 8; y++) {
-                for (int z = bz - 8; z <= bz + 8; z++) {
-                    double distance = ((bx - x) * (bx - x) + ((bz - z) * (bz - z)) + ((by - y) * (by - y)));
-                    if (distance < 81) {
-                        BlockPos l = new BlockPos(x, y, z);
-                        if (world.getBlockState(l).isIn(Main.BLOCK_LISTENERS)) {
-                            this.extraPipeData = new ExtraPipeData(l);
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        this.extraPipeData = null;
-        List<LivingEntity> entities = world.getNonSpectatingEntities(LivingEntity.class, new Box(pos.add(-18, -18, -18), pos.add(18, 18, 18)));
-        for (Entity entity : entities) {
-            if (entity.getType().isIn(Main.ENTITY_LISTENERS) && Math.floor(Math.sqrt(entity.getBlockPos().getSquaredDistance(pos))) <= 16) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

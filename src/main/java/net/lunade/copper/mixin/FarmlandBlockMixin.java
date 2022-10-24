@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.FarmBlock;
@@ -15,7 +15,7 @@ public class FarmlandBlockMixin {
     @Inject(at = @At("TAIL"), method = "isNearWater", cancellable = true)
     private static void isNearWater(LevelReader worldView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
         if (!info.getReturnValue()) {
-            info.setReturnValue(CopperPipe.isWaterPipeNearby(worldView, blockPos, 6));
+            info.setReturnValue(LeakingPipeManager.isWaterPipeNearbyBlockGetter(worldView, blockPos, 6));
             info.cancel();
         }
     }

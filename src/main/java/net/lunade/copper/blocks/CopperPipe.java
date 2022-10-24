@@ -2,6 +2,7 @@ package net.lunade.copper.blocks;
 
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.block_entity.CopperPipeEntity;
+import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
@@ -520,34 +521,6 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                 blockPointer.x() + 0.7D * (double)facing.getStepX(),
                 blockPointer.y() + 0.7D * (double)facing.getStepY(),
                 blockPointer.z() + 0.7D * (double)facing.getStepZ());
-    }
-
-    public static boolean isWaterPipeNearby(LevelReader worldView, BlockPos blockPos, int x) {
-        Iterator<BlockPos> var2 = BlockPos.betweenClosed(blockPos.offset(-x, 0, -x), blockPos.offset(x, 12, x)).iterator();
-        BlockPos blockPos2;
-        do {
-            if (!var2.hasNext()) { return false; }
-            blockPos2 = var2.next();
-        } while(!isWaterPipe(worldView.getBlockState(blockPos2)));
-        return true;
-    }
-
-    public static boolean isWaterPipeNearby(BlockGetter blockView, BlockPos blockPos, int x) {
-        Iterator<BlockPos> var2 = BlockPos.betweenClosed(blockPos.offset(-x, 0, -x), blockPos.offset(x, 12, x)).iterator();
-        BlockPos blockPos2;
-        do {
-            if (!var2.hasNext()) {
-                return false;
-            }
-            blockPos2 = var2.next();
-        } while(!isWaterPipe(blockView.getBlockState(blockPos2)));
-        return true;
-    }
-
-    public static boolean isWaterPipe(BlockState state) {
-        if (state.getBlock() instanceof CopperPipe) {
-            return state.getValue(HAS_WATER);
-        } return false;
     }
 
     public static boolean hasItem(BlockState state) {

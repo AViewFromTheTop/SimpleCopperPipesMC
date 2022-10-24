@@ -8,6 +8,8 @@ import net.lunade.copper.PipeMovementRestrictions;
 import net.lunade.copper.PoweredPipeDispenses;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
@@ -28,7 +30,6 @@ import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.WorldlyContainerHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -110,6 +111,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 --this.transferCooldown;
             } else {
                 this.pipeMove(world, blockPos, blockState);
+            }
+            if (blockState.getValue(CopperPipeProperties.HAS_WATER) && blockState.getValue(BlockStateProperties.FACING) != Direction.UP) {
+                LeakingPipeManager.addPos(world, blockPos);
             }
         }
     }

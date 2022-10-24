@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BaseCoralPlantTypeBlock;
@@ -15,7 +15,7 @@ public class CoralParentBlockMixin {
 
     @Inject(at = @At("TAIL"), method = "scanForWater", cancellable = true)
     private static void isInWater(BlockState blockState, BlockGetter blockView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
-        if (CopperPipe.isWaterPipeNearby(blockView, blockPos, 2)) {
+        if (LeakingPipeManager.isWaterPipeNearbyBlockGetter(blockView, blockPos, 2)) {
             info.setReturnValue(true);
         }
     }

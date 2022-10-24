@@ -2,6 +2,8 @@ package net.lunade.copper;
 
 import it.unimi.dsi.fastutil.objects.*;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
@@ -11,6 +13,7 @@ import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -235,6 +238,10 @@ public class CopperPipeMain implements ModInitializer {
 		PoweredPipeDispenses.init();
 		FittingPipeDispenses.init();
 		PipeMovementRestrictions.init();
+
+		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> LeakingPipeManager.clear());
+
+		ServerTickEvents.START_SERVER_TICK.register((listener) -> LeakingPipeManager.clear());
 
 		FabricLoader.getInstance().getEntrypointContainers("simplecopperpipes", CopperPipeEntrypoint.class).forEach(entrypoint -> {
 			try {

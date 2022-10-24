@@ -25,7 +25,6 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -57,8 +56,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Iterator;
 
 import static net.lunade.copper.CopperPipeMain.INSPECT_PIPE;
 
@@ -520,34 +517,6 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                 blockPointer.x() + 0.7D * (double)facing.getStepX(),
                 blockPointer.y() + 0.7D * (double)facing.getStepY(),
                 blockPointer.z() + 0.7D * (double)facing.getStepZ());
-    }
-
-    public static boolean isWaterPipeNearby(LevelReader worldView, BlockPos blockPos, int x) {
-        Iterator<BlockPos> var2 = BlockPos.betweenClosed(blockPos.offset(-x, 0, -x), blockPos.offset(x, 12, x)).iterator();
-        BlockPos blockPos2;
-        do {
-            if (!var2.hasNext()) { return false; }
-            blockPos2 = var2.next();
-        } while(!isWaterPipe(worldView.getBlockState(blockPos2)));
-        return true;
-    }
-
-    public static boolean isWaterPipeNearby(BlockGetter blockView, BlockPos blockPos, int x) {
-        Iterator<BlockPos> var2 = BlockPos.betweenClosed(blockPos.offset(-x, 0, -x), blockPos.offset(x, 12, x)).iterator();
-        BlockPos blockPos2;
-        do {
-            if (!var2.hasNext()) {
-                return false;
-            }
-            blockPos2 = var2.next();
-        } while(!isWaterPipe(blockView.getBlockState(blockPos2)));
-        return true;
-    }
-
-    public static boolean isWaterPipe(BlockState state) {
-        if (state.getBlock() instanceof CopperPipe) {
-            return state.getValue(HAS_WATER);
-        } return false;
     }
 
     public static boolean hasItem(BlockState state) {

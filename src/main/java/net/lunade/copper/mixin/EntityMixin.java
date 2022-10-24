@@ -1,14 +1,11 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.EnderMan;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
@@ -22,9 +19,6 @@ public class EntityMixin {
         Entity entity = Entity.class.cast(this);
         if (!entity.level.isClientSide) {
             this.hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(entity.level, entity.blockPosition(), 2);
-            if (entity instanceof EnderMan) {
-                CopperPipeMain.LOGGER.info(this.hadWaterPipeNearby ? "true" : "false");
-            }
         }
     }
 

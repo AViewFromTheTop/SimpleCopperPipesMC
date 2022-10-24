@@ -24,13 +24,16 @@ public class LeakingPipeManager {
         int x = blockPos.getX();
         int y = blockPos.getY();
         int z = blockPos.getZ();
+        ResourceLocation dimension = level.dimension().location();
         for (LeakingPipePos leakingPos : copiedList) {
-            int xVal = leakingPos.pos.getX() - x;
-            if (xVal >= -i && xVal <= i) {
-                int zVal = leakingPos.pos.getZ() - z;
-                if (zVal >= -i && zVal <= i) {
-                    int leakY = leakingPos.pos.getY();
-                    return (y < leakY && y >= leakY - 12);
+            if (leakingPos.dimension.equals(dimension)) {
+                int xVal = leakingPos.pos.getX() - x;
+                if (xVal >= -i && xVal <= i) {
+                    int zVal = leakingPos.pos.getZ() - z;
+                    if (zVal >= -i && zVal <= i) {
+                        int leakY = leakingPos.pos.getY();
+                        return (y < leakY && y >= leakY - 12);
+                    }
                 }
             }
         }

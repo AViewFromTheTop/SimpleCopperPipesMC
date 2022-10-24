@@ -522,34 +522,6 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                 blockPointer.z() + 0.7D * (double)facing.getStepZ());
     }
 
-    public static boolean isWaterPipeNearby(LevelReader worldView, BlockPos blockPos, int x) {
-        Iterator<BlockPos> var2 = BlockPos.betweenClosed(blockPos.offset(-x, 0, -x), blockPos.offset(x, 12, x)).iterator();
-        BlockPos blockPos2;
-        do {
-            if (!var2.hasNext()) { return false; }
-            blockPos2 = var2.next();
-        } while(!isWaterPipe(worldView.getBlockState(blockPos2)));
-        return true;
-    }
-
-    public static boolean isWaterPipeNearby(BlockGetter blockView, BlockPos blockPos, int x) {
-        Iterator<BlockPos> var2 = BlockPos.betweenClosed(blockPos.offset(-x, 0, -x), blockPos.offset(x, 12, x)).iterator();
-        BlockPos blockPos2;
-        do {
-            if (!var2.hasNext()) {
-                return false;
-            }
-            blockPos2 = var2.next();
-        } while(!isWaterPipe(blockView.getBlockState(blockPos2)));
-        return true;
-    }
-
-    public static boolean isWaterPipe(BlockState state) {
-        if (state.getBlock() instanceof CopperPipe) {
-            return state.getValue(HAS_WATER);
-        } return false;
-    }
-
     public static boolean hasItem(BlockState state) {
         if (state.getBlock() instanceof CopperPipe || state.getBlock() instanceof CopperFitting) {
             return state.getValue(HAS_ITEM) || state.getValue(HAS_ELECTRICITY);

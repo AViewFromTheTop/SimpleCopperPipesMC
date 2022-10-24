@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelReader;
@@ -22,7 +22,7 @@ public class SugarCaneBlockMixin {
             info.setReturnValue(true);
             info.cancel();
         } else if (blockState2.is(BlockTags.DIRT) || blockState2.is(Blocks.SAND) || blockState2.is(Blocks.RED_SAND)) {
-            info.setReturnValue(CopperPipe.isWaterPipeNearby(worldView, blockPos, 3));
+            info.setReturnValue(LeakingPipeManager.isWaterPipeNearbyBlockGetter(worldView, blockPos, 3));
             info.cancel();
         }
     }

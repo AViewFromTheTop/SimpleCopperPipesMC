@@ -1,6 +1,5 @@
 package net.lunade.copper.leaking_pipes;
 
-import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.minecraft.core.BlockPos;
@@ -22,15 +21,16 @@ public class LeakingPipeManager {
 
     public static boolean isWaterPipeNearby(Level level, BlockPos blockPos, int i) {
         ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) getPoses().clone();
+        int x = blockPos.getX();
+        int y = blockPos.getY();
+        int z = blockPos.getZ();
         for (LeakingPipePos leakingPos : copiedList) {
-            if (leakingPos.dimension.equals(level.dimension().location())) {
-                int xVal = leakingPos.pos.getX() - blockPos.getX();
-                if (xVal >= -i && xVal <= i) {
-                    int zVal = leakingPos.pos.getZ() - blockPos.getZ();
-                    if (zVal >= -i && zVal <= i) {
-                        int y = leakingPos.pos.getY();
-                        return (blockPos.getY() < y && blockPos.getY() >= y - 12);
-                    }
+            int xVal = leakingPos.pos.getX() - x;
+            if (xVal >= -i && xVal <= i) {
+                int zVal = leakingPos.pos.getZ() - z;
+                if (zVal >= -i && zVal <= i) {
+                    int leakY = leakingPos.pos.getY();
+                    return (y < leakY && y >= leakY - 12);
                 }
             }
         }
@@ -38,20 +38,19 @@ public class LeakingPipeManager {
     }
 
     public static boolean isWaterPipeNearbyBlockGetter(BlockGetter blockGetter, BlockPos blockPos, int i) {
-        int posX = blockPos.getX();
-        int posY = blockPos.getY();
-        int posZ = blockPos.getZ();
-        int l;
-        BlockState state;
         ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) getPoses().clone();
+        int x = blockPos.getX();
+        int y = blockPos.getY();
+        int z = blockPos.getZ();
+        BlockState state;
         for (LeakingPipePos leakingPos : copiedList) {
-            l = leakingPos.pos.getX();
-            if (posX > l - i && posX < l + i) {
-                l = leakingPos.pos.getZ();
-                if (posZ > l - i && posZ < l + i) {
-                    l = leakingPos.pos.getY();
-                    if (posY < l && posY >= l - 12) {
-                        state = blockGetter.getBlockState(blockPos);
+            int xVal = leakingPos.pos.getX() - x;
+            if (xVal >= -i && xVal <= i) {
+                int zVal = leakingPos.pos.getZ() - z;
+                if (zVal >= -i && zVal <= i) {
+                    int leakY = leakingPos.pos.getY();
+                    if (y < leakY && y >= leakY - 12) {
+                        state = blockGetter.getBlockState(leakingPos.pos);
                         if (state.getBlock() instanceof CopperPipe) {
                             return state.getValue(BlockStateProperties.FACING) != Direction.UP && state.getValue(CopperPipeProperties.HAS_WATER);
                         }
@@ -71,7 +70,7 @@ public class LeakingPipeManager {
     }
 
     public static void clear() {
-        getAltList().clear();
+        getPoses().clear();
     }
 
     public static void clearAll() {
@@ -80,12 +79,12 @@ public class LeakingPipeManager {
     }
 
     public static void clearAndSwitch() {
-        getAltList().clear();
+        clear();
         isAlt = !isAlt;
     }
 
     public static void addPos(Level level, BlockPos pos) {
-        getPoses().add(new LeakingPipePos(pos, level.dimension().location()));
+        getAltList().add(new LeakingPipePos(pos, level.dimension().location()));
     }
 
     public record LeakingPipePos(BlockPos pos, ResourceLocation dimension) {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "copper_pipe",
-  "version": "1.11.2",
+  "version": "1.11.3",
 
   "name": "Simple Copper Pipes",
   "description": "Adds copper pipes with unique mechanics to Minecraft.",

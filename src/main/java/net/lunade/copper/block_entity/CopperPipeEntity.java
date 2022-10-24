@@ -111,6 +111,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             } else {
                 this.pipeMove(world, blockPos, blockState);
             }
+            if (blockState.getValue(CopperPipeProperties.HAS_WATER) && blockState.getValue(BlockStateProperties.FACING) != Direction.UP) {
+                LeakingPipeManager.addPos(world, blockPos);
+            }
         }
     }
 

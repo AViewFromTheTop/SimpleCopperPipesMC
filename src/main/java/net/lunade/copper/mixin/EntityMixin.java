@@ -22,8 +22,8 @@ public class EntityMixin {
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "isTouchingWater", cancellable = true)
-    public void isTouchingWater(CallbackInfoReturnable<Boolean> info) {
+    @Inject(at = @At("HEAD"), method = "isBeingRainedOn", cancellable = true)
+    public void isBeingRainedOn(CallbackInfoReturnable<Boolean> info) {
         if (this.hadWaterPipeNearby) {
             info.setReturnValue(true);
             info.cancel();

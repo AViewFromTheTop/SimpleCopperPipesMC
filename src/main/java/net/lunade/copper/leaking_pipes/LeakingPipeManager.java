@@ -15,25 +15,21 @@ import java.util.ArrayList;
 
 public class LeakingPipeManager {
 
-    public static final ArrayList<LeakingPipePos> leakingPipePoses = new ArrayList<>();
+    private static final ArrayList<LeakingPipePos> leakingPipePosesOne = new ArrayList<>();
+    private static final ArrayList<LeakingPipePos> leakingPipePosesTwo = new ArrayList<>();
+
+    private static boolean isAlt;
 
     public static boolean isWaterPipeNearby(Level level, BlockPos blockPos, int i) {
-        int posX = blockPos.getX();
-        int posY = blockPos.getY();
-        int posZ = blockPos.getZ();
-        int l;
-        ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) leakingPipePoses.clone();
+        ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) getPoses().clone();
         for (LeakingPipePos leakingPos : copiedList) {
             if (leakingPos.dimension.equals(level.dimension().location())) {
-                CopperPipeMain.LOGGER.info(leakingPos.pos.toString());
-                l = leakingPos.pos.getX();
-                if (posX > l - i && posX < l + i) {
-                    l = leakingPos.pos.getZ();
-                    if (posZ > l - i && posZ < l + i) {
-                        l = leakingPos.pos.getY();
-                        if (posY < l && posY >= l - 12) {
-                            return true;
-                        }
+                int xVal = leakingPos.pos.getX() - blockPos.getX();
+                if (xVal >= -i && xVal <= i) {
+                    int zVal = leakingPos.pos.getZ() - blockPos.getZ();
+                    if (zVal >= -i && zVal <= i) {
+                        int y = leakingPos.pos.getY();
+                        return (blockPos.getY() < y && blockPos.getY() >= y - 12);
                     }
                 }
             }
@@ -47,7 +43,7 @@ public class LeakingPipeManager {
         int posZ = blockPos.getZ();
         int l;
         BlockState state;
-        ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) leakingPipePoses.clone();
+        ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) getPoses().clone();
         for (LeakingPipePos leakingPos : copiedList) {
             l = leakingPos.pos.getX();
             if (posX > l - i && posX < l + i) {
@@ -66,12 +62,30 @@ public class LeakingPipeManager {
         return false;
     }
 
+    public static ArrayList<LeakingPipePos> getPoses() {
+        return !isAlt ? leakingPipePosesOne : leakingPipePosesTwo;
+    }
+
+    public static ArrayList<LeakingPipePos> getAltList() {
+        return isAlt ? leakingPipePosesOne : leakingPipePosesTwo;
+    }
+
     public static void clear() {
-        leakingPipePoses.clear();
+        getAltList().clear();
+    }
+
+    public static void clearAll() {
+        leakingPipePosesOne.clear();
+        leakingPipePosesTwo.clear();
+    }
+
+    public static void clearAndSwitch() {
+        getAltList().clear();
+        isAlt = !isAlt;
     }
 
     public static void addPos(Level level, BlockPos pos) {
-        leakingPipePoses.add(new LeakingPipePos(pos, level.dimension().location()));
+        getPoses().add(new LeakingPipePos(pos, level.dimension().location()));
     }
 
     public record LeakingPipePos(BlockPos pos, ResourceLocation dimension) {

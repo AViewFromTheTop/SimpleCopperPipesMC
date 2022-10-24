@@ -239,9 +239,9 @@ public class CopperPipeMain implements ModInitializer {
 		FittingPipeDispenses.init();
 		PipeMovementRestrictions.init();
 
-		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> LeakingPipeManager.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> LeakingPipeManager.clearAll());
 
-		ServerTickEvents.START_SERVER_TICK.register((listener) -> LeakingPipeManager.clear());
+		ServerTickEvents.START_SERVER_TICK.register((listener) -> LeakingPipeManager.clearAndSwitch());
 
 		FabricLoader.getInstance().getEntrypointContainers("simplecopperpipes", CopperPipeEntrypoint.class).forEach(entrypoint -> {
 			try {

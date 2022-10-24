@@ -1,8 +1,11 @@
 package net.lunade.copper.mixin;
 
+import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.EnderMan;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -11,25 +14,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Entity.class)
 public class EntityMixin {
 
-    public boolean hadWaterPipeNearby;
+    @Unique
+    private boolean hadWaterPipeNearby;
 
-    @Inject(at = @At("TAIL"), method = "updateInWaterStateAndDoWaterCurrentPushing")
-    public void updateInWaterStateAndDoWaterCurrentPushing(CallbackInfo info) {
+    @Inject(at = @At("HEAD"), method = "updateInWaterStateAndDoFluidPushing")
+    public void updateInWaterStateAndDoFluidPushing(CallbackInfoReturnable<Boolean> info) {
         Entity entity = Entity.class.cast(this);
-        this.hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(entity.level, entity.blockPosition(), 2);
-    }
-
-    @Inject(at = @At("TAIL"), method = "isInWaterRainOrBubble", cancellable = true)
-    public void isInWaterRainOrBubble(CallbackInfoReturnable<Boolean> info) {
-        if (this.hadWaterPipeNearby) {
-            info.setReturnValue(true);
+        if (!entity.level.isClientSide) {
+            this.hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(entity.level, entity.blockPosition(), 2);
+            if (entity instanceof EnderMan) {
+                CopperPipeMain.LOGGER.info(this.hadWaterPipeNearby ? "true" : "false");
+            }
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "isInWaterOrBubble", cancellable = true)
-    public void isInWaterOrBubble(CallbackInfoReturnable<Boolean> info) {
+    @Inject(at = @At("HEAD"), method = "isInWater", cancellable = true)
+    public void isInWater(CallbackInfoReturnable<Boolean> info) {
         if (this.hadWaterPipeNearby) {
             info.setReturnValue(true);
+            info.cancel();
         }
     }
 }

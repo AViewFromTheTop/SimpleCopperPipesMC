@@ -48,11 +48,9 @@ public class CopperPipeMain implements ModInitializer {
 	public static BlockEntityType<CopperPipeEntity> COPPER_PIPE_ENTITY;
 
 	public static BlockEntityType<CopperFittingEntity> COPPER_FITTING_ENTITY;
-	public static final TagKey<Block> BLOCK_LISTENERS = TagKey.create(Registry.BLOCK_REGISTRY, id("block_event_listeners"));
 	public static final TagKey<Block> UNSCRAPEABLE = TagKey.create(Registry.BLOCK_REGISTRY, id("unscrapeable"));
 	public static final TagKey<Block> WAXED = TagKey.create(Registry.BLOCK_REGISTRY, id("waxed"));
 	public static final TagKey<Block> SILENT_PIPES = TagKey.create(Registry.BLOCK_REGISTRY, id("silent_pipes"));
-	public static final TagKey<EntityType<?>> ENTITY_LISTENERS = TagKey.create(Registry.ENTITY_TYPE_REGISTRY, id("entity_event_listeners"));
 
 	//SOUNDS
 	public static final SoundEvent ITEM_IN = new SoundEvent(id("block.copper_pipe.item_in"));

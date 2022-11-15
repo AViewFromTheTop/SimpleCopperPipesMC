@@ -10,6 +10,7 @@ import net.lunade.copper.block_entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -191,7 +192,7 @@ public class MoveablePipeDataHandler {
         }
 
         public SaveableMovablePipeNbt(GameEvent event, Vec3 originPos, GameEvent.Context emitter, BlockPos pipePos) {
-            this.savedID = Registry.GAME_EVENT.getKey(event);
+            this.savedID = BuiltInRegistries.GAME_EVENT.getKey(event);
             this.vec3d = originPos;
             this.vec3d2 = originPos;
             if (emitter.sourceEntity() != null) {
@@ -210,7 +211,7 @@ public class MoveablePipeDataHandler {
         }
 
         public SaveableMovablePipeNbt(GameEvent event, Vec3 originPos, @Nullable Entity entity, BlockPos pipePos) {
-            this.savedID = Registry.GAME_EVENT.getKey(event);
+            this.savedID = BuiltInRegistries.GAME_EVENT.getKey(event);
             this.vec3d = originPos;
             this.vec3d2 = originPos;
             if (entity != null) {

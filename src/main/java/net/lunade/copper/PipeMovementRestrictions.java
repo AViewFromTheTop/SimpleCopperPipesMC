@@ -3,6 +3,7 @@ package net.lunade.copper;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -48,7 +49,7 @@ public class PipeMovementRestrictions {
 
     @Nullable
     public static CanTransferTo getCanTransferTo(BlockEntity entity) {
-        ResourceLocation id = Registry.BLOCK_ENTITY_TYPE.getKey(entity.getType());
+        ResourceLocation id = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(entity.getType());
         if (blockEntityIds.contains(id)) {
             int index = blockEntityIds.indexOf(id);
             return canTransferTos.get(index);
@@ -58,7 +59,7 @@ public class PipeMovementRestrictions {
 
     @Nullable
     public static CanTakeFrom getCanTakeFrom(BlockEntity entity) {
-        ResourceLocation id = Registry.BLOCK_ENTITY_TYPE.getKey(entity.getType());
+        ResourceLocation id = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(entity.getType());
         if (blockEntityIds.contains(id)) {
             int index = blockEntityIds.indexOf(id);
             return canTakeFroms.get(index);

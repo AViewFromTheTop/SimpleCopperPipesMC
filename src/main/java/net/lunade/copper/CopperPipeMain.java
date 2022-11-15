@@ -19,6 +19,8 @@ import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatFormatter;
@@ -48,9 +50,9 @@ public class CopperPipeMain implements ModInitializer {
 	public static BlockEntityType<CopperPipeEntity> COPPER_PIPE_ENTITY;
 
 	public static BlockEntityType<CopperFittingEntity> COPPER_FITTING_ENTITY;
-	public static final TagKey<Block> UNSCRAPEABLE = TagKey.create(Registry.BLOCK_REGISTRY, id("unscrapeable"));
-	public static final TagKey<Block> WAXED = TagKey.create(Registry.BLOCK_REGISTRY, id("waxed"));
-	public static final TagKey<Block> SILENT_PIPES = TagKey.create(Registry.BLOCK_REGISTRY, id("silent_pipes"));
+	public static final TagKey<Block> UNSCRAPEABLE = TagKey.create(Registries.BLOCK, id("unscrapeable"));
+	public static final TagKey<Block> WAXED = TagKey.create(Registries.BLOCK, id("waxed"));
+	public static final TagKey<Block> SILENT_PIPES = TagKey.create(Registries.BLOCK, id("silent_pipes"));
 
 	//SOUNDS
 	public static final SoundEvent ITEM_IN = new SoundEvent(id("block.copper_pipe.item_in"));
@@ -85,31 +87,32 @@ public class CopperPipeMain implements ModInitializer {
 	public static final SimpleParticleType WHITE_INK = FabricParticleTypes.simple();
 
 	//Item List
-	public static final ArrayList<Item> COPPER_PIPE_ITEMS = new ArrayList<>();
+	public static final ArrayList<Item> REDSTONE_TAB_ITEMS = new ArrayList<>();
+	public static final ArrayList<Item> COLOURED_TAB_ITEMS = new ArrayList<>();
 
 	@Override
 	public void onInitialize() {
 		CopperPipeProperties.init();
 
-		Registry.register(Registry.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
+		Registry.register(BuiltInRegistries.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
 		Stats.CUSTOM.get(INSPECT_PIPE, StatFormatter.DEFAULT);
 
 		//PARTICLE
-		Registry.register(Registry.PARTICLE_TYPE, id("white_ink"), WHITE_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("light_gray_ink"), LIGHT_GRAY_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("gray_ink"), GRAY_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("brown_ink"), BROWN_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("red_ink"), RED_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("orange_ink"), ORANGE_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("yellow_ink"), YELLOW_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("lime_ink"), LIME_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("green_ink"), GREEN_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("cyan_ink"), CYAN_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("light_blue_ink"), LIGHT_BLUE_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("blue_ink"), BLUE_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("purple_ink"), PURPLE_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("magenta_ink"), MAGENTA_INK);
-		Registry.register(Registry.PARTICLE_TYPE, id("pink_ink"), PINK_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("white_ink"), WHITE_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("light_gray_ink"), LIGHT_GRAY_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("gray_ink"), GRAY_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("brown_ink"), BROWN_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("red_ink"), RED_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("orange_ink"), ORANGE_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("yellow_ink"), YELLOW_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("lime_ink"), LIME_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("green_ink"), GREEN_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("cyan_ink"), CYAN_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("light_blue_ink"), LIGHT_BLUE_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("blue_ink"), BLUE_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("purple_ink"), PURPLE_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("magenta_ink"), MAGENTA_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("pink_ink"), PINK_INK);
 
 		//PIPE
 		registerBlock(CopperPipe.COPPER_PIPE, id("copper_pipe"));
@@ -127,42 +130,42 @@ public class CopperPipeMain implements ModInitializer {
 		registerBlock(CopperPipe.CORRODED_PIPE, id("corroded_pipe"));
 
 		//COLOURED
-		registerBlock(CopperPipe.WHITE_PIPE, colourPipe("white"));
-		registerBlock(CopperPipe.LIGHT_GRAY_PIPE, colourPipe("light_gray"));
-		registerBlock(CopperPipe.GRAY_PIPE, colourPipe("gray"));
-		registerBlock(CopperPipe.BLACK_PIPE, colourPipe("black"));
-		registerBlock(CopperPipe.BROWN_PIPE, colourPipe("brown"));
-		registerBlock(CopperPipe.RED_PIPE, colourPipe("red"));
-		registerBlock(CopperPipe.ORANGE_PIPE, colourPipe("orange"));
-		registerBlock(CopperPipe.YELLOW_PIPE, colourPipe("yellow"));
-		registerBlock(CopperPipe.LIME_PIPE, colourPipe("lime"));
-		registerBlock(CopperPipe.GREEN_PIPE, colourPipe("green"));
-		registerBlock(CopperPipe.CYAN_PIPE, colourPipe("cyan"));
-		registerBlock(CopperPipe.LIGHT_BLUE_PIPE, colourPipe("light_blue"));
-		registerBlock(CopperPipe.BLUE_PIPE, colourPipe("blue"));
-		registerBlock(CopperPipe.PURPLE_PIPE, colourPipe("purple"));
-		registerBlock(CopperPipe.MAGENTA_PIPE, colourPipe("magenta"));
-		registerBlock(CopperPipe.PINK_PIPE, colourPipe("pink"));
+		registerColoured(CopperPipe.WHITE_PIPE, colourPipe("white"));
+		registerColoured(CopperPipe.LIGHT_GRAY_PIPE, colourPipe("light_gray"));
+		registerColoured(CopperPipe.GRAY_PIPE, colourPipe("gray"));
+		registerColoured(CopperPipe.BLACK_PIPE, colourPipe("black"));
+		registerColoured(CopperPipe.BROWN_PIPE, colourPipe("brown"));
+		registerColoured(CopperPipe.RED_PIPE, colourPipe("red"));
+		registerColoured(CopperPipe.ORANGE_PIPE, colourPipe("orange"));
+		registerColoured(CopperPipe.YELLOW_PIPE, colourPipe("yellow"));
+		registerColoured(CopperPipe.LIME_PIPE, colourPipe("lime"));
+		registerColoured(CopperPipe.GREEN_PIPE, colourPipe("green"));
+		registerColoured(CopperPipe.CYAN_PIPE, colourPipe("cyan"));
+		registerColoured(CopperPipe.LIGHT_BLUE_PIPE, colourPipe("light_blue"));
+		registerColoured(CopperPipe.BLUE_PIPE, colourPipe("blue"));
+		registerColoured(CopperPipe.PURPLE_PIPE, colourPipe("purple"));
+		registerColoured(CopperPipe.MAGENTA_PIPE, colourPipe("magenta"));
+		registerColoured(CopperPipe.PINK_PIPE, colourPipe("pink"));
 
 		//GLOWING
-		registerBlock(CopperPipe.GLOWING_WHITE_PIPE, glowingPipe("white"));
-		registerBlock(CopperPipe.GLOWING_LIGHT_GRAY_PIPE, glowingPipe("light_gray"));
-		registerBlock(CopperPipe.GLOWING_GRAY_PIPE, glowingPipe("gray"));
-		registerBlock(CopperPipe.GLOWING_BLACK_PIPE, glowingPipe("black"));
-		registerBlock(CopperPipe.GLOWING_BROWN_PIPE, glowingPipe("brown"));
-		registerBlock(CopperPipe.GLOWING_RED_PIPE, glowingPipe("red"));
-		registerBlock(CopperPipe.GLOWING_ORANGE_PIPE, glowingPipe("orange"));
-		registerBlock(CopperPipe.GLOWING_YELLOW_PIPE, glowingPipe("yellow"));
-		registerBlock(CopperPipe.GLOWING_LIME_PIPE, glowingPipe("lime"));
-		registerBlock(CopperPipe.GLOWING_GREEN_PIPE, glowingPipe("green"));
-		registerBlock(CopperPipe.GLOWING_CYAN_PIPE, glowingPipe("cyan"));
-		registerBlock(CopperPipe.GLOWING_LIGHT_BLUE_PIPE, glowingPipe("light_blue"));
-		registerBlock(CopperPipe.GLOWING_BLUE_PIPE, glowingPipe("blue"));
-		registerBlock(CopperPipe.GLOWING_PURPLE_PIPE, glowingPipe("purple"));
-		registerBlock(CopperPipe.GLOWING_MAGENTA_PIPE, glowingPipe("magenta"));
-		registerBlock(CopperPipe.GLOWING_PINK_PIPE, glowingPipe("pink"));
+		registerColoured(CopperPipe.GLOWING_WHITE_PIPE, glowingPipe("white"));
+		registerColoured(CopperPipe.GLOWING_LIGHT_GRAY_PIPE, glowingPipe("light_gray"));
+		registerColoured(CopperPipe.GLOWING_GRAY_PIPE, glowingPipe("gray"));
+		registerColoured(CopperPipe.GLOWING_BLACK_PIPE, glowingPipe("black"));
+		registerColoured(CopperPipe.GLOWING_BROWN_PIPE, glowingPipe("brown"));
+		registerColoured(CopperPipe.GLOWING_RED_PIPE, glowingPipe("red"));
+		registerColoured(CopperPipe.GLOWING_ORANGE_PIPE, glowingPipe("orange"));
+		registerColoured(CopperPipe.GLOWING_YELLOW_PIPE, glowingPipe("yellow"));
+		registerColoured(CopperPipe.GLOWING_LIME_PIPE, glowingPipe("lime"));
+		registerColoured(CopperPipe.GLOWING_GREEN_PIPE, glowingPipe("green"));
+		registerColoured(CopperPipe.GLOWING_CYAN_PIPE, glowingPipe("cyan"));
+		registerColoured(CopperPipe.GLOWING_LIGHT_BLUE_PIPE, glowingPipe("light_blue"));
+		registerColoured(CopperPipe.GLOWING_BLUE_PIPE, glowingPipe("blue"));
+		registerColoured(CopperPipe.GLOWING_PURPLE_PIPE, glowingPipe("purple"));
+		registerColoured(CopperPipe.GLOWING_MAGENTA_PIPE, glowingPipe("magenta"));
+		registerColoured(CopperPipe.GLOWING_PINK_PIPE, glowingPipe("pink"));
 
-		COPPER_PIPE_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "lunade:copper_pipe", FabricBlockEntityTypeBuilder.create(CopperPipeEntity::new, CopperPipe.COPPER_PIPE, CopperPipe.EXPOSED_PIPE, CopperPipe.WEATHERED_PIPE, CopperPipe.OXIDIZED_PIPE, CopperPipe.WAXED_COPPER_PIPE, CopperPipe.WAXED_EXPOSED_PIPE, CopperPipe.WAXED_WEATHERED_PIPE, CopperPipe.WAXED_OXIDIZED_PIPE
+		COPPER_PIPE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, "lunade:copper_pipe", FabricBlockEntityTypeBuilder.create(CopperPipeEntity::new, CopperPipe.COPPER_PIPE, CopperPipe.EXPOSED_PIPE, CopperPipe.WEATHERED_PIPE, CopperPipe.OXIDIZED_PIPE, CopperPipe.WAXED_COPPER_PIPE, CopperPipe.WAXED_EXPOSED_PIPE, CopperPipe.WAXED_WEATHERED_PIPE, CopperPipe.WAXED_OXIDIZED_PIPE
 		,CopperPipe.BLACK_PIPE, CopperPipe.RED_PIPE, CopperPipe.GREEN_PIPE, CopperPipe.BROWN_PIPE, CopperPipe.BLUE_PIPE, CopperPipe.PURPLE_PIPE, CopperPipe.CYAN_PIPE, CopperPipe.LIGHT_GRAY_PIPE
 		,CopperPipe.GRAY_PIPE, CopperPipe.PINK_PIPE, CopperPipe.LIME_PIPE, CopperPipe.YELLOW_PIPE, CopperPipe.LIGHT_BLUE_PIPE, CopperPipe.MAGENTA_PIPE, CopperPipe.ORANGE_PIPE, CopperPipe.WHITE_PIPE
 				,CopperPipe.GLOWING_BLACK_PIPE, CopperPipe.GLOWING_RED_PIPE, CopperPipe.GLOWING_GREEN_PIPE, CopperPipe.GLOWING_BROWN_PIPE, CopperPipe.GLOWING_BLUE_PIPE, CopperPipe.GLOWING_PURPLE_PIPE, CopperPipe.GLOWING_CYAN_PIPE, CopperPipe.GLOWING_LIGHT_GRAY_PIPE
@@ -183,58 +186,58 @@ public class CopperPipeMain implements ModInitializer {
 		registerBlock(CopperFitting.CORRODED_FITTING, id("corroded_fitting"));
 
 		//COLOURED
-		registerBlock(CopperFitting.WHITE_FITTING, colourFitting("white"));
-		registerBlock(CopperFitting.LIGHT_GRAY_FITTING, colourFitting("light_gray"));
-		registerBlock(CopperFitting.GRAY_FITTING, colourFitting("gray"));
-		registerBlock(CopperFitting.BLACK_FITTING, colourFitting("black"));
-		registerBlock(CopperFitting.BROWN_FITTING, colourFitting("brown"));
-		registerBlock(CopperFitting.RED_FITTING, colourFitting("red"));
-		registerBlock(CopperFitting.ORANGE_FITTING, colourFitting("orange"));
-		registerBlock(CopperFitting.YELLOW_FITTING, colourFitting("yellow"));
-		registerBlock(CopperFitting.LIME_FITTING, colourFitting("lime"));
-		registerBlock(CopperFitting.GREEN_FITTING, colourFitting("green"));
-		registerBlock(CopperFitting.CYAN_FITTING, colourFitting("cyan"));
-		registerBlock(CopperFitting.LIGHT_BLUE_FITTING, colourFitting("light_blue"));
-		registerBlock(CopperFitting.BLUE_FITTING, colourFitting("blue"));
-		registerBlock(CopperFitting.PURPLE_FITTING, colourFitting("purple"));
-		registerBlock(CopperFitting.MAGENTA_FITTING, colourFitting("magenta"));
-		registerBlock(CopperFitting.PINK_FITTING, colourFitting("pink"));
+		registerColoured(CopperFitting.WHITE_FITTING, colourFitting("white"));
+		registerColoured(CopperFitting.LIGHT_GRAY_FITTING, colourFitting("light_gray"));
+		registerColoured(CopperFitting.GRAY_FITTING, colourFitting("gray"));
+		registerColoured(CopperFitting.BLACK_FITTING, colourFitting("black"));
+		registerColoured(CopperFitting.BROWN_FITTING, colourFitting("brown"));
+		registerColoured(CopperFitting.RED_FITTING, colourFitting("red"));
+		registerColoured(CopperFitting.ORANGE_FITTING, colourFitting("orange"));
+		registerColoured(CopperFitting.YELLOW_FITTING, colourFitting("yellow"));
+		registerColoured(CopperFitting.LIME_FITTING, colourFitting("lime"));
+		registerColoured(CopperFitting.GREEN_FITTING, colourFitting("green"));
+		registerColoured(CopperFitting.CYAN_FITTING, colourFitting("cyan"));
+		registerColoured(CopperFitting.LIGHT_BLUE_FITTING, colourFitting("light_blue"));
+		registerColoured(CopperFitting.BLUE_FITTING, colourFitting("blue"));
+		registerColoured(CopperFitting.PURPLE_FITTING, colourFitting("purple"));
+		registerColoured(CopperFitting.MAGENTA_FITTING, colourFitting("magenta"));
+		registerColoured(CopperFitting.PINK_FITTING, colourFitting("pink"));
 
 		//GLOWING
-		registerBlock(CopperFitting.GLOWING_WHITE_FITTING, glowingFitting("white"));
-		registerBlock(CopperFitting.GLOWING_LIGHT_GRAY_FITTING, glowingFitting("light_gray"));
-		registerBlock(CopperFitting.GLOWING_GRAY_FITTING, glowingFitting("gray"));
-		registerBlock(CopperFitting.GLOWING_BLACK_FITTING, glowingFitting("black"));
-		registerBlock(CopperFitting.GLOWING_BROWN_FITTING, glowingFitting("brown"));
-		registerBlock(CopperFitting.GLOWING_RED_FITTING, glowingFitting("red"));
-		registerBlock(CopperFitting.GLOWING_ORANGE_FITTING, glowingFitting("orange"));
-		registerBlock(CopperFitting.GLOWING_YELLOW_FITTING, glowingFitting("yellow"));
-		registerBlock(CopperFitting.GLOWING_LIME_FITTING, glowingFitting("lime"));
-		registerBlock(CopperFitting.GLOWING_GREEN_FITTING, glowingFitting("green"));
-		registerBlock(CopperFitting.GLOWING_CYAN_FITTING, glowingFitting("cyan"));
-		registerBlock(CopperFitting.GLOWING_LIGHT_BLUE_FITTING, glowingFitting("light_blue"));
-		registerBlock(CopperFitting.GLOWING_BLUE_FITTING, glowingFitting("blue"));
-		registerBlock(CopperFitting.GLOWING_PURPLE_FITTING, glowingFitting("purple"));
-		registerBlock(CopperFitting.GLOWING_MAGENTA_FITTING, glowingFitting("magenta"));
-		registerBlock(CopperFitting.GLOWING_PINK_FITTING, glowingFitting("pink"));
+		registerColoured(CopperFitting.GLOWING_WHITE_FITTING, glowingFitting("white"));
+		registerColoured(CopperFitting.GLOWING_LIGHT_GRAY_FITTING, glowingFitting("light_gray"));
+		registerColoured(CopperFitting.GLOWING_GRAY_FITTING, glowingFitting("gray"));
+		registerColoured(CopperFitting.GLOWING_BLACK_FITTING, glowingFitting("black"));
+		registerColoured(CopperFitting.GLOWING_BROWN_FITTING, glowingFitting("brown"));
+		registerColoured(CopperFitting.GLOWING_RED_FITTING, glowingFitting("red"));
+		registerColoured(CopperFitting.GLOWING_ORANGE_FITTING, glowingFitting("orange"));
+		registerColoured(CopperFitting.GLOWING_YELLOW_FITTING, glowingFitting("yellow"));
+		registerColoured(CopperFitting.GLOWING_LIME_FITTING, glowingFitting("lime"));
+		registerColoured(CopperFitting.GLOWING_GREEN_FITTING, glowingFitting("green"));
+		registerColoured(CopperFitting.GLOWING_CYAN_FITTING, glowingFitting("cyan"));
+		registerColoured(CopperFitting.GLOWING_LIGHT_BLUE_FITTING, glowingFitting("light_blue"));
+		registerColoured(CopperFitting.GLOWING_BLUE_FITTING, glowingFitting("blue"));
+		registerColoured(CopperFitting.GLOWING_PURPLE_FITTING, glowingFitting("purple"));
+		registerColoured(CopperFitting.GLOWING_MAGENTA_FITTING, glowingFitting("magenta"));
+		registerColoured(CopperFitting.GLOWING_PINK_FITTING, glowingFitting("pink"));
 
-		COPPER_FITTING_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "lunade:copper_fitting", FabricBlockEntityTypeBuilder.create(CopperFittingEntity::new, CopperFitting.COPPER_FITTING, CopperFitting.EXPOSED_FITTING, CopperFitting.WEATHERED_FITTING, CopperFitting.OXIDIZED_FITTING, CopperFitting.WAXED_COPPER_FITTING, CopperFitting.WAXED_EXPOSED_FITTING, CopperFitting.WAXED_WEATHERED_FITTING, CopperFitting.WAXED_OXIDIZED_FITTING
+		COPPER_FITTING_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, "lunade:copper_fitting", FabricBlockEntityTypeBuilder.create(CopperFittingEntity::new, CopperFitting.COPPER_FITTING, CopperFitting.EXPOSED_FITTING, CopperFitting.WEATHERED_FITTING, CopperFitting.OXIDIZED_FITTING, CopperFitting.WAXED_COPPER_FITTING, CopperFitting.WAXED_EXPOSED_FITTING, CopperFitting.WAXED_WEATHERED_FITTING, CopperFitting.WAXED_OXIDIZED_FITTING
 				,CopperFitting.BLACK_FITTING, CopperFitting.RED_FITTING, CopperFitting.GREEN_FITTING, CopperFitting.BROWN_FITTING, CopperFitting.BLUE_FITTING, CopperFitting.PURPLE_FITTING, CopperFitting.CYAN_FITTING, CopperFitting.LIGHT_GRAY_FITTING
 				,CopperFitting.GRAY_FITTING, CopperFitting.PINK_FITTING, CopperFitting.LIME_FITTING, CopperFitting.YELLOW_FITTING, CopperFitting.LIGHT_BLUE_FITTING, CopperFitting.MAGENTA_FITTING, CopperFitting.ORANGE_FITTING, CopperFitting.WHITE_FITTING
 				,CopperFitting.GLOWING_BLACK_FITTING, CopperFitting.GLOWING_RED_FITTING, CopperFitting.GLOWING_GREEN_FITTING, CopperFitting.GLOWING_BROWN_FITTING, CopperFitting.GLOWING_BLUE_FITTING, CopperFitting.GLOWING_PURPLE_FITTING, CopperFitting.GLOWING_CYAN_FITTING, CopperFitting.GLOWING_LIGHT_GRAY_FITTING
 				,CopperFitting.GLOWING_GRAY_FITTING, CopperFitting.GLOWING_PINK_FITTING, CopperFitting.GLOWING_LIME_FITTING, CopperFitting.GLOWING_YELLOW_FITTING, CopperFitting.GLOWING_LIGHT_BLUE_FITTING, CopperFitting.GLOWING_MAGENTA_FITTING, CopperFitting.GLOWING_ORANGE_FITTING, CopperFitting.GLOWING_WHITE_FITTING, CopperFitting.CORRODED_FITTING).build(null));
 
 		//SOUND
-		Registry.register(Registry.SOUND_EVENT, ITEM_IN.getLocation(), ITEM_IN);
-		Registry.register(Registry.SOUND_EVENT, ITEM_OUT.getLocation(), ITEM_OUT);
-		Registry.register(Registry.SOUND_EVENT, LAUNCH.getLocation(), LAUNCH);
-		Registry.register(Registry.SOUND_EVENT, TURN.getLocation(), TURN);
+		Registry.register(BuiltInRegistries.SOUND_EVENT, ITEM_IN.getLocation(), ITEM_IN);
+		Registry.register(BuiltInRegistries.SOUND_EVENT, ITEM_OUT.getLocation(), ITEM_OUT);
+		Registry.register(BuiltInRegistries.SOUND_EVENT, LAUNCH.getLocation(), LAUNCH);
+		Registry.register(BuiltInRegistries.SOUND_EVENT, TURN.getLocation(), TURN);
 
-		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_PLACE.getLocation(), CORRODED_COPPER_PLACE);
-		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_STEP.getLocation(), CORRODED_COPPER_STEP);
-		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_BREAK.getLocation(), CORRODED_COPPER_BREAK);
-		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_FALL.getLocation(), CORRODED_COPPER_FALL);
-		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_HIT.getLocation(), CORRODED_COPPER_HIT);
+		Registry.register(BuiltInRegistries.SOUND_EVENT, CORRODED_COPPER_PLACE.getLocation(), CORRODED_COPPER_PLACE);
+		Registry.register(BuiltInRegistries.SOUND_EVENT, CORRODED_COPPER_STEP.getLocation(), CORRODED_COPPER_STEP);
+		Registry.register(BuiltInRegistries.SOUND_EVENT, CORRODED_COPPER_BREAK.getLocation(), CORRODED_COPPER_BREAK);
+		Registry.register(BuiltInRegistries.SOUND_EVENT, CORRODED_COPPER_FALL.getLocation(), CORRODED_COPPER_FALL);
+		Registry.register(BuiltInRegistries.SOUND_EVENT, CORRODED_COPPER_HIT.getLocation(), CORRODED_COPPER_HIT);
 
 		RegisterPipeNbtMethods.init();
 		PoweredPipeDispenses.init();
@@ -257,8 +260,14 @@ public class CopperPipeMain implements ModInitializer {
 			}
 		});
 
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TAB_REDSTONE).register((entries) -> {
-			for (Item item : COPPER_PIPE_ITEMS) {
+		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.REDSTONE_BLOCKS).register((entries) -> {
+			for (Item item : REDSTONE_TAB_ITEMS) {
+				entries.accept(item);
+			}
+		});
+
+		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COLORED_BLOCKS).register((entries) -> {
+			for (Item item : COLOURED_TAB_ITEMS) {
 				entries.accept(item);
 			}
 		});
@@ -382,8 +391,13 @@ public class CopperPipeMain implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("COPPER_PIPES");
 
 	public static void registerBlock(Block block, ResourceLocation resourceLocation) {
-		Registry.register(Registry.BLOCK, resourceLocation, block);
-		COPPER_PIPE_ITEMS.add(Registry.register(Registry.ITEM, resourceLocation, new BlockItem(block, new FabricItemSettings())));
+		Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
+		REDSTONE_TAB_ITEMS.add(Registry.register(BuiltInRegistries.ITEM, resourceLocation, new BlockItem(block, new FabricItemSettings())));
+	}
+
+	public static void registerColoured(Block block, ResourceLocation resourceLocation) {
+		Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
+		COLOURED_TAB_ITEMS.add(Registry.register(BuiltInRegistries.ITEM, resourceLocation, new BlockItem(block, new FabricItemSettings())));
 	}
 
 }

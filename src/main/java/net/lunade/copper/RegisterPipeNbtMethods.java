@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.VibrationParticleOption;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -115,7 +116,7 @@ public class RegisterPipeNbtMethods {
             Direction direction = blockState.getValue(FACING);
             Direction directionOpp = direction.getOpposite();
             boolean noteBlock = false;
-            if (Registry.GAME_EVENT.get(nbt.getSavedID()) == GameEvent.NOTE_BLOCK_PLAY) {
+            if (BuiltInRegistries.GAME_EVENT.get(nbt.getSavedID()) == GameEvent.NOTE_BLOCK_PLAY) {
                 pipe.noteBlockCooldown = 40;
                 boolean corroded;
                 float volume = 3.0F;
@@ -142,7 +143,7 @@ public class RegisterPipeNbtMethods {
                     }
                 }
             }
-            world.gameEvent(nbt.getEntity(world), Registry.GAME_EVENT.get(nbt.getSavedID()), pos);
+            world.gameEvent(nbt.getEntity(world), BuiltInRegistries.GAME_EVENT.get(nbt.getSavedID()), pos);
             if (noteBlock || pipe.noteBlockCooldown > 0) {
                 if (nbt.useCount == 0) {
                     world.sendParticles(new VibrationParticleOption(new BlockPositionSource(nbt.getBlockPos()), 5), nbt.getVec3d().x, nbt.getVec3d().y, nbt.getVec3d().z, 1, 0.0D, 0.0D, 0.0D, 0.0D);

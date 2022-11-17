@@ -30,12 +30,7 @@ public class HoeItemMixin {
         Player playerEntity = itemUsageContext.getPlayer();
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getItemInHand();
-
-        boolean pipe = false;
-        boolean fitting = false;
-
-        if (blockState!=null && blockState.getBlock() instanceof CopperPipe) {pipe = true;}
-        //if (blockState!=null && blockState.getBlock() instanceof CopperFitting && playerEntity != null) {fitting=true;}
+        boolean pipe = blockState != null && blockState.getBlock() instanceof CopperPipe;
 
         if (pipe) {
             if (playerEntity instanceof ServerPlayer) {
@@ -44,7 +39,6 @@ public class HoeItemMixin {
 
             Block block = blockState.getBlock();
             if (block instanceof CopperPipe) {
-                assert playerEntity != null;
                 Direction face = itemUsageContext.getClickedFace();
                 if (face!=blockState.getValue(CopperPipe.FACING)) {
                     BlockState state = blockState.setValue(CopperPipe.FACING, face);
@@ -52,35 +46,15 @@ public class HoeItemMixin {
                             .setValue(CopperPipe.FRONT_CONNECTED, CopperPipe.canConnectFront(world, blockPos, face))
                             .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(world, blockPos, face));
                     world.setBlockAndUpdate(blockPos, state);
-                    //TODO: ADD SOUNDEVENT FOR PIPE TURNING
                     world.playSound(null, blockPos, CopperPipeMain.TURN, SoundSource.BLOCKS, 0.5F, 1F);
-                    itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> {
-                        playerEntityx.broadcastBreakEvent(itemUsageContext.getHand());
-                    });
+                    if (playerEntity != null) {
+                        itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> playerEntityx.broadcastBreakEvent(itemUsageContext.getHand()));
+                    }
                 }
             }
-
             info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
             info.cancel();
-        } /*else if (fitting) {
-            if (playerEntity instanceof ServerPlayerEntity) {
-                Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack);
-            }
-
-            Block block = blockState.getBlock();
-            if (block instanceof CopperFitting) {
-                if (CopperFitting.getPreviousStage(world, blockPos)!=null) {
-                    CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.getPreviousStage(world, blockPos));
-                }
-            }
-            if (playerEntity != null) {
-                itemStack.damage(1, playerEntity, (playerEntityx) -> {
-                    playerEntityx.sendToolBreakStatus(itemUsageContext.getHand());
-                });
-            }
-
-            return ActionResult.success(world.isClient);
-        }*/
+        }
     }
 
 }

@@ -31,7 +31,8 @@ public class HoneyCombItemMixin {
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getItemInHand();
         boolean canWax = false;
-        if (blockState!=null) {
+
+        if (blockState != null) {
             Block block = blockState.getBlock();
             if (CopperPipeMain.WAX_STAGE.containsKey(block)) {
                 world.playSound(playerEntity, blockPos, SoundEvents.HONEYCOMB_WAX_ON, SoundSource.BLOCKS, 1.0F, 1.0F);

@@ -32,6 +32,7 @@ public class ItemMixin {
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getItemInHand();
         boolean canGlow = false;
+
         if (itemStack.is(Items.GLOW_INK_SAC) && blockState != null) {
             Block block = blockState.getBlock();
             if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {
@@ -40,8 +41,11 @@ public class ItemMixin {
                 canGlow = true;
             }
         }
+
         if (canGlow) {
-            if (playerEntity instanceof ServerPlayer) { CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)playerEntity, blockPos, itemStack); }
+            if (playerEntity instanceof ServerPlayer) {
+                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)playerEntity, blockPos, itemStack);
+            }
 
             Block block = blockState.getBlock();
             if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {

@@ -20,10 +20,9 @@ public class SugarCaneBlockMixin {
         BlockState blockState2 = worldView.getBlockState(blockPos.below());
         if (blockState2.is(Blocks.SUGAR_CANE)) {
             info.setReturnValue(true);
-            info.cancel();
         } else if (blockState2.is(BlockTags.DIRT) || blockState2.is(Blocks.SAND) || blockState2.is(Blocks.RED_SAND)) {
             info.setReturnValue(LeakingPipeManager.isWaterPipeNearbyBlockGetter(worldView, blockPos, 3));
-            info.cancel();
         }
     }
+
 }

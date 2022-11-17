@@ -86,10 +86,6 @@ public class CopperPipeMain implements ModInitializer {
 	public static final SimpleParticleType ORANGE_INK = FabricParticleTypes.simple();
 	public static final SimpleParticleType WHITE_INK = FabricParticleTypes.simple();
 
-	//Item List
-	public static final ArrayList<Item> REDSTONE_TAB_ITEMS = new ArrayList<>();
-	public static final ArrayList<Item> COLOURED_TAB_ITEMS = new ArrayList<>();
-
 	@Override
 	public void onInitialize() {
 		CopperPipeProperties.init();
@@ -251,18 +247,6 @@ public class CopperPipeMain implements ModInitializer {
 
 			}
 		});
-
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.REDSTONE_BLOCKS).register((entries) -> {
-			for (Item item : REDSTONE_TAB_ITEMS) {
-				entries.accept(item);
-			}
-		});
-
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COLORED_BLOCKS).register((entries) -> {
-			for (Item item : COLOURED_TAB_ITEMS) {
-				entries.accept(item);
-			}
-		});
 	}
 
 	public static List<Direction> shuffledDirections(RandomSource random) {
@@ -384,12 +368,16 @@ public class CopperPipeMain implements ModInitializer {
 
 	public static void registerBlock(Block block, ResourceLocation resourceLocation) {
 		Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
-		REDSTONE_TAB_ITEMS.add(Registry.register(BuiltInRegistries.ITEM, resourceLocation, new BlockItem(block, new FabricItemSettings())));
+		Item item = new BlockItem(block, new FabricItemSettings());
+		Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
+		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.REDSTONE_BLOCKS).register((entries) -> entries.accept(item));
 	}
 
 	public static void registerColoured(Block block, ResourceLocation resourceLocation) {
 		Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
-		COLOURED_TAB_ITEMS.add(Registry.register(BuiltInRegistries.ITEM, resourceLocation, new BlockItem(block, new FabricItemSettings())));
+		Item item = new BlockItem(block, new FabricItemSettings());
+		Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
+		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COLORED_BLOCKS).register((entries) -> entries.accept(item));
 	}
 
 }

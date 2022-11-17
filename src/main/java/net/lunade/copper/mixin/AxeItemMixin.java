@@ -31,7 +31,8 @@ public class AxeItemMixin {
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getItemInHand();
         boolean canRun = false;
-        if (blockState!=null) {
+
+        if (blockState != null) {
             Block block = blockState.getBlock();
             if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block) && !blockState.is(CopperPipeMain.UNSCRAPEABLE)) {
                 if (!blockState.is(CopperPipeMain.WAXED)) {
@@ -44,6 +45,7 @@ public class AxeItemMixin {
                 canRun = true;
             }
         }
+
         if (canRun) {
             if (playerEntity instanceof ServerPlayer) {
                 CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)playerEntity, blockPos, itemStack);
@@ -63,6 +65,7 @@ public class AxeItemMixin {
             info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
             info.cancel();
         }
+
     }
 
 }

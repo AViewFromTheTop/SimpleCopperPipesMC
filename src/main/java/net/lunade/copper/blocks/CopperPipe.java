@@ -431,26 +431,30 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public void animateTick(BlockState blockState, Level world, BlockPos blockPos, RandomSource random) {
         Direction direction = blockState.getValue(FACING);
         BlockState offsetState = world.getBlockState(blockPos.relative(direction));
-        boolean waterInFront = offsetState.getBlock()==Blocks.WATER;
-        boolean canWaterOrSmokeExtra = ((offsetState.getBlock()!=Blocks.AIR && !waterInFront) || direction==Direction.DOWN);
-        if (blockState.getValue(HAS_WATER) && direction!=Direction.UP) {
-            world.addParticle(ParticleTypes.DRIPPING_WATER, blockPos.getX()+getDripX(direction), blockPos.getY()+getDripY(direction), blockPos.getZ()+getDripZ(direction),0,0,0);
-            if (canWaterOrSmokeExtra) {
-                double x = blockPos.getX()+getDripX(direction, random);
-                double y = blockPos.getY()+getDripY(direction, random);
-                double z = blockPos.getZ()+getDripZ(direction, random);
-                world.addParticle(ParticleTypes.DRIPPING_WATER, x,y,z,0,0,0);
+        boolean waterInFront = offsetState.getBlock() == Blocks.WATER;
+        boolean canWaterOrSmokeExtra = ((offsetState.getBlock() != Blocks.AIR && !waterInFront) || direction == Direction.DOWN);
+        boolean canWater = blockState.getValue(HAS_WATER) && direction != Direction.UP;
+        boolean canSmoke = blockState.getValue(HAS_SMOKE) && random.nextInt(5) == 0;
+        boolean hasSmokeOrWater = canWater || canSmoke;
+        if (hasSmokeOrWater) {
+            double outX = blockPos.getX() + getDripX(direction);
+            double outY = blockPos.getY() + getDripZ(direction);
+            double outZ = blockPos.getZ() + getDripZ(direction);
+            if (canWater) {
+                world.addParticle(ParticleTypes.DRIPPING_WATER, outX, outY, outZ, 0, 0, 0);
             }
-        }
-        if (random.nextInt(5) == 0) {
-            if (blockState.getValue(HAS_SMOKE)) {
-                CampfireBlock.makeParticles(world, blockPos.relative(direction), false, false);
-                world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, blockPos.getX()+getDripX(direction), blockPos.getY()+getDripY(direction), blockPos.getZ()+getDripZ(direction),0.0D, 0.07D, 0.0D);
-                if (canWaterOrSmokeExtra) {
-                    double x = blockPos.getX()+getDripX(direction, random);
-                    double y = blockPos.getY()+getDripY(direction, random);
-                    double z = blockPos.getZ()+getDripZ(direction, random);
-                    world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x,y,z,0.0D, 0.07D, 0.0D);
+            if (canSmoke) {
+                world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, outX, outY, outZ, 0, 0.07D, 0);
+            }
+            if (canWaterOrSmokeExtra) {
+                double x = blockPos.getX() + getDripX(direction, random);
+                double y = blockPos.getY() + getDripY(direction, random);
+                double z = blockPos.getZ() + getDripZ(direction, random);
+                if (canWater) {
+                    world.addParticle(ParticleTypes.DRIPPING_WATER, x, y, z, 0, 0, 0);
+                }
+                if (canSmoke) {
+                    world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 0, 0.07D, 0);
                 }
             }
         }

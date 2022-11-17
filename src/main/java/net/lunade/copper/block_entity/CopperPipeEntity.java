@@ -467,7 +467,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.canAccept = nbtCompound.getBoolean("canAccept");
         if (nbtCompound.contains("listener", 10)) {
             DataResult<?> var10000 = CopperPipeListener.createPipeCodec(this).parse(new Dynamic<>(NbtOps.INSTANCE, nbtCompound.getCompound("listener")));
-            Logger var10001 = LOGGER;
+            Logger var10001 = CopperPipeMain.LOGGER;
             Objects.requireNonNull(var10001);
             var10000.resultOrPartial(var10001::error).ifPresent((vibrationListener) -> this.listener = (CopperPipeListener) vibrationListener);
         }
@@ -484,7 +484,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         nbtCompound.putBoolean("shootsSpecial", this.shootsSpecial);
         nbtCompound.putBoolean("canAccept", this.canAccept);
         DataResult<?> var10000 = CopperPipeListener.createPipeCodec(this).encodeStart(NbtOps.INSTANCE, this.listener);
-        Logger var10001 = LOGGER;
+        Logger var10001 = CopperPipeMain.LOGGER;
         Objects.requireNonNull(var10001);
         var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbtCompound.put("listener", (Tag)nbtElement));
     }

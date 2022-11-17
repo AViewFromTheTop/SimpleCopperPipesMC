@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockEntity implements Container {
-    public static final Logger LOGGER = LogUtils.getLogger();
 
     public NonNullList<ItemStack> inventory;
     public int waterCooldown;

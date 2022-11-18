@@ -39,23 +39,22 @@ public class HoneyCombItemMixin {
                 world.levelEvent(playerEntity, 3003, blockPos, 0);
                 canWax = true;
             }
-        }
-        if (canWax) {
-            if (playerEntity instanceof ServerPlayer) {
-                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)playerEntity, blockPos, itemStack);
-            }
 
-            Block block = blockState.getBlock();
-            if (CopperPipeMain.WAX_STAGE.containsKey(block)) {
-                Block waxStage = CopperPipeMain.WAX_STAGE.get(block);
-                if (block instanceof Copyable copyable) {
-                    copyable.makeCopyOf(blockState, world, blockPos, waxStage);
+            if (canWax) {
+                if (playerEntity instanceof ServerPlayer) {
+                    CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer) playerEntity, blockPos, itemStack);
                 }
-            }
-            itemStack.shrink(1);
 
-            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
-            info.cancel();
+                if (CopperPipeMain.WAX_STAGE.containsKey(block)) {
+                    Block waxStage = CopperPipeMain.WAX_STAGE.get(block);
+                    if (block instanceof Copyable copyable) {
+                        copyable.makeCopyOf(blockState, world, blockPos, waxStage);
+                    }
+                }
+                itemStack.shrink(1);
+
+                info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
+            }
         }
     }
 

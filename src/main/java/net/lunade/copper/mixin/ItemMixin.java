@@ -40,23 +40,24 @@ public class ItemMixin {
                 world.levelEvent(playerEntity, 3005, blockPos, 0);
                 canGlow = true;
             }
-        }
 
-        if (canGlow) {
-            if (playerEntity instanceof ServerPlayer) {
-                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)playerEntity, blockPos, itemStack);
-            }
-
-            Block block = blockState.getBlock();
-            if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {
-                Block glowStage = CopperPipeMain.GLOW_STAGE.get(block);
-                if (block instanceof Copyable copyable) {
-                    copyable.makeCopyOf(blockState, world, blockPos, glowStage);
+            if (canGlow) {
+                if (playerEntity instanceof ServerPlayer) {
+                    CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer) playerEntity, blockPos, itemStack);
                 }
+
+                if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {
+                    Block glowStage = CopperPipeMain.GLOW_STAGE.get(block);
+                    if (block instanceof Copyable copyable) {
+                        copyable.makeCopyOf(blockState, world, blockPos, glowStage);
+                    }
+                }
+                if (playerEntity != null) {
+                    itemStack.shrink(1);
+                }
+
+                info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
             }
-            if (playerEntity != null) { itemStack.shrink(1); }
-            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
-            info.cancel();
         }
     }
 

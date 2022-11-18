@@ -18,4 +18,5 @@ public class CoralBlockBlockMixin {
             info.setReturnValue(true);
         }
     }
+
 }

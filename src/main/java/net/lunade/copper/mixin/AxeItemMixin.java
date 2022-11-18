@@ -44,26 +44,24 @@ public class AxeItemMixin {
                 }
                 canRun = true;
             }
-        }
 
-        if (canRun) {
-            if (playerEntity instanceof ServerPlayer) {
-                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)playerEntity, blockPos, itemStack);
-            }
-
-            Block block = blockState.getBlock();
-            if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block)) {
-                Block previousStage = CopperPipeMain.PREVIOUS_STAGE.get(block);
-                if (block instanceof Copyable copyable) {
-                    copyable.makeCopyOf(blockState, world, blockPos, previousStage);
+            if (canRun) {
+                if (playerEntity instanceof ServerPlayer) {
+                    CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer) playerEntity, blockPos, itemStack);
                 }
-            }
-            if (playerEntity != null) {
-                itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> playerEntityx.broadcastBreakEvent(itemUsageContext.getHand()));
-            }
 
-            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
-            info.cancel();
+                if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block)) {
+                    Block previousStage = CopperPipeMain.PREVIOUS_STAGE.get(block);
+                    if (block instanceof Copyable copyable) {
+                        copyable.makeCopyOf(blockState, world, blockPos, previousStage);
+                    }
+                }
+                if (playerEntity != null) {
+                    itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> playerEntityx.broadcastBreakEvent(itemUsageContext.getHand()));
+                }
+
+                info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
+            }
         }
 
     }

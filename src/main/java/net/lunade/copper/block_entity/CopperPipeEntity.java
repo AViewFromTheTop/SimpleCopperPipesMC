@@ -30,7 +30,6 @@ import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.WorldlyContainerHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -149,8 +148,12 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public static boolean canTransfer(Level world, BlockPos pos, boolean out, CopperPipeEntity copperPipe) {
         BlockEntity entity = world.getBlockEntity(pos);
         if (entity != null) {
-            if (entity instanceof CopperPipeEntity pipe) { return pipe.transferCooldown <= 0; }
-            if (entity instanceof CopperFittingEntity) { return out || !world.getBlockState(pos).getValue(BlockStateProperties.POWERED); }
+            if (entity instanceof CopperPipeEntity pipe) {
+                return pipe.transferCooldown <= 0;
+            }
+            if (entity instanceof CopperFittingEntity) {
+                return out || !world.getBlockState(pos).getValue(BlockStateProperties.POWERED);
+            }
             if (out) {
                 PipeMovementRestrictions.CanTransferTo canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
                 if (canTransfer != null) {
@@ -162,7 +165,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                     return canTake.canTake((ServerLevel)world, pos, world.getBlockState(pos), copperPipe, entity);
                 }
             }
-        } return true;
+        }
+        return true;
     }
 
     private int moveIn(Level world, BlockPos blockPos, BlockState blockState, Direction facing) {
@@ -190,7 +194,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                     }
                 }
             }
-        } return 0;
+        }
+        return 0;
     }
 
     private boolean moveOut(Level world, BlockPos blockPos, Direction facing) {
@@ -218,7 +223,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 }
 
             }
-        } return false;
+        }
+        return false;
     }
 
     private boolean dispense(ServerLevel serverWorld, BlockPos blockPos, BlockState blockState) {
@@ -321,7 +327,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.unpackLootTable(null);
         int i = -1;
         int j = 1;
-        for(int k = 0; k < this.inventory.size(); ++k) {
+        for (int k = 0; k < this.inventory.size(); ++k) {
             if (!this.inventory.get(k).isEmpty() && random.nextInt(j++) == 0) {
                 i = k;
             }
@@ -375,7 +381,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             if (bl) {
                 inventory2.setChanged();
             }
-        } return itemStack;
+        }
+        return itemStack;
     }
 
     private boolean isFull() {
@@ -467,7 +474,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.canAccept = nbtCompound.getBoolean("canAccept");
         if (nbtCompound.contains("listener", 10)) {
             DataResult<?> var10000 = CopperPipeListener.createPipeCodec(this).parse(new Dynamic<>(NbtOps.INSTANCE, nbtCompound.getCompound("listener")));
-            Logger var10001 = LOGGER;
+            Logger var10001 = CopperPipeMain.LOGGER;
             Objects.requireNonNull(var10001);
             var10000.resultOrPartial(var10001::error).ifPresent((vibrationListener) -> this.listener = (CopperPipeListener) vibrationListener);
         }
@@ -484,7 +491,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         nbtCompound.putBoolean("shootsSpecial", this.shootsSpecial);
         nbtCompound.putBoolean("canAccept", this.canAccept);
         DataResult<?> var10000 = CopperPipeListener.createPipeCodec(this).encodeStart(NbtOps.INSTANCE, this.listener);
-        Logger var10001 = LOGGER;
+        Logger var10001 = CopperPipeMain.LOGGER;
         Objects.requireNonNull(var10001);
         var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbtCompound.put("listener", (Tag)nbtElement));
     }
@@ -498,7 +505,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if (this.canAccept) {
             this.moveablePipeDataHandler.addSaveableMoveablePipeNbt(new MoveablePipeDataHandler.SaveableMovablePipeNbt(gameEvent, Vec3.atCenterOf(blockPos), emitter, this.getBlockPos()).withShouldMove(true).withShouldSave(true));
             return true;
-        } return false;
+        }
+        return false;
     }
 
     @Override

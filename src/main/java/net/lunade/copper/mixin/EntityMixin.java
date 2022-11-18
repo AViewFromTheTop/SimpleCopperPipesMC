@@ -18,7 +18,7 @@ public class EntityMixin {
     public void updateInWaterStateAndDoFluidPushing(CallbackInfoReturnable<Boolean> info) {
         Entity entity = Entity.class.cast(this);
         if (!entity.level.isClientSide) {
-            this.hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(entity.level, entity.blockPosition(), 2);
+            this.hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(entity, 2);
         }
     }
 
@@ -26,7 +26,7 @@ public class EntityMixin {
     public void isInRain(CallbackInfoReturnable<Boolean> info) {
         if (this.hadWaterPipeNearby) {
             info.setReturnValue(true);
-            info.cancel();
         }
     }
+
 }

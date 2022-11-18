@@ -2,9 +2,7 @@ package net.lunade.copper.mixin;
 
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SugarCaneBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,15 +13,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(SugarCaneBlock.class)
 public class SugarCaneBlockMixin {
 
-    @Inject(at = @At("TAIL"), method = "canSurvive", cancellable = true)
-    public void canSurvive(BlockState blockState, LevelReader worldView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
-        BlockState blockState2 = worldView.getBlockState(blockPos.below());
-        if (blockState2.is(Blocks.SUGAR_CANE)) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/core/BlockPos;below()Lnet/minecraft/core/BlockPos;", ordinal = 1, shift = At.Shift.AFTER), method = "canSurvive", cancellable = true)
+    public void canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
+        if (LeakingPipeManager.isWaterPipeNearbyBlockGetter(levelReader, blockPos, 3)) {
             info.setReturnValue(true);
-            info.cancel();
-        } else if (blockState2.is(BlockTags.DIRT) || blockState2.is(Blocks.SAND) || blockState2.is(Blocks.RED_SAND)) {
-            info.setReturnValue(LeakingPipeManager.isWaterPipeNearbyBlockGetter(worldView, blockPos, 3));
-            info.cancel();
         }
     }
+
 }

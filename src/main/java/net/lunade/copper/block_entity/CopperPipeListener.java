@@ -22,21 +22,14 @@ import net.minecraft.world.phys.Vec3;
 public class CopperPipeListener extends VibrationListener {
 
     public static Codec<CopperPipeListener> createPipeCodec(CopperPipeListener.VibrationListenerConfig callback) {
-        return RecordCodecBuilder.create((instance) -> {
-            return instance.group(PositionSource.CODEC.fieldOf("source").forGetter((vibrationListener) -> {
-                return vibrationListener.listenerSource;
-            }), ExtraCodecs.NON_NEGATIVE_INT.fieldOf("range").forGetter((vibrationListener) -> {
-                return vibrationListener.listenerRange;
-            }), VibrationListener.ReceivingEvent.CODEC.optionalFieldOf("event").forGetter((vibrationListener) -> {
-                return Optional.ofNullable(vibrationListener.receivingEvent);
-            }), Codec.floatRange(0.0F, 3.4028235E38F).fieldOf("event_distance").orElse(0.0F).forGetter((vibrationListener) -> {
-                return vibrationListener.receivingDistance;
-            }), ExtraCodecs.NON_NEGATIVE_INT.fieldOf("event_delay").orElse(0).forGetter((vibrationListener) -> {
-                return vibrationListener.travelTimeInTicks;
-            })).apply(instance, (positionSource, integer, optional, float_, integer2) -> {
-                return new CopperPipeListener(positionSource, integer, callback, optional.orElse(null), float_, integer2);
-            });
-        });
+        return RecordCodecBuilder.create((instance) -> instance.group(
+                        PositionSource.CODEC.fieldOf("source").forGetter((vibrationListener) -> vibrationListener.listenerSource),
+                        ExtraCodecs.NON_NEGATIVE_INT.fieldOf("range").forGetter((vibrationListener) -> vibrationListener.listenerRange),
+                        ReceivingEvent.CODEC.optionalFieldOf("event").forGetter((vibrationListener) -> Optional.ofNullable(vibrationListener.receivingEvent)),
+                        Codec.floatRange(0.0F, 3.4028235E38F).fieldOf("event_distance").orElse(0.0F).forGetter((vibrationListener) -> vibrationListener.receivingDistance),
+                        ExtraCodecs.NON_NEGATIVE_INT.fieldOf("event_delay").orElse(0).forGetter((vibrationListener) -> vibrationListener.travelTimeInTicks))
+                .apply(instance, (positionSource, integer, optional, float_, integer2)
+                        -> new CopperPipeListener(positionSource, integer, callback, optional.orElse(null), float_, integer2)));
     }
 
     public CopperPipeListener(PositionSource positionSource, int i, VibrationListenerConfig callback, @Nullable VibrationListener.ReceivingEvent vibration, float f, int j) {
@@ -58,7 +51,7 @@ public class CopperPipeListener extends VibrationListener {
                     return false;
                 } else {
                     Vec3 vec3 = message.source();
-                    Vec3 vec32 = (Vec3)optional.get();
+                    Vec3 vec32 = optional.get();
                     if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
                         return false;
                     } else if (isOccluded(serverLevel, vec3, vec32)) {
@@ -76,20 +69,18 @@ public class CopperPipeListener extends VibrationListener {
         this.receivingDistance = (float)vec3.distanceTo(vec32);
         this.receivingEvent = new VibrationListener.ReceivingEvent(gameEvent, this.receivingDistance, vec3, context.sourceEntity());
         if (gameEvent!=GameEvent.NOTE_BLOCK_PLAY) {
-        this.travelTimeInTicks = Mth.floor(this.receivingDistance);
+            this.travelTimeInTicks = Mth.floor(this.receivingDistance);
         } else {
             this.travelTimeInTicks = 0;
         }
-        //serverLevel.sendParticles(new VibrationParticleOption(this.listenerSource, this.travelTimeInTicks), vec3.x, vec3.y, vec3.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         this.config.onSignalSchedule();
     }
 
     private static boolean isOccluded(Level level, Vec3 vec3, Vec3 vec32) {
         Vec3 vec33 = new Vec3((double)Mth.floor(vec3.x) + 0.5D, (double)Mth.floor(vec3.y) + 0.5D, (double)Mth.floor(vec3.z) + 0.5D);
         Vec3 vec34 = new Vec3((double)Mth.floor(vec32.x) + 0.5D, (double)Mth.floor(vec32.y) + 0.5D, (double)Mth.floor(vec32.z) + 0.5D);
-        Direction[] var5 = Direction.values();
 
-        for (Direction direction : var5) {
+        for (Direction direction : Direction.values()) {
             Vec3 vec35 = vec33.relative(direction, 9.999999747378752E-6D);
             if (level.isBlockInLine(new ClipBlockStateContext(vec35, vec34, (blockState) -> blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))).getType() != HitResult.Type.BLOCK) {
                 return false;
@@ -100,4 +91,3 @@ public class CopperPipeListener extends VibrationListener {
     }
 
 }
-

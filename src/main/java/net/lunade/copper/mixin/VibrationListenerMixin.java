@@ -19,8 +19,7 @@ public class VibrationListenerMixin {
     @Inject(at = @At("RETURN"), method = "handleGameEvent")
     public void handleGameEvent(ServerLevel serverLevel, GameEvent.Message message, CallbackInfoReturnable<Boolean> infoReturnable) {
         if (infoReturnable.getReturnValue()) {
-            BlockPos checkPos = new BlockPos(message.source());
-            BlockEntity blockEntity = serverLevel.getBlockEntity(checkPos);
+            BlockEntity blockEntity = serverLevel.getBlockEntity(new BlockPos(message.source()));
             if (blockEntity instanceof CopperPipeEntity pipeEntity) {
                 if (pipeEntity.inputGameEventPos != null && pipeEntity.gameEventNbtVec3 != null && pipeEntity.noteBlockCooldown <= 0) {
                     serverLevel.sendParticles(new VibrationParticleOption(new BlockPositionSource(pipeEntity.inputGameEventPos), 5), pipeEntity.gameEventNbtVec3.x(), pipeEntity.gameEventNbtVec3.y(), pipeEntity.gameEventNbtVec3.z(), 1, 0.0D, 0.0D, 0.0D, 0.0D);

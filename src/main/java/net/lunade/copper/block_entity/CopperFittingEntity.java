@@ -1,6 +1,6 @@
 package net.lunade.copper.block_entity;
 
-import net.lunade.copper.Main;
+import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.block.BlockState;
@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
     public CopperFittingEntity(BlockPos blockPos, BlockState blockState) {
-        super(Main.COPPER_FITTING_ENTITY, blockPos, blockState, MoveablePipeDataHandler.MOVE_TYPE.FROM_FITTING);
+        super(CopperPipeMain.COPPER_FITTING_ENTITY, blockPos, blockState, MoveablePipeDataHandler.MOVE_TYPE.FROM_FITTING);
     }
 
     @Override

@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Main implements ModInitializer {
+public class CopperPipeMain implements ModInitializer {
 
 	public static final int CURRENT_FIX_VERSION = 2;
 

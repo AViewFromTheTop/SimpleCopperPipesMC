@@ -18,7 +18,7 @@ public class EntityMixin {
     public void updateWaterState(CallbackInfoReturnable<Boolean> info) {
         Entity entity = Entity.class.cast(this);
         if (!entity.world.isClient) {
-            this.hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(entity.world, entity.getBlockPos(), 2);
+            this.hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(entity, 2);
         }
     }
 

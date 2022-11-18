@@ -3,11 +3,15 @@ package net.lunade.copper.leaking_pipes;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -19,20 +23,28 @@ public class LeakingPipeManager {
 
     private static boolean isAlt;
 
-    public static boolean isWaterPipeNearby(World level, BlockPos blockPos, int i) {
+    public static boolean isWaterPipeNearby(Entity entity, int i) {
         ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) getPoses().clone();
-        int x = blockPos.getX();
-        int y = blockPos.getY();
-        int z = blockPos.getZ();
-        Identifier dimension = level.getRegistryKey().getValue();
+        int x = entity.getBlockX();
+        int y = entity.getBlockY();
+        int z = entity.getBlockZ();
+        Vec3d entityPos = entity.getEyePos();
+        Identifier dimension = entity.world.getRegistryKey().getValue();
+        BlockPos leakPos;
         for (LeakingPipePos leakingPos : copiedList) {
             if (leakingPos.dimension.equals(dimension)) {
-                int xVal = leakingPos.pos.getX() - x;
+                leakPos = leakingPos.pos;
+                double xVal = leakPos.getX() - x;
                 if (xVal >= -i && xVal <= i) {
-                    int zVal = leakingPos.pos.getZ() - z;
+                    double zVal = leakPos.getZ() - z;
                     if (zVal >= -i && zVal <= i) {
-                        int leakY = leakingPos.pos.getY();
-                        return (y < leakY && y >= leakY - 12);
+                        int leakY = leakPos.getY();
+                        if (y < leakY && y >= leakY - 12) {
+                            BlockHitResult hitResult = entity.world.raycast(new RaycastContext(entityPos, new Vec3d(leakPos.getX() + 0.5, leakPos.getY() + 0.5, leakPos.getZ() + 0.5), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, entity));
+                            if (hitResult.getBlockPos().equals(leakPos)) {
+                                return true;
+                            }
+                        };
                     }
                 }
             }

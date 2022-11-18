@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.Main;
+import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.Copyable;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.Block;
@@ -24,35 +24,35 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Item.class)
 public class ItemMixin {
 
-    @Inject(at = @At("TAIL"), method = "useOnBlock", cancellable = true)
-    public void useOnBlock(ItemUsageContext itemUsageContext, CallbackInfoReturnable<ActionResult> info) {
+    @Inject(at = @At("TAIL"), method = "useOn", cancellable = true)
+    public void useOn(ItemUsageContext itemUsageContext, CallbackInfoReturnable<ActionResult> info) {
         World world = itemUsageContext.getWorld();
         BlockPos blockPos = itemUsageContext.getBlockPos();
         PlayerEntity playerEntity = itemUsageContext.getPlayer();
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getStack();
-        boolean canGlow = false;
+
         if (itemStack.isOf(Items.GLOW_INK_SAC) && blockState != null) {
             Block block = blockState.getBlock();
-            if (Main.GLOW_STAGE.containsKey(block)) {
+            if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {
                 world.playSound(playerEntity, blockPos, SoundEvents.ITEM_GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
                 world.syncWorldEvent(playerEntity, 3005, blockPos, 0);
-                canGlow = true;
-            }
-        }
-        if (canGlow) {
-            if (playerEntity instanceof ServerPlayerEntity) { Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack); }
-
-            Block block = blockState.getBlock();
-            if (Main.GLOW_STAGE.containsKey(block)) {
-                Block glowStage = Main.GLOW_STAGE.get(block);
-                if (block instanceof Copyable copyable) {
-                    copyable.makeCopyOf(blockState, world, blockPos, glowStage);
+                if (playerEntity instanceof ServerPlayerEntity player) {
+                    Criteria.ITEM_USED_ON_BLOCK.trigger(player, blockPos, itemStack);
                 }
+
+                if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {
+                    Block glowStage = CopperPipeMain.GLOW_STAGE.get(block);
+                    if (block instanceof Copyable copyable) {
+                        copyable.makeCopyOf(blockState, world, blockPos, glowStage);
+                    }
+                }
+                if (playerEntity != null) {
+                    itemStack.decrement(1);
+                }
+
+                info.setReturnValue(ActionResult.success(world.isClient));
             }
-            if (playerEntity != null) { itemStack.decrement(1); }
-            info.setReturnValue(ActionResult.success(world.isClient));
-            info.cancel();
         }
     }
 

@@ -12,11 +12,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(FarmlandBlock.class)
 public class FarmlandBlockMixin {
 
-    @Inject(at = @At("TAIL"), method = "isWaterNearby", cancellable = true)
+    @Inject(at = @At("RETURN"), method = "isWaterNearby", cancellable = true)
     private static void isWaterNearby(WorldView worldView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
-        if (!info.getReturnValue()) {
-            info.setReturnValue(LeakingPipeManager.isWaterPipeNearbyBlockGetter(worldView, blockPos, 6));
-            info.cancel();
+        if (!info.getReturnValue() && LeakingPipeManager.isWaterPipeNearbyBlockGetter(worldView, blockPos, 6)) {
+            info.setReturnValue(true);
         }
     }
 

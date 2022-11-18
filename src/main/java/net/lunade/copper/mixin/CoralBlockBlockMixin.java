@@ -16,7 +16,6 @@ public class CoralBlockBlockMixin {
     protected void isInWater(BlockView blockView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
         if (LeakingPipeManager.isWaterPipeNearbyBlockGetter(blockView, blockPos, 2)) {
             info.setReturnValue(true);
-            info.cancel();
         }
     }
 }

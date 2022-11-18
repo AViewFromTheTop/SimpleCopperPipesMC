@@ -24,8 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Item.class)
 public class ItemMixin {
 
-    @Inject(at = @At("TAIL"), method = "useOn", cancellable = true)
-    public void useOn(ItemUsageContext itemUsageContext, CallbackInfoReturnable<ActionResult> info) {
+    @Inject(at = @At("TAIL"), method = "useOnBlock", cancellable = true)
+    public void useOnBlock(ItemUsageContext itemUsageContext, CallbackInfoReturnable<ActionResult> info) {
         World world = itemUsageContext.getWorld();
         BlockPos blockPos = itemUsageContext.getBlockPos();
         PlayerEntity playerEntity = itemUsageContext.getPlayer();

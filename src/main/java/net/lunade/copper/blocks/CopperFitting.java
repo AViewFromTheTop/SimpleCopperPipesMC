@@ -101,14 +101,19 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
     public void setPlacedBy(Level world, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
         if (itemStack.hasCustomHoverName()) {
             BlockEntity blockEntity = world.getBlockEntity(blockPos);
-            if (blockEntity instanceof CopperFittingEntity) { ((CopperFittingEntity) blockEntity).setCustomName(itemStack.getHoverName()); }
+            if (blockEntity instanceof CopperFittingEntity) {
+                ((CopperFittingEntity) blockEntity).setCustomName(itemStack.getHoverName());
+            }
         }
         updateBlockEntityValues(world, blockPos, blockState);
     }
 
     @Override
     public FluidState getFluidState(BlockState blockState) {
-        if (blockState.getValue(WATERLOGGED)) { return Fluids.WATER.getSource(false); }return super.getFluidState(blockState);
+        if (blockState.getValue(WATERLOGGED)) {
+            return Fluids.WATER.getSource(false);
+        }
+        return super.getFluidState(blockState);
     }
 
     public RenderShape getRenderShape(BlockState blockState) {
@@ -140,7 +145,9 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
             float degradationChance = i == 0 ? 0.75F : 1.0F;
             for (BlockPos blockPos2 : BlockPos.withinManhattan(blockPos, 4, 4, 4)) {
                 int l = blockPos2.distManhattan(blockPos);
-                if (l > 4) { break; }
+                if (l > 4) {
+                    break;
+                }
 
                 if (!blockPos2.equals(blockPos)) {
                     BlockState blockState2 = serverWorld.getBlockState(blockPos2);
@@ -246,7 +253,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
                     CopperPipeMain.CORRODED_COPPER_BREAK,
                     CopperPipeMain.CORRODED_COPPER_FALL,
                     CopperPipeMain.CORRODED_COPPER_HIT
-    )), 4, ParticleTypes.SQUID_INK);
+            )), 4, ParticleTypes.SQUID_INK);
 
     public static final Block BLACK_FITTING = new CopperFitting(Properties.of(Material.METAL, MaterialColor.COLOR_BLACK).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2, ParticleTypes.SQUID_INK);
     public static final Block RED_FITTING = new CopperFitting(Properties.of(Material.METAL, MaterialColor.COLOR_RED).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2, CopperPipeMain.RED_INK);

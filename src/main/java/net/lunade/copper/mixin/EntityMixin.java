@@ -26,7 +26,7 @@ public class EntityMixin {
     public void isInRain(CallbackInfoReturnable<Boolean> info) {
         if (this.hadWaterPipeNearby) {
             info.setReturnValue(true);
-            info.cancel();
         }
     }
+
 }

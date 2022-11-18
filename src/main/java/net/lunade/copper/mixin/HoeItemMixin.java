@@ -13,7 +13,6 @@ import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,56 +30,26 @@ public class HoeItemMixin {
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getItemInHand();
 
-        boolean pipe = false;
-        boolean fitting = false;
-
-        if (blockState!=null && blockState.getBlock() instanceof CopperPipe) {pipe = true;}
-        //if (blockState!=null && blockState.getBlock() instanceof CopperFitting && playerEntity != null) {fitting=true;}
-
-        if (pipe) {
-            if (playerEntity instanceof ServerPlayer) {
-                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)playerEntity, blockPos, itemStack);
+        if (blockState != null && blockState.getBlock() instanceof CopperPipe) {
+            if (playerEntity instanceof ServerPlayer player) {
+                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(player, blockPos, itemStack);
             }
 
-            Block block = blockState.getBlock();
-            if (block instanceof CopperPipe) {
-                assert playerEntity != null;
-                Direction face = itemUsageContext.getClickedFace();
-                if (face!=blockState.getValue(CopperPipe.FACING)) {
-                    BlockState state = blockState.setValue(CopperPipe.FACING, face);
-                    state = state.setValue(CopperPipe.BACK_CONNECTED, CopperPipe.canConnectBack(world, blockPos, face))
-                            .setValue(CopperPipe.FRONT_CONNECTED, CopperPipe.canConnectFront(world, blockPos, face))
-                            .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(world, blockPos, face));
-                    world.setBlockAndUpdate(blockPos, state);
-                    //TODO: ADD SOUNDEVENT FOR PIPE TURNING
-                    world.playSound(null, blockPos, CopperPipeMain.TURN, SoundSource.BLOCKS, 0.5F, 1F);
-                    itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> {
-                        playerEntityx.broadcastBreakEvent(itemUsageContext.getHand());
-                    });
+            Direction face = itemUsageContext.getClickedFace();
+            if (face != blockState.getValue(CopperPipe.FACING)) {
+                BlockState state = blockState.setValue(CopperPipe.FACING, face)
+                        .setValue(CopperPipe.BACK_CONNECTED, CopperPipe.canConnectBack(world, blockPos, face))
+                        .setValue(CopperPipe.FRONT_CONNECTED, CopperPipe.canConnectFront(world, blockPos, face))
+                        .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(world, blockPos, face));
+
+                world.setBlockAndUpdate(blockPos, state);
+                world.playSound(null, blockPos, CopperPipeMain.TURN, SoundSource.BLOCKS, 0.5F, 1F);
+                if (playerEntity != null) {
+                    itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> playerEntityx.broadcastBreakEvent(itemUsageContext.getHand()));
                 }
             }
-
             info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
-            info.cancel();
-        } /*else if (fitting) {
-            if (playerEntity instanceof ServerPlayerEntity) {
-                Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack);
-            }
-
-            Block block = blockState.getBlock();
-            if (block instanceof CopperFitting) {
-                if (CopperFitting.getPreviousStage(world, blockPos)!=null) {
-                    CopperFitting.makeCopyOf(blockState, world, blockPos, CopperFitting.getPreviousStage(world, blockPos));
-                }
-            }
-            if (playerEntity != null) {
-                itemStack.damage(1, playerEntity, (playerEntityx) -> {
-                    playerEntityx.sendToolBreakStatus(itemUsageContext.getHand());
-                });
-            }
-
-            return ActionResult.success(world.isClient);
-        }*/
+        }
     }
 
 }

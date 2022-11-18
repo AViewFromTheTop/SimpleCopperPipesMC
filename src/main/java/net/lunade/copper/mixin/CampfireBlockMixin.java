@@ -19,10 +19,8 @@ public class CampfireBlockMixin {
         for(int i = 1; i <= 5; ++i) {
             BlockPos blockPos2 = blockPos.below(i);
             BlockState blockState = world.getBlockState(blockPos2);
-            if (blockState.getBlock() instanceof CopperPipe) {
-                if (blockState.getValue(CopperPipeProperties.HAS_SMOKE)) {
-                    info.setReturnValue(true);
-                }
+            if (blockState.getBlock() instanceof CopperPipe && blockState.getValue(CopperPipeProperties.HAS_SMOKE)) {
+                info.setReturnValue(true);
             }
         }
     }

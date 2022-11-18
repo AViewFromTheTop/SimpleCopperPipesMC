@@ -30,8 +30,8 @@ public class AxeItemMixin {
         Player playerEntity = itemUsageContext.getPlayer();
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getItemInHand();
-        boolean canRun = false;
-        if (blockState!=null) {
+
+        if (blockState != null) {
             Block block = blockState.getBlock();
             if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block) && !blockState.is(CopperPipeMain.UNSCRAPEABLE)) {
                 if (!blockState.is(CopperPipeMain.WAXED)) {
@@ -41,28 +41,24 @@ public class AxeItemMixin {
                     world.playSound(playerEntity, blockPos, SoundEvents.AXE_WAX_OFF, SoundSource.BLOCKS, 1.0F, 1.0F);
                     world.levelEvent(playerEntity, 3004, blockPos, 0);
                 }
-                canRun = true;
-            }
-        }
-        if (canRun) {
-            if (playerEntity instanceof ServerPlayer) {
-                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)playerEntity, blockPos, itemStack);
-            }
-
-            Block block = blockState.getBlock();
-            if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block)) {
-                Block previousStage = CopperPipeMain.PREVIOUS_STAGE.get(block);
-                if (block instanceof Copyable copyable) {
-                    copyable.makeCopyOf(blockState, world, blockPos, previousStage);
+                if (playerEntity instanceof ServerPlayer) {
+                    CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer) playerEntity, blockPos, itemStack);
                 }
-            }
-            if (playerEntity != null) {
-                itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> playerEntityx.broadcastBreakEvent(itemUsageContext.getHand()));
-            }
 
-            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
-            info.cancel();
+                if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block)) {
+                    Block previousStage = CopperPipeMain.PREVIOUS_STAGE.get(block);
+                    if (block instanceof Copyable copyable) {
+                        copyable.makeCopyOf(blockState, world, blockPos, previousStage);
+                    }
+                }
+                if (playerEntity != null) {
+                    itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> playerEntityx.broadcastBreakEvent(itemUsageContext.getHand()));
+                }
+
+                info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
+            }
         }
+
     }
 
 }

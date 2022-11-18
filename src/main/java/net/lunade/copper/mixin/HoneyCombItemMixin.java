@@ -30,31 +30,26 @@ public class HoneyCombItemMixin {
         Player playerEntity = itemUsageContext.getPlayer();
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getItemInHand();
-        boolean canWax = false;
-        if (blockState!=null) {
+
+        if (blockState != null) {
             Block block = blockState.getBlock();
             if (CopperPipeMain.WAX_STAGE.containsKey(block)) {
                 world.playSound(playerEntity, blockPos, SoundEvents.HONEYCOMB_WAX_ON, SoundSource.BLOCKS, 1.0F, 1.0F);
                 world.levelEvent(playerEntity, 3003, blockPos, 0);
-                canWax = true;
-            }
-        }
-        if (canWax) {
-            if (playerEntity instanceof ServerPlayer) {
-                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)playerEntity, blockPos, itemStack);
-            }
-
-            Block block = blockState.getBlock();
-            if (CopperPipeMain.WAX_STAGE.containsKey(block)) {
-                Block waxStage = CopperPipeMain.WAX_STAGE.get(block);
-                if (block instanceof Copyable copyable) {
-                    copyable.makeCopyOf(blockState, world, blockPos, waxStage);
+                if (playerEntity instanceof ServerPlayer) {
+                    CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer) playerEntity, blockPos, itemStack);
                 }
-            }
-            itemStack.shrink(1);
 
-            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
-            info.cancel();
+                if (CopperPipeMain.WAX_STAGE.containsKey(block)) {
+                    Block waxStage = CopperPipeMain.WAX_STAGE.get(block);
+                    if (block instanceof Copyable copyable) {
+                        copyable.makeCopyOf(blockState, world, blockPos, waxStage);
+                    }
+                }
+                itemStack.shrink(1);
+
+                info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
+            }
         }
     }
 

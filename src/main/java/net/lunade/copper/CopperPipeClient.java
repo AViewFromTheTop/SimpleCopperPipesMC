@@ -1,13 +1,9 @@
 package net.lunade.copper;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
-import net.lunade.copper.blocks.CopperFitting;
-import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.particle.PipeInkParticle;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -19,7 +15,6 @@ public class CopperPipeClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        //CrowdinTranslate.downloadTranslations("simple-copper-pipes", "lunade");
         ParticleFactoryRegistry.getInstance().register(CopperPipeMain.RED_INK, PipeInkParticle.RedFactory::new);
         ParticleFactoryRegistry.getInstance().register(CopperPipeMain.GREEN_INK, PipeInkParticle.GreenFactory::new);
         ParticleFactoryRegistry.getInstance().register(CopperPipeMain.BROWN_INK, PipeInkParticle.BrownFactory::new);
@@ -43,9 +38,9 @@ public class CopperPipeClient implements ClientModInitializer {
             Direction direction = getDirection(i);
             client.execute(() -> {
                 assert client.level != null;
-                double x = direction.getStepX()*0.6;
-                double y = direction.getStepY()*0.6;
-                double z = direction.getStepZ()*0.6;
+                double x = direction.getStepX() * 0.6;
+                double y = direction.getStepY() * 0.6;
+                double z = direction.getStepZ() * 0.6;
                 client.level.addParticle(ParticleTypes.NOTE, (double)pos.getX() + 0.5D + x, (double)pos.getY() + 0.5D + y, (double)pos.getZ() + 0.5D + z, (double)k / 24.0D, 0.0D, 0.0D);
             });
         });

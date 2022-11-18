@@ -31,17 +31,12 @@ public class ItemMixin {
         Player playerEntity = itemUsageContext.getPlayer();
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getItemInHand();
-        boolean canGlow = false;
 
         if (itemStack.is(Items.GLOW_INK_SAC) && blockState != null) {
             Block block = blockState.getBlock();
             if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {
                 world.playSound(playerEntity, blockPos, SoundEvents.GLOW_INK_SAC_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
                 world.levelEvent(playerEntity, 3005, blockPos, 0);
-                canGlow = true;
-            }
-
-            if (canGlow) {
                 if (playerEntity instanceof ServerPlayer) {
                     CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer) playerEntity, blockPos, itemStack);
                 }

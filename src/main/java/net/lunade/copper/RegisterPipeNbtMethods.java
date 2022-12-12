@@ -132,7 +132,7 @@ public class RegisterPipeNbtMethods {
                     BlockState state = world.getBlockState(originPos);
                     int k = state.getValue(NOTE);
                     float f = (float) Math.pow(2.0D, (double) (k - 12) / 12.0D);
-                    world.playSound(null, pos, state.getValue(INSTRUMENT).getSoundEvent(), SoundSource.RECORDS, volume, f);
+                    world.playSound(null, pos, state.getValue(INSTRUMENT).getSoundEvent().value(), SoundSource.RECORDS, volume, f);
                     //Send NoteBlock Particle Packet To Client
                     FriendlyByteBuf buf = PacketByteBufs.create();
                     buf.writeBlockPos(pos);

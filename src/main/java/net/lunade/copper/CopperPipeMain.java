@@ -27,14 +27,15 @@ import net.minecraft.stats.StatFormatter;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.List;
 
 public class CopperPipeMain implements ModInitializer {
 
@@ -55,16 +56,16 @@ public class CopperPipeMain implements ModInitializer {
 	public static final TagKey<Block> SILENT_PIPES = TagKey.create(Registries.BLOCK, id("silent_pipes"));
 
 	//SOUNDS
-	public static final SoundEvent ITEM_IN = new SoundEvent(id("block.copper_pipe.item_in"));
-	public static final SoundEvent ITEM_OUT = new SoundEvent(id("block.copper_pipe.item_out"));
-	public static final SoundEvent LAUNCH = new SoundEvent(id("block.copper_pipe.launch"));
-	public static final SoundEvent TURN = new SoundEvent(id("block.copper_pipe.turn"));
+	public static final SoundEvent ITEM_IN = SoundEvent.createVariableRangeEvent(id("block.copper_pipe.item_in"));
+	public static final SoundEvent ITEM_OUT = SoundEvent.createVariableRangeEvent(id("block.copper_pipe.item_out"));
+	public static final SoundEvent LAUNCH = SoundEvent.createVariableRangeEvent(id("block.copper_pipe.launch"));
+	public static final SoundEvent TURN = SoundEvent.createVariableRangeEvent(id("block.copper_pipe.turn"));
 
-	public static final SoundEvent CORRODED_COPPER_PLACE = new SoundEvent(id("block.corroded_copper.place"));
-	public static final SoundEvent CORRODED_COPPER_STEP = new SoundEvent(id("block.corroded_copper.step"));
-	public static final SoundEvent CORRODED_COPPER_BREAK = new SoundEvent(id("block.corroded_copper.break"));
-	public static final SoundEvent CORRODED_COPPER_FALL = new SoundEvent(id("block.corroded_copper.fall"));
-	public static final SoundEvent CORRODED_COPPER_HIT = new SoundEvent(id("block.corroded_copper.hit"));
+	public static final SoundEvent CORRODED_COPPER_PLACE = SoundEvent.createVariableRangeEvent(id("block.corroded_copper.place"));
+	public static final SoundEvent CORRODED_COPPER_STEP = SoundEvent.createVariableRangeEvent(id("block.corroded_copper.step"));
+	public static final SoundEvent CORRODED_COPPER_BREAK = SoundEvent.createVariableRangeEvent(id("block.corroded_copper.break"));
+	public static final SoundEvent CORRODED_COPPER_FALL = SoundEvent.createVariableRangeEvent(id("block.corroded_copper.fall"));
+	public static final SoundEvent CORRODED_COPPER_HIT = SoundEvent.createVariableRangeEvent(id("block.corroded_copper.hit"));
 
 	//NOTE BLOCK
 	public static final ResourceLocation NOTE_PACKET = id("note_packet");

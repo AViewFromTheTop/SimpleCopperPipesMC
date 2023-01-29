@@ -14,6 +14,7 @@ import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
+import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -25,13 +26,14 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.List;
 
 public class CopperPipeMain implements ModInitializer {
 
@@ -88,6 +90,7 @@ public class CopperPipeMain implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		CopperPipeProperties.init();
+		SimpleCopperRegistries.initRegistry();
 
 		Registry.register(Registry.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
 		Stats.CUSTOM.get(INSPECT_PIPE, StatFormatter.DEFAULT);

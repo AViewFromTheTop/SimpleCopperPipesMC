@@ -8,6 +8,7 @@ import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
+import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -24,8 +25,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-
 import static net.lunade.copper.blocks.CopperFitting.CORRODED_FITTING;
 import static net.minecraft.world.level.block.NoteBlock.INSTRUMENT;
 import static net.minecraft.world.level.block.NoteBlock.NOTE;
@@ -33,80 +32,78 @@ import static net.minecraft.world.level.block.state.properties.BlockStatePropert
 
 public class RegisterPipeNbtMethods {
 
-    private static final ArrayList<ResourceLocation> ids = new ArrayList<>();
-    private static final ArrayList<DispenseMethod<?>> dispenses = new ArrayList<>();
-    private static final ArrayList<OnMoveMethod<?>> moves = new ArrayList<>();
-    private static final ArrayList<TickMethod<?>> ticks = new ArrayList<>();
-    private static final ArrayList<CanMoveMethod<?>> canMoves = new ArrayList<>();
-
-    public static void register(ResourceLocation id, DispenseMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> dispense, OnMoveMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> move, TickMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> tick, CanMoveMethod<MoveablePipeDataHandler.SaveableMovablePipeNbt> canMove) {
-        if (!ids.contains(id)) {
-            ids.add(id);
-            dispenses.add(dispense);
-            moves.add(move);
-            ticks.add(tick);
-            canMoves.add(canMove);
-        } else {
-            dispenses.set(ids.indexOf(id), dispense);
-            moves.set(ids.indexOf(id), move);
-            ticks.set(ids.indexOf(id), tick);
-            canMoves.add(ids.indexOf(id), canMove);
-        }
+    public static void register(ResourceLocation id, DispenseMethod dispense, OnMoveMethod move, TickMethod tick, CanMoveMethod canMove) {
+        Registry.register(SimpleCopperRegistries.UNIQUE_PIPE_NBTS, id, new UniquePipeNbt(dispense, move, tick, canMove));
     }
 
+    public record UniquePipeNbt(
+            DispenseMethod dispenseMethod,
+            OnMoveMethod onMoveMethod,
+            TickMethod tickMethod,
+            CanMoveMethod canMoveMethod
+    ) {}
+    
     @Nullable
-    public static DispenseMethod<?> getDispense(ResourceLocation id) {
-        if (ids.contains(id)) {
-            int index = ids.indexOf(id);
-            return dispenses.get(index);
+    public static UniquePipeNbt getUniquePipeNbt(ResourceLocation id) {
+        if (SimpleCopperRegistries.UNIQUE_PIPE_NBTS.containsKey(id)) {
+            return SimpleCopperRegistries.UNIQUE_PIPE_NBTS.get(id);
         }
         return null;
     }
 
     @Nullable
-    public static OnMoveMethod<?> getMove(ResourceLocation id) {
-        if (ids.contains(id)) {
-            int index = ids.indexOf(id);
-            return moves.get(index);
+    public static DispenseMethod getDispense(ResourceLocation id) {
+        UniquePipeNbt uniquePipeNbt = getUniquePipeNbt(id);
+        if (uniquePipeNbt != null) {
+            return uniquePipeNbt.dispenseMethod();
         }
         return null;
     }
 
     @Nullable
-    public static TickMethod<?> getTick(ResourceLocation id) {
-        if (ids.contains(id)) {
-            int index = ids.indexOf(id);
-            return ticks.get(index);
+    public static OnMoveMethod getMove(ResourceLocation id) {
+        UniquePipeNbt uniquePipeNbt = getUniquePipeNbt(id);
+        if (uniquePipeNbt != null) {
+            return uniquePipeNbt.onMoveMethod();
         }
         return null;
     }
 
     @Nullable
-    public static CanMoveMethod<?> getCanMove(ResourceLocation id) {
-        if (ids.contains(id)) {
-            int index = ids.indexOf(id);
-            return canMoves.get(index);
+    public static TickMethod getTick(ResourceLocation id) {
+        UniquePipeNbt uniquePipeNbt = getUniquePipeNbt(id);
+        if (uniquePipeNbt != null) {
+            return uniquePipeNbt.tickMethod();
+        }
+        return null;
+    }
+
+    @Nullable
+    public static CanMoveMethod getCanMove(ResourceLocation id) {
+        UniquePipeNbt uniquePipeNbt = getUniquePipeNbt(id);
+        if (uniquePipeNbt != null) {
+            return uniquePipeNbt.canMoveMethod();
         }
         return null;
     }
 
     @FunctionalInterface
-    public interface DispenseMethod<SaveableMovablePipeNbt> {
+    public interface DispenseMethod {
         void dispense(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe);
     }
 
     @FunctionalInterface
-    public interface OnMoveMethod<SaveableMovablePipeNbt> {
+    public interface OnMoveMethod {
         void onMove(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
     }
 
     @FunctionalInterface
-    public interface TickMethod<SaveableMovablePipeNbt> {
+    public interface TickMethod {
         void tick(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
     }
 
     @FunctionalInterface
-    public interface CanMoveMethod<SaveableMovablePipeNbt> {
+    public interface CanMoveMethod {
         boolean canMove(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
     }
 
@@ -208,12 +205,24 @@ public class RegisterPipeNbtMethods {
     }
 
     public static int getDirection(Direction direction) {
-        if (direction==Direction.UP) {return 1;}
-        if (direction==Direction.DOWN) {return 2;}
-        if (direction==Direction.NORTH) {return 3;}
-        if (direction==Direction.SOUTH) {return 4;}
-        if (direction==Direction.EAST) {return 5;}
-        if (direction==Direction.WEST) {return 6;}
+        if (direction == Direction.UP) {
+            return 1;
+        }
+        if (direction == Direction.DOWN) {
+            return 2;
+        }
+        if (direction == Direction.NORTH) {
+            return 3;
+        }
+        if (direction == Direction.SOUTH) {
+            return 4;
+        }
+        if (direction == Direction.EAST) {
+            return 5;
+        }
+        if (direction == Direction.WEST) {
+            return 6;
+        }
         return 3;
     }
 

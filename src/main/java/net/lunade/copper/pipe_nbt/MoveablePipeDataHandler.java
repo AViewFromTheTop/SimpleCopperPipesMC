@@ -68,8 +68,6 @@ public class MoveablePipeDataHandler {
         if (!this.savedIds.contains(nbt.getNbtID())) {
             this.savedList.add(nbt);
             this.savedIds.add(nbt.getNbtID());
-        } else {
-            LOGGER.error("CANNOT ADD DUPLICATE PIPE NBT");
         }
     }
 

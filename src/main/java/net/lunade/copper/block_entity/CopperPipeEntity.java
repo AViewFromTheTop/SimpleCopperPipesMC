@@ -243,7 +243,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         Position position = CopperPipe.getOutputLocation(blockPointer, direction);
         ItemStack itemStack2 = itemStack;
         if (powered) { //Special Behavior When Powered
-            PoweredPipeDispenses.PoweredDispense<?> poweredDispense = PoweredPipeDispenses.getDispense(itemStack2.getItem());
+            PoweredPipeDispenses.PoweredDispense poweredDispense = PoweredPipeDispenses.getDispense(itemStack2.getItem());
             if (poweredDispense != null) {
                 itemStack2=itemStack.split(1);
                 poweredDispense.dispense(world, itemStack2, i, direction, position, state, corroded, pos, this);
@@ -255,7 +255,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             }
         }
         if (fitting) {
-            FittingPipeDispenses.FittingDispense<?> fittingDispense = FittingPipeDispenses.getDispense(itemStack2.getItem());
+            FittingPipeDispenses.FittingDispense fittingDispense = FittingPipeDispenses.getDispense(itemStack2.getItem());
             if (fittingDispense != null) { //Particle Emitters With Fitting
                 fittingDispense.dispense(world, itemStack2, i, direction, position, state, corroded, pos, this);
             } else { //Spawn Item W/O Sound With Fitting

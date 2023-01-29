@@ -70,8 +70,6 @@ public class MoveablePipeDataHandler {
         if (!this.savedIds.contains(nbt.getNbtID())) {
             this.savedList.add(nbt);
             this.savedIds.add(nbt.getNbtID());
-        } else {
-            LOGGER.error("CANNOT ADD DUPLICATE PIPE NBT");
         }
     }
 
@@ -287,38 +285,31 @@ public class MoveablePipeDataHandler {
         }
 
         public void dispense(ServerWorld world, BlockPos pos, BlockState state, CopperPipeEntity pipeEntity) {
-            RegisterPipeNbtMethods.DispenseMethod<?> method = RegisterPipeNbtMethods.getDispense(this.getNbtID());
-            if (method!=null) {
+            RegisterPipeNbtMethods.DispenseMethod method = RegisterPipeNbtMethods.getDispense(this.getNbtID());
+            if (method != null) {
                 method.dispense(this, world, pos, state, pipeEntity);
-            } else {
-                LOGGER.error("Unable to find dispense method for Moveable Pipe Nbt " + this.getNbtID() + "!");
             }
         }
 
         public void onMove(ServerWorld world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) {
-            RegisterPipeNbtMethods.OnMoveMethod<?> method = RegisterPipeNbtMethods.getMove(this.getNbtID());
-            if (method!=null) {
+            RegisterPipeNbtMethods.OnMoveMethod method = RegisterPipeNbtMethods.getMove(this.getNbtID());
+            if (method != null) {
                 method.onMove(this, world, pos, state, blockEntity);
-            } else {
-                LOGGER.error("Unable to find onMove method for Moveable Pipe Nbt " + this.getNbtID() + "!");
             }
         }
 
         public void tick(ServerWorld world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) { //Will be called at the CURRENT location, not the Pipe/Fitting it moves to on that tick - it can run this method and be dispensed on the same tick.
-            RegisterPipeNbtMethods.TickMethod<?> method = RegisterPipeNbtMethods.getTick(this.getNbtID());
+            RegisterPipeNbtMethods.TickMethod method = RegisterPipeNbtMethods.getTick(this.getNbtID());
             if (method!=null) {
                 method.tick(this, world, pos, state, blockEntity);
-            } else {
-                LOGGER.error("Unable to find tick method for Moveable Pipe Nbt " + this.getNbtID() + "!");
             }
         }
 
         public boolean canMove(ServerWorld world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) {
-            RegisterPipeNbtMethods.CanMoveMethod<?> method = RegisterPipeNbtMethods.getCanMove(this.getNbtID());
-            if (method!=null) {
+            RegisterPipeNbtMethods.CanMoveMethod method = RegisterPipeNbtMethods.getCanMove(this.getNbtID());
+            if (method != null) {
                 return method.canMove(this, world, pos, state, blockEntity);
             } else {
-                LOGGER.error("Unable to find canMove method Pipe Nbt " + this.getNbtID() + "!");
                 return true;
             }
         }

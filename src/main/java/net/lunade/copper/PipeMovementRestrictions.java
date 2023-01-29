@@ -1,6 +1,7 @@
 package net.lunade.copper;
 
 import net.lunade.copper.block_entity.CopperPipeEntity;
+import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -10,72 +11,51 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-
 public class PipeMovementRestrictions {
 
-    private static final ArrayList<ResourceLocation> blockEntityIds = new ArrayList<>();
-    private static final ArrayList<CanTransferTo> canTransferTos = new ArrayList<>();
-    private static final ArrayList<CanTakeFrom> canTakeFroms = new ArrayList<>();
+    public record PipeMovementRestriction<T extends BlockEntity>(
+            CanTransferTo<T> canTransferTo,
+            CanTakeFrom<T> canTakeFrom
+    ) {}
 
-    public static void register(ResourceLocation id, CanTransferTo canTransferTo, CanTakeFrom canTakeFrom) {
-        if (!blockEntityIds.contains(id)) {
-            blockEntityIds.add(id);
-            canTransferTos.add(canTransferTo);
-            canTakeFroms.add(canTakeFrom);
-        } else {
-            canTransferTos.set(blockEntityIds.indexOf(id), canTransferTo);
-            canTakeFroms.set(blockEntityIds.indexOf(id), canTakeFrom);
-        }
+    public static <T extends BlockEntity> void register(ResourceLocation id, CanTransferTo<T> canTransferTo, CanTakeFrom<T> canTakeFrom) {
+        Registry.register(SimpleCopperRegistries.PIPE_MOVEMENT_RESTRICTIONS, id, new PipeMovementRestriction<T>(canTransferTo, canTakeFrom));
     }
 
     @Nullable
-    public static CanTransferTo getCanTransferTo(ResourceLocation id) {
-        if (blockEntityIds.contains(id)) {
-            int index = blockEntityIds.indexOf(id);
-            return canTransferTos.get(index);
+    public static <T extends BlockEntity> CanTransferTo<T> getCanTransferTo(ResourceLocation id) {
+        if (SimpleCopperRegistries.PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) {
+            return SimpleCopperRegistries.PIPE_MOVEMENT_RESTRICTIONS.get(id).canTransferTo;
         }
         return null;
     }
 
     @Nullable
-    public static CanTakeFrom getCanTakeFrom(ResourceLocation id) {
-        if (blockEntityIds.contains(id)) {
-            int index = blockEntityIds.indexOf(id);
-            return canTakeFroms.get(index);
+    public static <T extends BlockEntity> CanTakeFrom<T> getCanTakeFrom(ResourceLocation id) {
+        if (SimpleCopperRegistries.PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) {
+            return SimpleCopperRegistries.PIPE_MOVEMENT_RESTRICTIONS.get(id).canTakeFrom;
         }
         return null;
     }
 
     @Nullable
-    public static CanTransferTo getCanTransferTo(BlockEntity entity) {
-        ResourceLocation id = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(entity.getType());
-        if (blockEntityIds.contains(id)) {
-            int index = blockEntityIds.indexOf(id);
-            return canTransferTos.get(index);
-        }
-        return null;
+    public static <T extends BlockEntity> CanTransferTo<T> getCanTransferTo(T entity) {
+        return getCanTransferTo(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(entity.getType()));
     }
 
     @Nullable
-    public static CanTakeFrom getCanTakeFrom(BlockEntity entity) {
-        ResourceLocation id = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(entity.getType());
-        if (blockEntityIds.contains(id)) {
-            int index = blockEntityIds.indexOf(id);
-            return canTakeFroms.get(index);
-        }
-        return null;
-    }
-
-    //Don't forget to cast the BlockEntity to your desired class!
-    @FunctionalInterface
-    public interface CanTransferTo {
-        boolean canTransfer(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe, BlockEntity toEntity);
+    public static <T extends BlockEntity> CanTakeFrom<T> getCanTakeFrom(T entity) {
+        return getCanTakeFrom(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(entity.getType()));
     }
 
     @FunctionalInterface
-    public interface CanTakeFrom {
-        boolean canTake(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe, BlockEntity toEntity);
+    public interface CanTransferTo<T extends BlockEntity> {
+        boolean canTransfer(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe, T toEntity);
+    }
+
+    @FunctionalInterface
+    public interface CanTakeFrom<T extends BlockEntity> {
+        boolean canTake(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe, T toEntity);
     }
 
     public static void init() {

@@ -44,7 +44,7 @@ public class LeakingPipeManager {
                             if (hitResult.getBlockPos().equals(leakPos)) {
                                 return true;
                             }
-                        };
+                        }
                     }
                 }
             }

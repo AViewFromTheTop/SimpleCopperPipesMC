@@ -529,7 +529,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return switch (direction) {
             case DOWN -> -0.05;
             case UP -> 1.05;
-            case NORTH, SOUTH, EAST, WEST -> 0.5;
+            case NORTH, SOUTH, EAST, WEST -> 0.75;
         };
     }
     public double getDripZ(Direction direction) {

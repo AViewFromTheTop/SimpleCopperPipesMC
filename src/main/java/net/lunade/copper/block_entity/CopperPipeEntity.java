@@ -406,7 +406,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     @Nullable
     private static Container getInventoryAt(Level world, double d, double e, double f) {
         Container inventory = null;
-        BlockPos blockPos = new BlockPos(d, e, f);
+        BlockPos blockPos = BlockPos.containing(d, e, f);
         BlockState blockState = world.getBlockState(blockPos);
         Block block = blockState.getBlock();
         if (block instanceof WorldlyContainerHolder) {

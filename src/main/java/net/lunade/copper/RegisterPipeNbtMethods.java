@@ -123,10 +123,10 @@ public class RegisterPipeNbtMethods {
                         volume = 4.5F;
                     }
                 }
-                BlockPos originPos = new BlockPos(nbt.getVec3d());
-                noteBlock = world.getBlockState(originPos).is(Blocks.NOTE_BLOCK);
+                BlockPos originPos = BlockPos.containing(nbt.getVec3d());
+                BlockState state = world.getBlockState(originPos);
+                noteBlock = state.is(Blocks.NOTE_BLOCK);
                 if (noteBlock) {
-                    BlockState state = world.getBlockState(originPos);
                     int k = state.getValue(NOTE);
                     float f = (float) Math.pow(2.0D, (double) (k - 12) / 12.0D);
                     world.playSound(null, pos, state.getValue(INSTRUMENT).getSoundEvent().value(), SoundSource.RECORDS, volume, f);

@@ -34,7 +34,7 @@ public class PipeInkParticle extends SimpleAnimatedParticle {
                 this.setAlpha(1.0F - ((float)this.age - (float)(this.lifetime / 2)) / (float)this.lifetime);
             }
 
-            if (this.level.getBlockState(new BlockPos(this.x, this.y, this.z)).isAir()) {
+            if (this.level.getBlockState(BlockPos.containing(this.x, this.y, this.z)).isAir()) {
                 this.yd -= 0.007400000002235174D;
             }
         }

@@ -137,7 +137,7 @@ public class FittingPipeDispenses {
             vibX = axis == Direction.Axis.X ? vibX + (10 * direction.getStepX()) : corroded ? (axis == Direction.Axis.Z ? vibX + random2 : vibX + random1) : vibX;
             vibY = axis == Direction.Axis.Y ? vibY + (10 * direction.getStepY()) : corroded ? vibY + random1 : vibY;
             vibZ = axis == Direction.Axis.Z ? vibZ + (10 * direction.getStepZ()) * 2 : corroded ? vibZ + random2 : vibZ;
-            BlockPositionSource blockSource = new BlockPositionSource(new BlockPos(vibX, vibY, vibZ));
+            BlockPositionSource blockSource = new BlockPositionSource(BlockPos.containing(vibX, vibY, vibZ));
             world.sendParticles(new VibrationParticleOption(blockSource, 32), position.x(), position.y(), position.z(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
         });
     }

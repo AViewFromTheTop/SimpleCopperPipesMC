@@ -462,7 +462,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         boolean hasSmokeOrWater = canWater || canSmoke;
         if (hasSmokeOrWater) {
             double outX = blockPos.getX() + getDripX(direction);
-            double outY = blockPos.getY() + getDripZ(direction);
+            double outY = blockPos.getY() + getDripY(direction);
             double outZ = blockPos.getZ() + getDripZ(direction);
             if (canWater) {
                 world.addParticle(ParticleTypes.DRIPPING_WATER, outX, outY, outZ, 0, 0, 0);
@@ -529,7 +529,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return switch (direction) {
             case DOWN -> -0.05;
             case UP -> 1.05;
-            case NORTH, SOUTH, EAST, WEST -> 0.75;
+            case NORTH, SOUTH, EAST, WEST -> 0.5;
         };
     }
     public double getDripZ(Direction direction) {

@@ -23,14 +23,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class HoeItemMixin {
 
     @Inject(at = @At("HEAD"), method = "useOn", cancellable = true)
-    public void useOn(UseOnContext itemUsageContext, CallbackInfoReturnable<InteractionResult> info) {
+    public void simpleCopperPipes$useOn(UseOnContext itemUsageContext, CallbackInfoReturnable<InteractionResult> info) {
         Level world = itemUsageContext.getLevel();
         BlockPos blockPos = itemUsageContext.getClickedPos();
-        Player playerEntity = itemUsageContext.getPlayer();
         BlockState blockState = world.getBlockState(blockPos);
-        ItemStack itemStack = itemUsageContext.getItemInHand();
 
-        if (blockState != null && blockState.getBlock() instanceof CopperPipe) {
+        if (blockState.getBlock() instanceof CopperPipe) {
+            Player playerEntity = itemUsageContext.getPlayer();
+            ItemStack itemStack = itemUsageContext.getItemInHand();
             if (playerEntity instanceof ServerPlayer player) {
                 CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(player, blockPos, itemStack);
             }

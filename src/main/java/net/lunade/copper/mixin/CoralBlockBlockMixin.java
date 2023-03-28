@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class CoralBlockBlockMixin {
 
     @Inject(at = @At("TAIL"), method = "scanForWater", cancellable = true)
-    protected void isInWater(BlockGetter blockView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
+    protected void simpleCopperPipes$isInWater(BlockGetter blockView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
         if (LeakingPipeManager.isWaterPipeNearbyBlockGetter(blockView, blockPos, 2)) {
             info.setReturnValue(true);
         }

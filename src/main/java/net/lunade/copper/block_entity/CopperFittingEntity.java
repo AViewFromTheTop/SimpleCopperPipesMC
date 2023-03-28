@@ -2,7 +2,6 @@ package net.lunade.copper.block_entity;
 
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperFitting;
-import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;

@@ -2,7 +2,6 @@ package net.lunade.copper.block_entity;
 
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperPipeProperties;
-import net.lunade.copper.blocks.Copyable;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -86,10 +85,8 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
             if (this.electricityCooldown == -1 && state.getValue(CopperPipeProperties.HAS_ELECTRICITY)) {
                 this.electricityCooldown = 80;
                 Block stateGetBlock = state.getBlock();
-                if (stateGetBlock instanceof Copyable copyable) {
-                    if (CopperPipeMain.PREVIOUS_STAGE.containsKey(stateGetBlock) && !state.is(CopperPipeMain.WAXED)) {
-                        state = copyable.makeCopyOf(state, CopperPipeMain.PREVIOUS_STAGE.get(stateGetBlock));
-                    }
+                if (CopperPipeMain.PREVIOUS_STAGE.containsKey(stateGetBlock) && !state.is(CopperPipeMain.WAXED)) {
+                    state = CopperPipeMain.PREVIOUS_STAGE.get(stateGetBlock).withPropertiesOf(state);
                 }
             }
             if (this.electricityCooldown == 79) {
@@ -242,7 +239,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 
     public enum MOVE_TYPE {
         FROM_PIPE,
-        FROM_FITTING;
+        FROM_FITTING
     }
 
 }

@@ -1,7 +1,6 @@
 package net.lunade.copper.mixin;
 
 import net.lunade.copper.CopperPipeMain;
-import net.lunade.copper.blocks.Copyable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ItemMixin {
 
     @Inject(at = @At("TAIL"), method = "useOn", cancellable = true)
-    public void useOn(UseOnContext itemUsageContext, CallbackInfoReturnable<InteractionResult> info) {
+    public void simpleCopperPipes$useOn(UseOnContext itemUsageContext, CallbackInfoReturnable<InteractionResult> info) {
         Level world = itemUsageContext.getLevel();
         BlockPos blockPos = itemUsageContext.getClickedPos();
         Player playerEntity = itemUsageContext.getPlayer();
@@ -42,10 +41,7 @@ public class ItemMixin {
                 }
 
                 if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {
-                    Block glowStage = CopperPipeMain.GLOW_STAGE.get(block);
-                    if (block instanceof Copyable copyable) {
-                        copyable.makeCopyOf(blockState, world, blockPos, glowStage);
-                    }
+                    world.setBlockAndUpdate(blockPos, CopperPipeMain.GLOW_STAGE.get(block).withPropertiesOf(blockState));
                 }
                 if (playerEntity != null) {
                     itemStack.shrink(1);

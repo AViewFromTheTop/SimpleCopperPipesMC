@@ -11,11 +11,7 @@ import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
-import net.minecraft.core.BlockSourceImpl;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Position;
+import net.minecraft.core.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -155,12 +151,12 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 return out || !world.getBlockState(pos).getValue(BlockStateProperties.POWERED);
             }
             if (out) {
-                PipeMovementRestrictions.CanTransferTo canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
+                PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
                 if (canTransfer != null) {
                     return canTransfer.canTransfer((ServerLevel)world, pos, world.getBlockState(pos), copperPipe, entity);
                 }
             } else {
-                PipeMovementRestrictions.CanTakeFrom canTake = PipeMovementRestrictions.getCanTakeFrom(entity);
+                PipeMovementRestrictions.CanTakeFrom<BlockEntity> canTake = PipeMovementRestrictions.getCanTakeFrom(entity);
                 if (canTake != null) {
                     return canTake.canTake((ServerLevel)world, pos, world.getBlockState(pos), copperPipe, entity);
                 }
@@ -349,23 +345,23 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if (inventory2 instanceof WorldlyContainer sidedInventory && direction != null) {
             int[] is = sidedInventory.getSlotsForFace(direction);
             for(int i = 0; i < is.length && !itemStack.isEmpty(); ++i) {
-                itemStack = transfer(inventory2, itemStack, is[i], direction);
+                itemStack = transfer(inventory2, itemStack, is[i]);
             }
         } else {
             int sidedInventory = inventory2.getContainerSize();
             for(int is = 0; is < sidedInventory && !itemStack.isEmpty(); ++is) {
-                itemStack = transfer(inventory2, itemStack, is, direction);
+                itemStack = transfer(inventory2, itemStack, is);
             }
         } return itemStack;
     }
 
-    private static boolean canInsert(Container inventory, ItemStack itemStack, int i, @Nullable Direction direction) {
+    private static boolean canInsert(Container inventory, ItemStack itemStack, int i) {
         return inventory.canPlaceItem(i, itemStack);
     }
 
-    private static ItemStack transfer(Container inventory2, ItemStack itemStack, int i, @Nullable Direction direction) {
+    private static ItemStack transfer(Container inventory2, ItemStack itemStack, int i) {
         ItemStack itemStack2 = inventory2.getItem(i);
-        if (canInsert(inventory2, itemStack, i, direction)) {
+        if (canInsert(inventory2, itemStack, i)) {
             boolean bl = false;
             if (itemStack2.isEmpty()) {
                 inventory2.setItem(i, itemStack);

@@ -1,7 +1,6 @@
 package net.lunade.copper.mixin;
 
 import net.lunade.copper.CopperPipeMain;
-import net.lunade.copper.blocks.Copyable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,41 +23,33 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class AxeItemMixin {
 
     @Inject(at = @At("TAIL"), method = "useOn", cancellable = true)
-    public void useOn(UseOnContext itemUsageContext, CallbackInfoReturnable<InteractionResult> info) {
+    public void simpleCopperPipes$useOn(UseOnContext itemUsageContext, CallbackInfoReturnable<InteractionResult> info) {
         Level world = itemUsageContext.getLevel();
         BlockPos blockPos = itemUsageContext.getClickedPos();
-        Player playerEntity = itemUsageContext.getPlayer();
         BlockState blockState = world.getBlockState(blockPos);
-        ItemStack itemStack = itemUsageContext.getItemInHand();
 
-        if (blockState != null) {
-            Block block = blockState.getBlock();
-            if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block) && !blockState.is(CopperPipeMain.UNSCRAPEABLE)) {
-                if (!blockState.is(CopperPipeMain.WAXED)) {
-                    world.playSound(playerEntity, blockPos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0F, 1.0F);
-                    world.levelEvent(playerEntity, 3005, blockPos, 0);
-                } else {
-                    world.playSound(playerEntity, blockPos, SoundEvents.AXE_WAX_OFF, SoundSource.BLOCKS, 1.0F, 1.0F);
-                    world.levelEvent(playerEntity, 3004, blockPos, 0);
-                }
-                if (playerEntity instanceof ServerPlayer) {
-                    CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer) playerEntity, blockPos, itemStack);
-                }
-
-                if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block)) {
-                    Block previousStage = CopperPipeMain.PREVIOUS_STAGE.get(block);
-                    if (block instanceof Copyable copyable) {
-                        copyable.makeCopyOf(blockState, world, blockPos, previousStage);
-                    }
-                }
-                if (playerEntity != null) {
-                    itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> playerEntityx.broadcastBreakEvent(itemUsageContext.getHand()));
-                }
-
-                info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
+        Block block = blockState.getBlock();
+        if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block) && !blockState.is(CopperPipeMain.UNSCRAPEABLE)) {
+            Player playerEntity = itemUsageContext.getPlayer();
+            ItemStack itemStack = itemUsageContext.getItemInHand();
+            if (!blockState.is(CopperPipeMain.WAXED)) {
+                world.playSound(playerEntity, blockPos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                world.levelEvent(playerEntity, 3005, blockPos, 0);
+            } else {
+                world.playSound(playerEntity, blockPos, SoundEvents.AXE_WAX_OFF, SoundSource.BLOCKS, 1.0F, 1.0F);
+                world.levelEvent(playerEntity, 3004, blockPos, 0);
             }
+            if (playerEntity instanceof ServerPlayer) {
+                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer) playerEntity, blockPos, itemStack);
+            }
+            if (CopperPipeMain.PREVIOUS_STAGE.containsKey(block)) {
+                world.setBlockAndUpdate(blockPos, CopperPipeMain.PREVIOUS_STAGE.get(block).withPropertiesOf(blockState));
+            }
+            if (playerEntity != null) {
+                itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> playerEntityx.broadcastBreakEvent(itemUsageContext.getHand()));
+            }
+            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
         }
-
     }
 
 }

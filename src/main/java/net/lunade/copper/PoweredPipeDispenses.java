@@ -14,27 +14,21 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PoweredPipeDispenses {
 
-    private static final ArrayList<ItemLike> items = new ArrayList<>();
-    private static final ArrayList<PoweredDispense> dispenses = new ArrayList<>();
+    private static final Map<ItemLike, PoweredDispense> ITEMS_TO_DISPENSES = new HashMap<>();
 
     public static void register(ItemLike item, PoweredDispense dispense) {
-        if (!items.contains(item)) {
-            items.add(item);
-            dispenses.add(dispense);
-        } else {
-            dispenses.set(items.indexOf(item), dispense);
-        }
+        ITEMS_TO_DISPENSES.put(item, dispense);
     }
 
     @Nullable
     public static PoweredDispense getDispense(ItemLike item) {
-        if (items.contains(item)) {
-            int index = items.indexOf(item);
-            return dispenses.get(index);
+        if (ITEMS_TO_DISPENSES.containsKey(item)) {
+            return ITEMS_TO_DISPENSES.get(item);
         }
         return null;
     }

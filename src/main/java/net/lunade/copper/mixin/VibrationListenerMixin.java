@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class VibrationListenerMixin {
 
     @Inject(at = @At("RETURN"), method = "handleGameEvent")
-    public void handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, CallbackInfoReturnable<Boolean> infoReturnable) {
+    public void simpleCopperPipes$handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, CallbackInfoReturnable<Boolean> infoReturnable) {
         if (infoReturnable.getReturnValue()) {
             BlockEntity blockEntity = serverLevel.getBlockEntity(new BlockPos(vec3));
             if (blockEntity instanceof CopperPipeEntity pipeEntity) {

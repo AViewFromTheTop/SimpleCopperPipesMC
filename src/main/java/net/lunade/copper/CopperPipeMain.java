@@ -14,6 +14,7 @@ import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.Util;
@@ -42,6 +43,10 @@ public class CopperPipeMain implements ModInitializer {
 
 	public static final int CURRENT_FIX_VERSION = 2;
 
+	public static int getCompatID() {
+		return 1;
+	}
+
 	public static final String MOD_ID = "copper_pipe";
 	public static final String BLOCK_ID = "lunade";
 
@@ -52,6 +57,7 @@ public class CopperPipeMain implements ModInitializer {
 	public static BlockEntityType<CopperPipeEntity> COPPER_PIPE_ENTITY;
 
 	public static BlockEntityType<CopperFittingEntity> COPPER_FITTING_ENTITY;
+
 	public static final TagKey<Block> UNSCRAPEABLE = TagKey.create(Registries.BLOCK, id("unscrapeable"));
 	public static final TagKey<Block> WAXED = TagKey.create(Registries.BLOCK, id("waxed"));
 	public static final TagKey<Block> SILENT_PIPES = TagKey.create(Registries.BLOCK, id("silent_pipes"));
@@ -234,6 +240,7 @@ public class CopperPipeMain implements ModInitializer {
 		PoweredPipeDispenses.init();
 		FittingPipeDispenses.init();
 		PipeMovementRestrictions.init();
+		LeakingPipeDrips.init();
 
 		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> LeakingPipeManager.clearAll());
 

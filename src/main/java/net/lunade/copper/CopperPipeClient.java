@@ -52,12 +52,24 @@ public class CopperPipeClient implements ClientModInitializer {
     }
 
     public static Direction getDirection(int i) {
-        if (i==1) {return Direction.UP;}
-        if (i==2) {return Direction.DOWN;}
-        if (i==3) {return Direction.NORTH;}
-        if (i==4) {return Direction.SOUTH;}
-        if (i==5) {return Direction.EAST;}
-        if (i==6) {return Direction.WEST;}
+        if (i == 1) {
+            return Direction.UP;
+        }
+        if (i == 2) {
+            return Direction.DOWN;
+        }
+        if (i == 3) {
+            return Direction.NORTH;
+        }
+        if (i == 4) {
+            return Direction.SOUTH;
+        }
+        if (i == 5) {
+            return Direction.EAST;
+        }
+        if ( i== 6) {
+            return Direction.WEST;
+        }
         return Direction.NORTH;
     }
 }

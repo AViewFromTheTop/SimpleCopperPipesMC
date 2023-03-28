@@ -1,17 +1,15 @@
 package net.lunade.copper.blocks;
 
 import net.lunade.copper.CopperPipeMain;
+import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.block_entity.CopperPipeEntity;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Position;
-import net.minecraft.core.PositionImpl;
+import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.*;
+import net.minecraft.util.ParticleUtils;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
@@ -25,19 +23,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.ChangeOverTimeBlock;
-import net.minecraft.world.level.block.LightningRodBlock;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.WeatheringCopper;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -58,11 +44,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
-
 import static net.lunade.copper.CopperPipeMain.INSPECT_PIPE;
 
-public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBlock, Copyable {
+public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBlock {
 
     public int cooldown;
     public int dispenserShotLength;
@@ -181,13 +165,17 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         };
     }
 
+    @Override
     public VoxelShape getShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos, CollisionContext shapeContext) {
         return getPipeShape(blockState);
     }
+
+    @Override
     public VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos) {
         return getPipeShape(blockState);
     }
 
+    @Override
     public BlockState getStateForPlacement(BlockPlaceContext itemPlacementContext) {
         Direction direction = itemPlacementContext.getClickedFace().getOpposite();
         BlockPos blockPos = itemPlacementContext.getClickedPos();
@@ -198,6 +186,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return this.defaultBlockState().setValue(FACING, direction.getOpposite()).setValue(FRONT_CONNECTED, front).setValue(BACK_CONNECTED, back).setValue(SMOOTH, smooth).setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
     }
 
+    @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor worldAccess, BlockPos blockPos, BlockPos blockPos2) {
         boolean front = canConnectFront(worldAccess, blockPos, blockState.getValue(FACING));
         boolean back = canConnectBack(worldAccess, blockPos, blockState.getValue(FACING));
@@ -238,6 +227,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         }
     }
 
+    @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return new CopperPipeEntity(blockPos, blockState);
     }
@@ -246,6 +236,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockView, BlockPos blockPos) { return blockState.getFluidState().isEmpty();}
 
     @Nullable
+    @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState blockState, BlockEntityType<T> blockEntityType) {
         if (!world.isClientSide) {
             return createTickerHelper(blockEntityType, CopperPipeMain.COPPER_PIPE_ENTITY, (world1, blockPos, blockState1, copperPipeEntity) -> copperPipeEntity.serverTick(world1, blockPos, blockState1));
@@ -253,6 +244,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     }
 
     @Nullable
+    @Override
     public <T extends BlockEntity> GameEventListener getListener(ServerLevel world, T blockEntity) {
         if (blockEntity instanceof CopperPipeEntity pipeEntity) {
             return pipeEntity.getGameEventListener();
@@ -278,6 +270,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return super.getFluidState(blockState);
     }
 
+    @Override
     public InteractionResult use(BlockState blockState, Level world, BlockPos blockPos, Player playerEntity, InteractionHand hand, BlockHitResult blockHitResult) {
         if (playerEntity.getItemInHand(hand).getItem() instanceof BlockItem blockItem) {
             if (blockItem.getBlock() instanceof CopperPipe || blockItem.getBlock() instanceof CopperFitting) {
@@ -296,39 +289,46 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         }
     }
 
+    @Override
     public RenderShape getRenderShape(BlockState blockState) { return RenderShape.MODEL; }
 
+    @Override
     public boolean hasAnalogOutputSignal(BlockState blockState) { return true; }
 
+    @Override
     public int getAnalogOutputSignal(BlockState blockState, Level world, BlockPos blockPos) { return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(world.getBlockEntity(blockPos)); }
 
+    @Override
     public BlockState rotate(BlockState blockState, Rotation blockRotation) { return blockState.setValue(FACING, blockRotation.rotate(blockState.getValue(FACING))); }
 
+    @Override
     public BlockState mirror(BlockState blockState, Mirror blockMirror) { return blockState.rotate(blockMirror.getRotation(blockState.getValue(FACING))); }
 
+    @Override
     protected void createBlockStateDefinition(Builder<Block, BlockState> builder) { builder.add(FACING).add(FRONT_CONNECTED).add(BACK_CONNECTED).add(SMOOTH).add(WATERLOGGED).add(HAS_WATER).add(HAS_SMOKE).add(HAS_ELECTRICITY).add(HAS_ITEM).add(POWERED); }
 
+    @Override
     public boolean isPathfindable(BlockState blockState, BlockGetter blockView, BlockPos blockPos, PathComputationType navigationType) { return false; }
 
     public static boolean canConnectFront(Level world, BlockPos blockPos, Direction direction) {
         BlockState state = world.getBlockState(blockPos.relative(direction));
-        if (isPipe(state)) {
+        if (state.getBlock() instanceof CopperPipe) {
             return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
         }
-        return isFitting(state);
+        return state.getBlock() instanceof CopperFitting;
     }
 
     public static boolean canConnectBack(Level world, BlockPos blockPos, Direction direction) {
         BlockState state = world.getBlockState(blockPos.relative(direction.getOpposite()));
-        if (isPipe(state)) {
+        if (state.getBlock() instanceof CopperPipe) {
             return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
         }
-        return isFitting(state);
+        return state.getBlock() instanceof CopperFitting;
     }
 
     public static boolean isSmooth(Level world, BlockPos blockPos, Direction direction) {
         BlockState state = world.getBlockState(blockPos.relative(direction));
-        if (isPipe(state)) {
+        if (state.getBlock() instanceof CopperPipe) {
             return state.getValue(CopperPipe.FACING) == direction && !canConnectFront(world,blockPos,direction);
         }
         return false;
@@ -336,69 +336,52 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 
     public static boolean canConnectFront(LevelAccessor world, BlockPos blockPos, Direction direction) {
         BlockState state = world.getBlockState(blockPos.relative(direction));
-        if (isPipe(state)) {
+        if (state.getBlock() instanceof CopperPipe) {
             return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
         }
-        return isFitting(state);
+        return state.getBlock() instanceof CopperFitting;
     }
 
     public static boolean canConnectBack(LevelAccessor world, BlockPos blockPos, Direction direction) {
         BlockState state = world.getBlockState(blockPos.relative(direction.getOpposite()));
-        if (isPipe(state)) {
+        if (state.getBlock() instanceof CopperPipe) {
             return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
         }
-        return isFitting(state);
+        return state.getBlock() instanceof CopperFitting;
     }
 
     public static boolean isSmooth(LevelAccessor world, BlockPos blockPos, Direction direction) {
         BlockState state = world.getBlockState(blockPos.relative(direction));
-        if (isPipe(state)) {
+        if (state.getBlock() instanceof CopperPipe) {
             return state.getValue(CopperPipe.FACING) == direction && !canConnectFront(world,blockPos,direction);
         }
         return false;
     }
 
-    public static boolean isPipe(BlockState state) {
-        return state.getBlock() instanceof CopperPipe;
-    }
-
-    public static boolean isFitting(BlockState state) {
-        return state.getBlock() instanceof CopperFitting;
-    }
-
+    @Override
     public void randomTick(BlockState blockState, ServerLevel serverWorld, BlockPos blockPos, RandomSource random) {
         Direction direction = blockState.getValue(FACING);
-        if (blockState.getValue(HAS_WATER) && direction!=Direction.UP) {
-            BlockPos pos = blockPos;
+        if (blockState.getValue(HAS_WATER) && direction != Direction.UP) {
+            BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
             boolean hasOffset = false;
             for (int i = 0; i < 12; i++) { //Searches for 12 blocks
                 if (direction != Direction.DOWN && !hasOffset) {
-                    pos = pos.relative(direction);
+                    mutableBlockPos.move(direction);
                     hasOffset = true;
                 }
-                pos = pos.below();
-                BlockState state = serverWorld.getBlockState(pos);
-                if (serverWorld.getFluidState(pos).isEmpty()) {
-                    if (state.getBlock() == Blocks.CAULDRON) {
-                        i = 99; //Stop loop if viable Cauldron is found
-                        serverWorld.setBlockAndUpdate(pos, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 1));
+                mutableBlockPos.move(Direction.DOWN);
+                BlockState state = serverWorld.getBlockState(mutableBlockPos);
+                if (serverWorld.getFluidState(mutableBlockPos).isEmpty()) {
+                    LeakingPipeDrips.DripOn dripOn = LeakingPipeDrips.getDrip(state.getBlock());
+                    if (dripOn != null) {
+                        dripOn.dripOn(serverWorld, mutableBlockPos, state);
+                        break;
                     }
-                    if (state.getBlock() == Blocks.WATER_CAULDRON) {
-                        if (state.getValue(BlockStateProperties.LEVEL_CAULDRON) != 3) { //Ignores filled Cauldrons
-                            i = 99; //Stop loop if viable Cauldron is found
-                            serverWorld.setBlockAndUpdate(pos, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, state.getValue(BlockStateProperties.LEVEL_CAULDRON) + 1));
-                        }
+                    if (state.getCollisionShape(serverWorld, mutableBlockPos) != Shapes.empty()) {
+                        break;
                     }
-                    if (state.getBlock() == Blocks.DIRT) {
-                        i = 99; //Stop loop if viable Block is found
-                        serverWorld.setBlockAndUpdate(pos, Blocks.MUD.defaultBlockState());
-                    }
-                    if (state.getBlock() == Blocks.FIRE) {
-                        serverWorld.destroyBlock(pos, false);
-                    }
-                    if (state.isRedstoneConductor(serverWorld, pos)) {
-                        i = 99;
-                    } //Water will "pass through" all non-full blocks (I.E. ladders, stairs). This also allows for water to "overflow" from Cauldrons down into one below if they're full or have Lava.
+                } else {
+                    break;
                 }
             }
         }
@@ -417,7 +400,9 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             float degradationChance = i == 0 ? 0.75F : 1.0F;
             for (BlockPos blockPos2 : BlockPos.withinManhattan(blockPos, 4, 4, 4)) {
                 int l = blockPos2.distManhattan(blockPos);
-                if (l > 4) { break; }
+                if (l > 4) {
+                    break;
+                }
 
                 if (!blockPos2.equals(blockPos)) {
                     BlockState blockState2 = serverWorld.getBlockState(blockPos2);
@@ -426,13 +411,25 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                         Enum<?> enum_ = ((ChangeOverTimeBlock<?>) block).getAge();
                         if (enum_.getClass() == WeatheringCopper.WeatherState.class) {
                             int m = enum_.ordinal();
-                            if (m < i) { return; }
-                            if (m > i) { ++k;} else { ++j; }
+                            if (m < i) {
+                                return;
+                            }
+                            if (m > i) {
+                                ++k;
+                            } else {
+                                ++j;
+                            }
                         }
                     } else if (CopperPipeMain.OXIDIZATION_INT.containsKey(block)) {
                         int m = CopperPipeMain.OXIDIZATION_INT.getInt(block);
-                        if (m < i) { return; }
-                        if (m > i) { ++k; } else { ++j; }
+                        if (m < i) {
+                            return;
+                        }
+                        if (m > i) {
+                            ++k;
+                        } else {
+                            ++j;
+                        }
                     }
                 }
             }
@@ -440,7 +437,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             float g = f * f * degradationChance;
             if (random.nextFloat() < g) {
                 if (CopperPipeMain.NEXT_STAGE.containsKey(first)) {
-                    serverWorld.setBlockAndUpdate(blockPos, makeCopyOf(blockState, CopperPipeMain.NEXT_STAGE.get(first)));
+                    serverWorld.setBlockAndUpdate(blockPos, CopperPipeMain.NEXT_STAGE.get(first).withPropertiesOf(blockState));
                 }
             }
         }
@@ -486,10 +483,13 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             ParticleUtils.spawnParticlesAlongAxis(direction.getAxis(), world, blockPos, 0.4D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
         }
         if (waterInFront) {
-            double x = blockPos.getX() + getDripX(direction, random);
-            double y = blockPos.getY() + getDripY(direction, random);
-            double z = blockPos.getZ() + getDripZ(direction, random);
-            world.addParticle(ParticleTypes.BUBBLE, x, y, z,direction.getStepX() * 0.7D, direction.getStepY() * 0.7D, direction.getStepZ() * 0.7D);
+            world.addParticle(ParticleTypes.BUBBLE,
+                    blockPos.getX() + getDripX(direction, random),
+                    blockPos.getY() + getDripY(direction, random),
+                    blockPos.getZ() + getDripZ(direction, random),
+                    direction.getStepX() * 0.7D,
+                    direction.getStepY() * 0.7D,
+                    direction.getStepZ() * 0.7D);
         }
     }
 
@@ -503,6 +503,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             case WEST -> -0.05;
         };
     }
+
     public double getDripY(Direction direction, RandomSource random) {
         return switch (direction) {
             case DOWN -> -0.05;
@@ -510,6 +511,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             case NORTH, WEST, EAST, SOUTH -> 0.5 + getRan(random);
         };
     }
+
     public double getDripZ(Direction direction, RandomSource random) {
         return switch (direction) {
             case DOWN, EAST, WEST -> 0.5 + getRan(random);
@@ -518,6 +520,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             case SOUTH -> 1.05;
         };
     }
+
     public double getDripX(Direction direction) {
         return switch (direction) {
             case DOWN, SOUTH, NORTH, UP -> 0.5;
@@ -525,6 +528,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             case WEST -> -0.05;
         };
     }
+
     public double getDripY(Direction direction) {
         return switch (direction) {
             case DOWN -> -0.05;
@@ -532,6 +536,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             case NORTH, SOUTH, EAST, WEST -> 0.5;
         };
     }
+
     public double getDripZ(Direction direction) {
         return switch (direction) {
             case DOWN, WEST, EAST, UP -> 0.5;
@@ -547,7 +552,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                 blockPointer.z() + 0.7D * (double)facing.getStepZ());
     }
 
-    public static boolean hasItem(BlockState state) {
+    public static boolean shouldGlow(BlockState state) {
         if (state.getBlock() instanceof CopperPipe || state.getBlock() instanceof CopperFitting) {
             return state.getValue(HAS_ITEM) || state.getValue(HAS_ELECTRICITY);
         }
@@ -566,6 +571,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return 1;
     }
 
+    @Override
     public void onRemove(BlockState blockState, Level world, BlockPos blockPos, BlockState blockState2, boolean bl) {
         updateBlockEntityValues(world, blockPos, blockState);
         if (blockState.hasBlockEntity() && !(blockState2.getBlock() instanceof CopperPipe)) {
@@ -585,27 +591,6 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             }
         }
         return false;
-    }
-
-    public void makeCopyOf(BlockState state, Level world, BlockPos blockPos, Block block) {
-        if (block instanceof CopperPipe) {
-            world.setBlockAndUpdate(blockPos, block.defaultBlockState().setValue(FACING, state.getValue(FACING)).setValue(FRONT_CONNECTED, state.getValue(FRONT_CONNECTED))
-                    .setValue(BACK_CONNECTED, state.getValue(BACK_CONNECTED)).setValue(WATERLOGGED, state.getValue(WATERLOGGED))
-                    .setValue(HAS_WATER, state.getValue(HAS_WATER)).setValue(SMOOTH, state.getValue(SMOOTH))
-                    .setValue(HAS_ITEM, state.getValue(HAS_ITEM)).setValue(HAS_SMOKE, state.getValue(HAS_SMOKE)).setValue(HAS_ELECTRICITY, state.getValue(HAS_ELECTRICITY)).setValue(POWERED, state.getValue(POWERED)));
-        }
-    }
-
-    @Nullable
-    public BlockState makeCopyOf(BlockState state, Block block) {
-        if (block instanceof CopperPipe) {
-            return block.defaultBlockState().setValue(FACING, state.getValue(FACING)).setValue(FRONT_CONNECTED, state.getValue(FRONT_CONNECTED))
-                    .setValue(BACK_CONNECTED, state.getValue(BACK_CONNECTED)).setValue(WATERLOGGED, state.getValue(WATERLOGGED))
-                    .setValue(HAS_WATER, state.getValue(HAS_WATER)).setValue(SMOOTH, state.getValue(SMOOTH))
-                    .setValue(HAS_ITEM, state.getValue(HAS_ITEM)).setValue(HAS_SMOKE, state.getValue(HAS_SMOKE)).setValue(HAS_ELECTRICITY, state.getValue(HAS_ELECTRICITY)).setValue(POWERED, state.getValue(POWERED));
-        } else {
-            return null;
-        }
     }
 
     static {
@@ -696,21 +681,21 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public static final Block GRAY_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 4,22, CopperPipeMain.GRAY_INK);
     public static final Block BROWN_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_BROWN).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 4,23, CopperPipeMain.BROWN_INK);
 
-    public static final Block GLOWING_BLACK_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_BLACK).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,7, ParticleTypes.SQUID_INK);
-    public static final Block GLOWING_RED_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_RED).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,8, CopperPipeMain.RED_INK);
-    public static final Block GLOWING_ORANGE_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,9, CopperPipeMain.ORANGE_INK);
-    public static final Block GLOWING_YELLOW_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_YELLOW).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,10, CopperPipeMain.YELLOW_INK);
-    public static final Block GLOWING_LIME_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_GREEN).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,11, CopperPipeMain.LIME_INK);
-    public static final Block GLOWING_GREEN_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_GREEN).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,12, CopperPipeMain.GREEN_INK);
-    public static final Block GLOWING_CYAN_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_CYAN).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,13, CopperPipeMain.CYAN_INK);
-    public static final Block GLOWING_LIGHT_BLUE_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_BLUE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4, 14, CopperPipeMain.LIGHT_BLUE_INK);
-    public static final Block GLOWING_BLUE_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_BLUE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,15, CopperPipeMain.BLUE_INK);
-    public static final Block GLOWING_PURPLE_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_PURPLE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,16, CopperPipeMain.PURPLE_INK);
-    public static final Block GLOWING_MAGENTA_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_MAGENTA).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,17, CopperPipeMain.MAGENTA_INK);
-    public static final Block GLOWING_PINK_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_PINK).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,18, CopperPipeMain.PINK_INK);
-    public static final Block GLOWING_WHITE_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.SNOW).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,19, CopperPipeMain.WHITE_INK);
-    public static final Block GLOWING_LIGHT_GRAY_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,20, CopperPipeMain.LIGHT_GRAY_INK);
-    public static final Block GLOWING_GRAY_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,21, CopperPipeMain.GRAY_INK);
-    public static final Block GLOWING_BROWN_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_BROWN).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.hasItem(state)), 4,22, CopperPipeMain.BROWN_INK);
+    public static final Block GLOWING_BLACK_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_BLACK).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,7, ParticleTypes.SQUID_INK);
+    public static final Block GLOWING_RED_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_RED).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,8, CopperPipeMain.RED_INK);
+    public static final Block GLOWING_ORANGE_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,9, CopperPipeMain.ORANGE_INK);
+    public static final Block GLOWING_YELLOW_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_YELLOW).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,10, CopperPipeMain.YELLOW_INK);
+    public static final Block GLOWING_LIME_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_GREEN).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,11, CopperPipeMain.LIME_INK);
+    public static final Block GLOWING_GREEN_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_GREEN).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,12, CopperPipeMain.GREEN_INK);
+    public static final Block GLOWING_CYAN_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_CYAN).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,13, CopperPipeMain.CYAN_INK);
+    public static final Block GLOWING_LIGHT_BLUE_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_BLUE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4, 14, CopperPipeMain.LIGHT_BLUE_INK);
+    public static final Block GLOWING_BLUE_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_BLUE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,15, CopperPipeMain.BLUE_INK);
+    public static final Block GLOWING_PURPLE_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_PURPLE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,16, CopperPipeMain.PURPLE_INK);
+    public static final Block GLOWING_MAGENTA_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_MAGENTA).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,17, CopperPipeMain.MAGENTA_INK);
+    public static final Block GLOWING_PINK_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_PINK).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,18, CopperPipeMain.PINK_INK);
+    public static final Block GLOWING_WHITE_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.SNOW).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,19, CopperPipeMain.WHITE_INK);
+    public static final Block GLOWING_LIGHT_GRAY_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,20, CopperPipeMain.LIGHT_GRAY_INK);
+    public static final Block GLOWING_GRAY_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,21, CopperPipeMain.GRAY_INK);
+    public static final Block GLOWING_BROWN_PIPE = new CopperPipe(Properties.of(Material.METAL, MaterialColor.COLOR_BROWN).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,22, CopperPipeMain.BROWN_INK);
 
 }

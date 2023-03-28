@@ -12,19 +12,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class EntityMixin {
 
     @Unique
-    private boolean hadWaterPipeNearby;
+    private boolean simpleCopperPipes$hadWaterPipeNearby;
 
     @Inject(at = @At("HEAD"), method = "updateInWaterStateAndDoFluidPushing")
-    public void updateInWaterStateAndDoFluidPushing(CallbackInfoReturnable<Boolean> info) {
+    public void simpleCopperPipes$updateInWaterStateAndDoFluidPushing(CallbackInfoReturnable<Boolean> info) {
         Entity entity = Entity.class.cast(this);
         if (!entity.level.isClientSide) {
-            this.hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(entity, 2);
+            this.simpleCopperPipes$hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(entity, 2);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "isInRain", cancellable = true)
-    public void isInRain(CallbackInfoReturnable<Boolean> info) {
-        if (this.hadWaterPipeNearby) {
+    public void simpleCopperPipes$isInRain(CallbackInfoReturnable<Boolean> info) {
+        if (this.simpleCopperPipes$hadWaterPipeNearby) {
             info.setReturnValue(true);
         }
     }

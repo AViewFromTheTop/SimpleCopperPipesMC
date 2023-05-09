@@ -29,7 +29,7 @@ public class LeakingPipeManager {
         int y = entity.getBlockY();
         int z = entity.getBlockZ();
         Vec3 entityPos = entity.getEyePosition();
-        ResourceLocation dimension = entity.level.dimension().location();
+        ResourceLocation dimension = entity.level().dimension().location();
         BlockPos leakPos;
         for (LeakingPipePos leakingPos : copiedList) {
             if (leakingPos.dimension.equals(dimension)) {
@@ -40,7 +40,7 @@ public class LeakingPipeManager {
                     if (zVal >= -i && zVal <= i) {
                         int leakY = leakPos.getY();
                         if (y < leakY && y >= leakY - 12) {
-                            BlockHitResult hitResult = entity.level.clip(new ClipContext(entityPos, new Vec3(leakPos.getX() + 0.5, leakPos.getY() + 0.5, leakPos.getZ() + 0.5), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
+                            BlockHitResult hitResult = entity.level().clip(new ClipContext(entityPos, new Vec3(leakPos.getX() + 0.5, leakPos.getY() + 0.5, leakPos.getZ() + 0.5), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
                             if (hitResult.getBlockPos().equals(leakPos)) {
                                 return true;
                             }

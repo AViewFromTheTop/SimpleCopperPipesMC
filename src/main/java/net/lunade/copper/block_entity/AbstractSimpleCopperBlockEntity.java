@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -95,10 +96,8 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
                 sendElectricity(world, blockPos);
             }
             if (this.electricityCooldown == 0) {
-                if (state != null) {
-                    if (state.hasProperty(CopperPipeProperties.HAS_ELECTRICITY)) {
-                        state = state.setValue(CopperPipeProperties.HAS_ELECTRICITY, false);
-                    }
+                if (state.hasProperty(CopperPipeProperties.HAS_ELECTRICITY)) {
+                    state = state.setValue(CopperPipeProperties.HAS_ELECTRICITY, false);
                 }
             }
             if (state != blockState) {
@@ -215,6 +214,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     }
 
     @Override
+    @NotNull
     protected NonNullList<ItemStack> getItems() {
         return this.inventory;
     }
@@ -225,11 +225,13 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     }
 
     @Override
+    @NotNull
     protected Component getDefaultName() {
         return Component.translatable(this.getBlockState().getBlock().getDescriptionId());
     }
 
     @Override
+    @NotNull
     protected AbstractContainerMenu createMenu(int i, Inventory playerInventory) {
         return new HopperMenu(i, playerInventory, this);
     }

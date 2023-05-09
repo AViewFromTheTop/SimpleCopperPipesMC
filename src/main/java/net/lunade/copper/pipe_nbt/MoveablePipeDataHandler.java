@@ -189,11 +189,11 @@ public class MoveablePipeDataHandler {
             this.nbtID = nbtId;
         }
 
-        public SaveableMovablePipeNbt(GameEvent event, Vec3 originPos, GameEvent.Context emitter, BlockPos pipePos) {
+        public SaveableMovablePipeNbt(GameEvent event, Vec3 originPos, @Nullable GameEvent.Context emitter, BlockPos pipePos) {
             this.savedID = BuiltInRegistries.GAME_EVENT.getKey(event);
             this.vec3d = originPos;
             this.vec3d2 = originPos;
-            if (emitter.sourceEntity() != null) {
+            if (emitter != null && emitter.sourceEntity() != null) {
                 this.string = emitter.sourceEntity().getUUID().toString();
             } else {
                 this.string = "noEntity";

@@ -14,7 +14,8 @@
     "HoneyCombItemMixin",
     "ItemMixin",
     "SugarCaneBlockMixin",
-    "VibrationListenerMixin"
+    "VibrationListenerMixin",
+    "VibrationTickerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

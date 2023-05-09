@@ -31,7 +31,7 @@ public class ItemMixin {
         BlockState blockState = world.getBlockState(blockPos);
         ItemStack itemStack = itemUsageContext.getItemInHand();
 
-        if (itemStack.is(Items.GLOW_INK_SAC) && blockState != null) {
+        if (itemStack.is(Items.GLOW_INK_SAC)) {
             Block block = blockState.getBlock();
             if (CopperPipeMain.GLOW_STAGE.containsKey(block)) {
                 world.playSound(playerEntity, blockPos, SoundEvents.GLOW_INK_SAC_USE, SoundSource.BLOCKS, 1.0F, 1.0F);

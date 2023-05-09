@@ -1,6 +1,5 @@
 package net.lunade.copper.block_entity;
 
-import com.mojang.logging.LogUtils;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
@@ -25,7 +24,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;

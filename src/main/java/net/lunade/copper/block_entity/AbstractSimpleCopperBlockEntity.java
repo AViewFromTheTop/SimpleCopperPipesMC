@@ -184,6 +184,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         }
     }
 
+    @Override
     public void load(CompoundTag nbtCompound) {
         super.load(nbtCompound);
         this.inventory = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
@@ -198,6 +199,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         this.moveablePipeDataHandler.readNbt(nbtCompound);
     }
 
+    @Override
     protected void saveAdditional(CompoundTag nbtCompound) {
         super.saveAdditional(nbtCompound);
         if (!this.trySaveLootTable(nbtCompound)) {

@@ -32,6 +32,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedBlock {
@@ -55,59 +56,78 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
     }
 
     @Override
-    public VoxelShape getShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos, CollisionContext shapeContext) { return FITTING_SHAPE; }
-
-    @Override
-    public VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos) { return FITTING_SHAPE; }
-
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext itemPlacementContext) {
-        BlockPos blockPos = itemPlacementContext.getClickedPos();
-        FluidState fluidState = itemPlacementContext.getLevel().getFluidState(blockPos);
-        return this.defaultBlockState().setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+    @NotNull
+    public VoxelShape getShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos, CollisionContext shapeContext) {
+        return FITTING_SHAPE;
     }
 
     @Override
+    @NotNull
+    public VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos) {
+        return FITTING_SHAPE;
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext itemPlacementContext) {
+        return this.defaultBlockState().setValue(WATERLOGGED, itemPlacementContext.getLevel().getFluidState(itemPlacementContext.getClickedPos()).getType() == Fluids.WATER);
+    }
+
+    @Override
+    @NotNull
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor worldAccess, BlockPos blockPos, BlockPos blockPos2) {
-        if (blockState.getValue(WATERLOGGED)) { worldAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(worldAccess)); }
+        if (blockState.getValue(WATERLOGGED)) {
+            worldAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(worldAccess));
+        }
         boolean electricity = blockState.getValue(HAS_ELECTRICITY);
         if (worldAccess.getBlockState(blockPos2).getBlock() instanceof LightningRodBlock) {
-            if (worldAccess.getBlockState(blockPos2).getValue(POWERED)) { electricity = true; }
+            if (worldAccess.getBlockState(blockPos2).getValue(POWERED)) {
+                electricity = true;
+            }
         } return blockState.setValue(HAS_ELECTRICITY, electricity);
     }
 
     @Override
     public void neighborChanged(BlockState blockState, Level world, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-        if (world.hasNeighborSignal(blockPos)) { world.setBlockAndUpdate(blockPos, blockState.setValue(CopperFitting.POWERED, true));}
-        else { world.setBlockAndUpdate(blockPos, blockState.setValue(CopperFitting.POWERED, false)); }
+        if (world.hasNeighborSignal(blockPos)) {
+            world.setBlockAndUpdate(blockPos, blockState.setValue(CopperFitting.POWERED, true));
+        } else {
+            world.setBlockAndUpdate(blockPos, blockState.setValue(CopperFitting.POWERED, false));
+        }
         updateBlockEntityValues(world, blockPos, blockState);
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) { return new CopperFittingEntity(blockPos, blockState); }
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new CopperFittingEntity(blockPos, blockState);
+    }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockView, BlockPos blockPos) { return blockState.getFluidState().isEmpty(); }
+    public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockView, BlockPos blockPos) {
+        return blockState.getFluidState().isEmpty();
+    }
 
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState blockState, BlockEntityType<T> blockEntityType) {
         if (!world.isClientSide) {
-            return createTickerHelper(blockEntityType, CopperPipeMain.COPPER_FITTING_ENTITY, (world1, blockPos, blockState1, copperFittingEntity) -> copperFittingEntity.serverTick(world1, blockPos, blockState1));
-        } return null;
+            return createTickerHelper(blockEntityType, CopperPipeMain.COPPER_FITTING_ENTITY, (world1, blockPos, blockState1, copperFittingEntity) ->
+                    copperFittingEntity.serverTick(world1, blockPos, blockState1)
+            );
+        }
+        return null;
     }
 
     @Override
     public void setPlacedBy(Level world, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
         if (itemStack.hasCustomHoverName()) {
-            BlockEntity blockEntity = world.getBlockEntity(blockPos);
-            if (blockEntity instanceof CopperFittingEntity) {
-                ((CopperFittingEntity) blockEntity).setCustomName(itemStack.getHoverName());
+            if (world.getBlockEntity(blockPos) instanceof CopperFittingEntity copperFittingEntity) {
+                copperFittingEntity.setCustomName(itemStack.getHoverName());
             }
         }
         updateBlockEntityValues(world, blockPos, blockState);
     }
 
     @Override
+    @NotNull
     public FluidState getFluidState(BlockState blockState) {
         if (blockState.getValue(WATERLOGGED)) {
             return Fluids.WATER.getSource(false);
@@ -116,6 +136,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
     }
 
     @Override
+    @NotNull
     public RenderShape getRenderShape(BlockState blockState) {
         return RenderShape.MODEL;
     }
@@ -126,13 +147,19 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState blockState, Level world, BlockPos blockPos) { return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(world.getBlockEntity(blockPos)); }
+    public int getAnalogOutputSignal(BlockState blockState, Level world, BlockPos blockPos) {
+        return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(world.getBlockEntity(blockPos));
+    }
 
     @Override
-    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) { builder.add(WATERLOGGED).add(POWERED).add(HAS_WATER).add(HAS_SMOKE).add(HAS_ELECTRICITY).add(HAS_ITEM); }
+    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+        builder.add(WATERLOGGED).add(POWERED).add(HAS_WATER).add(HAS_SMOKE).add(HAS_ELECTRICITY).add(HAS_ITEM);
+    }
 
     @Override
-    public boolean isPathfindable(BlockState blockState, BlockGetter blockView, BlockPos blockPos, PathComputationType navigationType) { return false; }
+    public boolean isPathfindable(BlockState blockState, BlockGetter blockView, BlockPos blockPos, PathComputationType navigationType) {
+        return false;
+    }
 
     @Override
     public void randomTick(BlockState blockState, ServerLevel serverWorld, BlockPos blockPos, RandomSource random) {

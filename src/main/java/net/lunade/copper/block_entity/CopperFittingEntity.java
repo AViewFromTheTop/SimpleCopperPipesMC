@@ -19,6 +19,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
         super.serverTick(world, blockPos, blockState);
     }
 
+    @Override
     public boolean canAcceptMoveableNbt(MOVE_TYPE moveType, Direction moveDirection, BlockState fromState) {
         if (moveType == MOVE_TYPE.FROM_FITTING) {
             return false;
@@ -28,6 +29,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
         return false;
     }
 
+    @Override
     public void updateBlockEntityValues(Level world, BlockPos pos, BlockState state) {
         if (state.getBlock() instanceof CopperFitting) {
             this.canWater = state.getValue(BlockStateProperties.WATERLOGGED);

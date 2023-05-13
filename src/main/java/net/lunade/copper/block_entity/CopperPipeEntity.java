@@ -76,14 +76,18 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.vibrationListener = new VibrationSystem.Listener(this);
     }
 
+    @Override
     public void setItem(int i, ItemStack itemStack) {
         this.unpackLootTable(null);
-        this.getItems().set(i, itemStack);
-        if (itemStack.getCount() > this.getMaxStackSize()) {
-            itemStack.setCount(this.getMaxStackSize());
+        if (itemStack != null) {
+            this.getItems().set(i, itemStack);
+            if (itemStack.getCount() > this.getMaxStackSize()) {
+                itemStack.setCount(this.getMaxStackSize());
+            }
         }
     }
 
+    @Override
     public void serverTick(Level world, BlockPos blockPos, BlockState blockState) {
         VibrationSystem.Ticker.tick(level, this.getVibrationData(), this.createVibrationUser());
         super.serverTick(world, blockPos, blockState);
@@ -175,9 +179,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if (inventory2 != null) {
             if (!isInventoryFull(this, facing) && canTransfer(world, offsetOppPos, false, this)) {
                 for (int i = 0; i < inventory2.getContainerSize(); ++i) {
-                    if (!inventory2.getItem(i).isEmpty()) {
+                    ItemStack stack = inventory2.getItem(i);
+                    if (stack != null & !stack.isEmpty()) {
                         this.setCooldown(blockState);
-                        ItemStack itemStack = inventory2.getItem(i).copy();
+                        ItemStack itemStack = stack.copy();
                         ItemStack itemStack2 = transfer(this, inventory2.removeItem(i, 1), facing);
                         if (itemStack2.isEmpty()) {
                             this.setChanged();
@@ -210,9 +215,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             }
             if (canMove && !isInventoryFull(inventory2, opp)) {
                 for (int i = 0; i < this.getContainerSize(); ++i) {
-                    if (!this.getItem(i).isEmpty()) {
+                    ItemStack stack = this.getItem(i);
+                    if (stack != null & !stack.isEmpty()) {
                         setCooldown(world, offsetPos);
-                        ItemStack itemStack = this.getItem(i).copy();
+                        ItemStack itemStack = stack.copy();
                         ItemStack itemStack2 = transfer(inventory2, this.removeItem(i, 1), opp);
                         if (itemStack2.isEmpty()) {
                             inventory2.setChanged();
@@ -238,15 +244,17 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 ItemStack itemStack = this.getItem(i);
                 if (!itemStack.isEmpty()) {
                     ItemStack itemStack2;
-                    int o=4;
+                    int o = 4;
                     if (this.shootsControlled) { //If Dropper
-                        o=10;
+                        o = 10;
                         serverWorld.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverWorld.random.nextFloat()*0.25F) + 0.8F);
                     } else if (this.shootsSpecial) { //If Dispenser, Use Pipe-Specific Launch Length
                         if (blockState.getBlock() instanceof CopperPipe pipe) {
                             o = pipe.dispenserShotLength;
                             serverWorld.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverWorld.random.nextFloat()*0.25F) + 0.8F);
-                        } else {o=12;}
+                        } else {
+                            o= 12;
+                        }
                     }
                     boolean silent = blockState.is(CopperPipeMain.SILENT_PIPES);
                     if (serverWorld.getBlockState(blockPos.relative(directionOpp)).getBlock() instanceof CopperFitting) {
@@ -438,7 +446,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         } else if (itemStack.getCount() > itemStack.getMaxStackSize()) {
             return false;
         } else {
-            return ItemStack.tagMatches(itemStack, itemStack2);
+            return ItemStack.isSameItemSameTags(itemStack, itemStack2);
         }
     }
 
@@ -458,6 +466,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         }
     }
 
+    @Override
     public void load(CompoundTag nbtCompound) {
         super.load(nbtCompound);
         this.transferCooldown = nbtCompound.getInt("transferCooldown");
@@ -475,6 +484,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         }
     }
 
+    @Override
     protected void saveAdditional(CompoundTag nbtCompound) {
         super.saveAdditional(nbtCompound);
         nbtCompound.putInt("transferCooldown", this.transferCooldown);

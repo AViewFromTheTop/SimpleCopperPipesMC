@@ -8,6 +8,8 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -41,6 +43,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static net.lunade.copper.CopperPipeMain.INSPECT_PIPE;
@@ -165,35 +168,47 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     }
 
     @Override
+    @NotNull
     public VoxelShape getShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos, CollisionContext shapeContext) {
         return getPipeShape(blockState);
     }
 
     @Override
+    @NotNull
     public VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos) {
         return getPipeShape(blockState);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext itemPlacementContext) {
-        Direction direction = itemPlacementContext.getClickedFace().getOpposite();
+        Direction direction = itemPlacementContext.getClickedFace();
         BlockPos blockPos = itemPlacementContext.getClickedPos();
-        boolean front = canConnectFront(itemPlacementContext.getLevel(), blockPos, direction.getOpposite());
-        boolean back = canConnectBack(itemPlacementContext.getLevel(), blockPos, direction.getOpposite());
-        boolean smooth = isSmooth(itemPlacementContext.getLevel(), blockPos, direction.getOpposite());
-        FluidState fluidState = itemPlacementContext.getLevel().getFluidState(blockPos);
-        return this.defaultBlockState().setValue(FACING, direction.getOpposite()).setValue(FRONT_CONNECTED, front).setValue(BACK_CONNECTED, back).setValue(SMOOTH, smooth).setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
+        return this.defaultBlockState()
+                .setValue(FACING, direction)
+                .setValue(FRONT_CONNECTED, canConnectFront(itemPlacementContext.getLevel(), blockPos, direction))
+                .setValue(BACK_CONNECTED, canConnectBack(itemPlacementContext.getLevel(), blockPos, direction))
+                .setValue(SMOOTH, isSmooth(itemPlacementContext.getLevel(), blockPos, direction))
+                .setValue(WATERLOGGED, itemPlacementContext.getLevel().getFluidState(blockPos).getType() == Fluids.WATER);
     }
 
     @Override
+    @NotNull
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor worldAccess, BlockPos blockPos, BlockPos blockPos2) {
-        boolean front = canConnectFront(worldAccess, blockPos, blockState.getValue(FACING));
-        boolean back = canConnectBack(worldAccess, blockPos, blockState.getValue(FACING));
-        boolean smooth = isSmooth(worldAccess, blockPos, blockState.getValue(FACING));
-        if (blockState.getValue(WATERLOGGED)) {worldAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(worldAccess));}
+        if (blockState.getValue(WATERLOGGED)) {
+            worldAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(worldAccess));
+        }
         boolean electricity = blockState.getValue(HAS_ELECTRICITY);
-        if (worldAccess.getBlockState(blockPos2).getBlock() instanceof LightningRodBlock) { if (worldAccess.getBlockState(blockPos2).getValue(POWERED)) {electricity=true;} }
-        return blockState.setValue(FRONT_CONNECTED, front).setValue(BACK_CONNECTED, back).setValue(SMOOTH, smooth).setValue(HAS_ELECTRICITY, electricity);
+        if (worldAccess.getBlockState(blockPos2).getBlock() instanceof LightningRodBlock) {
+            if (worldAccess.getBlockState(blockPos2).getValue(POWERED)) {
+                electricity = true;
+            }
+        }
+        Direction facing = blockState.getValue(FACING);
+        return blockState
+                .setValue(FRONT_CONNECTED, canConnectFront(worldAccess, blockPos, facing))
+                .setValue(BACK_CONNECTED, canConnectBack(worldAccess, blockPos, facing))
+                .setValue(SMOOTH, isSmooth(worldAccess, blockPos, facing))
+                .setValue(HAS_ELECTRICITY, electricity);
     }
 
     @Override
@@ -209,13 +224,11 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public static void updateBlockEntityValues(Level world, BlockPos pos, BlockState state) {
         if (state.getBlock() instanceof CopperPipe) {
             Direction direction = state.getValue(BlockStateProperties.FACING);
-            Direction directionOpp = direction.getOpposite();
-            Block dirBlock = world.getBlockState(pos.relative(direction)).getBlock();
-            BlockState oppState = world.getBlockState(pos.relative(directionOpp));
+            BlockState dirState = world.getBlockState(pos.relative(direction));
+            BlockState oppState = world.getBlockState(pos.relative(direction.getOpposite()));
             Block oppBlock = oppState.getBlock();
-            BlockEntity entity = world.getBlockEntity(pos);
-            if (entity instanceof CopperPipeEntity pipe) {
-                pipe.canDispense = (dirBlock == Blocks.AIR || dirBlock == Blocks.WATER) && (oppBlock != Blocks.AIR && oppBlock != Blocks.WATER);
+            if (world.getBlockEntity(pos) instanceof CopperPipeEntity pipe) {
+                pipe.canDispense = (dirState.isAir() || dirState.getBlock() == Blocks.WATER) && (!oppState.isAir() && oppBlock != Blocks.WATER);
                 pipe.corroded = oppBlock == CopperFitting.CORRODED_FITTING || state.getBlock() == CopperPipe.CORRODED_PIPE;
                 pipe.shootsControlled = oppBlock == Blocks.DROPPER;
                 pipe.shootsSpecial = oppBlock == Blocks.DISPENSER;
@@ -232,14 +245,19 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockView, BlockPos blockPos) { return blockState.getFluidState().isEmpty();}
+    public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockView, BlockPos blockPos) {
+        return blockState.getFluidState().isEmpty();
+    }
 
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState blockState, BlockEntityType<T> blockEntityType) {
         if (!world.isClientSide) {
-            return createTickerHelper(blockEntityType, CopperPipeMain.COPPER_PIPE_ENTITY, (world1, blockPos, blockState1, copperPipeEntity) -> copperPipeEntity.serverTick(world1, blockPos, blockState1));
-        } return null;
+            return createTickerHelper(blockEntityType, CopperPipeMain.COPPER_PIPE_ENTITY, (world1, blockPos, blockState1, copperPipeEntity) ->
+                    copperPipeEntity.serverTick(world1, blockPos, blockState1)
+            );
+        }
+        return null;
     }
 
     @Nullable
@@ -251,17 +269,18 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return null;
     }
 
+    @Override
     public void setPlacedBy(Level world, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
         updateBlockEntityValues(world, blockPos, blockState);
         if (itemStack.hasCustomHoverName()) {
-            BlockEntity blockEntity = world.getBlockEntity(blockPos);
-            if (blockEntity instanceof CopperPipeEntity) {
-                ((CopperPipeEntity)blockEntity).setCustomName(itemStack.getHoverName());
+            if (world.getBlockEntity(blockPos) instanceof CopperPipeEntity copperPipeEntity) {
+                copperPipeEntity.setCustomName(itemStack.getHoverName());
             }
         }
     }
 
     @Override
+    @NotNull
     public FluidState getFluidState(BlockState blockState) {
         if (blockState.getValue(WATERLOGGED)) {
             return Fluids.WATER.getSource(false);
@@ -270,6 +289,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     }
 
     @Override
+    @NotNull
     public InteractionResult use(BlockState blockState, Level world, BlockPos blockPos, Player playerEntity, InteractionHand hand, BlockHitResult blockHitResult) {
         if (playerEntity.getItemInHand(hand).getItem() instanceof BlockItem blockItem) {
             if (blockItem.getBlock() instanceof CopperPipe || blockItem.getBlock() instanceof CopperFitting) {
@@ -280,8 +300,8 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             return InteractionResult.SUCCESS;
         } else {
             BlockEntity blockEntity = world.getBlockEntity(blockPos);
-            if (blockEntity instanceof CopperPipeEntity) {
-                playerEntity.openMenu((CopperPipeEntity) blockEntity);
+            if (blockEntity instanceof CopperPipeEntity copperPipeEntity) {
+                playerEntity.openMenu(copperPipeEntity);
                 playerEntity.awardStat(Stats.CUSTOM.get(INSPECT_PIPE));
             }
             return InteractionResult.CONSUME;
@@ -289,25 +309,42 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState blockState) { return RenderShape.MODEL; }
+    @NotNull
+    public RenderShape getRenderShape(BlockState blockState) {
+        return RenderShape.MODEL;
+    }
 
     @Override
-    public boolean hasAnalogOutputSignal(BlockState blockState) { return true; }
+    public boolean hasAnalogOutputSignal(BlockState blockState) {
+        return true;
+    }
 
     @Override
-    public int getAnalogOutputSignal(BlockState blockState, Level world, BlockPos blockPos) { return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(world.getBlockEntity(blockPos)); }
+    public int getAnalogOutputSignal(BlockState blockState, Level world, BlockPos blockPos) {
+        return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(world.getBlockEntity(blockPos));
+    }
 
     @Override
-    public BlockState rotate(BlockState blockState, Rotation blockRotation) { return blockState.setValue(FACING, blockRotation.rotate(blockState.getValue(FACING))); }
+    @NotNull
+    public BlockState rotate(BlockState blockState, Rotation blockRotation) {
+        return blockState.setValue(FACING, blockRotation.rotate(blockState.getValue(FACING)));
+    }
 
     @Override
-    public BlockState mirror(BlockState blockState, Mirror blockMirror) { return blockState.rotate(blockMirror.getRotation(blockState.getValue(FACING))); }
+    @NotNull
+    public BlockState mirror(BlockState blockState, Mirror blockMirror) {
+        return blockState.rotate(blockMirror.getRotation(blockState.getValue(FACING)));
+    }
 
     @Override
-    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) { builder.add(FACING).add(FRONT_CONNECTED).add(BACK_CONNECTED).add(SMOOTH).add(WATERLOGGED).add(HAS_WATER).add(HAS_SMOKE).add(HAS_ELECTRICITY).add(HAS_ITEM).add(POWERED); }
+    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+        builder.add(FACING).add(FRONT_CONNECTED).add(BACK_CONNECTED).add(SMOOTH).add(WATERLOGGED).add(HAS_WATER).add(HAS_SMOKE).add(HAS_ELECTRICITY).add(HAS_ITEM).add(POWERED);
+    }
 
     @Override
-    public boolean isPathfindable(BlockState blockState, BlockGetter blockView, BlockPos blockPos, PathComputationType navigationType) { return false; }
+    public boolean isPathfindable(BlockState blockState, BlockGetter blockView, BlockPos blockPos, PathComputationType navigationType) {
+        return false;
+    }
 
     public static boolean canConnectFront(Level world, BlockPos blockPos, Direction direction) {
         BlockState state = world.getBlockState(blockPos.relative(direction));
@@ -328,7 +365,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public static boolean isSmooth(Level world, BlockPos blockPos, Direction direction) {
         BlockState state = world.getBlockState(blockPos.relative(direction));
         if (state.getBlock() instanceof CopperPipe) {
-            return state.getValue(CopperPipe.FACING) == direction && !canConnectFront(world,blockPos,direction);
+            return state.getValue(CopperPipe.FACING) == direction && !canConnectFront(world, blockPos, direction);
         }
         return false;
     }
@@ -352,7 +389,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public static boolean isSmooth(LevelAccessor world, BlockPos blockPos, Direction direction) {
         BlockState state = world.getBlockState(blockPos.relative(direction));
         if (state.getBlock() instanceof CopperPipe) {
-            return state.getValue(CopperPipe.FACING) == direction && !canConnectFront(world,blockPos,direction);
+            return state.getValue(CopperPipe.FACING) == direction && !canConnectFront(world, blockPos, direction);
         }
         return false;
     }
@@ -442,6 +479,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         }
     }
 
+    @Override
     public boolean isRandomlyTicking(BlockState blockState) {
         Block block = blockState.getBlock();
         return block == CopperPipe.COPPER_PIPE || block == CopperPipe.EXPOSED_PIPE || block == CopperPipe.WEATHERED_PIPE || blockState.getValue(HAS_WATER);
@@ -451,8 +489,8 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public void animateTick(BlockState blockState, Level world, BlockPos blockPos, RandomSource random) {
         Direction direction = blockState.getValue(FACING);
         BlockState offsetState = world.getBlockState(blockPos.relative(direction));
-        boolean waterInFront = offsetState.getBlock() == Blocks.WATER;
-        boolean canWaterOrSmokeExtra = ((offsetState.getBlock() != Blocks.AIR && !waterInFront) || direction == Direction.DOWN);
+        FluidState fluidState = offsetState.getFluidState();
+        boolean canWaterOrSmokeExtra = ((!offsetState.isAir() && fluidState.isEmpty()) || direction == Direction.DOWN);
         boolean canWater = blockState.getValue(HAS_WATER) && direction != Direction.UP;
         boolean canSmoke = blockState.getValue(HAS_SMOKE) && random.nextInt(5) == 0;
         boolean hasSmokeOrWater = canWater || canSmoke;
@@ -471,7 +509,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                 double y = blockPos.getY() + getDripY(direction, random);
                 double z = blockPos.getZ() + getDripZ(direction, random);
                 if (canWater) {
-                    world.addParticle(ParticleTypes.DRIPPING_WATER, x, y, z, 0, 0, 0);
+                    world.addParticle(ParticleTypes.DRIPPING_WATER, x, outY, z, 0, 0, 0);
                 }
                 if (canSmoke) {
                     world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 0, 0.07D, 0);
@@ -481,14 +519,15 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         if (blockState.getValue(HAS_ELECTRICITY)) {
             ParticleUtils.spawnParticlesAlongAxis(direction.getAxis(), world, blockPos, 0.4D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
         }
-        if (waterInFront) {
+        if (fluidState.is(FluidTags.WATER)) {
             world.addParticle(ParticleTypes.BUBBLE,
                     blockPos.getX() + getDripX(direction, random),
                     blockPos.getY() + getDripY(direction, random),
                     blockPos.getZ() + getDripZ(direction, random),
                     direction.getStepX() * 0.7D,
                     direction.getStepY() * 0.7D,
-                    direction.getStepZ() * 0.7D);
+                    direction.getStepZ() * 0.7D
+            );
         }
     }
 
@@ -507,7 +546,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return switch (direction) {
             case DOWN -> -0.05;
             case UP -> 1.05;
-            case NORTH, WEST, EAST, SOUTH -> 0.5 + getRan(random);
+            case NORTH, WEST, EAST, SOUTH -> 0.4375 + Mth.clamp(getRan(random), -2, 0.625);
         };
     }
 
@@ -532,7 +571,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return switch (direction) {
             case DOWN -> -0.05;
             case UP -> 1.05;
-            case NORTH, SOUTH, EAST, WEST -> 0.5;
+            case NORTH, SOUTH, EAST, WEST -> 0.4375;
         };
     }
 
@@ -548,7 +587,8 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return new PositionImpl(
                 blockPointer.x() + 0.7D * (double)facing.getStepX(),
                 blockPointer.y() + 0.7D * (double)facing.getStepY(),
-                blockPointer.z() + 0.7D * (double)facing.getStepZ());
+                blockPointer.z() + 0.7D * (double)facing.getStepZ()
+        );
     }
 
     public static boolean shouldGlow(BlockState state) {

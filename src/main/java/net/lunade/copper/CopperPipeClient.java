@@ -1,13 +1,9 @@
 package net.lunade.copper;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
-import net.lunade.copper.blocks.CopperFitting;
-import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.particle.PipeInkParticle;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -19,22 +15,22 @@ public class CopperPipeClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        //CrowdinTranslate.downloadTranslations("simple-copper-pipes", "lunade");
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.RED_INK, PipeInkParticle.RedFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.GREEN_INK, PipeInkParticle.GreenFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.BROWN_INK, PipeInkParticle.BrownFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.BLUE_INK, PipeInkParticle.BlueFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.PURPLE_INK, PipeInkParticle.PurpleFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.CYAN_INK, PipeInkParticle.CyanFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.LIGHT_GRAY_INK, PipeInkParticle.LightGrayFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.GRAY_INK, PipeInkParticle.GrayFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.PINK_INK, PipeInkParticle.PinkFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.LIME_INK, PipeInkParticle.LimeFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.YELLOW_INK, PipeInkParticle.YellowFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.LIGHT_BLUE_INK, PipeInkParticle.LightBlueFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.MAGENTA_INK, PipeInkParticle.MagentaFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.ORANGE_INK, PipeInkParticle.OrangeFactory::new);
-        ParticleFactoryRegistry.getInstance().register(CopperPipeMain.WHITE_INK, PipeInkParticle.WhiteFactory::new);
+        ParticleFactoryRegistry particleFactoryRegistry = ParticleFactoryRegistry.getInstance();
+        particleFactoryRegistry.register(CopperPipeMain.RED_INK, PipeInkParticle.RedFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.GREEN_INK, PipeInkParticle.GreenFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.BROWN_INK, PipeInkParticle.BrownFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.BLUE_INK, PipeInkParticle.BlueFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.PURPLE_INK, PipeInkParticle.PurpleFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.CYAN_INK, PipeInkParticle.CyanFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.LIGHT_GRAY_INK, PipeInkParticle.LightGrayFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.GRAY_INK, PipeInkParticle.GrayFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.PINK_INK, PipeInkParticle.PinkFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.LIME_INK, PipeInkParticle.LimeFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.YELLOW_INK, PipeInkParticle.YellowFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.LIGHT_BLUE_INK, PipeInkParticle.LightBlueFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.MAGENTA_INK, PipeInkParticle.MagentaFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.ORANGE_INK, PipeInkParticle.OrangeFactory::new);
+        particleFactoryRegistry.register(CopperPipeMain.WHITE_INK, PipeInkParticle.WhiteFactory::new);
 
         ClientPlayNetworking.registerGlobalReceiver(NOTE_PACKET, (client, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();

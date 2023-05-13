@@ -1,6 +1,5 @@
 package net.lunade.copper.block_entity;
 
-import com.mojang.logging.LogUtils;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
@@ -24,7 +23,7 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
-import org.slf4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -187,6 +186,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         }
     }
 
+    @Override
     public void load(CompoundTag nbtCompound) {
         super.load(nbtCompound);
         this.inventory = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
@@ -201,6 +201,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         this.moveablePipeDataHandler.readNbt(nbtCompound);
     }
 
+    @Override
     protected void saveAdditional(CompoundTag nbtCompound) {
         super.saveAdditional(nbtCompound);
         if (!this.trySaveLootTable(nbtCompound)) {
@@ -215,6 +216,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     }
 
     @Override
+    @NotNull
     protected NonNullList<ItemStack> getItems() {
         return this.inventory;
     }
@@ -225,11 +227,13 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     }
 
     @Override
+    @NotNull
     protected Component getDefaultName() {
         return Component.translatable(this.getBlockState().getBlock().getDescriptionId());
     }
 
     @Override
+    @NotNull
     protected AbstractContainerMenu createMenu(int i, Inventory playerInventory) {
         return new HopperMenu(i, playerInventory, this);
     }

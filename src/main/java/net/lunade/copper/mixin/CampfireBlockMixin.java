@@ -11,13 +11,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(CampfireBlock.class)
 public class CampfireBlockMixin {
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/CampfireBlock;isLitCampfire(Lnet/minecraft/world/level/block/state/BlockState;)Z", ordinal = 0), method = "isSmokeyPos")
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/CampfireBlock;isLitCampfire(Lnet/minecraft/world/level/block/state/BlockState;)Z"), method = "isSmokeyPos")
     private static boolean simpleCopperPipes$isSmokeyPosA(BlockState state) {
-        return CampfireBlock.isLitCampfire(state) || (state.getBlock() instanceof CopperPipe && state.getValue(CopperPipeProperties.HAS_SMOKE));
-    }
-
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/CampfireBlock;isLitCampfire(Lnet/minecraft/world/level/block/state/BlockState;)Z", ordinal = 1), method = "isSmokeyPos")
-    private static boolean simpleCopperPipes$isSmokeyPosB(BlockState state) {
         return CampfireBlock.isLitCampfire(state) || (state.getBlock() instanceof CopperPipe && state.getValue(CopperPipeProperties.HAS_SMOKE));
     }
 

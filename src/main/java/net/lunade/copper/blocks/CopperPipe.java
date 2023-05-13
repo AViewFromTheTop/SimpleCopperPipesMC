@@ -1,13 +1,15 @@
 package net.lunade.copper.blocks;
 
 import net.lunade.copper.CopperPipeMain;
-import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.block_entity.CopperPipeEntity;
+import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -223,11 +225,11 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public static void updateBlockEntityValues(Level world, BlockPos pos, BlockState state) {
         if (state.getBlock() instanceof CopperPipe) {
             Direction direction = state.getValue(BlockStateProperties.FACING);
-            Block dirBlock = world.getBlockState(pos.relative(direction)).getBlock();
+            BlockState dirState = world.getBlockState(pos.relative(direction));
             BlockState oppState = world.getBlockState(pos.relative(direction.getOpposite()));
             Block oppBlock = oppState.getBlock();
             if (world.getBlockEntity(pos) instanceof CopperPipeEntity pipe) {
-                pipe.canDispense = (dirBlock == Blocks.AIR || dirBlock == Blocks.WATER) && (oppBlock != Blocks.AIR && oppBlock != Blocks.WATER);
+                pipe.canDispense = (dirState.isAir() || dirState.getBlock() == Blocks.WATER) && (!oppState.isAir() && oppBlock != Blocks.WATER);
                 pipe.corroded = oppBlock == CopperFitting.CORRODED_FITTING || state.getBlock() == CopperPipe.CORRODED_PIPE;
                 pipe.shootsControlled = oppBlock == Blocks.DROPPER;
                 pipe.shootsSpecial = oppBlock == Blocks.DISPENSER;
@@ -488,8 +490,8 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public void animateTick(BlockState blockState, Level world, BlockPos blockPos, RandomSource random) {
         Direction direction = blockState.getValue(FACING);
         BlockState offsetState = world.getBlockState(blockPos.relative(direction));
-        boolean waterInFront = offsetState.getBlock() == Blocks.WATER;
-        boolean canWaterOrSmokeExtra = ((offsetState.getBlock() != Blocks.AIR && !waterInFront) || direction == Direction.DOWN);
+        FluidState fluidState = offsetState.getFluidState();
+        boolean canWaterOrSmokeExtra = ((!offsetState.isAir() && fluidState.isEmpty()) || direction == Direction.DOWN);
         boolean canWater = blockState.getValue(HAS_WATER) && direction != Direction.UP;
         boolean canSmoke = blockState.getValue(HAS_SMOKE) && random.nextInt(5) == 0;
         boolean hasSmokeOrWater = canWater || canSmoke;
@@ -498,7 +500,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             double outY = blockPos.getY() + getDripY(direction);
             double outZ = blockPos.getZ() + getDripZ(direction);
             if (canWater) {
-                world.addParticle(ParticleTypes.DRIPPING_WATER, outX, Math.min(outY, 0.625), outZ, 0, 0, 0);
+                world.addParticle(ParticleTypes.DRIPPING_WATER, outX, outY, outZ, 0, 0, 0);
             }
             if (canSmoke) {
                 world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, outX, outY, outZ, 0, 0.07D, 0);
@@ -508,7 +510,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                 double y = blockPos.getY() + getDripY(direction, random);
                 double z = blockPos.getZ() + getDripZ(direction, random);
                 if (canWater) {
-                    world.addParticle(ParticleTypes.DRIPPING_WATER, x, Math.min(y, 0.625), z, 0, 0, 0);
+                    world.addParticle(ParticleTypes.DRIPPING_WATER, x, outY, z, 0, 0, 0);
                 }
                 if (canSmoke) {
                     world.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 0, 0.07D, 0);
@@ -518,7 +520,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         if (blockState.getValue(HAS_ELECTRICITY)) {
             ParticleUtils.spawnParticlesAlongAxis(direction.getAxis(), world, blockPos, 0.4D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
         }
-        if (waterInFront) {
+        if (fluidState.is(FluidTags.WATER)) {
             world.addParticle(ParticleTypes.BUBBLE,
                     blockPos.getX() + getDripX(direction, random),
                     blockPos.getY() + getDripY(direction, random),
@@ -545,7 +547,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return switch (direction) {
             case DOWN -> -0.05;
             case UP -> 1.05;
-            case NORTH, WEST, EAST, SOUTH -> 0.5 + getRan(random);
+            case NORTH, WEST, EAST, SOUTH -> 0.4375 + Mth.clamp(getRan(random), -2, 0.625);
         };
     }
 
@@ -570,7 +572,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return switch (direction) {
             case DOWN -> -0.05;
             case UP -> 1.05;
-            case NORTH, SOUTH, EAST, WEST -> 0.5;
+            case NORTH, SOUTH, EAST, WEST -> 0.4375;
         };
     }
 

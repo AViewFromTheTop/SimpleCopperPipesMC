@@ -208,12 +208,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if (!container.canPlaceItem(i, itemStack)) {
             return false;
         } else {
-            if (container instanceof WorldlyContainer worldlyContainer) {
-                if (!worldlyContainer.canPlaceItemThroughFace(i, itemStack, direction)) {
-                    return false;
-                }
-            }
-            return true;
+            return !(container instanceof WorldlyContainer) || ((WorldlyContainer)container).canPlaceItemThroughFace(i, itemStack, direction);
         }
     }
 

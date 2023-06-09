@@ -1,13 +1,15 @@
 {
   "schemaVersion": 1,
   "id": "copper_pipe",
-  "version": "1.11.4-1.18.2",
+  "version": "1.12.1-1.18.2",
 
   "name": "Simple Copper Pipes",
-  "description": "Adds copper pipes with unique mechanics to Minecraft.",
+  "description": "Adds Copper Pipes with unique mechanics to Minecraft.",
   "authors": [
-    "Lunade",
-    "Merp"
+    "Lunade"
+  ],
+  "contributors": [
+    "I_am_merp"
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/simple-copper-pipes"

@@ -144,15 +144,20 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         } return true;
     }
 
+    private static boolean canExtract(Inventory inventory, ItemStack itemStack, int i, Direction direction) {
+        return !(inventory instanceof SidedInventory) || ((SidedInventory)inventory).canExtract(i, itemStack, direction);
+    }
+
     private int moveIn(World world, BlockPos blockPos, BlockState blockState, Direction facing) {
         BlockPos offsetOppPos = blockPos.offset(facing.getOpposite());
         Inventory inventory2 = getInventoryAt(world, offsetOppPos);
         if (inventory2 != null) {
             if (!isInventoryFull(this, facing) && canTransfer(world, offsetOppPos, false, this)) {
                 for (int i = 0; i < inventory2.size(); ++i) {
-                    if (!inventory2.getStack(i).isEmpty()) {
+                    ItemStack stack = inventory2.getStack(1);
+                    if (!stack.isEmpty() && canExtract(inventory2, stack, i, facing)) {
                         this.setCooldown(blockState);
-                        ItemStack itemStack = inventory2.getStack(i).copy();
+                        ItemStack itemStack = stack.copy();
                         ItemStack itemStack2 = transfer(this, inventory2.removeStack(i, 1), facing);
                         if (itemStack2.isEmpty()) {
                             this.markDirty();
@@ -172,6 +177,14 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         } return 0;
     }
 
+    private static boolean canInsert(Inventory inventory, ItemStack itemStack, int i, @Nullable Direction direction) {
+        if (!inventory.isValid(i, itemStack)) {
+            return false;
+        } else {
+            return !(inventory instanceof SidedInventory) || ((SidedInventory)inventory).canInsert(i, itemStack, direction);
+        }
+    }
+
     private boolean moveOut(World world, BlockPos blockPos, Direction facing) {
         BlockPos offsetPos = blockPos.offset(facing);
         Inventory inventory2 = getInventoryAt(world, offsetPos);
@@ -184,9 +197,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             }
             if (canMove && !isInventoryFull(inventory2, opp)) {
                 for (int i = 0; i < this.size(); ++i) {
-                    if (!this.getStack(i).isEmpty()) {
+                    ItemStack stack = this.getStack(i);
+                    if (!stack.isEmpty() && canInsert(inventory2, stack, i, opp)) {
                         setCooldown(world, offsetPos);
-                        ItemStack itemStack = this.getStack(i).copy();
+                        ItemStack itemStack = stack.copy();
                         ItemStack itemStack2 = transfer(inventory2, this.removeStack(i, 1), opp);
                         if (itemStack2.isEmpty()) {
                             inventory2.markDirty();
@@ -330,10 +344,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 itemStack = transfer(inventory2, itemStack, is, direction);
             }
         } return itemStack;
-    }
-
-    private static boolean canInsert(Inventory inventory, ItemStack itemStack, int i, @Nullable Direction direction) {
-        return inventory.isValid(i, itemStack);
     }
 
     private static ItemStack transfer(Inventory inventory2, ItemStack itemStack, int i, @Nullable Direction direction) {

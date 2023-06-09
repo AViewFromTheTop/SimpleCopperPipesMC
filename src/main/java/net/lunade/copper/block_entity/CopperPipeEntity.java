@@ -170,15 +170,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return true;
     }
 
-    private static boolean canTakeItemFromContainer(Container container, Container container2, ItemStack itemStack, int i, Direction direction) {
-        if (!container2.canTakeItem(container, i, itemStack)) {
-            return false;
-        } else {
-            if (container2 instanceof WorldlyContainer worldlyContainer) {
-                return worldlyContainer.canTakeItemThroughFace(i, itemStack, direction);
-            }
-            return true;
-        }
+    private static boolean canTakeItemFromContainer(Container container, ItemStack itemStack, int i, Direction direction) {
+        return !(container instanceof WorldlyContainer) || ((WorldlyContainer)container).canTakeItemThroughFace(i, itemStack, direction);
     }
 
     private int moveIn(Level world, BlockPos blockPos, BlockState blockState, Direction facing) {
@@ -188,7 +181,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             if (!isInventoryFull(this, facing) && canTransfer(world, offsetOppPos, false, this)) {
                 for (int i = 0; i < inventory2.getContainerSize(); ++i) {
                     ItemStack stack = inventory2.getItem(i);
-                    if (stack != null & !stack.isEmpty() && canTakeItemFromContainer(this, inventory2, stack, i, facing)) {
+                    if (stack != null & !stack.isEmpty() && canTakeItemFromContainer(inventory2, stack, i, facing)) {
                         this.setCooldown(blockState);
                         ItemStack itemStack = stack.copy();
                         ItemStack itemStack2 = transfer(this, inventory2.removeItem(i, 1), facing);

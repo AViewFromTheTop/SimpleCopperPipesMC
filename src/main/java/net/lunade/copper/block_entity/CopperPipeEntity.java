@@ -32,6 +32,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.Hopper;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
@@ -184,34 +185,38 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         }
     }
 
-    private int moveIn(Level world, BlockPos blockPos, BlockState blockState, Direction facing) {
+    private int moveIn(Level level, BlockPos blockPos, BlockState blockState, Direction facing) {
         BlockPos offsetOppPos = blockPos.relative(facing.getOpposite());
-        Container inventory2 = getInventoryAt(world, offsetOppPos);
-        if (inventory2 != null) {
-            if (!isInventoryFull(this, facing) && canTransfer(world, offsetOppPos, false, this)) {
-                for (int i = 0; i < inventory2.getContainerSize(); ++i) {
-                    ItemStack stack = inventory2.getItem(i);
-                    if (stack != null & !stack.isEmpty() && canTakeItemFromContainer(this, inventory2, stack, i, facing)) {
-                        this.setCooldown(blockState);
-                        ItemStack itemStack = stack.copy();
-                        ItemStack itemStack2 = transfer(this, inventory2.removeItem(i, 1), facing);
-                        if (itemStack2.isEmpty()) {
-                            this.setChanged();
-                            if (blockState.is(CopperPipeMain.SILENT_PIPES)) {
-                                return 2;
-                            }
-                            Block block = world.getBlockState(offsetOppPos).getBlock();
-                            if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) {
-                                return 3;
-                            }
-                            return 2;
-                        }
-                        inventory2.setItem(i, itemStack);
-                    }
+        Container container = getInventoryAt(level, offsetOppPos);
+        if (container != null) {
+            Direction direction = Direction.DOWN;
+            boolean result = !isEmptyContainer(container, direction) && getSlots(container, direction).anyMatch((i) -> tryTakeInItemFromSlot(container, i, direction));
+            if (result) {
+                if (blockState.is(CopperPipeMain.SILENT_PIPES)) {
+                    return 2;
                 }
+                Block block = level.getBlockState(offsetOppPos).getBlock();
+                if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) {
+                    return 3;
+                }
+                return 2;
             }
         }
         return 0;
+    }
+
+    private boolean tryTakeInItemFromSlot(Container container, int i, Direction direction) {
+        ItemStack itemStack = container.getItem(i);
+        if (!itemStack.isEmpty() && canTakeItemFromContainer(this, container, itemStack, i, direction)) {
+            ItemStack itemStack2 = itemStack.copy();
+            ItemStack itemStack3 = addItem(container, this, container.removeItem(i, 1), null);
+            if (itemStack3.isEmpty()) {
+                container.setChanged();
+                return true;
+            }
+            container.setItem(i, itemStack2);
+        }
+        return false;
     }
 
     private static boolean canPlaceItemInContainer(Container container, ItemStack itemStack, int i, @Nullable Direction direction) {
@@ -219,9 +224,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             return false;
         } else {
             if (container instanceof WorldlyContainer worldlyContainer) {
-                if (!worldlyContainer.canPlaceItemThroughFace(i, itemStack, direction)) {
-                    return false;
-                }
+                return worldlyContainer.canPlaceItemThroughFace(i, itemStack, direction);
             }
             return true;
         }
@@ -237,13 +240,13 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             if (state.getBlock() instanceof CopperPipe) {
                 canMove = state.getValue(BlockStateProperties.FACING) != facing;
             }
-            if (canMove && !isInventoryFull(inventory2, opp)) {
+            if (canMove && !isEmptyContainer(inventory2, opp)) {
                 for (int i = 0; i < this.getContainerSize(); ++i) {
                     ItemStack stack = this.getItem(i);
-                    if (stack != null & !stack.isEmpty() && canPlaceItemInContainer(inventory2, stack, i, opp)) {
+                    if (!stack.isEmpty()) {
                         setCooldown(world, offsetPos);
                         ItemStack itemStack = stack.copy();
-                        ItemStack itemStack2 = transfer(inventory2, this.removeItem(i, 1), opp);
+                        ItemStack itemStack2 = addItem(this, inventory2, this.removeItem(i, 1), opp);
                         if (itemStack2.isEmpty()) {
                             inventory2.setChanged();
                             return true;
@@ -370,11 +373,53 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return inventory instanceof WorldlyContainer ? IntStream.of(((WorldlyContainer)inventory).getSlotsForFace(direction)) : IntStream.range(0, inventory.getContainerSize());
     }
 
-    private static boolean isInventoryFull(Container inventory, Direction direction) {
-        return getSlots(inventory, direction).allMatch((i) -> {
-            ItemStack itemStack = inventory.getItem(i);
-            return itemStack.getCount() >= itemStack.getMaxStackSize();
-        });
+    private static boolean isEmptyContainer(Container container, Direction direction) {
+        return getSlots(container, direction).allMatch((i) -> container.getItem(i).isEmpty());
+    }
+
+    public static ItemStack addItem(@Nullable Container container, Container container2, ItemStack itemStack, @Nullable Direction direction) {
+        int i;
+        if (container2 instanceof WorldlyContainer worldlyContainer) {
+            if (direction != null) {
+                int[] is = worldlyContainer.getSlotsForFace(direction);
+
+                for(i = 0; i < is.length && !itemStack.isEmpty(); ++i) {
+                    itemStack = tryMoveInItem(container2, itemStack, is[i], direction);
+                }
+
+                return itemStack;
+            }
+        }
+
+        int j = container2.getContainerSize();
+
+        for(i = 0; i < j && !itemStack.isEmpty(); ++i) {
+            itemStack = tryMoveInItem(container2, itemStack, i, direction);
+        }
+
+        return itemStack;
+    }
+
+    private static ItemStack tryMoveInItem(Container container2, ItemStack itemStack, int i, @Nullable Direction direction) {
+        ItemStack itemStack2 = container2.getItem(i);
+        if (canPlaceItemInContainer(container2, itemStack, i, direction)) {
+            boolean bl = false;
+            if (itemStack2.isEmpty()) {
+                container2.setItem(i, itemStack);
+                itemStack = ItemStack.EMPTY;
+                bl = true;
+            } else if (canMergeItems(itemStack2, itemStack)) {
+                int j = itemStack.getMaxStackSize() - itemStack2.getCount();
+                int k = Math.min(itemStack.getCount(), j);
+                itemStack.shrink(k);
+                itemStack2.grow(k);
+                bl = k > 0;
+            }
+            if (bl) {
+                container2.setChanged();
+            }
+        }
+        return itemStack;
     }
 
     public static ItemStack transfer(Container inventory2, ItemStack itemStack, @Nullable Direction direction) {

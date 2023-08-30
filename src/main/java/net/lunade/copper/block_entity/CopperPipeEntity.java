@@ -240,7 +240,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             if (state.getBlock() instanceof CopperPipe) {
                 canMove = state.getValue(BlockStateProperties.FACING) != facing;
             }
-            if (canMove && !isEmptyContainer(inventory2, opp)) {
+            if (canMove) {
                 for (int i = 0; i < this.getContainerSize(); ++i) {
                     ItemStack stack = this.getItem(i);
                     if (!stack.isEmpty()) {

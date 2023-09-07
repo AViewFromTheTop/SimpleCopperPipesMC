@@ -152,7 +152,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         BlockEntity entity = level.getBlockEntity(pos);
         if (entity != null) {
             if (entity instanceof CopperPipeEntity pipe) {
-                return !to || pipe.transferCooldown <= 0;
+                return to || pipe.transferCooldown <= 0;
             }
             if (entity instanceof CopperFittingEntity) {
                 return false;

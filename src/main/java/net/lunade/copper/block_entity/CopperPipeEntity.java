@@ -64,7 +64,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public Vec3 gameEventNbtVec3;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
-        super(CopperPipeMain.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
+        super(CopperBlockEntities.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
         this.noteBlockCooldown = 0;
         this.vibrationUser = this.createVibrationUser();
         this.vibrationData = new VibrationSystem.Data();

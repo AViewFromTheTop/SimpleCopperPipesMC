@@ -10,7 +10,9 @@ import net.minecraft.world.level.block.Block;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(HoneycombItem.class)
+// Run before Quilt's block content registry.
+// Quilt's priority is 500
+@Mixin(value = HoneycombItem.class, priority = 400)
 public class HoneyCombItemMixin {
 
     @WrapOperation(method = "method_34723", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableBiMap$Builder;build()Lcom/google/common/collect/ImmutableBiMap;"))

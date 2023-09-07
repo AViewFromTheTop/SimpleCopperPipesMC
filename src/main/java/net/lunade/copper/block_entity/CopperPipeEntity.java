@@ -137,14 +137,18 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         boolean bl1 = moveOut(level, blockPos, facing);
         int bl2 = moveIn(level, blockPos, blockState, facing);
         if (bl1 || bl2 >= 2) {
+            setCooldown(blockState);
             setChanged(level, blockPos, blockState);
-        }
-        if (bl2 == 1 || bl2 == 3) {
-            level.playSound(null, blockPos, CopperPipeMain.ITEM_IN, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
+            if (bl2 == 3) {
+                level.playSound(null, blockPos, CopperPipeMain.ITEM_IN, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
+            }
         }
     }
 
-    public static boolean canTransfer(Level level, BlockPos pos, boolean to, CopperPipeEntity copperPipe) {
+    public static boolean canTransfer(Level level, BlockPos pos, boolean to, @NotNull CopperPipeEntity copperPipe) {
+        if (copperPipe.transferCooldown > 0) {
+            return false;
+        }
         BlockEntity entity = level.getBlockEntity(pos);
         if (entity != null) {
             if (entity instanceof CopperPipeEntity pipe) {
@@ -165,7 +169,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private int moveIn(Level level, BlockPos blockPos, BlockState blockState, Direction facing) {

@@ -95,7 +95,6 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
                     }
                     ItemStack stack = this.getItem(i);
                     if (!stack.isEmpty()) {
-                        CopperPipeEntity.setCooldown(world, offsetPos);
                         ItemStack itemStack = stack.copy();
                         ItemStack itemStack2 = addItem(inventory2, this.removeItem(i, 1), opposite);
                         if (itemStack2.isEmpty()) {

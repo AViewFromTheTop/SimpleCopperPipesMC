@@ -600,7 +600,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public static final Block WAXED_WEATHERED_PIPE = new CopperPipe(WeatherState.WEATHERED, Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1,15, ParticleTypes.SQUID_INK);
     public static final Block WAXED_OXIDIZED_PIPE = new CopperPipe(WeatherState.OXIDIZED, Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1,12, ParticleTypes.SQUID_INK);
 
-    public static final Block CORRODED_PIPE =new CopperPipe(WeatherState.OXIDIZED, Properties
+    public static final Block CORRODED_PIPE = new CopperPipe(WeatherState.OXIDIZED, Properties
             .of().mapColor(MapColor.TERRACOTTA_ORANGE)
             .requiresCorrectToolForDrops()
             .strength(2F, 3.5F)

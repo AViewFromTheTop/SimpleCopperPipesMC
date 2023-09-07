@@ -1,7 +1,6 @@
 package net.lunade.copper.block_entity;
 
 import net.lunade.copper.blocks.CopperFitting;
-import net.lunade.copper.blocks.CopperPipe;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

@@ -14,7 +14,8 @@
     "ItemMixin",
     "SugarCaneBlockMixin",
     "VibrationListenerMixin",
-    "VibrationTickerMixin"
+    "VibrationTickerMixin",
+    "WeatheringCopperMixin"
   ],
   "injectors": {
     "defaultRequire": 1

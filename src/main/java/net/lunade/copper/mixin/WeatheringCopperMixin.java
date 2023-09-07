@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(WeatheringCopper.class)
-public class WeatheringCopperMixin {
+public interface WeatheringCopperMixin {
 
     @WrapOperation(method = "method_34740", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/google/common/collect/ImmutableBiMap$Builder;build()Lcom/google/common/collect/ImmutableBiMap;"))
     private static ImmutableBiMap<Block, Block> addSimpleCopperPipes(ImmutableBiMap.Builder<Block, Block> registry, Operation<ImmutableBiMap<Block, Block>> original) {

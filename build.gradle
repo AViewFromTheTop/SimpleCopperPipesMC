@@ -85,6 +85,13 @@ repositories {
 		url = "https://minecraft.guntram.de/maven/"
 	}
 	maven {
+		url = "https://maven.modrinth.com"
+
+		content {
+			includeGroup "maven.modrinth"
+		}
+	}
+	maven {
 		name = 'Quilt'
 		url = 'https://maven.quiltmc.org/repository/release'
 	}
@@ -105,6 +112,8 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	include(modImplementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.2.0-rc.2")))
+
+	modCompileOnly("maven.modrinth:create-fabric:0.5.1-d-build.1161+mc1.20.1")
 
 	//modImplementation "de.guntram.mcmod:crowdin-translate:1.4+1.19"
 	//include "de.guntram.mcmod:crowdin-translate:1.4+1.19"

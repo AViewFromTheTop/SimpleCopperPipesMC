@@ -1,5 +1,6 @@
 package net.lunade.copper.blocks;
 
+import net.fabricmc.fabric.api.tag.convention.v1.TagUtil;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -297,10 +299,9 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     @Override
     @NotNull
     public InteractionResult use(BlockState blockState, Level world, BlockPos blockPos, Player playerEntity, InteractionHand hand, BlockHitResult blockHitResult) {
-        if (playerEntity.getItemInHand(hand).getItem() instanceof BlockItem blockItem) {
-            if (blockItem.getBlock() instanceof CopperPipe || blockItem.getBlock() instanceof CopperFitting) {
-                return  InteractionResult.PASS;
-            }
+        Item item = playerEntity.getItemInHand(hand).getItem();
+        if (TagUtil.isIn(CopperPipeMain.IGNORES_COPPER_PIPE_MENU, item)) {
+            return InteractionResult.PASS;
         }
         if (world.isClientSide) {
             return InteractionResult.SUCCESS;

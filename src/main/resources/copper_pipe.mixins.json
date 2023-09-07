@@ -2,6 +2,7 @@
   "required": true,
   "minVersion": "0.8.5",
   "package": "net.lunade.copper.mixin",
+  "plugin": "net.lunade.copper.CopperPipePlugin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "CampfireBlockMixin",
@@ -15,7 +16,8 @@
     "SugarCaneBlockMixin",
     "VibrationListenerMixin",
     "VibrationTickerMixin",
-    "WeatheringCopperMixin"
+    "WeatheringCopperMixin",
+    "create.WrenchItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -62,6 +62,8 @@ public class CopperPipeMain implements ModInitializer {
 	public static final TagKey<Block> WAXED = TagKey.create(Registries.BLOCK, id("waxed"));
 	public static final TagKey<Block> SILENT_PIPES = TagKey.create(Registries.BLOCK, id("silent_pipes"));
 
+	public static final TagKey<Item> IGNORES_COPPER_PIPE_MENU = TagKey.create(Registries.ITEM, id("ignores_copper_pipe_menu"));
+
 	//SOUNDS
 	public static final SoundEvent ITEM_IN = SoundEvent.createVariableRangeEvent(id("block.copper_pipe.item_in"));
 	public static final SoundEvent ITEM_OUT = SoundEvent.createVariableRangeEvent(id("block.copper_pipe.item_out"));

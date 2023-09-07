@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.loader.api.FabricLoader;
+import net.lunade.copper.block_entity.CopperBlockEntities;
 import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
@@ -96,6 +97,8 @@ public class CopperPipeMain implements ModInitializer {
 	public void onInitialize() {
 		CopperPipeProperties.init();
 		SimpleCopperRegistries.initRegistry();
+
+		CopperBlockEntities.init();
 
 		Registry.register(BuiltInRegistries.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
 		Stats.CUSTOM.get(INSPECT_PIPE, StatFormatter.DEFAULT);

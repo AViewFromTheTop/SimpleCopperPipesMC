@@ -4,7 +4,6 @@
   "package": "net.lunade.copper.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AxeItemMixin",
     "CampfireBlockMixin",
     "CoralBlockBlockMixin",
     "CoralParentBlockMixin",

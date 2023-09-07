@@ -48,65 +48,71 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.lunade.copper.CopperPipeMain.INSPECT_PIPE;
 
-public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBlock {
+public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBlock, WeatheringCopper {
 
+    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    public static final BooleanProperty FRONT_CONNECTED = CopperPipeProperties.FRONT_CONNECTED;
+    public static final BooleanProperty BACK_CONNECTED = CopperPipeProperties.BACK_CONNECTED;
+    public static final BooleanProperty SMOOTH = CopperPipeProperties.SMOOTH;
+    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    public static final BooleanProperty HAS_WATER = CopperPipeProperties.HAS_WATER;
+    public static final BooleanProperty HAS_SMOKE = CopperPipeProperties.HAS_SMOKE;
+    public static final BooleanProperty HAS_ELECTRICITY = CopperPipeProperties.HAS_ELECTRICITY;
+    public static final BooleanProperty HAS_ITEM = CopperPipeProperties.HAS_ITEM;
+
+    private static final VoxelShape UP_SHAPE = Shapes.or(Block.box(4.0D, 0.0D, 4.0D, 12.0D, 14.0D, 12.0D),Block.box(3.0D, 14.0D, 3.0D, 13.0D, 16.0D, 13.0D));
+    private static final VoxelShape DOWN_SHAPE = Shapes.or(Block.box(4.0D, 2.0D, 4.0D, 12.0D, 16.0D, 12.0D),Block.box(3.0D, 0.0D, 3.0D, 13.0D, 2.0D, 13.0D));
+    private static final VoxelShape NORTH_SHAPE = Shapes.or(Block.box(4.0D, 4.0D, 2.0D, 12.0D, 12.0D, 16.0D),Block.box(3.0D, 3.0D, 0.D, 13.0D, 13.0D, 2.0D));
+    private static final VoxelShape SOUTH_SHAPE = Shapes.or(Block.box(4.0D, 4.0D, 0.0D, 12.0D, 12.0D, 14.0D),Block.box(3.0D, 3.0D, 14.D, 13.0D, 13.0D, 16.0D));
+    private static final VoxelShape EAST_SHAPE = Shapes.or(Block.box(0.0D, 4.0D, 4.0D, 14.0D, 12.0D, 12.0D),Block.box(14.0D, 3.0D, 3.0D, 16.0D, 13.0D, 13.0D));
+    private static final VoxelShape WEST_SHAPE = Shapes.or(Block.box(2.0D, 4.0D, 4.0D, 16.0D, 12.0D, 12.0D),Block.box(0.0D, 3.0D, 3.0D, 2.0D, 13.0D, 13.0D));
+
+    private static final VoxelShape DOWN_FRONT = Shapes.or(Block.box(4.0D, -2.0D, 4.0D, 12.0D, 16.0D, 12.0D),Block.box(3.0D, -4.0D, 3.0D, 13.0D, -2.0D, 13.0D));
+    private static final VoxelShape EAST_FRONT = Shapes.or(Block.box(0.0D, 4.0D, 4.0D, 18.0D, 12.0D, 12.0D),Block.box(18.0D, 3.0D, 3.0D, 20.0D, 13.0D, 13.0D));
+    private static final VoxelShape NORTH_FRONT = Shapes.or(Block.box(4.0D, 4.0D, -2.0D, 12.0D, 12.0D, 16.0D),Block.box(3.0D, 3.0D, -4.0D, 13.0D, 13.0D, -2.0D));
+    private static final VoxelShape SOUTH_FRONT = Shapes.or(Block.box(4.0D, 4.0D, 0.0D, 12.0D, 12.0D, 18.0D),Block.box(3.0D, 3.0D, 18.D, 13.0D, 13.0D, 20.0D));
+    private static final VoxelShape WEST_FRONT = Shapes.or(Block.box(-2.0D, 4.0D, 4.0D, 16.0D, 12.0D, 12.0D),Block.box(-4.0D, 3.0D, 3.0D, -2.0D, 13.0D, 13.0D));
+    private static final VoxelShape UP_FRONT = Shapes.or(Block.box(4.0D, 0.0D, 4.0D, 12.0D, 18.0D, 12.0D),Block.box(3.0D, 18.0D, 3.0D, 13.0D, 20.0D, 13.0D));
+
+    private static final VoxelShape DOWN_BACK = Shapes.or(Block.box(4.0D, 2.0D, 4.0D, 12.0D, 20.0D, 12.0D),Block.box(3.0D, 0.0D, 3.0D, 13.0D, 2.0D, 13.0D));
+    private static final VoxelShape EAST_BACK = Shapes.or(Block.box(-4.0D, 4.0D, 4.0D, 14.0D, 12.0D, 12.0D),Block.box(14.0D, 3.0D, 3.0D, 16.0D, 13.0D, 13.0D));
+    private static final VoxelShape NORTH_BACK = Shapes.or(Block.box(4.0D, 4.0D, 2.0D, 12.0D, 12.0D, 20.0D),Block.box(3.0D, 3.0D, 0.D, 13.0D, 13.0D, 2.0D));
+    private static final VoxelShape SOUTH_BACK = Shapes.or(Block.box(4.0D, 4.0D, -4.0D, 12.0D, 12.0D, 14.0D),Block.box(3.0D, 3.0D, 14.D, 13.0D, 13.0D, 16.0D));
+    private static final VoxelShape WEST_BACK = Shapes.or(Block.box(2.0D, 4.0D, 4.0D, 20.0D, 12.0D, 12.0D),Block.box(0.0D, 3.0D, 3.0D, 2.0D, 13.0D, 13.0D));
+    private static final VoxelShape UP_BACK = Shapes.or(Block.box(4.0D, -4.0D, 4.0D, 12.0D, 14.0D, 12.0D),Block.box(3.0D, 14.0D, 3.0D, 13.0D, 16.0D, 13.0D));
+
+    private static final VoxelShape DOWN_DOUBLE = Block.box(4.0D, -4.0D, 4.0D, 12.0D, 20.0D, 12.0D);
+    private static final VoxelShape NORTH_DOUBLE = Block.box(4.0D, 4.0D, -4.0D, 12.0D, 12.0D, 20.0D);
+    private static final VoxelShape EAST_DOUBLE = Block.box(-4.0D, 4.0D, 4.0D, 20.0D, 12.0D, 12.0D);
+
+    private static final VoxelShape DOWN_SMOOTH = Block.box(4.0D, 0.0D, 4.0D, 12.0D, 16.0D, 12.0D);
+    private static final VoxelShape NORTH_SMOOTH = Block.box(4.0D, 4.0D, 0.0D, 12.0D, 12.0D, 16.0D);
+    private static final VoxelShape EAST_SMOOTH = Block.box(0.0D, 4.0D, 4.0D, 16.0D, 12.0D, 12.0D);
+
+    private static final VoxelShape DOWN_BACK_SMOOTH = Block.box(4.0D, 0.0D, 4.0D, 12.0D, 20.0D, 12.0D);
+    private static final VoxelShape NORTH_BACK_SMOOTH = Block.box(4.0D, 4.0D, 0.0D, 12.0D, 12.0D, 20.0D);
+    private static final VoxelShape SOUTH_BACK_SMOOTH = Block.box(4.0D, 4.0D, -4.0D, 12.0D, 12.0D, 16.0D);
+    private static final VoxelShape EAST_BACK_SMOOTH = Block.box(-4.0D, 4.0D, 4.0D, 16.0D, 12.0D, 12.0D);
+    private static final VoxelShape WEST_BACK_SMOOTH = Block.box(0.0D, 4.0D, 4.0D, 20.0D, 12.0D, 12.0D);
+    private static final VoxelShape UP_BACK_SMOOTH = Block.box(4.0D, -4.0D, 4.0D, 12.0D, 16.0D, 12.0D);
+
+    private final WeatherState weatherState;
     public int cooldown;
     public int dispenserShotLength;
     public ParticleOptions ink;
 
-    public static final DirectionProperty FACING;
-    public static final BooleanProperty FRONT_CONNECTED;
-    public static final BooleanProperty BACK_CONNECTED;
-    public static final BooleanProperty SMOOTH;
-    public static final BooleanProperty POWERED;
-    public static final BooleanProperty WATERLOGGED;
-    public static final BooleanProperty HAS_WATER;
-    public static final BooleanProperty HAS_SMOKE;
-    public static final BooleanProperty HAS_ELECTRICITY;
-    public static final BooleanProperty HAS_ITEM;
-
-    private static final VoxelShape DOWN_SHAPE;
-    private static final VoxelShape EAST_SHAPE;
-    private static final VoxelShape NORTH_SHAPE;
-    private static final VoxelShape SOUTH_SHAPE;
-    private static final VoxelShape WEST_SHAPE;
-    private static final VoxelShape UP_SHAPE;
-
-    private static final VoxelShape DOWN_FRONT;
-    private static final VoxelShape EAST_FRONT;
-    private static final VoxelShape NORTH_FRONT;
-    private static final VoxelShape SOUTH_FRONT;
-    private static final VoxelShape WEST_FRONT;
-    private static final VoxelShape UP_FRONT;
-
-    private static final VoxelShape DOWN_BACK;
-    private static final VoxelShape EAST_BACK;
-    private static final VoxelShape NORTH_BACK;
-    private static final VoxelShape SOUTH_BACK;
-    private static final VoxelShape WEST_BACK;
-    private static final VoxelShape UP_BACK;
-
-    private static final VoxelShape DOWN_DOUBLE;
-    private static final VoxelShape NORTH_DOUBLE;
-    private static final VoxelShape EAST_DOUBLE;
-
-    private static final VoxelShape DOWN_SMOOTH;
-    private static final VoxelShape NORTH_SMOOTH;
-    private static final VoxelShape EAST_SMOOTH;
-
-    private static final VoxelShape DOWN_BACK_SMOOTH;
-    private static final VoxelShape NORTH_BACK_SMOOTH;
-    private static final VoxelShape SOUTH_BACK_SMOOTH;
-    private static final VoxelShape EAST_BACK_SMOOTH;
-    private static final VoxelShape WEST_BACK_SMOOTH;
-    private static final VoxelShape UP_BACK_SMOOTH;
-
-    public CopperPipe(Properties settings, int cooldown, int dispenserShotLength, ParticleOptions ink) {
+    public CopperPipe(WeatherState weatherState, Properties settings, int cooldown, int dispenserShotLength, ParticleOptions ink) {
         super(settings);
+        this.weatherState = weatherState;
         this.cooldown = cooldown;
         this.dispenserShotLength = dispenserShotLength;
         this.ink = ink;
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.DOWN).setValue(SMOOTH, false).setValue(WATERLOGGED, false).setValue(HAS_WATER, false).setValue(HAS_SMOKE, false).setValue(HAS_ELECTRICITY, false).setValue(HAS_ITEM, false).setValue(POWERED, false));
+    }
+
+    public CopperPipe(Properties settings, int cooldown, int dispenserShotLength, ParticleOptions ink) {
+        this(WeatherState.UNAFFECTED, settings, cooldown, dispenserShotLength, ink);
     }
 
     public VoxelShape getPipeShape(BlockState blockState) {
@@ -422,61 +428,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             }
         }
 
-        if (random.nextFloat() < 0.05688889F) {
-            this.tryDegrade(blockState, serverWorld, blockPos, random);
-        }
-    }
-
-    public void tryDegrade(BlockState blockState, ServerLevel serverWorld, BlockPos blockPos, RandomSource random) {
-        Block first = blockState.getBlock();
-        if (CopperPipeMain.OXIDIZATION_INT.containsKey(first)) {
-            int i = CopperPipeMain.OXIDIZATION_INT.getInt(first);
-            int j = 0;
-            int k = 0;
-            float degradationChance = i == 0 ? 0.75F : 1.0F;
-            for (BlockPos blockPos2 : BlockPos.withinManhattan(blockPos, 4, 4, 4)) {
-                int l = blockPos2.distManhattan(blockPos);
-                if (l > 4) {
-                    break;
-                }
-
-                if (!blockPos2.equals(blockPos)) {
-                    BlockState blockState2 = serverWorld.getBlockState(blockPos2);
-                    Block block = blockState2.getBlock();
-                    if (block instanceof ChangeOverTimeBlock) {
-                        Enum<?> enum_ = ((ChangeOverTimeBlock<?>) block).getAge();
-                        if (enum_.getClass() == WeatheringCopper.WeatherState.class) {
-                            int m = enum_.ordinal();
-                            if (m < i) {
-                                return;
-                            }
-                            if (m > i) {
-                                ++k;
-                            } else {
-                                ++j;
-                            }
-                        }
-                    } else if (CopperPipeMain.OXIDIZATION_INT.containsKey(block)) {
-                        int m = CopperPipeMain.OXIDIZATION_INT.getInt(block);
-                        if (m < i) {
-                            return;
-                        }
-                        if (m > i) {
-                            ++k;
-                        } else {
-                            ++j;
-                        }
-                    }
-                }
-            }
-            float f = (float) (k + 1) / (float) (k + j + 1);
-            float g = f * f * degradationChance;
-            if (random.nextFloat() < g) {
-                if (CopperPipeMain.NEXT_STAGE.containsKey(first)) {
-                    serverWorld.setBlockAndUpdate(blockPos, CopperPipeMain.NEXT_STAGE.get(first).withPropertiesOf(blockState));
-                }
-            }
-        }
+        this.onRandomTick(blockState, serverWorld, blockPos, random);
     }
 
     @Override
@@ -583,6 +535,11 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         };
     }
 
+    @Override
+    public WeatherState getAge() {
+        return this.weatherState;
+    }
+
     public static Position getOutputLocation(BlockSource blockPointer, Direction facing) {
         return new PositionImpl(
                 blockPointer.x() + 0.7D * (double)facing.getStepX(),
@@ -632,66 +589,17 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return false;
     }
 
-    static {
-        FACING = BlockStateProperties.FACING;
-        FRONT_CONNECTED = CopperPipeProperties.FRONT_CONNECTED;
-        BACK_CONNECTED = CopperPipeProperties.BACK_CONNECTED;
-        SMOOTH = CopperPipeProperties.SMOOTH;
-        WATERLOGGED = BlockStateProperties.WATERLOGGED;
-        HAS_WATER = CopperPipeProperties.HAS_WATER;
-        HAS_SMOKE = CopperPipeProperties.HAS_SMOKE;
-        HAS_ELECTRICITY = CopperPipeProperties.HAS_ELECTRICITY;
-        HAS_ITEM = CopperPipeProperties.HAS_ITEM;
-        POWERED = BlockStateProperties.POWERED;
+    public static final Block OXIDIZED_PIPE = new CopperPipe(WeatherState.OXIDIZED, Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2,12, ParticleTypes.SQUID_INK);
+    public static final Block WEATHERED_PIPE = new CopperPipe(WeatherState.WEATHERED, Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2,15, ParticleTypes.SQUID_INK);
+    public static final Block EXPOSED_PIPE = new CopperPipe(WeatherState.EXPOSED, Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2,18, ParticleTypes.SQUID_INK);
+    public static final Block COPPER_PIPE = new CopperPipe(WeatherState.UNAFFECTED, Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2, 20, ParticleTypes.SQUID_INK);
 
-        UP_SHAPE = Shapes.or(Block.box(4.0D, 0.0D, 4.0D, 12.0D, 14.0D, 12.0D),Block.box(3.0D, 14.0D, 3.0D, 13.0D, 16.0D, 13.0D));
-        DOWN_SHAPE = Shapes.or(Block.box(4.0D, 2.0D, 4.0D, 12.0D, 16.0D, 12.0D),Block.box(3.0D, 0.0D, 3.0D, 13.0D, 2.0D, 13.0D));
-        EAST_SHAPE = Shapes.or(Block.box(0.0D, 4.0D, 4.0D, 14.0D, 12.0D, 12.0D),Block.box(14.0D, 3.0D, 3.0D, 16.0D, 13.0D, 13.0D));
-        WEST_SHAPE = Shapes.or(Block.box(2.0D, 4.0D, 4.0D, 16.0D, 12.0D, 12.0D),Block.box(0.0D, 3.0D, 3.0D, 2.0D, 13.0D, 13.0D));
-        NORTH_SHAPE = Shapes.or(Block.box(4.0D, 4.0D, 2.0D, 12.0D, 12.0D, 16.0D),Block.box(3.0D, 3.0D, 0.D, 13.0D, 13.0D, 2.0D));
-        SOUTH_SHAPE = Shapes.or(Block.box(4.0D, 4.0D, 0.0D, 12.0D, 12.0D, 14.0D),Block.box(3.0D, 3.0D, 14.D, 13.0D, 13.0D, 16.0D));
+    public static final Block WAXED_OXIDIZED_PIPE = new CopperPipe(WeatherState.OXIDIZED, Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1,12, ParticleTypes.SQUID_INK);
+    public static final Block WAXED_WEATHERED_PIPE = new CopperPipe(WeatherState.WEATHERED, Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1,15, ParticleTypes.SQUID_INK);
+    public static final Block WAXED_EXPOSED_PIPE = new CopperPipe(WeatherState.EXPOSED, Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1,18, ParticleTypes.SQUID_INK);
+    public static final Block WAXED_COPPER_PIPE = new CopperPipe(WeatherState.UNAFFECTED, Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1,20, ParticleTypes.SQUID_INK);
 
-        UP_BACK = Shapes.or(Block.box(4.0D, -4.0D, 4.0D, 12.0D, 14.0D, 12.0D),Block.box(3.0D, 14.0D, 3.0D, 13.0D, 16.0D, 13.0D));
-        DOWN_BACK = Shapes.or(Block.box(4.0D, 2.0D, 4.0D, 12.0D, 20.0D, 12.0D),Block.box(3.0D, 0.0D, 3.0D, 13.0D, 2.0D, 13.0D));
-        EAST_BACK = Shapes.or(Block.box(-4.0D, 4.0D, 4.0D, 14.0D, 12.0D, 12.0D),Block.box(14.0D, 3.0D, 3.0D, 16.0D, 13.0D, 13.0D));
-        WEST_BACK = Shapes.or(Block.box(2.0D, 4.0D, 4.0D, 20.0D, 12.0D, 12.0D),Block.box(0.0D, 3.0D, 3.0D, 2.0D, 13.0D, 13.0D));
-        NORTH_BACK = Shapes.or(Block.box(4.0D, 4.0D, 2.0D, 12.0D, 12.0D, 20.0D),Block.box(3.0D, 3.0D, 0.D, 13.0D, 13.0D, 2.0D));
-        SOUTH_BACK = Shapes.or(Block.box(4.0D, 4.0D, -4.0D, 12.0D, 12.0D, 14.0D),Block.box(3.0D, 3.0D, 14.D, 13.0D, 13.0D, 16.0D));
-
-        UP_BACK_SMOOTH = Block.box(4.0D, -4.0D, 4.0D, 12.0D, 16.0D, 12.0D);
-        DOWN_BACK_SMOOTH = Block.box(4.0D, 0.0D, 4.0D, 12.0D, 20.0D, 12.0D);
-        EAST_BACK_SMOOTH = Block.box(-4.0D, 4.0D, 4.0D, 16.0D, 12.0D, 12.0D);
-        WEST_BACK_SMOOTH = Block.box(0.0D, 4.0D, 4.0D, 20.0D, 12.0D, 12.0D);
-        NORTH_BACK_SMOOTH = Block.box(4.0D, 4.0D, 0.0D, 12.0D, 12.0D, 20.0D);
-        SOUTH_BACK_SMOOTH = Block.box(4.0D, 4.0D, -4.0D, 12.0D, 12.0D, 16.0D);
-
-        UP_FRONT = Shapes.or(Block.box(4.0D, 0.0D, 4.0D, 12.0D, 18.0D, 12.0D),Block.box(3.0D, 18.0D, 3.0D, 13.0D, 20.0D, 13.0D));
-        DOWN_FRONT = Shapes.or(Block.box(4.0D, -2.0D, 4.0D, 12.0D, 16.0D, 12.0D),Block.box(3.0D, -4.0D, 3.0D, 13.0D, -2.0D, 13.0D));
-        EAST_FRONT = Shapes.or(Block.box(0.0D, 4.0D, 4.0D, 18.0D, 12.0D, 12.0D),Block.box(18.0D, 3.0D, 3.0D, 20.0D, 13.0D, 13.0D));
-        WEST_FRONT = Shapes.or(Block.box(-2.0D, 4.0D, 4.0D, 16.0D, 12.0D, 12.0D),Block.box(-4.0D, 3.0D, 3.0D, -2.0D, 13.0D, 13.0D));
-        NORTH_FRONT = Shapes.or(Block.box(4.0D, 4.0D, -2.0D, 12.0D, 12.0D, 16.0D),Block.box(3.0D, 3.0D, -4.0D, 13.0D, 13.0D, -2.0D));
-        SOUTH_FRONT = Shapes.or(Block.box(4.0D, 4.0D, 0.0D, 12.0D, 12.0D, 18.0D),Block.box(3.0D, 3.0D, 18.D, 13.0D, 13.0D, 20.0D));
-
-        EAST_DOUBLE = Block.box(-4.0D, 4.0D, 4.0D, 20.0D, 12.0D, 12.0D);
-        NORTH_DOUBLE = Block.box(4.0D, 4.0D, -4.0D, 12.0D, 12.0D, 20.0D);
-        DOWN_DOUBLE = Block.box(4.0D, -4.0D, 4.0D, 12.0D, 20.0D, 12.0D);
-
-        EAST_SMOOTH = Block.box(0.0D, 4.0D, 4.0D, 16.0D, 12.0D, 12.0D);
-        NORTH_SMOOTH = Block.box(4.0D, 4.0D, 0.0D, 12.0D, 12.0D, 16.0D);
-        DOWN_SMOOTH = Block.box(4.0D, 0.0D, 4.0D, 12.0D, 16.0D, 12.0D);
-    }
-
-    public static final Block OXIDIZED_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2,12, ParticleTypes.SQUID_INK);
-    public static final Block WEATHERED_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2,15, ParticleTypes.SQUID_INK);
-    public static final Block EXPOSED_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2,18, ParticleTypes.SQUID_INK);
-    public static final Block COPPER_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2, 20, ParticleTypes.SQUID_INK);
-
-    public static final Block WAXED_OXIDIZED_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1,12, ParticleTypes.SQUID_INK);
-    public static final Block WAXED_WEATHERED_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1,15, ParticleTypes.SQUID_INK);
-    public static final Block WAXED_EXPOSED_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1,18, ParticleTypes.SQUID_INK);
-    public static final Block WAXED_COPPER_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1,20, ParticleTypes.SQUID_INK);
-
-    public static final Block CORRODED_PIPE = new CopperPipe(Properties
+    public static final Block CORRODED_PIPE = new CopperPipe(WeatherState.OXIDIZED, Properties
             .of().mapColor(MapColor.TERRACOTTA_ORANGE)
             .requiresCorrectToolForDrops()
             .strength(2F, 3.5F)
@@ -736,5 +644,4 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     public static final Block GLOWING_LIGHT_GRAY_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,20, CopperPipeMain.LIGHT_GRAY_INK);
     public static final Block GLOWING_GRAY_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.COLOR_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,21, CopperPipeMain.GRAY_INK);
     public static final Block GLOWING_BROWN_PIPE = new CopperPipe(Properties.of().mapColor(MapColor.COLOR_BROWN).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)), 4,22, CopperPipeMain.BROWN_INK);
-
 }

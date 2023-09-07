@@ -17,6 +17,7 @@ import net.minecraft.world.inventory.HopperMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
@@ -27,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockEntity implements Container {
 
@@ -86,8 +88,9 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
             if (this.electricityCooldown == -1 && state.getValue(CopperPipeProperties.HAS_ELECTRICITY)) {
                 this.electricityCooldown = 80;
                 Block stateGetBlock = state.getBlock();
-                if (CopperPipeMain.PREVIOUS_STAGE.containsKey(stateGetBlock) && !state.is(CopperPipeMain.WAXED)) {
-                    state = CopperPipeMain.PREVIOUS_STAGE.get(stateGetBlock).withPropertiesOf(state);
+                Optional<Block> previous = WeatheringCopper.getPrevious(stateGetBlock);
+                if (previous.isPresent() && !state.is(CopperPipeMain.WAXED)) {
+                    state = previous.get().withPropertiesOf(state);
                 }
             }
             if (this.electricityCooldown == 79) {

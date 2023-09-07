@@ -35,24 +35,30 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedBlock {
+public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedBlock, WeatheringCopper {
 
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    public static final BooleanProperty HAS_WATER = CopperPipeProperties.HAS_WATER;
+    public static final BooleanProperty HAS_SMOKE = CopperPipeProperties.HAS_SMOKE;
+    public static final BooleanProperty HAS_ELECTRICITY = CopperPipeProperties.HAS_ELECTRICITY;
+    public static final BooleanProperty HAS_ITEM = CopperPipeProperties.HAS_ITEM;
+    private static final VoxelShape FITTING_SHAPE = Block.box(2.5D, 2.5D, 2.5D, 13.5D, 13.5D, 13.5D);
+
+    private final WeatherState weatherState;
     public ParticleOptions ink;
     public int cooldown;
 
-    public static final BooleanProperty WATERLOGGED;
-    public static final BooleanProperty POWERED;
-    public static final BooleanProperty HAS_WATER;
-    public static final BooleanProperty HAS_SMOKE;
-    public static final BooleanProperty HAS_ELECTRICITY;
-    public static final BooleanProperty HAS_ITEM;
-    private static final VoxelShape FITTING_SHAPE;
-
-    public CopperFitting(Properties settings, int cooldown, ParticleOptions ink) {
+    public CopperFitting(WeatherState weatherState, Properties settings, int cooldown, ParticleOptions ink) {
         super(settings);
+        this.weatherState = weatherState;
         this.cooldown = cooldown;
         this.ink = ink;
         this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, false).setValue(WATERLOGGED, false).setValue(HAS_WATER, false).setValue(HAS_SMOKE, false).setValue(HAS_ELECTRICITY, false).setValue(HAS_ITEM, false));
+    }
+
+    public CopperFitting(Properties settings, int cooldown, ParticleOptions ink) {
+        this(WeatherState.UNAFFECTED, settings, cooldown, ink);
     }
 
     @Override
@@ -163,49 +169,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 
     @Override
     public void randomTick(BlockState blockState, ServerLevel serverWorld, BlockPos blockPos, RandomSource random) {
-        if (random.nextFloat() < 0.05688889F) {
-            this.tryDegrade(blockState, serverWorld, blockPos, random);
-        }
-    }
-
-    public void tryDegrade(BlockState blockState, ServerLevel serverWorld, BlockPos blockPos, RandomSource random) {
-        Block first = blockState.getBlock();
-        if (CopperPipeMain.OXIDIZATION_INT.containsKey(first)) {
-            int i = CopperPipeMain.OXIDIZATION_INT.getInt(first);
-            int j = 0;
-            int k = 0;
-            float degradationChance = i == 0 ? 0.75F : 1.0F;
-            for (BlockPos blockPos2 : BlockPos.withinManhattan(blockPos, 4, 4, 4)) {
-                int l = blockPos2.distManhattan(blockPos);
-                if (l > 4) {
-                    break;
-                }
-
-                if (!blockPos2.equals(blockPos)) {
-                    BlockState blockState2 = serverWorld.getBlockState(blockPos2);
-                    Block block = blockState2.getBlock();
-                    if (block instanceof ChangeOverTimeBlock) {
-                        Enum<?> enum_ = ((ChangeOverTimeBlock<?>) block).getAge();
-                        if (enum_.getClass() == WeatheringCopper.WeatherState.class) {
-                            int m = enum_.ordinal();
-                            if (m < i) { return; }
-                            if (m > i) { ++k;} else { ++j; }
-                        }
-                    } else if (CopperPipeMain.OXIDIZATION_INT.containsKey(block)) {
-                        int m = CopperPipeMain.OXIDIZATION_INT.getInt(block);
-                        if (m < i) { return; }
-                        if (m > i) { ++k; } else { ++j; }
-                    }
-                }
-            }
-            float f = (float) (k + 1) / (float) (k + j + 1);
-            float g = f * f * degradationChance;
-            if (random.nextFloat() < g) {
-                if (CopperPipeMain.NEXT_STAGE.containsKey(first)) {
-                    serverWorld.setBlockAndUpdate(blockPos, CopperPipeMain.NEXT_STAGE.get(first).withPropertiesOf(blockState));
-                }
-            }
-        }
+        this.onRandomTick(blockState, serverWorld, blockPos, random);
     }
 
     public static void updateBlockEntityValues(Level world, BlockPos pos, BlockState state) {
@@ -243,27 +207,22 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
         }
     }
 
-    static {
-        WATERLOGGED = BlockStateProperties.WATERLOGGED;
-        POWERED = BlockStateProperties.POWERED;
-        HAS_WATER = CopperPipeProperties.HAS_WATER;
-        HAS_SMOKE = CopperPipeProperties.HAS_SMOKE;
-        HAS_ELECTRICITY = CopperPipeProperties.HAS_ELECTRICITY;
-        HAS_ITEM = CopperPipeProperties.HAS_ITEM;
-        FITTING_SHAPE = Block.box(2.5D, 2.5D, 2.5D, 13.5D, 13.5D, 13.5D);
+    @Override
+    public WeatherState getAge() {
+        return this.weatherState;
     }
 
-    public static final Block OXIDIZED_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1, ParticleTypes.SQUID_INK);
-    public static final Block WEATHERED_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1, ParticleTypes.SQUID_INK);
-    public static final Block EXPOSED_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1, ParticleTypes.SQUID_INK);
-    public static final Block COPPER_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1, ParticleTypes.SQUID_INK);
+    public static final Block OXIDIZED_FITTING = new CopperFitting(WeatherState.OXIDIZED, Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1, ParticleTypes.SQUID_INK);
+    public static final Block WEATHERED_FITTING = new CopperFitting(WeatherState.WEATHERED, Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1, ParticleTypes.SQUID_INK);
+    public static final Block EXPOSED_FITTING = new CopperFitting(WeatherState.EXPOSED, Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1, ParticleTypes.SQUID_INK);
+    public static final Block COPPER_FITTING = new CopperFitting(WeatherState.UNAFFECTED, Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1, ParticleTypes.SQUID_INK);
 
     public static final Block WAXED_OXIDIZED_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 0, ParticleTypes.SQUID_INK);
     public static final Block WAXED_WEATHERED_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 0, ParticleTypes.SQUID_INK);
     public static final Block WAXED_EXPOSED_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 0, ParticleTypes.SQUID_INK);
     public static final Block WAXED_COPPER_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 0, ParticleTypes.SQUID_INK);
 
-    public static final Block CORRODED_FITTING = new CopperFitting(Properties
+    public static final Block CORRODED_FITTING = new CopperFitting(WeatherState.OXIDIZED, Properties
             .of().mapColor(MapColor.QUARTZ)
             .requiresCorrectToolForDrops()
             .strength(2F, 3.5F)
@@ -308,5 +267,4 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
     public static final Block GLOWING_MAGENTA_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.COLOR_MAGENTA).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)),2, CopperPipeMain.MAGENTA_INK);
     public static final Block GLOWING_ORANGE_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)),2, CopperPipeMain.ORANGE_INK);
     public static final Block GLOWING_WHITE_FITTING = new CopperFitting(Properties.of().mapColor(MapColor.SNOW).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER).lightLevel(CopperPipe::getLuminance).emissiveRendering((state, world, pos) -> CopperPipe.shouldGlow(state)),2, CopperPipeMain.WHITE_INK);
-
 }

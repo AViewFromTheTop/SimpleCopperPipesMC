@@ -3,7 +3,6 @@ package net.lunade.copper.block_entity;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -149,21 +148,21 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 
     }
 
-    public void moveMoveableNbt(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState) {
+    public void moveMoveableNbt(ServerLevel world, BlockPos blockPos, BlockState blockState) {
         ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = moveablePipeDataHandler.getSavedNbtList();
         ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> usedNbts = new ArrayList<>();
         if (!nbtList.isEmpty()) {
-            List<Direction> dirs = Util.shuffledCopy(Direction.values(), serverLevel.getRandom());
+            List<Direction> dirs = CopperPipeMain.shuffledDirections(world.getRandom());
             for (Direction direction : dirs) {
                 if (this.canMoveNbtInDirection(direction, blockState)) {
                     BlockPos newPos = blockPos.relative(direction);
-                    if (serverLevel.hasChunkAt(newPos)) {
-                        BlockState state = serverLevel.getBlockState(newPos);
-                        BlockEntity entity = serverLevel.getBlockEntity(newPos);
+                    if (world.hasChunkAt(newPos)) {
+                        BlockState state = world.getBlockState(newPos);
+                        BlockEntity entity = world.getBlockEntity(newPos);
                         if (entity instanceof AbstractSimpleCopperBlockEntity copperEntity) {
                             if (copperEntity.canAcceptMoveableNbt(this.moveType, direction, blockState)) {
                                 for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
-                                    if (nbt.getShouldMove() && (!nbt.getCanOnlyGoThroughOnePipe() || !usedNbts.contains(nbt)) && nbt.canMove(serverLevel, newPos, state, copperEntity)) {
+                                    if (nbt.getShouldMove() && (!nbt.getCanOnlyGoThroughOnePipe() || !usedNbts.contains(nbt)) && nbt.canMove(world, newPos, state, copperEntity)) {
                                         MoveablePipeDataHandler.SaveableMovablePipeNbt onMove;
                                         if (nbt.getShouldCopy()) {
                                             onMove = nbt.copyOf();
@@ -171,7 +170,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
                                             onMove = nbt;
                                         }
                                         copperEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtID(), onMove);
-                                        onMove.onMove(serverLevel, newPos, state, copperEntity);
+                                        onMove.onMove(world, newPos, state, copperEntity);
                                         if (!usedNbts.contains(nbt)) {
                                             usedNbts.add(nbt);
                                         }

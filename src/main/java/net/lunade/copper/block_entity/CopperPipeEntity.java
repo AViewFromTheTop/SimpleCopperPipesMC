@@ -11,7 +11,6 @@ import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
-import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.core.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -50,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements GameEventListener.Holder<VibrationSystem.Listener>, VibrationSystem {
 
@@ -70,7 +70,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public Vec3 gameEventNbtVec3;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
-        super(RegisterCopperBlockEntities.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
+        super(CopperBlockEntities.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
         this.noteBlockCooldown = 0;
         this.vibrationUser = this.createVibrationUser();
         this.vibrationData = new VibrationSystem.Data();
@@ -181,7 +181,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 return to || pipe.transferCooldown <= 0;
             }
             if (entity instanceof CopperFittingEntity) {
-                return false;
+                return to;
             }
             if (to) {
                 PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);

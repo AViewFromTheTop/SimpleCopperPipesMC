@@ -1,24 +1,25 @@
 package net.lunade.copper;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.loader.api.FabricLoader;
-import net.lunade.copper.registry.RegisterCopperBlockEntities;
+import net.lunade.copper.block_entity.CopperBlockEntities;
+import net.lunade.copper.block_entity.CopperFittingEntity;
+import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
-import net.lunade.copper.registry.RegisterCopperBlocks;
 import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.Util;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,12 +29,16 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatFormatter;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class CopperPipeMain implements ModInitializer {
 
@@ -93,8 +98,7 @@ public class CopperPipeMain implements ModInitializer {
 		CopperPipeProperties.init();
 		SimpleCopperRegistries.initRegistry();
 
-		RegisterCopperBlocks.register();
-		RegisterCopperBlockEntities.init();
+		CopperBlockEntities.init();
 
 		Registry.register(BuiltInRegistries.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
 		Stats.CUSTOM.get(INSPECT_PIPE, StatFormatter.DEFAULT);
@@ -151,6 +155,10 @@ public class CopperPipeMain implements ModInitializer {
 		});
 	}
 
+	public static List<Direction> shuffledDirections(RandomSource random) {
+		return Util.shuffledCopy(Direction.values(), random);
+	}
+
 	public static final Object2ObjectMap<Block, Block> GLOW_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
 		//PIPE
 		object2IntOpenHashMap.put(CopperPipe.RED_PIPE, CopperPipe.GLOWING_RED_PIPE);
@@ -190,6 +198,45 @@ public class CopperPipeMain implements ModInitializer {
 		return new ResourceLocation(BLOCK_ID, path);
 	}
 
+	public static ResourceLocation colourPipe(String colour) {
+		return id(colour + "_pipe");
+	}
+
+	public static ResourceLocation glowingPipe(String colour) {
+		return id("glowing_" + colour + "_pipe");
+	}
+
+	public static ResourceLocation colourFitting(String colour) {
+		return id(colour + "_fitting");
+	}
+
+	public static ResourceLocation glowingFitting(String colour) {
+		return id("glowing_" + colour + "_fitting");
+	}
+
 	public static final Logger LOGGER = LoggerFactory.getLogger("COPPER_PIPES");
 
+	public static Block registerBlock(Block block, ResourceLocation resourceLocation) {
+		var registered = Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
+		Item item = new BlockItem(block, new FabricItemSettings());
+		Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
+		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.REDSTONE_BLOCKS).register((entries) -> entries.accept(item));
+		return registered;
+	}
+
+	public static Block registerBlock(ResourceLocation resourceLocation, Block block) {
+		return registerBlock(block, resourceLocation);
+	}
+
+	public static Block registerColoured(Block block, ResourceLocation resourceLocation) {
+		var registered = Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
+		Item item = new BlockItem(block, new FabricItemSettings());
+		Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
+		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COLORED_BLOCKS).register((entries) -> entries.accept(item));
+		return registered;
+	}
+
+	public static Block registerColoured(ResourceLocation resourceLocation, Block block) {
+		return registerColoured(block, resourceLocation);
+	}
 }

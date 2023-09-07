@@ -1,7 +1,7 @@
 package net.lunade.copper.block_entity;
 
 import net.lunade.copper.blocks.CopperFitting;
-import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
     public CopperFittingEntity(BlockPos blockPos, BlockState blockState) {
-        super(CopperBlockEntities.COPPER_FITTING_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_FITTING);
+        super(RegisterCopperBlockEntities.COPPER_FITTING_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_FITTING);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
     public static boolean canTransfer(@NotNull Level level, BlockPos pos, Direction direction) {
         BlockState blockState;
-        return level.getBlockEntity(pos) instanceof CopperPipeEntity && (blockState = level.getBlockState(pos)).hasProperty(BlockStateProperties.FACING) && blockState.getValue(BlockStateProperties.FACING) == direction;
+        return level.getBlockEntity(pos) instanceof CopperPipeEntity pipe && pipe.transferCooldown <= 0 && (blockState = level.getBlockState(pos)).hasProperty(BlockStateProperties.FACING) && blockState.getValue(BlockStateProperties.FACING) == direction;
     }
 
     private boolean moveIn(Level level, @NotNull BlockPos blockPos, RandomSource randomSource) {

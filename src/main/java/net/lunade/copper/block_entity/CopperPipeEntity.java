@@ -22,13 +22,17 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.WorldlyContainerHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -37,12 +41,14 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements GameEventListener.Holder<VibrationSystem.Listener>, VibrationSystem {
@@ -117,7 +123,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     }
 
     @Override
-    public void updateBlockEntityValues(Level world, BlockPos pos, BlockState state) {
+    public void updateBlockEntityValues(Level world, BlockPos pos, @NotNull BlockState state) {
         if (state.getBlock() instanceof CopperPipe) {
             Direction direction = state.getValue(BlockStateProperties.FACING);
             Direction directionOpp = direction.getOpposite();
@@ -132,7 +138,27 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         }
     }
 
-    public void pipeMove(Level level, BlockPos blockPos, BlockState blockState) {
+    @Nullable
+    public static Container getContainerAt(Level world, @NotNull BlockPos blockPos) {
+        return getContainerAt(world, (double)blockPos.getX() + 0.5D, (double)blockPos.getY() + 0.5D, (double)blockPos.getZ() + 0.5D);
+    }
+
+    @Nullable
+    public static Container getContainerAt(@NotNull Level level, double d, double e, double f) {
+        BlockEntity blockEntity;
+        Container container = null;
+        BlockPos blockPos = BlockPos.containing(d, e, f);
+        BlockState blockState = level.getBlockState(blockPos);
+        Block block = blockState.getBlock();
+        if (block instanceof WorldlyContainerHolder worldlyContainerHolder) {
+            container = worldlyContainerHolder.getContainer(blockState, level, blockPos);
+        } else if (blockState.hasBlockEntity() && (blockEntity = level.getBlockEntity(blockPos)) instanceof Container && (container = (Container) blockEntity) instanceof ChestBlockEntity && block instanceof ChestBlock) {
+            container = ChestBlock.getContainer((ChestBlock)block, blockState, level, blockPos, true);
+        }
+        return container;
+    }
+
+    public void pipeMove(Level level, BlockPos blockPos, @NotNull BlockState blockState) {
         Direction facing = blockState.getValue(BlockStateProperties.FACING);
         boolean bl1 = moveOut(level, blockPos, facing);
         int bl2 = moveIn(level, blockPos, blockState, facing);
@@ -168,6 +194,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                     return canTake.canTake((ServerLevel)level, pos, level.getBlockState(pos), copperPipe, entity);
                 }
             }
+            return true;
         }
         return false;
     }
@@ -175,10 +202,12 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     private int moveIn(Level level, BlockPos blockPos, BlockState blockState, Direction facing) {
         Direction opposite = facing.getOpposite();
         BlockPos offsetOppPos = blockPos.relative(opposite);
-        Container container = HopperBlockEntity.getContainerAt(level, offsetOppPos);
+        Container container = getContainerAt(level, offsetOppPos);
         if (container != null && canTransfer(level, offsetOppPos, false, this)) {
-            boolean result = !HopperBlockEntity.isEmptyContainer(container, opposite) && HopperBlockEntity.getSlots(container, opposite).anyMatch((i) -> tryTakeInItemFromSlot(container, i, opposite));
-            if (result) {
+            if (HopperBlockEntity.isEmptyContainer(container, opposite)) {
+                return 0;
+            }
+            if (HopperBlockEntity.getSlots(container, opposite).anyMatch(i -> tryTakeInItemFromSlot(container, i, opposite))) {
                 if (blockState.is(CopperPipeMain.SILENT_PIPES)) {
                     return 2;
                 }
@@ -206,9 +235,32 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return false;
     }
 
+    public static ItemStack addItem(@Nullable Container container, Container container2, ItemStack itemStack, @Nullable Direction direction) {
+        if (container2 instanceof WorldlyContainer worldlyContainer) {
+            if (direction != null) {
+                int[] is = worldlyContainer.getSlotsForFace(direction);
+                int i = 0;
+                while (i < is.length) {
+                    if (itemStack.isEmpty()) return itemStack;
+                    itemStack = tryMoveInItem(container, container2, itemStack, is[i], direction);
+                    ++i;
+                }
+                return itemStack;
+            }
+        }
+        int j = container2.getContainerSize();
+        int i = 0;
+        while (i < j) {
+            if (itemStack.isEmpty()) return itemStack;
+            itemStack = tryMoveInItem(container, container2, itemStack, i, direction);
+            ++i;
+        }
+        return itemStack;
+    }
+
     private boolean moveOut(Level world, BlockPos blockPos, Direction facing) {
         BlockPos offsetPos = blockPos.relative(facing);
-        Container inventory2 = HopperBlockEntity.getContainerAt(world, offsetPos);
+        Container inventory2 = getContainerAt(world, offsetPos);
         if (inventory2 != null && canTransfer(world, offsetPos, true, this)) {
             Direction opp = facing.getOpposite();
             boolean canMove = true;
@@ -237,6 +289,29 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             }
         }
         return false;
+    }
+
+    private static ItemStack tryMoveInItem(@Nullable Container container, Container container2, ItemStack itemStack, int i, @Nullable Direction direction) {
+        ItemStack itemStack2 = container2.getItem(i);
+        if (HopperBlockEntity.canPlaceItemInContainer(container2, itemStack, i, direction)) {
+            int k;
+            boolean bl = false;
+            if (itemStack2.isEmpty()) {
+                container2.setItem(i, itemStack);
+                itemStack = ItemStack.EMPTY;
+                bl = true;
+            } else if (HopperBlockEntity.canMergeItems(itemStack2, itemStack)) {
+                int j = itemStack.getMaxStackSize() - itemStack2.getCount();
+                k = Math.min(itemStack.getCount(), j);
+                itemStack.shrink(k);
+                itemStack2.grow(k);
+                bl = k > 0;
+            }
+            if (bl) {
+                container2.setChanged();
+            }
+        }
+        return itemStack;
     }
 
     private boolean dispense(ServerLevel serverWorld, BlockPos blockPos, BlockState blockState) {
@@ -346,103 +421,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 i = k;
             }
         } return i;
-    }
-
-    public static ItemStack addItem(@Nullable Container container, Container container2, ItemStack itemStack, @Nullable Direction direction) {
-        int i;
-        if (container2 instanceof WorldlyContainer worldlyContainer) {
-            if (direction != null) {
-                int[] is = worldlyContainer.getSlotsForFace(direction);
-
-                for(i = 0; i < is.length && !itemStack.isEmpty(); ++i) {
-                    itemStack = tryMoveInItem(container2, itemStack, is[i], direction);
-                }
-
-                return itemStack;
-            }
-        }
-
-        int j = container2.getContainerSize();
-
-        for(i = 0; i < j && !itemStack.isEmpty(); ++i) {
-            itemStack = tryMoveInItem(container2, itemStack, i, direction);
-        }
-
-        return itemStack;
-    }
-
-    private static ItemStack tryMoveInItem(Container container2, ItemStack itemStack, int i, @Nullable Direction direction) {
-        ItemStack itemStack2 = container2.getItem(i);
-        if (HopperBlockEntity.canPlaceItemInContainer(container2, itemStack, i, direction)) {
-            boolean bl = false;
-            if (itemStack2.isEmpty()) {
-                container2.setItem(i, itemStack);
-                itemStack = ItemStack.EMPTY;
-                bl = true;
-            } else if (HopperBlockEntity.canMergeItems(itemStack2, itemStack)) {
-                int j = itemStack.getMaxStackSize() - itemStack2.getCount();
-                int k = Math.min(itemStack.getCount(), j);
-                itemStack.shrink(k);
-                itemStack2.grow(k);
-                bl = k > 0;
-            }
-            if (bl) {
-                container2.setChanged();
-            }
-        }
-        return itemStack;
-    }
-
-    public static ItemStack transfer(Container inventory2, ItemStack itemStack, @Nullable Direction direction) {
-        if (inventory2 instanceof WorldlyContainer sidedInventory && direction != null) {
-            int[] is = sidedInventory.getSlotsForFace(direction);
-            for(int i = 0; i < is.length && !itemStack.isEmpty(); ++i) {
-                itemStack = transfer(inventory2, itemStack, is[i]);
-            }
-        } else {
-            int sidedInventory = inventory2.getContainerSize();
-            for(int is = 0; is < sidedInventory && !itemStack.isEmpty(); ++is) {
-                itemStack = transfer(inventory2, itemStack, is);
-            }
-        } return itemStack;
-    }
-
-    private static boolean canInsert(Container inventory, ItemStack itemStack, int i) {
-        return inventory.canPlaceItem(i, itemStack);
-    }
-
-    private static ItemStack transfer(Container inventory2, ItemStack itemStack, int i) {
-        ItemStack itemStack2 = inventory2.getItem(i);
-        if (canInsert(inventory2, itemStack, i)) {
-            boolean bl = false;
-            if (itemStack2.isEmpty()) {
-                inventory2.setItem(i, itemStack);
-                itemStack = ItemStack.EMPTY;
-                bl = true;
-            } else if (HopperBlockEntity.canMergeItems(itemStack2, itemStack)) {
-                int j = itemStack.getMaxStackSize() - itemStack2.getCount();
-                int k = Math.min(itemStack.getCount(), j);
-                itemStack.shrink(k);
-                itemStack2.grow(k);
-                bl = k > 0;
-            }
-            if (bl) {
-                inventory2.setChanged();
-            }
-        }
-        return itemStack;
-    }
-
-    private boolean isFull() {
-        Iterator<ItemStack> var1 = this.inventory.iterator();
-        ItemStack itemStack;
-        do {
-            if (!var1.hasNext()) {
-                return true;
-            }
-            itemStack = var1.next();
-        } while(!itemStack.isEmpty() && itemStack.getCount() == itemStack.getMaxStackSize());
-        return false;
     }
 
     public void setCooldown(BlockState state) {

@@ -50,8 +50,8 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
         boolean bl1 = moveOut(level, blockPos, level.random);
         boolean bl2 = moveIn(level, blockPos, level.random);
         if (bl1 || bl2) {
-            setChanged(level, blockPos, blockState);
             setCooldown(blockState);
+            setChanged(level, blockPos, blockState);
         }
     }
 

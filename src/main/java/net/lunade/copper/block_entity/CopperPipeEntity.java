@@ -144,16 +144,16 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         }
     }
 
-    public static boolean canTransfer(Level world, BlockPos pos, boolean out, CopperPipeEntity copperPipe) {
+    public static boolean canTransfer(Level world, BlockPos pos, boolean to, CopperPipeEntity copperPipe) {
         BlockEntity entity = world.getBlockEntity(pos);
         if (entity != null) {
             if (entity instanceof CopperPipeEntity pipe) {
-                return pipe.transferCooldown <= 0;
+                return !to || pipe.transferCooldown <= 0;
             }
             if (entity instanceof CopperFittingEntity) {
-                return out || !world.getBlockState(pos).getValue(BlockStateProperties.POWERED);
+                return to || !world.getBlockState(pos).getValue(BlockStateProperties.POWERED);
             }
-            if (out) {
+            if (to) {
                 PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
                 if (canTransfer != null) {
                     return canTransfer.canTransfer((ServerLevel)world, pos, world.getBlockState(pos), copperPipe, entity);

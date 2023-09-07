@@ -75,7 +75,9 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext itemPlacementContext) {
-        return this.defaultBlockState().setValue(WATERLOGGED, itemPlacementContext.getLevel().getFluidState(itemPlacementContext.getClickedPos()).getType() == Fluids.WATER);
+        return this.defaultBlockState()
+                .setValue(WATERLOGGED, itemPlacementContext.getLevel().getFluidState(itemPlacementContext.getClickedPos()).getType() == Fluids.WATER)
+                .setValue(POWERED, itemPlacementContext.getLevel().hasNeighborSignal(itemPlacementContext.getClickedPos()));
     }
 
     @Override

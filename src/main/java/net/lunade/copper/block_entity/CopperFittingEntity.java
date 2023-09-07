@@ -7,6 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import org.jetbrains.annotations.NotNull;
 
 public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
@@ -15,8 +16,8 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
     }
 
     @Override
-    public void serverTick(Level world, BlockPos blockPos, BlockState blockState) {
-        super.serverTick(world, blockPos, blockState);
+    public void serverTick(@NotNull Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState) {
+        super.serverTick(level, blockPos, blockState);
     }
 
     @Override

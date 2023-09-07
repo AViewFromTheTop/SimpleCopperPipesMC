@@ -32,7 +32,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.minecraft.world.level.block.entity.Hopper;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
@@ -150,16 +149,16 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         }
     }
 
-    public static boolean canTransfer(Level world, BlockPos pos, boolean out, CopperPipeEntity copperPipe) {
+    public static boolean canTransfer(Level world, BlockPos pos, boolean to, CopperPipeEntity copperPipe) {
         BlockEntity entity = world.getBlockEntity(pos);
         if (entity != null) {
             if (entity instanceof CopperPipeEntity pipe) {
-                return pipe.transferCooldown <= 0;
+                return !to || pipe.transferCooldown <= 0;
             }
             if (entity instanceof CopperFittingEntity) {
-                return out || !world.getBlockState(pos).getValue(BlockStateProperties.POWERED);
+                return to || !world.getBlockState(pos).getValue(BlockStateProperties.POWERED);
             }
-            if (out) {
+            if (to) {
                 PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
                 if (canTransfer != null) {
                     return canTransfer.canTransfer((ServerLevel)world, pos, world.getBlockState(pos), copperPipe, entity);
@@ -188,7 +187,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     private int moveIn(Level level, BlockPos blockPos, BlockState blockState, Direction facing) {
         BlockPos offsetOppPos = blockPos.relative(facing.getOpposite());
         Container container = getInventoryAt(level, offsetOppPos);
-        if (container != null) {
+        if (container != null && canTransfer(level, offsetOppPos, false, this)) {
             Direction direction = Direction.DOWN;
             boolean result = !isEmptyContainer(container, direction) && getSlots(container, direction).anyMatch((i) -> tryTakeInItemFromSlot(container, i, direction));
             if (result) {

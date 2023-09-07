@@ -6,6 +6,7 @@ import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
 import com.simibubi.create.content.kinetics.base.HorizontalAxisKineticBlock;
 import com.simibubi.create.content.kinetics.base.HorizontalKineticBlock;
+import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -43,8 +44,12 @@ public class WrenchItemMixin {
         Level world = context.getLevel();
         BlockPos blockPos = context.getClickedPos();
         BlockState blockState = world.getBlockState(blockPos);
+        Block block = blockState.getBlock();
 
-        if (blockState.getBlock() instanceof CopperPipe) {
+        if (block instanceof CopperFitting) {
+            cir.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide)); // Don't do anything if the player isn't shifting.
+        }
+        if (block instanceof CopperPipe) {
             IWrenchable wrenchable = new IWrenchable() {};
             BlockState rotated = wrenchable.getRotatedBlockState(blockState, context.getClickedFace());
 

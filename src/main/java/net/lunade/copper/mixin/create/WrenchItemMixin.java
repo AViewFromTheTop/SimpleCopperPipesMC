@@ -27,12 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(WrenchItem.class)
-public abstract class WrenchItemMixin {
-
-    @Shadow
-    private static InteractionResult onItemUseOnOther(UseOnContext context) {
-        return null;
-    }
+public class WrenchItemMixin {
 
     @Inject(method = "useOn", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/equipment/wrench/WrenchItem;onItemUseOnOther(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     private void wrenchPickup(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir, Player player, BlockState state, Block block) {
@@ -49,14 +44,15 @@ public abstract class WrenchItemMixin {
         BlockPos blockPos = context.getClickedPos();
         BlockState blockState = world.getBlockState(blockPos);
 
-        if (blockState.getBlock() instanceof CopperPipe pipe) {
+        if (blockState.getBlock() instanceof CopperPipe) {
             IWrenchable wrenchable = new IWrenchable() {};
             BlockState rotated = wrenchable.getRotatedBlockState(blockState, context.getClickedFace());
 
+            Direction face = context.getClickedFace();
             BlockState state = rotated
-                    .setValue(CopperPipe.BACK_CONNECTED, CopperPipe.canConnectBack(world, blockPos, rotated.getValue(CopperPipe.FACING)))
-                    .setValue(CopperPipe.FRONT_CONNECTED, CopperPipe.canConnectFront(world, blockPos, rotated.getValue(CopperPipe.FACING)))
-                    .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(world, blockPos, rotated.getValue(CopperPipe.FACING)));
+                    .setValue(CopperPipe.BACK_CONNECTED, CopperPipe.canConnectBack(world, blockPos, face))
+                    .setValue(CopperPipe.FRONT_CONNECTED, CopperPipe.canConnectFront(world, blockPos, face))
+                    .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(world, blockPos, face));
 
             world.setBlockAndUpdate(blockPos, state);
             AllSoundEvents.WRENCH_ROTATE.playOnServer(world, blockPos, 1, Create.RANDOM.nextFloat() + 0.5F);

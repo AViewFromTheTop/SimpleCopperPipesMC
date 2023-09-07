@@ -10,7 +10,9 @@ import net.minecraft.world.level.block.WeatheringCopper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(WeatheringCopper.class)
+// Run before Quilt's block content registry.
+// Quilt's priority is 500
+@Mixin(value = WeatheringCopper.class, priority = 400)
 public interface WeatheringCopperMixin {
 
     @WrapOperation(method = "method_34740", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableBiMap$Builder;build()Lcom/google/common/collect/ImmutableBiMap;"))

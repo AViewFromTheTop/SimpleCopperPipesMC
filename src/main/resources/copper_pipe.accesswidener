@@ -1,1 +1,7 @@
 accessWidener    v2    named
+accessible method net/minecraft/world/level/block/entity/HopperBlockEntity canMergeItems (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z
+accessible method net/minecraft/world/level/block/entity/HopperBlockEntity getSlots (Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Ljava/util/stream/IntStream;
+accessible method net/minecraft/world/level/block/entity/HopperBlockEntity isFullContainer (Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z
+accessible method net/minecraft/world/level/block/entity/HopperBlockEntity isEmptyContainer (Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z
+accessible method net/minecraft/world/level/block/entity/HopperBlockEntity canTakeItemFromContainer (Lnet/minecraft/world/Container;Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;ILnet/minecraft/core/Direction;)Z
+accessible method net/minecraft/world/level/block/entity/HopperBlockEntity canPlaceItemInContainer (Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;ILnet/minecraft/core/Direction;)Z

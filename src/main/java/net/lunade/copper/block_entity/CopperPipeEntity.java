@@ -83,19 +83,19 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     }
 
     @Override
-    public void serverTick(Level world, BlockPos blockPos, BlockState blockState) {
-        VibrationSystem.Ticker.tick(level, this.getVibrationData(), this.createVibrationUser());
-        super.serverTick(world, blockPos, blockState);
-        if (!world.isClientSide) {
+    public void serverTick(Level level, BlockPos blockPos, BlockState blockState) {
+        VibrationSystem.Ticker.tick(this.level, this.getVibrationData(), this.createVibrationUser());
+        super.serverTick(level, blockPos, blockState);
+        if (!level.isClientSide) {
             if (this.noteBlockCooldown > 0) {
                 --this.noteBlockCooldown;
             }
             if (this.dispenseCooldown > 0) {
                 --this.dispenseCooldown;
             } else {
-                this.dispense((ServerLevel) world, blockPos, blockState);
+                this.dispense((ServerLevel) level, blockPos, blockState);
                 int i = 0;
-                if (world.getBlockState(blockPos.relative(blockState.getValue(BlockStateProperties.FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
+                if (level.getBlockState(blockPos.relative(blockState.getValue(BlockStateProperties.FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
                     i = fitting.cooldown;
                 } else {
                     if (blockState.getBlock() instanceof CopperPipe pipe) {
@@ -108,10 +108,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             if (this.transferCooldown > 0) {
                 --this.transferCooldown;
             } else {
-                this.pipeMove(world, blockPos, blockState);
+                this.pipeMove(level, blockPos, blockState);
             }
             if (blockState.getValue(CopperPipeProperties.HAS_WATER) && blockState.getValue(BlockStateProperties.FACING) != Direction.UP) {
-                LeakingPipeManager.addPos(world, blockPos);
+                LeakingPipeManager.addPos(level, blockPos);
             }
         }
     }
@@ -132,59 +132,48 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         }
     }
 
-    public void pipeMove(Level world, BlockPos blockPos, BlockState blockState) {
+    public void pipeMove(Level level, BlockPos blockPos, BlockState blockState) {
         Direction facing = blockState.getValue(BlockStateProperties.FACING);
-        boolean bl1 = moveOut(world, blockPos, facing);
-        int bl2 = moveIn(world, blockPos, blockState, facing);
+        boolean bl1 = moveOut(level, blockPos, facing);
+        int bl2 = moveIn(level, blockPos, blockState, facing);
         if (bl1 || bl2 >= 2) {
-            setChanged(world, blockPos, blockState);
+            setChanged(level, blockPos, blockState);
         }
         if (bl2 == 1 || bl2 == 3) {
-            world.playSound(null, blockPos, CopperPipeMain.ITEM_IN, SoundSource.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
+            level.playSound(null, blockPos, CopperPipeMain.ITEM_IN, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
         }
     }
 
-    public static boolean canTransfer(Level world, BlockPos pos, boolean to, CopperPipeEntity copperPipe) {
-        BlockEntity entity = world.getBlockEntity(pos);
+    public static boolean canTransfer(Level level, BlockPos pos, boolean to, CopperPipeEntity copperPipe) {
+        BlockEntity entity = level.getBlockEntity(pos);
         if (entity != null) {
             if (entity instanceof CopperPipeEntity pipe) {
                 return !to || pipe.transferCooldown <= 0;
             }
             if (entity instanceof CopperFittingEntity) {
-                return to || !world.getBlockState(pos).getValue(BlockStateProperties.POWERED);
+                return to;
             }
             if (to) {
                 PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
                 if (canTransfer != null) {
-                    return canTransfer.canTransfer((ServerLevel)world, pos, world.getBlockState(pos), copperPipe, entity);
+                    return canTransfer.canTransfer((ServerLevel)level, pos, level.getBlockState(pos), copperPipe, entity);
                 }
             } else {
                 PipeMovementRestrictions.CanTakeFrom<BlockEntity> canTake = PipeMovementRestrictions.getCanTakeFrom(entity);
                 if (canTake != null) {
-                    return canTake.canTake((ServerLevel)world, pos, world.getBlockState(pos), copperPipe, entity);
+                    return canTake.canTake((ServerLevel)level, pos, level.getBlockState(pos), copperPipe, entity);
                 }
             }
         }
         return true;
     }
 
-    private static boolean canTakeItemFromContainer(Container container, Container container2, ItemStack itemStack, int i, Direction direction) {
-        if (!container2.canTakeItem(container, i, itemStack)) {
-            return false;
-        } else {
-            if (container2 instanceof WorldlyContainer worldlyContainer) {
-                return worldlyContainer.canTakeItemThroughFace(i, itemStack, direction);
-            }
-            return true;
-        }
-    }
-
     private int moveIn(Level level, BlockPos blockPos, BlockState blockState, Direction facing) {
-        BlockPos offsetOppPos = blockPos.relative(facing.getOpposite());
+        Direction opposite = facing.getOpposite();
+        BlockPos offsetOppPos = blockPos.relative(opposite);
         Container container = HopperBlockEntity.getContainerAt(level, offsetOppPos);
-        if (container != null) {
-            Direction direction = Direction.DOWN;
-            boolean result = !isEmptyContainer(container, direction) && getSlots(container, direction).anyMatch((i) -> tryTakeInItemFromSlot(container, i, direction));
+        if (container != null && canTransfer(level, offsetOppPos, false, this)) {
+            boolean result = !HopperBlockEntity.isEmptyContainer(container, opposite) && HopperBlockEntity.getSlots(container, opposite).anyMatch((i) -> tryTakeInItemFromSlot(container, i, opposite));
             if (result) {
                 if (blockState.is(CopperPipeMain.SILENT_PIPES)) {
                     return 2;
@@ -201,7 +190,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 
     private boolean tryTakeInItemFromSlot(Container container, int i, Direction direction) {
         ItemStack itemStack = container.getItem(i);
-        if (!itemStack.isEmpty() && canTakeItemFromContainer(this, container, itemStack, i, direction)) {
+        if (!itemStack.isEmpty() && HopperBlockEntity.canTakeItemFromContainer(this, container, itemStack, i, direction)) {
             ItemStack itemStack2 = itemStack.copy();
             ItemStack itemStack3 = addItem(container, this, container.removeItem(i, 1), null);
             if (itemStack3.isEmpty()) {
@@ -211,17 +200,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             container.setItem(i, itemStack2);
         }
         return false;
-    }
-
-    private static boolean canPlaceItemInContainer(Container container, ItemStack itemStack, int i, @Nullable Direction direction) {
-        if (!container.canPlaceItem(i, itemStack)) {
-            return false;
-        } else {
-            if (container instanceof WorldlyContainer worldlyContainer) {
-                return worldlyContainer.canPlaceItemThroughFace(i, itemStack, direction);
-            }
-            return true;
-        }
     }
 
     private boolean moveOut(Level world, BlockPos blockPos, Direction facing) {
@@ -236,6 +214,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             }
             if (canMove) {
                 for (int i = 0; i < this.getContainerSize(); ++i) {
+                    if (HopperBlockEntity.isFullContainer(inventory2, facing)) {
+                        return false;
+                    }
                     ItemStack stack = this.getItem(i);
                     if (!stack.isEmpty()) {
                         setCooldown(world, offsetPos);
@@ -363,14 +344,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         } return i;
     }
 
-    private static IntStream getSlots(Container inventory, Direction direction) {
-        return inventory instanceof WorldlyContainer ? IntStream.of(((WorldlyContainer)inventory).getSlotsForFace(direction)) : IntStream.range(0, inventory.getContainerSize());
-    }
-
-    private static boolean isEmptyContainer(Container container, Direction direction) {
-        return getSlots(container, direction).allMatch(i -> container.getItem(i).isEmpty());
-    }
-
     public static ItemStack addItem(@Nullable Container container, Container container2, ItemStack itemStack, @Nullable Direction direction) {
         int i;
         if (container2 instanceof WorldlyContainer worldlyContainer) {
@@ -396,13 +369,13 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 
     private static ItemStack tryMoveInItem(Container container2, ItemStack itemStack, int i, @Nullable Direction direction) {
         ItemStack itemStack2 = container2.getItem(i);
-        if (canPlaceItemInContainer(container2, itemStack, i, direction)) {
+        if (HopperBlockEntity.canPlaceItemInContainer(container2, itemStack, i, direction)) {
             boolean bl = false;
             if (itemStack2.isEmpty()) {
                 container2.setItem(i, itemStack);
                 itemStack = ItemStack.EMPTY;
                 bl = true;
-            } else if (canMergeItems(itemStack2, itemStack)) {
+            } else if (HopperBlockEntity.canMergeItems(itemStack2, itemStack)) {
                 int j = itemStack.getMaxStackSize() - itemStack2.getCount();
                 int k = Math.min(itemStack.getCount(), j);
                 itemStack.shrink(k);
@@ -442,7 +415,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 inventory2.setItem(i, itemStack);
                 itemStack = ItemStack.EMPTY;
                 bl = true;
-            } else if (canMergeItems(itemStack2, itemStack)) {
+            } else if (HopperBlockEntity.canMergeItems(itemStack2, itemStack)) {
                 int j = itemStack.getMaxStackSize() - itemStack2.getCount();
                 int k = Math.min(itemStack.getCount(), j);
                 itemStack.shrink(k);
@@ -468,18 +441,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return false;
     }
 
-    private static boolean canMergeItems(ItemStack itemStack, ItemStack itemStack2) {
-        if (!itemStack.is(itemStack2.getItem())) {
-            return false;
-        } else if (itemStack.getDamageValue() != itemStack2.getDamageValue()) {
-            return false;
-        } else if (itemStack.getCount() > itemStack.getMaxStackSize()) {
-            return false;
-        } else {
-            return ItemStack.isSameItemSameTags(itemStack, itemStack2);
-        }
-    }
-
     public void setCooldown(BlockState state) {
         int i = 2;
         if (state.getBlock() instanceof CopperPipe pipe) {
@@ -491,7 +452,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public static void setCooldown(Level world, BlockPos blockPos) {
         BlockEntity entity = world.getBlockEntity(blockPos);
         BlockState state = world.getBlockState(blockPos);
-        if (state.getBlock() instanceof CopperPipe && entity instanceof CopperPipeEntity pipe) {
+        if (entity instanceof CopperPipeEntity pipe) {
             pipe.setCooldown(state);
         }
     }

@@ -48,11 +48,10 @@ public class WrenchItemMixin {
             IWrenchable wrenchable = new IWrenchable() {};
             BlockState rotated = wrenchable.getRotatedBlockState(blockState, context.getClickedFace());
 
-            Direction face = context.getClickedFace();
             BlockState state = rotated
-                    .setValue(CopperPipe.BACK_CONNECTED, CopperPipe.canConnectBack(world, blockPos, face))
-                    .setValue(CopperPipe.FRONT_CONNECTED, CopperPipe.canConnectFront(world, blockPos, face))
-                    .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(world, blockPos, face));
+                    .setValue(CopperPipe.BACK_CONNECTED, CopperPipe.canConnectBack(world, blockPos, rotated.getValue(CopperPipe.FACING)))
+                    .setValue(CopperPipe.FRONT_CONNECTED, CopperPipe.canConnectFront(world, blockPos, rotated.getValue(CopperPipe.FACING)))
+                    .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(world, blockPos, rotated.getValue(CopperPipe.FACING)));
 
             world.setBlockAndUpdate(blockPos, state);
             AllSoundEvents.WRENCH_ROTATE.playOnServer(world, blockPos, 1, Create.RANDOM.nextFloat() + 0.5F);

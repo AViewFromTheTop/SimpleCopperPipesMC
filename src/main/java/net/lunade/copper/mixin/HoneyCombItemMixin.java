@@ -1,13 +1,7 @@
 package net.lunade.copper.mixin;
 
 import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.lunade.copper.CopperPipeMain;
-import net.lunade.copper.blocks.CopperFitting;
-import net.lunade.copper.blocks.CopperPipe;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.level.block.Block;
 import org.spongepowered.asm.mixin.Mixin;

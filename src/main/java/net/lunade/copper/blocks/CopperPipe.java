@@ -2,9 +2,9 @@ package net.lunade.copper.blocks;
 
 import net.fabricmc.fabric.api.tag.convention.v1.TagUtil;
 import net.lunade.copper.CopperPipeMain;
-import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
+import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -48,7 +48,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static net.lunade.copper.CopperPipeMain.*;
+import static net.lunade.copper.CopperPipeMain.INSPECT_PIPE;
 
 public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBlock, WeatheringCopper {
 

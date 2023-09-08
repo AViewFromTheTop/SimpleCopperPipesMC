@@ -1,6 +1,8 @@
-package net.lunade.copper.block_entity;
+package net.lunade.copper.registry;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.lunade.copper.block_entity.CopperFittingEntity;
+import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.minecraft.core.Registry;
@@ -9,8 +11,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 
 // block entities need to be in here because class initialization is weird
 // you know what im saying?
-public final class CopperBlockEntities {
-    private CopperBlockEntities() {
+public final class RegisterCopperBlockEntities {
+    private RegisterCopperBlockEntities() {
     }
 
     public static final BlockEntityType<CopperPipeEntity> COPPER_PIPE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, "lunade:copper_pipe", FabricBlockEntityTypeBuilder.create(CopperPipeEntity::new, CopperPipe.COPPER_PIPE, CopperPipe.EXPOSED_PIPE, CopperPipe.WEATHERED_PIPE, CopperPipe.OXIDIZED_PIPE, CopperPipe.WAXED_COPPER_PIPE, CopperPipe.WAXED_EXPOSED_PIPE, CopperPipe.WAXED_WEATHERED_PIPE, CopperPipe.WAXED_OXIDIZED_PIPE

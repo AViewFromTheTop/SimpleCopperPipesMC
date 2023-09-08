@@ -16,6 +16,7 @@ import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
+import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.core.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -70,7 +71,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public Vec3 gameEventNbtVec3;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
-        super(CopperBlockEntities.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
+        super(RegisterCopperBlockEntities.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
         this.noteBlockCooldown = 0;
         this.vibrationUser = this.createVibrationUser();
         this.vibrationData = new VibrationSystem.Data();
@@ -181,7 +182,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 return to || pipe.transferCooldown <= 0;
             }
             if (entity instanceof CopperFittingEntity) {
-                return to;
+                return false;
             }
             if (to) {
                 PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
@@ -211,14 +212,13 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         Storage<ItemVariant> inventory = ItemStorage.SIDED.find(level, offsetOppPos, level.getBlockState(offsetOppPos), level.getBlockEntity(offsetOppPos), facing);
         Storage<ItemVariant> pipeInventory = ItemStorage.SIDED.find(level, blockPos, level.getBlockState(blockPos), level.getBlockEntity(blockPos), opposite);
         if (inventory != null && canTransfer(level, offsetOppPos, false, this, inventory)) {
-            Transaction transaction = Transaction.openOuter();
             for (StorageView<ItemVariant> storageView : inventory) {
                 if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
-                    Transaction subTransaction = Transaction.openNested(transaction);
+                    Transaction transaction = Transaction.openOuter();
                     var resource = storageView.getResource();
-                    long extracted = inventory.extract(resource, 1, subTransaction);
+                    long extracted = inventory.extract(resource, 1, transaction);
                     if (extracted > 0) {
-                        addItem(resource.toStack(), inventory, pipeInventory, subTransaction);
+                        addItem(resource.toStack(), inventory, pipeInventory, transaction);
                         if (blockState.is(CopperPipeMain.SILENT_PIPES)) {
                             transaction.commit(); // applies the changes
                             return 2;
@@ -232,9 +232,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                         transaction.commit(); // applies the changes
                         return 2;
                     }
+                    transaction.close(); // if it cant commit, close it.
                 }
             }
-            transaction.close();
         }
         return 0;
     }
@@ -256,11 +256,12 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public static ItemStack addItem(ItemStack itemStack, Storage<ItemVariant> inventory, Storage<ItemVariant> pipeInventory, Transaction transaction) {
         if (inventory.supportsInsertion()) {
             for (StorageView<ItemVariant> storageView : inventory) {
-                Transaction subTransaction = Transaction.openNested(transaction);
-                var resource = storageView.getResource();
-                long inserted = pipeInventory.insert(resource, 1, subTransaction);
-                if (inserted > 0) {
-                    inventory.extract(resource, 1, subTransaction);
+                if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
+                    var resource = storageView.getResource();
+                    long inserted = pipeInventory.insert(resource, 1, transaction);
+                    if (inserted > 0) {
+                        inventory.extract(resource, 1, transaction);
+                    }
                 }
             }
         }
@@ -294,30 +295,27 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         BlockPos offsetPos = blockPos.relative(facing);
         Storage<ItemVariant> inventory = ItemStorage.SIDED.find(level, offsetPos, level.getBlockState(offsetPos), level.getBlockEntity(offsetPos), facing.getOpposite());
         Storage<ItemVariant> pipeInventory = ItemStorage.SIDED.find(level, blockPos, level.getBlockState(blockPos), level.getBlockEntity(blockPos), facing);
-        if (inventory != null) {
-            if (inventory.supportsInsertion() && canTransfer(level, offsetPos, true, this)) {
-                Direction opp = facing.getOpposite();
-                boolean canMove = true;
-                BlockState state = world.getBlockState(offsetPos);
-                if (state.getBlock() instanceof CopperPipe) {
-                    canMove = state.getValue(BlockStateProperties.FACING) != facing;
-                }
-                if (canMove) {
-                    Transaction transaction = Transaction.openOuter();
-                    for (StorageView<ItemVariant> storageView : pipeInventory) {
-                        if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
-                            Transaction subTransaction = Transaction.openNested(transaction);
-                            setCooldown(world, offsetPos);
-                            var resource = storageView.getResource();
-                            long extracted = inventory.insert(resource, 1, subTransaction);
-                            if (extracted > 0) { // successfully inserted item
-                                pipeInventory.extract(resource, 1, subTransaction);
-                                transaction.commit(); // applies the changes
-                                return true;
-                            }
+        if (inventory != null && canTransfer(level, offsetPos, true, this)) {
+            Direction opp = facing.getOpposite();
+            boolean canMove = true;
+            BlockState state = world.getBlockState(offsetPos);
+            if (state.getBlock() instanceof CopperPipe) {
+                canMove = state.getValue(BlockStateProperties.FACING) != facing;
+            }
+            if (canMove) {
+                for (StorageView<ItemVariant> storageView : pipeInventory) {
+                    if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
+                        Transaction transaction = Transaction.openOuter();
+                        setCooldown(world, offsetPos);
+                        var resource = storageView.getResource();
+                        long inserted = inventory.insert(resource, 1, transaction);
+                        if (inserted > 0) { // successfully inserted item
+                            pipeInventory.extract(resource, 1, transaction);
+                            transaction.commit(); // applies the changes
+                            return true;
                         }
+                        transaction.close(); // if it can't commit, close it.
                     }
-                    transaction.close();
                 }
             }
         }

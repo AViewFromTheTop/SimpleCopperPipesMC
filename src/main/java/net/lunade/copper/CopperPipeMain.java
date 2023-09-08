@@ -1,5 +1,8 @@
 package net.lunade.copper;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
@@ -11,16 +14,17 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.loader.api.FabricLoader;
-import net.lunade.copper.block_entity.CopperBlockEntities;
+import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
+import net.lunade.copper.registry.RegisterCopperBlocks;
 import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.Util;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -32,7 +36,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatFormatter;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -80,32 +83,36 @@ public class CopperPipeMain implements ModInitializer {
 	public static final ResourceLocation NOTE_PACKET = id("note_packet");
 
 	//PIPE INK PARTICLES
-	public static final SimpleParticleType RED_INK = registerParticle("red_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType GREEN_INK = registerParticle("green_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType BROWN_INK = registerParticle("brown_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType BLUE_INK = registerParticle("blue_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType PURPLE_INK = registerParticle("purple_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType CYAN_INK = registerParticle("cyan_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType LIGHT_GRAY_INK = registerParticle("light_gray_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType GRAY_INK = registerParticle("gray_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType PINK_INK = registerParticle("pink_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType LIME_INK = registerParticle("lime_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType YELLOW_INK = registerParticle("yellow_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType LIGHT_BLUE_INK = registerParticle("light_blue_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType MAGENTA_INK = registerParticle("magenta_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType ORANGE_INK = registerParticle("orange_ink", FabricParticleTypes.simple());
-	public static final SimpleParticleType WHITE_INK = registerParticle("white_ink", FabricParticleTypes.simple());
+	public static final SimpleParticleType RED_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType GREEN_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType BROWN_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType BLUE_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType PURPLE_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType CYAN_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType LIGHT_GRAY_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType GRAY_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType PINK_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType LIME_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType YELLOW_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType LIGHT_BLUE_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType MAGENTA_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType ORANGE_INK = FabricParticleTypes.simple();
+	public static final SimpleParticleType WHITE_INK = FabricParticleTypes.simple();
 
-	public static final BiMap<Block, Block> OXIDIZATION = HashBiMap.create();
-	public static final BiMap<Block, Block> UNOXIDIZATION = HashBiMap.create();
+    public static final BiMap<Block, Block> OXIDIZATION = HashBiMap.create();
+    public static final BiMap<Block, Block> UNOXIDIZATION = HashBiMap.create();
 
-	public static final BiMap<Block, Block> WAXING = HashBiMap.create();
-	public static final BiMap<Block, Block> UNWAXING = HashBiMap.create();
+    public static final BiMap<Block, Block> WAXING = HashBiMap.create();
+    public static final BiMap<Block, Block> UNWAXING = HashBiMap.create();
 
 	@Override
 	public void onInitialize() {
+		ItemStorage
 		CopperPipeProperties.init();
 		SimpleCopperRegistries.initRegistry();
+
+		RegisterCopperBlocks.register();
+		RegisterCopperBlockEntities.init();
 
 		// just a temporary registry variable
 		BiMap<Block, Block> registry = HashBiMap.create();
@@ -137,10 +144,27 @@ public class CopperPipeMain implements ModInitializer {
 		UNWAXING.putAll(registry.inverse());
 		registry.clear();
 
-		CopperBlockEntities.init();
+		RegisterCopperBlockEntities.init();
 
 		Registry.register(BuiltInRegistries.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
 		Stats.CUSTOM.get(INSPECT_PIPE, StatFormatter.DEFAULT);
+
+		//PARTICLE
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("white_ink"), WHITE_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("light_gray_ink"), LIGHT_GRAY_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("gray_ink"), GRAY_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("brown_ink"), BROWN_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("red_ink"), RED_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("orange_ink"), ORANGE_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("yellow_ink"), YELLOW_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("lime_ink"), LIME_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("green_ink"), GREEN_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("cyan_ink"), CYAN_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("light_blue_ink"), LIGHT_BLUE_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("blue_ink"), BLUE_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("purple_ink"), PURPLE_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("magenta_ink"), MAGENTA_INK);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("pink_ink"), PINK_INK);
 
 		//SOUND
 		Registry.register(BuiltInRegistries.SOUND_EVENT, ITEM_IN.getLocation(), ITEM_IN);
@@ -175,10 +199,6 @@ public class CopperPipeMain implements ModInitializer {
 
 			}
 		});
-	}
-
-	public static List<Direction> shuffledDirections(RandomSource random) {
-		return Util.shuffledCopy(Direction.values(), random);
 	}
 
 	public static final Object2ObjectMap<Block, Block> GLOW_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
@@ -220,50 +240,6 @@ public class CopperPipeMain implements ModInitializer {
 		return new ResourceLocation(NAMESPACE, path);
 	}
 
-	public static ResourceLocation colourPipe(String colour) {
-		return id(colour + "_pipe");
-	}
-
-	public static ResourceLocation glowingPipe(String colour) {
-		return id("glowing_" + colour + "_pipe");
-	}
-
-	public static ResourceLocation colourFitting(String colour) {
-		return id(colour + "_fitting");
-	}
-
-	public static ResourceLocation glowingFitting(String colour) {
-		return id("glowing_" + colour + "_fitting");
-	}
-
 	public static final Logger LOGGER = LoggerFactory.getLogger("COPPER_PIPES");
 
-	public static Block registerBlock(Block block, ResourceLocation resourceLocation) {
-		var registered = Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
-		Item item = new BlockItem(block, new FabricItemSettings());
-		Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.REDSTONE_BLOCKS).register((entries) -> entries.accept(item));
-		return registered;
-	}
-
-	public static Block registerBlock(ResourceLocation resourceLocation, Block block) {
-		return registerBlock(block, resourceLocation);
-	}
-
-	public static Block registerColoured(Block block, ResourceLocation resourceLocation) {
-		var registered = Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
-		Item item = new BlockItem(block, new FabricItemSettings());
-		Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COLORED_BLOCKS).register((entries) -> entries.accept(item));
-		return registered;
-	}
-
-	public static Block registerColoured(ResourceLocation resourceLocation, Block block) {
-		return registerColoured(block, resourceLocation);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T extends ParticleOptions, P extends ParticleType<T>> P registerParticle(String path, ParticleType<T> particleType) {
-		return (P) Registry.register(BuiltInRegistries.PARTICLE_TYPE, id(path), particleType);
-	}
 }

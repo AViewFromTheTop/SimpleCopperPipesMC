@@ -1,6 +1,7 @@
 package net.lunade.copper.block_entity;
 
 import net.lunade.copper.blocks.CopperFitting;
+import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,7 +20,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
     public int transferCooldown;
 
     public CopperFittingEntity(BlockPos blockPos, BlockState blockState) {
-        super(CopperBlockEntities.COPPER_FITTING_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_FITTING);
+        super(RegisterCopperBlockEntities.COPPER_FITTING_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_FITTING);
     }
 
     @Override

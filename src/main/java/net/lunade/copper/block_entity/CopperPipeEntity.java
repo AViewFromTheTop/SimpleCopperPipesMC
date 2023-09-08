@@ -218,7 +218,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                     var resource = storageView.getResource();
                     long extracted = inventory.extract(resource, 1, transaction);
                     if (extracted > 0) {
-                        addItem(resource.toStack(), inventory, pipeInventory, transaction);
+                        addItem(resource, pipeInventory, transaction);
                         if (blockState.is(CopperPipeMain.SILENT_PIPES)) {
                             transaction.commit(); // applies the changes
                             return 2;
@@ -253,19 +253,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return false;
     }
 
-    public static ItemStack addItem(ItemStack itemStack, Storage<ItemVariant> inventory, Storage<ItemVariant> pipeInventory, Transaction transaction) {
-        if (inventory.supportsInsertion()) {
-            for (StorageView<ItemVariant> storageView : inventory) {
-                if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
-                    var resource = storageView.getResource();
-                    long inserted = pipeInventory.insert(resource, 1, transaction);
-                    if (inserted > 0) {
-                        inventory.extract(resource, 1, transaction);
-                    }
-                }
-            }
+    public static void addItem(ItemVariant resource, Storage<ItemVariant> pipeInventory, Transaction transaction) {
+        if (pipeInventory.supportsInsertion()) {
+            pipeInventory.insert(resource, 1, transaction);
         }
-        return itemStack;
     }
 
     public static ItemStack addItem(@Nullable Container container, Container container2, ItemStack itemStack, @Nullable Direction direction) {

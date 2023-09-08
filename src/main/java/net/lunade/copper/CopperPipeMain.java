@@ -107,7 +107,6 @@ public class CopperPipeMain implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		ItemStorage
 		CopperPipeProperties.init();
 		SimpleCopperRegistries.initRegistry();
 

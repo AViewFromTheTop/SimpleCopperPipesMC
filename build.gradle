@@ -141,6 +141,8 @@ dependencies {
 	//include "de.guntram.mcmod:crowdin-translate:1.4+1.19"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+	gametestImplementation sourceSets.main.output
 }
 
 processResources {

@@ -1,14 +1,17 @@
 {
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
-  "group": "blue_pipe",
+  "group": "red_pipe",
   "ingredients": [
     {
-      "item": "minecraft:blue_dye"
+      "item": "minecraft:cyan_dye"
     },
     [
       {
         "item": "lunade:black_pipe"
+      },
+      {
+        "item": "lunade:blue_pipe"
       },
       {
         "item": "lunade:brown_pipe"
@@ -44,9 +47,6 @@
         "item": "lunade:purple_pipe"
       },
       {
-        "item": "lunade:red_pipe"
-      },
-      {
         "item": "lunade:yellow_pipe"
       },
       {
@@ -55,6 +55,6 @@
     ]
   ],
   "result": {
-    "item": "lunade:blue_pipe"
+    "item": "lunade:red_pipe"
   }
 }

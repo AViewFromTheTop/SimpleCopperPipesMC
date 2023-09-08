@@ -1,14 +1,17 @@
 {
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
-  "group": "blue_fitting",
+  "group": "magenta_fitting",
   "ingredients": [
     {
-      "item": "minecraft:blue_dye"
+      "item": "minecraft:cyan_dye"
     },
     [
       {
         "item": "lunade:black_fitting"
+      },
+      {
+        "item": "lunade:blue_fitting"
       },
       {
         "item": "lunade:brown_fitting"
@@ -32,9 +35,6 @@
         "item": "lunade:lime_fitting"
       },
       {
-        "item": "lunade:magenta_fitting"
-      },
-      {
         "item": "lunade:orange_fitting"
       },
       {
@@ -55,6 +55,6 @@
     ]
   ],
   "result": {
-    "item": "lunade:blue_fitting"
+    "item": "lunade:magenta_fitting"
   }
 }

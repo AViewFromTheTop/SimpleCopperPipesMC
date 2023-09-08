@@ -1,0 +1,31 @@
+{
+    "schemaVersion": 1,
+    "id": "copper_pipe_gametest",
+    "version": "1.0",
+  
+    "name": "Simple Copper Pipes GameTest",
+    "description": "GameTest sources for Simple Copper Pipes",
+    "authors": [
+      "Lunade"
+    ],
+    "contributors": [
+      "Treetrain1",
+      "I_am_Merp"
+    ], 
+    "license": "MIT",
+    "icon": "assets/lunade/copper_icon.png",
+  
+    "environment": "*",
+    "entrypoints": {
+      "fabric-gametest": [
+        "net.lunade.copper.gametest.CopperGameTest"
+      ]
+    },
+    "depends": {
+      "fabricloader": ">=0.14.6",
+      "fabric-api": ">=0.80.3",
+      "minecraft": ">=1.20-alpha.23.18.a",
+      "java": ">=17"
+    }
+  }
+  

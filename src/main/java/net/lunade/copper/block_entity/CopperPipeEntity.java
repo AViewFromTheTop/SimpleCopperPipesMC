@@ -288,7 +288,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     }
 
     private ItemStack canonShoot(@NotNull BlockSource blockPointer, ItemStack itemStack, @NotNull BlockState state, int i, boolean powered, boolean fitting, boolean silent, boolean corroded) {
-        ServerLevel world = blockPointer.getLevel();
+        ServerLevel serverLevel = blockPointer.getLevel();
         BlockPos pos = blockPointer.getPos();
         Direction direction = state.getValue(BlockStateProperties.FACING);
         Position position = CopperPipe.getOutputLocation(blockPointer, direction);
@@ -297,10 +297,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             PoweredPipeDispenses.PoweredDispense poweredDispense = PoweredPipeDispenses.getDispense(itemStack2.getItem());
             if (poweredDispense != null) {
                 itemStack2=itemStack.split(1);
-                poweredDispense.dispense(world, itemStack2, i, direction, position, state, corroded, pos, this);
+                poweredDispense.dispense(serverLevel, itemStack2, i, direction, position, state, corroded, pos, this);
                 if (!fitting && !silent) {
-                    world.playSound(null, pos, CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (world.random.nextFloat()*0.25F) + 0.8F);
-                    world.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
+                    serverLevel.playSound(null, pos, CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat()*0.25F) + 0.8F);
+                    serverLevel.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
                 }
                 return itemStack;
             }
@@ -308,19 +308,19 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if (fitting) {
             FittingPipeDispenses.FittingDispense fittingDispense = FittingPipeDispenses.getDispense(itemStack2.getItem());
             if (fittingDispense != null) { //Particle Emitters With Fitting
-                fittingDispense.dispense(world, itemStack2, i, direction, position, state, corroded, pos, this);
+                fittingDispense.dispense(serverLevel, itemStack2, i, direction, position, state, corroded, pos, this);
             } else { //Spawn Item W/O Sound With Fitting
-                itemStack2=itemStack.split(1);
-                spawnItem(world, itemStack2, i, direction, position, direction, corroded);
-                world.levelEvent(2000, pos, direction.get3DDataValue());
+                itemStack2 = itemStack.split(1);
+                spawnItem(serverLevel, itemStack2, i, direction, position, direction, corroded);
+                serverLevel.levelEvent(2000, pos, direction.get3DDataValue());
             }
         } else {
-            itemStack2=itemStack.split(1);
-            world.levelEvent(2000, blockPointer.getPos(), direction.get3DDataValue());
-            spawnItem(world, itemStack2, i, direction, position, direction, corroded);
+            itemStack2 = itemStack.split(1);
+            serverLevel.levelEvent(2000, blockPointer.getPos(), direction.get3DDataValue());
+            spawnItem(serverLevel, itemStack2, i, direction, position, direction, corroded);
             if (!silent) {
-                world.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
-                world.playSound(null, blockPointer.getPos(), CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (world.random.nextFloat() * 0.25F) + 0.8F);
+                serverLevel.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
+                serverLevel.playSound(null, blockPointer.getPos(), CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
             }
         }
         return itemStack;

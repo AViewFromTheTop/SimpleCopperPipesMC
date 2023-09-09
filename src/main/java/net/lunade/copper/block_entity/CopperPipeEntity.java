@@ -31,6 +31,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -256,7 +257,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if (this.canDispense) {
             BlockSourceImpl blockPointerImpl = new BlockSourceImpl(serverLevel, blockPos);
             int i = this.chooseNonEmptySlot(serverLevel.random);
-            if (!(i < 0)) {
+            if (i >= 0) {
                 ItemStack itemStack = this.getItem(i);
                 if (!itemStack.isEmpty()) {
                     ItemStack itemStack2;
@@ -277,7 +278,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                         itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, true, silent, this.corroded);
                     } else {
                         itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, false, silent, this.corroded);
-                        blockPointerImpl.getLevel().levelEvent(2000, blockPointerImpl.getPos(), direction.get3DDataValue());
+                        blockPointerImpl.getLevel().levelEvent(LevelEvent.PARTICLES_SHOOT, blockPointerImpl.getPos(), direction.get3DDataValue());
                     }
                     this.setItem(i, itemStack2);
                     return true;
@@ -312,11 +313,11 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             } else { //Spawn Item W/O Sound With Fitting
                 itemStack2 = itemStack.split(1);
                 spawnItem(serverLevel, itemStack2, i, direction, position, direction, corroded);
-                serverLevel.levelEvent(2000, pos, direction.get3DDataValue());
+                serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, pos, direction.get3DDataValue());
             }
         } else {
             itemStack2 = itemStack.split(1);
-            serverLevel.levelEvent(2000, blockPointer.getPos(), direction.get3DDataValue());
+            serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, blockPointer.getPos(), direction.get3DDataValue());
             spawnItem(serverLevel, itemStack2, i, direction, position, direction, corroded);
             if (!silent) {
                 serverLevel.gameEvent(null, GameEvent.ENTITY_PLACE, pos);

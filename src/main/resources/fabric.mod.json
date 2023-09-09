@@ -26,6 +26,9 @@
     ],
     "client": [
       "net.lunade.copper.CopperPipeClient"
+    ],
+    "fabric-gametest": [
+      "net.lunade.copper.gametest.CopperGameTest"
     ]
   },
   "mixins": [

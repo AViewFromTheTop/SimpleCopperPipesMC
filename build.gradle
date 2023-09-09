@@ -11,30 +11,8 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
-sourceSets {
-	gametest {
-		compileClasspath += main.compileClasspath
-		runtimeClasspath += runtimeClasspath
-	}
-}
-
 loom {
 	runtimeOnlyLog4j = true
-
-	runs {
-		gametestClient {
-			client()
-			ideConfigGenerated rootProject == project
-			name "GameTest Client"
-			source sourceSets.gametest
-		}
-		gametestServer {
-			server()
-			ideConfigGenerated rootProject == project
-			name "GameTest Server"
-			source sourceSets.gametest
-		}
-	}
 
 	mixin {
 		defaultRefmapName = "mixins.copper_pipe.refmap.json"
@@ -141,8 +119,6 @@ dependencies {
 	//include "de.guntram.mcmod:crowdin-translate:1.4+1.19"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-	gametestImplementation sourceSets.main.output
 }
 
 processResources {

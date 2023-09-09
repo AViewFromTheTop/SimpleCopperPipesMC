@@ -59,8 +59,8 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
     }
 
     public static boolean canTransfer(@NotNull Level level, BlockPos pos, Direction direction, boolean to) {
-        BlockState blockState;
-        return level.getBlockEntity(pos) instanceof CopperPipeEntity pipe && (!to || pipe.transferCooldown <= 0) && (blockState = level.getBlockState(pos)).hasProperty(BlockStateProperties.FACING) && blockState.getValue(BlockStateProperties.FACING) == direction;
+        BlockState blockState = level.getBlockState(pos);
+        return level.getBlockEntity(pos) instanceof CopperPipeEntity pipe && (!to || pipe.transferCooldown <= 0) && blockState.hasProperty(BlockStateProperties.FACING) && blockState.getValue(BlockStateProperties.FACING) == direction;
     }
 
     private boolean moveIn(Level level, @NotNull BlockPos blockPos, RandomSource randomSource) {

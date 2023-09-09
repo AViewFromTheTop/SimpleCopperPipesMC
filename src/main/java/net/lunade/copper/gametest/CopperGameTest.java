@@ -78,21 +78,21 @@ public class CopperGameTest implements FabricGameTest {
             player.remove(Entity.RemovalReason.DISCARDED);
 
             // check if all pipes and fittings have been interacted with
-            helper.assertBlockPresent(CopperPipe.COPPER_PIPE, BlockPos.containing(copperPipe));
-            helper.assertBlockPresent(CopperPipe.EXPOSED_PIPE, BlockPos.containing(exposedPipe));
-            helper.assertBlockPresent(CopperPipe.WEATHERED_PIPE, BlockPos.containing(weatheredPipe));
-            helper.assertBlockPresent(CopperPipe.COPPER_PIPE, BlockPos.containing(copperPipe2));
-            helper.assertBlockPresent(CopperPipe.EXPOSED_PIPE, BlockPos.containing(exposedPipe2));
-            helper.assertBlockPresent(CopperPipe.WEATHERED_PIPE, BlockPos.containing(weatheredPipe2));
-            helper.assertBlockPresent(CopperPipe.OXIDIZED_PIPE, BlockPos.containing(oxidizedPipe));
+            helper.assertBlockPresent(CopperPipe.COPPER_PIPE, BlockPos.containing(helper.relativeVec(copperPipe)));
+            helper.assertBlockPresent(CopperPipe.EXPOSED_PIPE, BlockPos.containing(helper.relativeVec(exposedPipe)));
+            helper.assertBlockPresent(CopperPipe.WEATHERED_PIPE, BlockPos.containing(helper.relativeVec(weatheredPipe)));
+            helper.assertBlockPresent(CopperPipe.COPPER_PIPE, BlockPos.containing(helper.relativeVec(copperPipe2)));
+            helper.assertBlockPresent(CopperPipe.EXPOSED_PIPE, BlockPos.containing(helper.relativeVec(exposedPipe2)));
+            helper.assertBlockPresent(CopperPipe.WEATHERED_PIPE, BlockPos.containing(helper.relativeVec(weatheredPipe2)));
+            helper.assertBlockPresent(CopperPipe.OXIDIZED_PIPE, BlockPos.containing(helper.relativeVec(oxidizedPipe)));
 
-            helper.assertBlockPresent(CopperFitting.COPPER_FITTING, BlockPos.containing(copperFitting));
-            helper.assertBlockPresent(CopperFitting.EXPOSED_FITTING, BlockPos.containing(exposedFitting));
-            helper.assertBlockPresent(CopperFitting.WEATHERED_FITTING, BlockPos.containing(weatheredFitting));
-            helper.assertBlockPresent(CopperFitting.COPPER_FITTING, BlockPos.containing(copperFitting2));
-            helper.assertBlockPresent(CopperFitting.EXPOSED_FITTING, BlockPos.containing(exposedFitting2));
-            helper.assertBlockPresent(CopperFitting.WEATHERED_FITTING, BlockPos.containing(weatheredFitting2));
-            helper.assertBlockPresent(CopperFitting.OXIDIZED_FITTING, BlockPos.containing(oxidizedFitting));
+            helper.assertBlockPresent(CopperFitting.COPPER_FITTING, BlockPos.containing(helper.relativeVec(copperFitting)));
+            helper.assertBlockPresent(CopperFitting.EXPOSED_FITTING, BlockPos.containing(helper.relativeVec(exposedFitting)));
+            helper.assertBlockPresent(CopperFitting.WEATHERED_FITTING, BlockPos.containing(helper.relativeVec(weatheredFitting)));
+            helper.assertBlockPresent(CopperFitting.COPPER_FITTING, BlockPos.containing(helper.relativeVec(copperFitting2)));
+            helper.assertBlockPresent(CopperFitting.EXPOSED_FITTING, BlockPos.containing(helper.relativeVec(exposedFitting2)));
+            helper.assertBlockPresent(CopperFitting.WEATHERED_FITTING, BlockPos.containing(helper.relativeVec(weatheredFitting2)));
+            helper.assertBlockPresent(CopperFitting.OXIDIZED_FITTING, BlockPos.containing(helper.relativeVec(oxidizedFitting)));
 
             helper.succeed();
         });

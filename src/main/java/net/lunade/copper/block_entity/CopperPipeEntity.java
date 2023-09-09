@@ -136,8 +136,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 
     public void pipeMove(Level level, BlockPos blockPos, @NotNull BlockState blockState) {
         Direction facing = blockState.getValue(BlockStateProperties.FACING);
-        boolean bl1 = moveOut(level, blockPos, facing);
-        int bl2 = moveIn(level, blockPos, blockState, facing);
+        boolean bl1 = this.moveOut(level, blockPos, facing);
+        int bl2 = this.moveIn(level, blockPos, blockState, facing);
         if (bl1 || bl2 >= 2) {
             setCooldown(blockState);
             setChanged(level, blockPos, blockState);

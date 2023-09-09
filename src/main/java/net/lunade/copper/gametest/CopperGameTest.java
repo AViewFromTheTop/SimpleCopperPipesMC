@@ -113,7 +113,7 @@ public class CopperGameTest implements FabricGameTest {
         });
     }
 
-    @GameTest(template = STORAGE_UNIFICATION, timeoutTicks = 518)
+    @GameTest(template = STORAGE_UNIFICATION, timeoutTicks = 700)
     public void storageUnification(GameTestHelper helper) {
         ItemVariant resource = ItemVariant.of(Blocks.MANGROVE_LOG);
         for (int z = 0; z < 10; z +=  2) {

@@ -15,7 +15,23 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class CopperGameTest implements FabricGameTest {
 
+    private static final String DIRECT_PIPE_TRANSFER = "copper_pipe:direct_pipe_transfer";
     private static final String STORAGE_UNIFICATION = "copper_pipe:storage_unification";
+
+    @GameTest(template = DIRECT_PIPE_TRANSFER)
+    public void directPipeTransfer(GameTestHelper helper) {
+        ItemVariant resource = ItemVariant.of(Blocks.MANGROVE_LOG);
+        BlockPos sourceChest = new BlockPos(9, 2, 4);
+        BlockPos targetChest = new BlockPos(0, 2, 4);
+        helper.assertBlockPresent(Blocks.CHEST, sourceChest);
+        helper.assertBlockPresent(Blocks.CHEST, targetChest);
+
+        moveResources(helper, sourceChest, resource, 32, MoveDirection.IN, false);
+        helper.onEachTick(() -> {
+            long amountInChest = moveResources(helper, targetChest, resource, 32, MoveDirection.OUT, true);
+            if (amountInChest == 32) helper.succeed();
+        });
+    }
 
     @GameTest(template = STORAGE_UNIFICATION, timeoutTicks = 518)
     public void storageUnification(GameTestHelper helper) {
@@ -33,7 +49,7 @@ public class CopperGameTest implements FabricGameTest {
         });
     }
 
-    private static long moveResources(GameTestHelper helper, BlockPos inventoryPos, ItemVariant resource, long amount, MoveDirection direction, boolean simulate) {
+    private static long moveResources(GameTestHelper helper, BlockPos inventoryPos, ItemVariant resource, long maxAmount, MoveDirection direction, boolean simulate) {
         BlockState blockState = helper.getBlockState(inventoryPos);
         BlockEntity blockEntity = helper.getBlockEntity(inventoryPos);
 
@@ -41,8 +57,8 @@ public class CopperGameTest implements FabricGameTest {
         helper.assertTrue(inventory != null, "Inventory not found at " + inventoryPos);
         Transaction transaction = Transaction.openOuter();
         long inserted = switch (direction) {
-            case IN -> insert(inventory, resource, amount, transaction, simulate);
-            case OUT -> extract(inventory, resource, amount, transaction, simulate);
+            case IN -> insert(inventory, resource, maxAmount, transaction, simulate);
+            case OUT -> extract(inventory, resource, maxAmount, transaction, simulate);
         };
         transaction.commit();
         return inserted;

@@ -101,16 +101,17 @@ public class CopperGameTest implements FabricGameTest {
 
     @GameTest(template = COMPOSTER_TRANSFER)
     public void composterTransfer(GameTestHelper helper) {
-        ItemVariant resource = ItemVariant.of(Items.CORNFLOWER);
+        ItemVariant inputResource = ItemVariant.of(Items.CORNFLOWER);
+        ItemVariant outputResource = ItemVariant.of(Items.BONE_MEAL);
         BlockPos source = new BlockPos(9, 4, 4);
         BlockPos output = new BlockPos(7, 2, 4);
         helper.assertBlockPresent(CopperPipe.WAXED_COPPER_PIPE, source);
         helper.assertBlockPresent(Blocks.CHEST, output);
 
-        moveResources(helper, source, resource, 32, MoveDirection.IN, false);
-        helper.runAfterDelay(50L, () -> {
-            long amountInChest = moveResources(helper, output, resource, 32, MoveDirection.OUT, true);
-            if (amountInChest > 0) helper.succeed();
+        moveResources(helper, source, inputResource, 32, MoveDirection.IN, false);
+        helper.runAfterDelay(75L, () -> {
+            long amountInChest = moveResources(helper, output, outputResource, 32, MoveDirection.OUT, true);
+            if (amountInChest > 0) helper.succeed(); else helper.fail("No items in chest");
         });
     }
 

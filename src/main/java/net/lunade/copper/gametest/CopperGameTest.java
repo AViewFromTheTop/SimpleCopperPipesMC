@@ -34,6 +34,7 @@ import java.util.List;
 public class CopperGameTest implements FabricGameTest {
 
     private static final String AXE_INTERACTION = "copper_pipe:axe_interaction";
+    private static final String COMPOSTER_TRANSFER = "copper_pipe:composter_transfer";
     private static final String DIRECT_PIPE_TRANSFER = "copper_pipe:direct_pipe_transfer";
     private static final String STORAGE_UNIFICATION = "copper_pipe:storage_unification";
 
@@ -95,6 +96,21 @@ public class CopperGameTest implements FabricGameTest {
             helper.assertBlockPresent(CopperFitting.OXIDIZED_FITTING, BlockPos.containing(helper.relativeVec(oxidizedFitting)));
 
             helper.succeed();
+        });
+    }
+
+    @GameTest(template = COMPOSTER_TRANSFER)
+    public void composterTransfer(GameTestHelper helper) {
+        ItemVariant resource = ItemVariant.of(Items.CORNFLOWER);
+        BlockPos source = new BlockPos(9, 4, 4);
+        BlockPos output = new BlockPos(7, 2, 4);
+        helper.assertBlockPresent(CopperPipe.WAXED_COPPER_PIPE, source);
+        helper.assertBlockPresent(Blocks.CHEST, output);
+
+        moveResources(helper, source, resource, 32, MoveDirection.IN, false);
+        helper.runAfterDelay(50L, () -> {
+            long amountInChest = moveResources(helper, output, resource, 32, MoveDirection.OUT, true);
+            if (amountInChest > 0) helper.succeed();
         });
     }
 

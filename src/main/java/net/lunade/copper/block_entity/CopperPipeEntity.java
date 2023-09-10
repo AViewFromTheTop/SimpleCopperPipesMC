@@ -177,10 +177,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return false;
     }
 
-    public static boolean canTransfer(Level level, BlockPos pos, boolean to, @NotNull CopperPipeEntity copperPipe) {
-        return canTransfer(level, pos, to, copperPipe, null);
-    }
-
     private int moveIn(Level level, @NotNull BlockPos blockPos, BlockState blockState, @NotNull Direction facing) {
         Direction opposite = facing.getOpposite();
         BlockPos offsetOppPos = blockPos.relative(opposite);
@@ -214,9 +210,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return 0;
     }
 
-    public static void addItem(ItemVariant resource, @NotNull Storage<ItemVariant> pipeInventory, Transaction transaction) {
-        if (pipeInventory.supportsInsertion()) {
-            pipeInventory.insert(resource, 1, transaction);
+    public static void addItem(ItemVariant resource, @NotNull Storage<ItemVariant> inventory, Transaction transaction) {
+        if (inventory.supportsInsertion()) {
+            inventory.insert(resource, 1, transaction);
         }
     }
 
@@ -224,7 +220,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         BlockPos offsetPos = blockPos.relative(facing);
         Storage<ItemVariant> inventory = ItemStorage.SIDED.find(level, offsetPos, level.getBlockState(offsetPos), this.level.getBlockEntity(offsetPos), facing.getOpposite());
         Storage<ItemVariant> pipeInventory = ItemStorage.SIDED.find(level, blockPos, level.getBlockState(blockPos), this.level.getBlockEntity(blockPos), facing);
-        if (inventory != null && pipeInventory != null && canTransfer(level, offsetPos, true, this)) {
+        if (inventory != null && pipeInventory != null && canTransfer(level, offsetPos, true, this, inventory)) {
             boolean canMove = true;
             BlockState state = level.getBlockState(offsetPos);
             if (state.getBlock() instanceof CopperPipe) {

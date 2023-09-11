@@ -16,7 +16,8 @@ public final class SimpleCopperPipesConfig {
             )
     );
 
-    public boolean 
+    @Comment("Whether or not copper fittings have an interactable GUI")
+    public boolean openableFittings = false;
 
     public static SimpleCopperPipesConfig get() {
         return INSTANCE.config();

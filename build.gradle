@@ -15,10 +15,10 @@ loom {
 	runtimeOnlyLog4j = true
 
 	mixin {
-		defaultRefmapName = "mixins.copper_pipe.refmap.json"
+		defaultRefmapName = "mixins.simple_copper_pipes.refmap.json"
 	}
 
-	accessWidenerPath = file("src/main/resources/copper_pipe.accesswidener")
+	accessWidenerPath = file("src/main/resources/simple_copper_pipes.accesswidener")
 	interfaceInjection {
 		// When enabled, injected interfaces from dependencies will be applied.
 		enableDependencyInterfaceInjection = false

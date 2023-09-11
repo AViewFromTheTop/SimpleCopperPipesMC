@@ -1,6 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "copper_pipe",
+  "id": "simple_copper_pipes",
+  "provides": [
+    "copper_pipe"
+  ],
   "version": "1.14",
 
   "name": "Simple Copper Pipes",
@@ -17,7 +20,7 @@
   },
 
   "license": "MIT",
-  "icon": "assets/lunade/copper_icon.png",
+  "icon": "assets/simple_copper_pipes/icon.png",
 
   "environment": "*",
   "entrypoints": {
@@ -35,15 +38,15 @@
     ]
   },
   "mixins": [
-    "copper_pipe.mixins.json"
+    "simple_copper_pipes.mixins.json"
   ],
 
-  "accessWidener": "copper_pipe.accesswidener",
+  "accessWidener": "simple_copper_pipes.accesswidener",
 
   "depends": {
-    "fabricloader": ">=0.14.6",
-    "fabric-api": ">=0.80.3",
-    "minecraft": ">=1.20-alpha.23.18.a",
+    "fabricloader": ">=0.14.22",
+    "fabric-api": ">=0.87.0",
+    "minecraft": ">=1.20.1",
     "java": ">=17"
   },
   "custom": {

@@ -43,7 +43,7 @@ public class CopperPipeMain implements ModInitializer {
 		return 1;
 	}
 
-	public static final String MOD_ID = "copper_pipe";
+	public static final String MOD_ID = "simple_copper_pipes";
 	public static final String NAMESPACE = "lunade";
 
 	public static final ResourceLocation INSPECT_PIPE = id("inspect_copper_pipe");

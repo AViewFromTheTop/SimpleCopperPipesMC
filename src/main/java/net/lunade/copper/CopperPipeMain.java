@@ -50,7 +50,6 @@ public class CopperPipeMain implements ModInitializer {
 	public static final ResourceLocation WATER = id("water");
 	public static final ResourceLocation SMOKE = id("smoke");
 
-	public static final TagKey<Block> UNSCRAPEABLE = TagKey.create(Registries.BLOCK, id("unscrapeable"));
 	public static final TagKey<Block> WAXED = TagKey.create(Registries.BLOCK, id("waxed"));
 	public static final TagKey<Block> SILENT_PIPES = TagKey.create(Registries.BLOCK, id("silent_pipes"));
 

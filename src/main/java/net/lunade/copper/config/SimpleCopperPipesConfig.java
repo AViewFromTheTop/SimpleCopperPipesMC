@@ -16,6 +16,8 @@ public final class SimpleCopperPipesConfig {
             )
     );
 
+    public boolean 
+
     public static SimpleCopperPipesConfig get() {
         return INSTANCE.config();
     }

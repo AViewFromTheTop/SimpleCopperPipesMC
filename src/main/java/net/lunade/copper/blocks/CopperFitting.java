@@ -47,8 +47,8 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
     private static final VoxelShape FITTING_SHAPE = Block.box(2.5D, 2.5D, 2.5D, 13.5D, 13.5D, 13.5D);
 
     private final WeatherState weatherState;
-    public ParticleOptions ink;
-    public int cooldown;
+    public final int cooldown;
+    public final ParticleOptions ink;
 
     public CopperFitting(WeatherState weatherState, Properties settings, int cooldown, ParticleOptions ink) {
         super(settings);

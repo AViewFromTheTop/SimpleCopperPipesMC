@@ -100,9 +100,9 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     private static final VoxelShape UP_BACK_SMOOTH = Block.box(4.0D, -4.0D, 4.0D, 12.0D, 16.0D, 12.0D);
 
     private final WeatherState weatherState;
-    public int cooldown;
-    public int dispenserShotLength;
-    public ParticleOptions ink;
+    public final int cooldown;
+    public final int dispenserShotLength;
+    public final ParticleOptions ink;
 
     public CopperPipe(WeatherState weatherState, Properties settings, int cooldown, int dispenserShotLength, ParticleOptions ink) {
         super(settings);

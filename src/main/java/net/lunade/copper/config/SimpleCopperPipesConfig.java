@@ -1,5 +1,6 @@
 package net.lunade.copper.config;
 
+import blue.endless.jankson.Comment;
 import net.frozenblock.lib.config.api.instance.Config;
 import net.frozenblock.lib.config.api.instance.json.JsonConfig;
 import net.frozenblock.lib.config.api.instance.json.JsonType;
@@ -18,6 +19,10 @@ public final class SimpleCopperPipesConfig {
 
     @Comment("Whether or not copper fittings have an interactable GUI")
     public boolean openableFittings = false;
+
+    public boolean dispensing = true;
+
+    public boolean specialEffectDispensing = true;
 
     public static SimpleCopperPipesConfig get() {
         return INSTANCE.config();

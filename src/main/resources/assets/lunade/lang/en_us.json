@@ -87,5 +87,6 @@
   "block.lunade.glowing_orange_fitting": "Glowing Orange Fitting",
   "block.lunade.glowing_white_fitting": "Glowing White Fitting",
 
-  "stat.lunade.inspect_copper_pipe": "Copper Pipes Searched"
+  "stat.lunade.inspect_copper_pipe": "Copper Pipes Searched",
+  "stat.lunade.inspect_copper_fitting": "Copper Fittings Searched"
 }

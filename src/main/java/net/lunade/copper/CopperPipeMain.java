@@ -47,6 +47,7 @@ public class CopperPipeMain implements ModInitializer {
 	public static final String NAMESPACE = "lunade";
 
 	public static final ResourceLocation INSPECT_PIPE = id("inspect_copper_pipe");
+	public static final ResourceLocation INSPECT_FITTING = id("inspect_copper_fitting");
 	public static final ResourceLocation WATER = id("water");
 	public static final ResourceLocation SMOKE = id("smoke");
 
@@ -120,6 +121,7 @@ public class CopperPipeMain implements ModInitializer {
 		RegisterCopperBlockEntities.init();
 
 		Registry.register(BuiltInRegistries.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
+		Registry.register(BuiltInRegistries.CUSTOM_STAT, INSPECT_FITTING, INSPECT_FITTING);
 		Stats.CUSTOM.get(INSPECT_PIPE, StatFormatter.DEFAULT);
 
 		//PARTICLE

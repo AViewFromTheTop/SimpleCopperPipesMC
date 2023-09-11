@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -165,7 +166,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof CopperFittingEntity fittingEntity) {
             player.openMenu(fittingEntity);
-            //player.awardStat(Stats.CUSTOM.get(CopperPipeMain.INSPECT_PIPE));
+            player.awardStat(Stats.CUSTOM.get(CopperPipeMain.INSPECT_FITTING));
         }
         return InteractionResult.CONSUME;
     }

@@ -39,6 +39,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
     @Override
     public void serverTick(@NotNull Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState) {
+        super.serverTick(level, blockPos, blockState);
         if (!level.isClientSide) {
             if (this.transferCooldown > 0) {
                 --this.transferCooldown;
@@ -46,7 +47,6 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
                 this.fittingMove(level, blockPos, blockState);
             }
         }
-        super.serverTick(level, blockPos, blockState);
     }
 
     public void fittingMove(@NotNull Level level, BlockPos blockPos, @NotNull BlockState blockState) {

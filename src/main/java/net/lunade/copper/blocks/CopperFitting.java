@@ -1,7 +1,9 @@
 package net.lunade.copper.blocks;
 
+import net.fabricmc.fabric.api.tag.convention.v1.TagUtil;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.block_entity.CopperFittingEntity;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,8 +14,12 @@ import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -31,6 +37,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
@@ -142,6 +149,25 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
             return Fluids.WATER.getSource(false);
         }
         return super.getFluidState(blockState);
+    }
+
+    @Override
+    @NotNull
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, @NotNull Player player, InteractionHand hand, BlockHitResult blockHitResult) {
+        if (!SimpleCopperPipesConfig.get().openableFittings) return super.use(blockState, level, blockPos, player, hand, blockHitResult);
+
+        Item item = player.getItemInHand(hand).getItem();
+        if (TagUtil.isIn(CopperPipeMain.IGNORES_COPPER_PIPE_MENU, item)) {
+            return InteractionResult.PASS;
+        }
+        if (level.isClientSide) return InteractionResult.SUCCESS;
+
+        BlockEntity blockEntity = level.getBlockEntity(blockPos);
+        if (blockEntity instanceof CopperFittingEntity fittingEntity) {
+            player.openMenu(fittingEntity);
+            //player.awardStat(Stats.CUSTOM.get(CopperPipeMain.INSPECT_PIPE));
+        }
+        return InteractionResult.CONSUME;
     }
 
     @Override

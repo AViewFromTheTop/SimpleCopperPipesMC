@@ -298,21 +298,19 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 
     @Override
     @NotNull
-    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, @NotNull Player playerEntity, InteractionHand hand, BlockHitResult blockHitResult) {
-        Item item = playerEntity.getItemInHand(hand).getItem();
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, @NotNull Player player, InteractionHand hand, BlockHitResult blockHitResult) {
+        Item item = player.getItemInHand(hand).getItem();
         if (TagUtil.isIn(CopperPipeMain.IGNORES_COPPER_PIPE_MENU, item)) {
             return InteractionResult.PASS;
         }
-        if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
-        } else {
-            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-            if (blockEntity instanceof CopperPipeEntity copperPipeEntity) {
-                playerEntity.openMenu(copperPipeEntity);
-                playerEntity.awardStat(Stats.CUSTOM.get(INSPECT_PIPE));
-            }
-            return InteractionResult.CONSUME;
+        if (level.isClientSide) return InteractionResult.SUCCESS;
+
+        BlockEntity blockEntity = level.getBlockEntity(blockPos);
+        if (blockEntity instanceof CopperPipeEntity copperPipeEntity) {
+            player.openMenu(copperPipeEntity);
+            player.awardStat(Stats.CUSTOM.get(INSPECT_PIPE));
         }
+        return InteractionResult.CONSUME;
     }
 
     @Override

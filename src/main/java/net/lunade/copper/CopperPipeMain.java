@@ -9,10 +9,12 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
+import net.fabricmc.fabric.api.registry.OxidizableBlocksRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.lunade.copper.registry.RegisterCopperBlockEntities;
@@ -86,49 +88,35 @@ public class CopperPipeMain implements ModInitializer {
 	public static final SimpleParticleType ORANGE_INK = FabricParticleTypes.simple();
 	public static final SimpleParticleType WHITE_INK = FabricParticleTypes.simple();
 
-    public static final BiMap<Block, Block> OXIDIZATION = HashBiMap.create();
-    public static final BiMap<Block, Block> UNOXIDIZATION = HashBiMap.create();
-
-    public static final BiMap<Block, Block> WAXING = HashBiMap.create();
-    public static final BiMap<Block, Block> UNWAXING = HashBiMap.create();
-
 	@Override
 	public void onInitialize() {
 		CopperPipeProperties.init();
 		SimpleCopperRegistries.initRegistry();
+		// make config file
+		SimpleCopperPipesConfig.get();
 
 		RegisterCopperBlocks.register();
 		RegisterCopperBlockEntities.init();
 
-		// just a temporary registry variable
-		BiMap<Block, Block> registry = HashBiMap.create();
-		// PIPE
-		registry.put(CopperPipe.COPPER_PIPE, CopperPipe.EXPOSED_PIPE);
-		registry.put(CopperPipe.EXPOSED_PIPE, CopperPipe.WEATHERED_PIPE);
-		registry.put(CopperPipe.WEATHERED_PIPE, CopperPipe.OXIDIZED_PIPE);
-		registry.put(CopperPipe.OXIDIZED_PIPE, CopperPipe.CORRODED_PIPE);
-		// FITTING
-		registry.put(CopperFitting.COPPER_FITTING, CopperFitting.EXPOSED_FITTING);
-		registry.put(CopperFitting.EXPOSED_FITTING, CopperFitting.WEATHERED_FITTING);
-		registry.put(CopperFitting.WEATHERED_FITTING, CopperFitting.OXIDIZED_FITTING);
-		registry.put(CopperFitting.OXIDIZED_FITTING, CopperFitting.CORRODED_FITTING);
-		OXIDIZATION.putAll(registry);
-		UNOXIDIZATION.putAll(registry.inverse());
-		registry.clear();
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperPipe.COPPER_PIPE, CopperPipe.EXPOSED_PIPE);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperPipe.EXPOSED_PIPE, CopperPipe.WEATHERED_PIPE);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperPipe.WEATHERED_PIPE, CopperPipe.OXIDIZED_PIPE);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperPipe.OXIDIZED_PIPE, CopperPipe.CORRODED_PIPE);
 
-		// PIPE
-		registry.put(CopperPipe.COPPER_PIPE, CopperPipe.WAXED_COPPER_PIPE);
-		registry.put(CopperPipe.EXPOSED_PIPE, CopperPipe.WAXED_EXPOSED_PIPE);
-		registry.put(CopperPipe.WEATHERED_PIPE, CopperPipe.WAXED_WEATHERED_PIPE);
-		registry.put(CopperPipe.OXIDIZED_PIPE, CopperPipe.WAXED_OXIDIZED_PIPE);
-		// FITTING
-		registry.put(CopperFitting.COPPER_FITTING, CopperFitting.WAXED_COPPER_FITTING);
-		registry.put(CopperFitting.EXPOSED_FITTING, CopperFitting.WAXED_EXPOSED_FITTING);
-		registry.put(CopperFitting.WEATHERED_FITTING, CopperFitting.WAXED_WEATHERED_FITTING);
-		registry.put(CopperFitting.OXIDIZED_FITTING, CopperFitting.WAXED_OXIDIZED_FITTING);
-		WAXING.putAll(registry);
-		UNWAXING.putAll(registry.inverse());
-		registry.clear();
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperFitting.COPPER_FITTING, CopperFitting.EXPOSED_FITTING);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperFitting.EXPOSED_FITTING, CopperFitting.WEATHERED_FITTING);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperFitting.WEATHERED_FITTING, CopperFitting.OXIDIZED_FITTING);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperFitting.OXIDIZED_FITTING, CopperFitting.CORRODED_FITTING);
+
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperPipe.COPPER_PIPE, CopperPipe.WAXED_COPPER_PIPE);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperPipe.EXPOSED_PIPE, CopperPipe.WAXED_EXPOSED_PIPE);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperPipe.WEATHERED_PIPE, CopperPipe.WAXED_WEATHERED_PIPE);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperPipe.OXIDIZED_PIPE, CopperPipe.WAXED_OXIDIZED_PIPE);
+
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperFitting.COPPER_FITTING, CopperFitting.WAXED_COPPER_FITTING);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperFitting.EXPOSED_FITTING, CopperFitting.WAXED_EXPOSED_FITTING);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperFitting.WEATHERED_FITTING, CopperFitting.WAXED_WEATHERED_FITTING);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperFitting.OXIDIZED_FITTING, CopperFitting.WAXED_OXIDIZED_FITTING);
 
 		RegisterCopperBlockEntities.init();
 

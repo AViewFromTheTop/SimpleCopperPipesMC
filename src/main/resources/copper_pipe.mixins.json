@@ -11,12 +11,10 @@
     "EntityMixin",
     "FarmlandBlockMixin",
     "HoeItemMixin",
-    "HoneyCombItemMixin",
     "ItemMixin",
     "SugarCaneBlockMixin",
     "VibrationListenerMixin",
     "VibrationTickerMixin",
-    "WeatheringCopperMixin",
     "create.WrenchItemMixin"
   ],
   "injectors": {

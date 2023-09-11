@@ -31,7 +31,7 @@
       "net.lunade.copper.gametest.CopperGameTest"
     ],
     "modmenu": [
-      
+      "net.lunade.copper.config.gui.ModMenuIntegration"
     ]
   },
   "mixins": [

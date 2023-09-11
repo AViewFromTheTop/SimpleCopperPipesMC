@@ -49,6 +49,8 @@ import java.util.Objects;
 
 public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements GameEventListener.Holder<VibrationSystem.Listener>, VibrationSystem {
 
+    private static final int VIBRATION_RANGE = 8;
+
     public int transferCooldown;
     public int dispenseCooldown;
     public int noteBlockCooldown;
@@ -438,7 +440,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 
         @Override
         public int getListenerRadius() {
-            return 8;
+            return VIBRATION_RANGE;
         }
 
         @Override

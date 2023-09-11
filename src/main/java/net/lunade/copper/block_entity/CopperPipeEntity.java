@@ -182,8 +182,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     private int moveIn(Level level, @NotNull BlockPos blockPos, BlockState blockState, @NotNull Direction facing) {
         Direction opposite = facing.getOpposite();
         BlockPos offsetOppPos = blockPos.relative(opposite);
-        Storage<ItemVariant> inventory = ItemStorage.SIDED.find(level, offsetOppPos, level.getBlockState(offsetOppPos), level.getBlockEntity(offsetOppPos), facing);
-        Storage<ItemVariant> pipeInventory = ItemStorage.SIDED.find(level, blockPos, level.getBlockState(blockPos), level.getBlockEntity(blockPos), opposite);
+        Storage<ItemVariant inventory = getStorageAt(level, offsetOppPos, facing);
+        Storage<ItemVariant> pipeInventory = getStorageAt(level, blockPos, opposite);
         if (inventory != null && pipeInventory != null && canTransfer(level, offsetOppPos, false, this, inventory)) {
             for (StorageView<ItemVariant> storageView : inventory) {
                 if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
@@ -220,8 +220,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 
     private boolean moveOut(Level level, @NotNull BlockPos blockPos, Direction facing) {
         BlockPos offsetPos = blockPos.relative(facing);
-        Storage<ItemVariant> inventory = ItemStorage.SIDED.find(level, offsetPos, level.getBlockState(offsetPos), this.level.getBlockEntity(offsetPos), facing.getOpposite());
-        Storage<ItemVariant> pipeInventory = ItemStorage.SIDED.find(level, blockPos, level.getBlockState(blockPos), this.level.getBlockEntity(blockPos), facing);
+        Storage<ItemVariant> inventory = getStorageAt(level, offsetPos, facing.getOpposite());
+        Storage<ItemVariant> pipeInventory = getStorageAt(level, blockPos, facing);
         if (inventory != null && pipeInventory != null && canTransfer(level, offsetPos, true, this, inventory)) {
             boolean canMove = true;
             BlockState state = level.getBlockState(offsetPos);
@@ -371,6 +371,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if (entity instanceof CopperPipeEntity pipe) {
             pipe.setCooldown(state);
         }
+    }
+
+    public static Storage<ItemVariant> getStorageAt(Level level, BlockPos blockPos, Direction direction) {
+        return ItemStorage.SIDED.find(level, blockPos, level.getBlockState(blockPos), level.getBlockEntity(blockPos), direction);
     }
 
     @Override

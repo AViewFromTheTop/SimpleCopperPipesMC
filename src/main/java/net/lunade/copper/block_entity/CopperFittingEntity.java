@@ -68,8 +68,8 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
         for (Direction direction : Util.shuffledCopy(Direction.values(), randomSource)) {
             Direction opposite = direction.getOpposite();
             BlockPos offsetOppPos = blockPos.relative(opposite);
-            Storage<ItemVariant> inventory = ItemStorage.SIDED.find(level, offsetOppPos, level.getBlockState(offsetOppPos), level.getBlockEntity(offsetOppPos), direction);
-            Storage<ItemVariant> fittingInventory = ItemStorage.SIDED.find(level, blockPos, level.getBlockState(blockPos), level.getBlockEntity(blockPos), opposite);
+            Storage<ItemVariant> inventory = CopperPipeEntity.getStorageAt(level, offsetOppPos, direction);
+            Storage<ItemVariant> fittingInventory = CopperPipeEntity.getStorageAt(level, blockPos, opposite);
             if (inventory != null && fittingInventory != null && canTransfer(level, offsetOppPos, direction, false)) {
                 for (StorageView<ItemVariant> storageView : inventory) {
                     if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {

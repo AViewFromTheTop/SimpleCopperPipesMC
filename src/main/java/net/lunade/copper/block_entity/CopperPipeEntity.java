@@ -182,7 +182,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     private int moveIn(Level level, @NotNull BlockPos blockPos, BlockState blockState, @NotNull Direction facing) {
         Direction opposite = facing.getOpposite();
         BlockPos offsetOppPos = blockPos.relative(opposite);
-        Storage<ItemVariant inventory = getStorageAt(level, offsetOppPos, facing);
+        Storage<ItemVariant> inventory = getStorageAt(level, offsetOppPos, facing);
         Storage<ItemVariant> pipeInventory = getStorageAt(level, blockPos, opposite);
         if (inventory != null && pipeInventory != null && canTransfer(level, offsetOppPos, false, this, inventory)) {
             for (StorageView<ItemVariant> storageView : inventory) {

@@ -82,6 +82,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
                             result = true;
                         }
                         transaction.close(); // if it cant commit, close it.
+                        // make sure to close instead of commit bc the item would be deleted
                     }
                 }
             }
@@ -108,6 +109,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
                             result = true;
                         }
                         transaction.close(); // if it can't commit, close it.
+                        // make sure to close instead of commit bc the item would be deleted
                     }
                 }
             }

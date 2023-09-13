@@ -46,6 +46,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements GameEventListener.Holder<VibrationSystem.Listener>, VibrationSystem {
 
@@ -338,9 +339,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         double y = 0;
         double z = 0;
         Direction.Axis axis = facing.getAxis();
-        x = axis == Direction.Axis.X ? (i * facing.getStepX()) * 0.1 : corroded ? (level.random.nextDouble() * 0.6) - 0.3 : x;
-        y = axis == Direction.Axis.Y ? (i * facing.getStepY()) * 0.1 : corroded ? (level.random.nextDouble() * 0.6) - 0.3 : y;
-        z = axis == Direction.Axis.Z ? (i * facing.getStepZ()) * 0.1 : corroded ? (level.random.nextDouble() * 0.6) - 0.3 : z;
+        BiFunction<Boolean, Double, Double> fun = (corr, pos) -> Boolean.TRUE.equals(corr) ? (level.random.nextDouble() * 0.6) - 0.3 : pos;
+        x = axis == Direction.Axis.X ? (i * facing.getStepX()) * 0.1 : fun.apply(corroded, x);
+        y = axis == Direction.Axis.Y ? (i * facing.getStepY()) * 0.1 : fun.apply(corroded, y);
+        z = axis == Direction.Axis.Z ? (i * facing.getStepZ()) * 0.1 : fun.apply(corroded, z);
         ItemEntity itemEntity = new ItemEntity(level, d, e, f, itemStack);
         itemEntity.setDeltaMovement(x, y, z);
         level.addFreshEntity(itemEntity);

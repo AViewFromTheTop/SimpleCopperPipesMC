@@ -3,15 +3,14 @@ package net.lunade.copper.gametest;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.frozenblock.lib.gametest.api.TrackedPosition;
+import net.frozenblock.lib.storage.api.MoveDirection;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Position;
-import net.minecraft.core.Vec3i;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,7 +19,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -144,137 +142,11 @@ public class CopperGameTest implements FabricGameTest {
         helper.assertTrue(inventory != null, "Inventory not found at " + inventoryPos.relative());
 
         Transaction transaction = Transaction.openOuter();
-        long amountMoved = direction.moveResources(inventory, resource, maxAmount, transaction, simulate);
+        long amountMoved = simulate
+                ? direction.simulateMoveResources(inventory, resource, maxAmount, transaction)
+                : direction.moveResources(inventory, resource, maxAmount, transaction);
         transaction.commit();
         return amountMoved;
     }
 
-    private record TrackedPosition<T>(PositionType type, T pos, T opposite) {
-
-        /**
-             * Creates a new {@link TrackedPosition} with the given position as its relative value.
-             */
-            public static TrackedPosition<BlockPos> createRelative(GameTestHelper helper, BlockPos pos) {
-                return new TrackedPosition<>(PositionType.RELATIVE, pos, helper.absolutePos(pos));
-            }
-
-            /**
-             * Creates a new {@link TrackedPosition} with the given position as its relative value.
-             * <p>
-             * Asserts the given block is at the position.
-             */
-            public static TrackedPosition<BlockPos> createRelative(GameTestHelper helper, Block block, BlockPos pos) {
-                return createRelative(helper, pos).assertBlockPresent(helper, block);
-            }
-
-            /**
-             * Creates a new {@link TrackedPosition} with the given position as its absolute value.
-             */
-            public static TrackedPosition<BlockPos> createAbsolute(GameTestHelper helper, BlockPos pos) {
-                return new TrackedPosition<>(PositionType.ABSOLUTE, pos, helper.relativePos(pos));
-            }
-
-            /**
-             * Creates a new {@link TrackedPosition} with the given position as its absolute value.
-             * <p>
-             * Asserts the given block is at the relative position.
-             */
-            public static TrackedPosition<BlockPos> createAbsolute(GameTestHelper helper, Block block, BlockPos pos) {
-                return createAbsolute(helper, pos).assertBlockPresent(helper, block);
-            }
-
-            /**
-             * Creates a new {@link TrackedPosition} with the given position as its relative value.
-             */
-            public static TrackedPosition<Vec3> createRelative(GameTestHelper helper, Vec3 pos) {
-                return new TrackedPosition<>(PositionType.RELATIVE, pos, helper.absoluteVec(pos));
-            }
-
-            /**
-             * Creates a new {@link TrackedPosition} with the given position as its relative value.
-             * <p>
-             * Asserts the given block is at the position.
-             */
-            public static TrackedPosition<Vec3> createRelative(GameTestHelper helper, Block block, Vec3 pos) {
-                return createRelative(helper, pos).assertBlockPresent(helper, block);
-            }
-
-            /**
-             * Creates a new {@link TrackedPosition} with the given position as its absolute value.
-             */
-            public static TrackedPosition<Vec3> createAbsolute(GameTestHelper helper, Vec3 pos) {
-                return new TrackedPosition<>(PositionType.ABSOLUTE, pos, helper.relativeVec(pos));
-            }
-
-            /**
-             * Creates a new {@link TrackedPosition} with the given position as its absolute value.
-             * <p>
-             * Asserts the given block is at the relative position.
-             */
-            public static TrackedPosition<Vec3> createAbsolute(GameTestHelper helper, Block block, Vec3 pos) {
-                return createAbsolute(helper, pos).assertBlockPresent(helper, block);
-            }
-
-            public T absolute() {
-                return switch (this.type()) {
-                    case RELATIVE -> this.opposite();
-                    case ABSOLUTE -> this.pos();
-                };
-            }
-
-            public T relative() {
-                return switch (this.type()) {
-                    case RELATIVE -> this.pos();
-                    case ABSOLUTE -> this.opposite();
-                };
-            }
-
-            public TrackedPosition<T> assertBlockPresent(GameTestHelper helper, Block block) {
-                T relative = this.relative();
-                if (relative instanceof Position position) { // covers Vec3
-                    helper.assertBlockPresent(block, BlockPos.containing(position));
-                } else if (relative instanceof BlockPos blockPos) {
-                    helper.assertBlockPresent(block, blockPos);
-                } else if (relative instanceof Vec3i vec3i) {
-                    helper.assertBlockPresent(block, new BlockPos(vec3i));
-                }
-                return this;
-            }
-        }
-
-    private enum PositionType {
-        /**
-         * Converts absolute positions to relative
-         */
-        RELATIVE,
-        /**
-         * Converts relative positions to absolute
-         */
-        ABSOLUTE;
-    }
-
-    private enum MoveDirection {
-        IN((inventory, resource, maxAmount, transaction, simulate) ->
-            simulate ? StorageUtil.simulateInsert(inventory, resource, maxAmount, transaction)
-            : inventory.insert(resource, maxAmount, transaction)
-        ),
-        OUT((inventory, resource, maxAmount, transaction, simulate) ->
-            simulate ? StorageUtil.simulateExtract(inventory, resource, maxAmount, transaction)
-            : inventory.extract(resource, maxAmount, transaction)
-        );
-
-        private final StorageInteraction<ItemVariant> interaction;
-
-        MoveDirection(StorageInteraction<ItemVariant> interaction) {
-            this.interaction = interaction;
-        }
-
-        public long moveResources(Storage<ItemVariant> inventory, ItemVariant resource, long maxAmount, Transaction transaction, boolean simulate) {
-            return this.interaction.moveResources(inventory, resource, maxAmount, transaction, simulate);
-        }
-    }
-
-    private interface StorageInteraction<T> {
-        long moveResources(Storage<T> storage, T resource, long maxAmount, Transaction transaction, boolean simulate);
-    }
 }

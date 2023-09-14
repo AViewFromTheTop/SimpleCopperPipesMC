@@ -121,7 +121,6 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	modApi("maven.modrinth:frozenlib:${project.frozenlib_version}")
-	implementation("blue.endless:jankson:1.2.3")
 
 	modImplementation("maven.modrinth:modmenu:${project.modmenu_version}")
 }

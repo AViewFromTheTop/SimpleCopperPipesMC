@@ -194,17 +194,15 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                     long extracted = inventory.extract(resource, 1, transaction);
                     if (extracted > 0) {
                         addItem(resource, pipeInventory, transaction);
+                        transaction.commit(); // applies the changes
                         if (blockState.is(CopperPipeMain.SILENT_PIPES)) {
-                            transaction.commit(); // applies the changes
                             return 2;
                         }
 
                         Block block = level.getBlockState(offsetOppPos).getBlock();
                         if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) {
-                            transaction.commit(); // applies the changes
                             return 3;
                         }
-                        transaction.commit(); // applies the changes
                         return 2;
                     }
                     transaction.close(); // if it cant commit, close it.

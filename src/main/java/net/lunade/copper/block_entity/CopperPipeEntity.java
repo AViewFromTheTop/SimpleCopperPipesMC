@@ -14,6 +14,7 @@ import net.lunade.copper.PoweredPipeDispenses;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.lunade.copper.registry.RegisterCopperBlockEntities;
@@ -308,19 +309,25 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if (fitting) {
             FittingPipeDispenses.FittingDispense fittingDispense = FittingPipeDispenses.getDispense(itemStack2.getItem());
             if (fittingDispense != null) { //Particle Emitters With Fitting
-                fittingDispense.dispense(serverLevel, itemStack2, i, direction, position, state, corroded, pos, this);
+                if (SimpleCopperPipesConfig.get().specialEffectDispensing) {
+                    fittingDispense.dispense(serverLevel, itemStack2, i, direction, position, state, corroded, pos, this);
+                }
             } else { //Spawn Item W/O Sound With Fitting
-                itemStack2 = itemStack.split(1);
-                spawnItem(serverLevel, itemStack2, i, direction, position, direction, corroded);
-                serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, pos, direction.get3DDataValue());
+                if (SimpleCopperPipesConfig.get().dispensing) {
+                    itemStack2 = itemStack.split(1);
+                    spawnItem(serverLevel, itemStack2, i, direction, position, direction, corroded);
+                    serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, pos, direction.get3DDataValue());
+                }
             }
         } else {
-            itemStack2 = itemStack.split(1);
-            serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, blockPointer.getPos(), direction.get3DDataValue());
-            spawnItem(serverLevel, itemStack2, i, direction, position, direction, corroded);
-            if (!silent) {
-                serverLevel.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
-                serverLevel.playSound(null, blockPointer.getPos(), CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
+            if (SimpleCopperPipesConfig.get().dispensing) {
+                itemStack2 = itemStack.split(1);
+                serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, blockPointer.getPos(), direction.get3DDataValue());
+                spawnItem(serverLevel, itemStack2, i, direction, position, direction, corroded);
+                if (!silent) {
+                    serverLevel.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
+                    serverLevel.playSound(null, blockPointer.getPos(), CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
+                }
             }
         }
         return itemStack;

@@ -88,5 +88,17 @@
   "block.lunade.glowing_white_fitting": "Glowing White Fitting",
 
   "stat.lunade.inspect_copper_pipe": "Copper Pipes Searched",
-  "stat.lunade.inspect_copper_fitting": "Copper Fittings Searched"
+  "stat.lunade.inspect_copper_fitting": "Copper Fittings Searched",
+
+  "option.lunade.component.title": "Simple Copper Pipes Config",
+  "option.lunade.false": "§cDisabled",
+  "option.lunade.true": "§aEnabled",
+
+  "option.lunade.openable_fittings": "Openable Fittings",
+  "tooltip.lunade.openable_fittings": "Whether or not copper fittings have an interactable GUI",
+
+  "option.lunade.dispensing": "Dispensing",
+  "tooltip.lunade.dispensing": "Whether or not copper pipes should be able to dispense items",
+  "option.lunade.special_effect_dispensing": "Special Effect Dispensing",
+  "tooltip.lunade.special_effect_dispensing": "Whether or not copper pipes should be able to dispense special effects"
 }

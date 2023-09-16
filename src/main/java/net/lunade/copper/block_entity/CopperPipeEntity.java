@@ -259,23 +259,23 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 ItemStack itemStack = this.getItem(i);
                 if (!itemStack.isEmpty()) {
                     ItemStack itemStack2;
-                    int o = 4;
+                    int shotLength = 4;
                     if (this.shootsControlled) { //If Dropper
-                        o = 10;
+                        shotLength = 10;
                         serverLevel.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat()*0.25F) + 0.8F);
                     } else if (this.shootsSpecial) { //If Dispenser, Use Pipe-Specific Launch Length
                         if (blockState.getBlock() instanceof CopperPipe pipe) {
-                            o = pipe.dispenserShotLength;
+                            shotLength = pipe.dispenserShotLength;
                             serverLevel.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat()*0.25F) + 0.8F);
                         } else {
-                            o= 12;
+                            shotLength= 12;
                         }
                     }
                     boolean silent = blockState.is(CopperPipeMain.SILENT_PIPES);
                     if (serverLevel.getBlockState(blockPos.relative(directionOpp)).getBlock() instanceof CopperFitting) {
-                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, true, silent, this.corroded);
+                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, shotLength, powered, true, silent, this.corroded);
                     } else {
-                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, o, powered, false, silent, this.corroded);
+                        itemStack2 = canonShoot(blockPointerImpl, itemStack, blockState, shotLength, powered, false, silent, this.corroded);
                         blockPointerImpl.getLevel().levelEvent(LevelEvent.PARTICLES_SHOOT, blockPointerImpl.getPos(), direction.get3DDataValue());
                     }
                     this.setItem(i, itemStack2);
@@ -286,7 +286,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return false;
     }
 
-    private ItemStack canonShoot(@NotNull BlockSource blockPointer, ItemStack itemStack, @NotNull BlockState state, int i, boolean powered, boolean fitting, boolean silent, boolean corroded) {
+    private ItemStack canonShoot(@NotNull BlockSource blockPointer, ItemStack itemStack, @NotNull BlockState state, int shotLength, boolean powered, boolean fitting, boolean silent, boolean corroded) {
         ServerLevel serverLevel = blockPointer.getLevel();
         BlockPos pos = blockPointer.getPos();
         Direction direction = state.getValue(BlockStateProperties.FACING);
@@ -296,7 +296,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             PoweredPipeDispenses.PoweredDispense poweredDispense = PoweredPipeDispenses.getDispense(itemStack2.getItem());
             if (poweredDispense != null) {
                 itemStack2=itemStack.split(1);
-                poweredDispense.dispense(serverLevel, itemStack2, i, direction, position, state, corroded, pos, this);
+                poweredDispense.dispense(serverLevel, itemStack2, shotLength, direction, position, state, corroded, pos, this);
                 if (!fitting && !silent) {
                     serverLevel.playSound(null, pos, CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat()*0.25F) + 0.8F);
                     serverLevel.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
@@ -308,12 +308,12 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             FittingPipeDispenses.FittingDispense fittingDispense = FittingPipeDispenses.getDispense(itemStack2.getItem());
             if (fittingDispense != null) { //Particle Emitters With Fitting
                 if (SimpleCopperPipesConfig.get().specialEffectDispensing) {
-                    fittingDispense.dispense(serverLevel, itemStack2, i, direction, position, state, corroded, pos, this);
+                    fittingDispense.dispense(serverLevel, itemStack2, shotLength, direction, position, state, corroded, pos, this);
                 }
             } else { //Spawn Item W/O Sound With Fitting
                 if (SimpleCopperPipesConfig.get().dispensing) {
                     itemStack2 = itemStack.split(1);
-                    spawnItem(serverLevel, itemStack2, i, direction, position, direction, corroded);
+                    spawnItem(serverLevel, itemStack2, shotLength, direction, position, direction, corroded);
                     serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, pos, direction.get3DDataValue());
                 }
             }
@@ -321,7 +321,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             if (SimpleCopperPipesConfig.get().dispensing) {
                 itemStack2 = itemStack.split(1);
                 serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, blockPointer.getPos(), direction.get3DDataValue());
-                spawnItem(serverLevel, itemStack2, i, direction, position, direction, corroded);
+                spawnItem(serverLevel, itemStack2, shotLength, direction, position, direction, corroded);
                 if (!silent) {
                     serverLevel.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
                     serverLevel.playSound(null, blockPointer.getPos(), CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
@@ -331,7 +331,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return itemStack;
     }
 
-    public static void spawnItem(Level level, ItemStack itemStack, int i, @NotNull Direction direction, @NotNull Position position, Direction facing, boolean corroded) { //Simply Spawn An Item
+    public static void spawnItem(Level level, ItemStack itemStack, int shotLength, @NotNull Direction direction, @NotNull Position position, Direction facing, boolean corroded) { //Simply Spawn An Item
         double d = position.x();
         double e = position.y();
         double f = position.z();
@@ -345,9 +345,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         double z = 0;
         Direction.Axis axis = facing.getAxis();
         BiFunction<Boolean, Double, Double> fun = (corr, pos) -> Boolean.TRUE.equals(corr) ? (level.random.nextDouble() * 0.6) - 0.3 : pos;
-        x = axis == Direction.Axis.X ? (i * facing.getStepX()) * 0.1 : fun.apply(corroded, x);
-        y = axis == Direction.Axis.Y ? (i * facing.getStepY()) * 0.1 : fun.apply(corroded, y);
-        z = axis == Direction.Axis.Z ? (i * facing.getStepZ()) * 0.1 : fun.apply(corroded, z);
+        x = axis == Direction.Axis.X ? (shotLength * facing.getStepX()) * 0.1 : fun.apply(corroded, x);
+        y = axis == Direction.Axis.Y ? (shotLength * facing.getStepY()) * 0.1 : fun.apply(corroded, y);
+        z = axis == Direction.Axis.Z ? (shotLength * facing.getStepZ()) * 0.1 : fun.apply(corroded, z);
         ItemEntity itemEntity = new ItemEntity(level, d, e, f, itemStack);
         itemEntity.setDeltaMovement(x, y, z);
         level.addFreshEntity(itemEntity);

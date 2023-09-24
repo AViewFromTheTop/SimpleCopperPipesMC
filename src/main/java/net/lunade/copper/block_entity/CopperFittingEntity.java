@@ -20,6 +20,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
+    private static final int MAX_TRANSFER_AMOUNT = 1;
+
     public int transferCooldown;
 
     public CopperFittingEntity(BlockPos blockPos, BlockState blockState) {
@@ -75,11 +77,13 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
                     if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
                         Transaction transaction = Transaction.openOuter();
                         var resource = storageView.getResource();
-                        long extracted = inventory.extract(resource, 1, transaction);
+                        long extracted = inventory.extract(resource, MAX_TRANSFER_AMOUNT, transaction);
                         if (extracted > 0) {
-                            CopperPipeEntity.addItem(resource, fittingInventory, transaction);
-                            transaction.commit(); // applies the changes
-                            result = true;
+                            long inserted = CopperPipeEntity.addItem(resource, fittingInventory, transaction);
+                            if (inserted > 0) {
+                                transaction.commit(); // applies the changes
+                                result = true;
+                            }
                         }
                         transaction.close(); // if it cant commit, close it.
                         // make sure to close instead of commit bc the item would be deleted
@@ -102,11 +106,13 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
                     if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
                         Transaction transaction = Transaction.openOuter();
                         var resource = storageView.getResource();
-                        long inserted = inventory.insert(resource, 1, transaction);
+                        long inserted = inventory.insert(resource, MAX_TRANSFER_AMOUNT, transaction);
                         if (inserted > 0) { // successfully inserted item
-                            fittingInventory.extract(resource, 1, transaction);
-                            transaction.commit(); // applies the changes
-                            result = true;
+                            long extracted = fittingInventory.extract(resource, MAX_TRANSFER_AMOUNT, transaction);
+                            if (extracted > 0) {
+                                transaction.commit(); // applies the changes
+                                result = true;
+                            }
                         }
                         transaction.close(); // if it can't commit, close it.
                         // make sure to close instead of commit bc the item would be deleted

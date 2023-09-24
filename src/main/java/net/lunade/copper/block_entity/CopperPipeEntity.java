@@ -52,6 +52,7 @@ import java.util.function.BiFunction;
 public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements GameEventListener.Holder<VibrationSystem.Listener>, VibrationSystem {
 
     private static final int VIBRATION_RANGE = 8;
+    private static final int MAX_TRANSFER_AMOUNT = 1;
 
     public int transferCooldown;
     public int dispenseCooldown;
@@ -151,14 +152,22 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         }
     }
 
-    public static boolean canTransfer(Level level, BlockPos pos, boolean to, @NotNull CopperPipeEntity copperPipe, @Nullable Storage<ItemVariant> inventory) {
+    public static boolean canTransfer(Level level, BlockPos pos, boolean to, @NotNull CopperPipeEntity copperPipe, @Nullable Storage<ItemVariant> inventory, @Nullable Storage<ItemVariant> pipeInventory) {
         if (copperPipe.transferCooldown > 0) {
             return false;
+        }
+        boolean transferApiCheck = true;
+        boolean usingTransferApi = false;
+        if (inventory != null) {
+            usingTransferApi = true;
+            transferApiCheck = to
+                    ? inventory.supportsInsertion() && (pipeInventory == null || pipeInventory.supportsExtraction())
+                    : inventory.supportsExtraction() && (pipeInventory == null || pipeInventory.supportsInsertion());
         }
         BlockEntity entity = level.getBlockEntity(pos);
         if (entity != null) {
             if (entity instanceof CopperPipeEntity pipe) {
-                return to || pipe.transferCooldown <= 0;
+                return (to || pipe.transferCooldown <= 0) && transferApiCheck;
             }
             if (entity instanceof CopperFittingEntity) {
                 return false;
@@ -166,19 +175,16 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             if (to) {
                 PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
                 if (canTransfer != null) {
-                    return canTransfer.canTransfer((ServerLevel)level, pos, level.getBlockState(pos), copperPipe, entity);
+                    return canTransfer.canTransfer((ServerLevel)level, pos, level.getBlockState(pos), copperPipe, entity) && transferApiCheck;
                 }
             } else {
                 PipeMovementRestrictions.CanTakeFrom<BlockEntity> canTake = PipeMovementRestrictions.getCanTakeFrom(entity);
                 if (canTake != null) {
-                    return canTake.canTake((ServerLevel)level, pos, level.getBlockState(pos), copperPipe, entity);
+                    return canTake.canTake((ServerLevel)level, pos, level.getBlockState(pos), copperPipe, entity) && transferApiCheck;
                 }
             }
-            if (inventory != null) return to ? inventory.supportsInsertion() : inventory.supportsExtraction();
-            return true;
         }
-        if (inventory != null) return to ? inventory.supportsInsertion() : inventory.supportsExtraction();
-        return false;
+        return usingTransferApi && transferApiCheck;
     }
 
     private int moveIn(Level level, @NotNull BlockPos blockPos, BlockState blockState, @NotNull Direction facing) {
@@ -186,24 +192,26 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         BlockPos offsetOppPos = blockPos.relative(opposite);
         Storage<ItemVariant> inventory = getStorageAt(level, offsetOppPos, facing);
         Storage<ItemVariant> pipeInventory = getStorageAt(level, blockPos, opposite);
-        if (inventory != null && pipeInventory != null && canTransfer(level, offsetOppPos, false, this, inventory)) {
+        if (inventory != null && pipeInventory != null && canTransfer(level, offsetOppPos, false, this, inventory, pipeInventory)) {
             for (StorageView<ItemVariant> storageView : inventory) {
                 if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
                     Transaction transaction = Transaction.openOuter();
                     var resource = storageView.getResource();
-                    long extracted = inventory.extract(resource, 1, transaction);
-                    if (extracted > 0) {
-                        addItem(resource, pipeInventory, transaction);
-                        transaction.commit(); // applies the changes
-                        if (blockState.is(CopperPipeMain.SILENT_PIPES)) {
+                    long extracted = inventory.extract(resource, MAX_TRANSFER_AMOUNT, transaction);
+                    if (extracted > 0) { // successfully extracted item
+                        long inserted = addItem(resource, pipeInventory, transaction);
+                        if (inserted > 0) { // successfully inserted item
+                            transaction.commit(); // applies the changes
+                            if (blockState.is(CopperPipeMain.SILENT_PIPES)) {
+                                return 2;
+                            }
+
+                            Block block = level.getBlockState(offsetOppPos).getBlock();
+                            if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) {
+                                return 3;
+                            }
                             return 2;
                         }
-
-                        Block block = level.getBlockState(offsetOppPos).getBlock();
-                        if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) {
-                            return 3;
-                        }
-                        return 2;
                     }
                     transaction.close(); // if it cant commit, close it.
                 }
@@ -212,17 +220,18 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return 0;
     }
 
-    public static void addItem(ItemVariant resource, @NotNull Storage<ItemVariant> inventory, Transaction transaction) {
+    public static long addItem(ItemVariant resource, @NotNull Storage<ItemVariant> inventory, Transaction transaction) {
         if (inventory.supportsInsertion()) {
-            inventory.insert(resource, 1, transaction);
+            return inventory.insert(resource, MAX_TRANSFER_AMOUNT, transaction);
         }
+        return 0L;
     }
 
     private boolean moveOut(Level level, @NotNull BlockPos blockPos, Direction facing) {
         BlockPos offsetPos = blockPos.relative(facing);
         Storage<ItemVariant> inventory = getStorageAt(level, offsetPos, facing.getOpposite());
         Storage<ItemVariant> pipeInventory = getStorageAt(level, blockPos, facing);
-        if (inventory != null && pipeInventory != null && canTransfer(level, offsetPos, true, this, inventory)) {
+        if (inventory != null && pipeInventory != null && canTransfer(level, offsetPos, true, this, inventory, pipeInventory)) {
             boolean canMove = true;
             BlockState state = level.getBlockState(offsetPos);
             if (state.getBlock() instanceof CopperPipe) {
@@ -234,11 +243,13 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                         Transaction transaction = Transaction.openOuter();
                         setCooldown(level, offsetPos);
                         var resource = storageView.getResource();
-                        long inserted = inventory.insert(resource, 1, transaction);
+                        long inserted = inventory.insert(resource, MAX_TRANSFER_AMOUNT, transaction);
                         if (inserted > 0) { // successfully inserted item
-                            pipeInventory.extract(resource, 1, transaction);
-                            transaction.commit(); // applies the changes
-                            return true;
+                            long extracted = pipeInventory.extract(resource, MAX_TRANSFER_AMOUNT, transaction);
+                            if (extracted > 0) { // successfully extracted item
+                                transaction.commit(); // applies the changes
+                                return true;
+                            }
                         }
                         transaction.close(); // if it can't commit, close it.
                     }

@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public final class SimpleCopperPipesConfigGui {
+    private SimpleCopperPipesConfigGui() {}
 
     static Screen buildScreen(Screen parent) {
         var configBuilder = ConfigBuilder.create().setParentScreen(parent).setTitle(text("component.title"));

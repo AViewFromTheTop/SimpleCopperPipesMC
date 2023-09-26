@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "group": "colored_fitting",
+  "group": "cyan_fitting",
   "ingredients": [
     {
       "item": "lunade:corroded_fitting"

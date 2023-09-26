@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "group": "colored_pipe",
+  "group": "blue_pipe",
   "ingredients": [
     {
       "item": "lunade:corroded_pipe"

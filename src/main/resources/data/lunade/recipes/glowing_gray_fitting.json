@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "group": "glowing_fitting",
+  "group": "gray_fitting",
   "ingredients": [
     {
       "item": "lunade:gray_fitting"

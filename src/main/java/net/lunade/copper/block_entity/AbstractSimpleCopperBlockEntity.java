@@ -3,6 +3,7 @@ package net.lunade.copper.block_entity;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperPipeProperties;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -17,6 +18,7 @@ import net.minecraft.world.inventory.HopperMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
@@ -27,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockEntity implements Container {
 
@@ -51,11 +54,11 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         this.moveType = moveType;
     }
 
-    public void serverTick(Level world, BlockPos blockPos, BlockState blockState) {
+    public void serverTick(@NotNull Level level, BlockPos blockPos, BlockState blockState) {
         BlockState state = blockState;
-        if (!world.isClientSide) {
+        if (!level.isClientSide) {
             if (this.lastFixVersion < CopperPipeMain.CURRENT_FIX_VERSION) {
-                this.updateBlockEntityValues(world, blockPos, blockState);
+                this.updateBlockEntityValues(level, blockPos, blockState);
                 this.lastFixVersion = CopperPipeMain.CURRENT_FIX_VERSION;
             }
             if (this.canWater) {
@@ -74,9 +77,9 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
             if (state.hasProperty(CopperPipeProperties.HAS_SMOKE)) {
                 state = state.setValue(CopperPipeProperties.HAS_SMOKE, this.canSmoke || smokeNbt != null);
             }
-            this.tickMoveableNbt((ServerLevel) world, blockPos, blockState);
-            this.dispenseMoveableNbt((ServerLevel) world, blockPos, blockState);
-            this.moveMoveableNbt((ServerLevel) world, blockPos, blockState);
+            this.tickMoveableNbt((ServerLevel) level, blockPos, blockState);
+            this.dispenseMoveableNbt((ServerLevel) level, blockPos, blockState);
+            this.moveMoveableNbt((ServerLevel) level, blockPos, blockState);
             if (this.isEmpty() == state.getValue(CopperPipeProperties.HAS_ITEM)) {
                 state = state.setValue(CopperPipeProperties.HAS_ITEM, !isEmpty());
             }
@@ -86,12 +89,13 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
             if (this.electricityCooldown == -1 && state.getValue(CopperPipeProperties.HAS_ELECTRICITY)) {
                 this.electricityCooldown = 80;
                 Block stateGetBlock = state.getBlock();
-                if (CopperPipeMain.PREVIOUS_STAGE.containsKey(stateGetBlock) && !state.is(CopperPipeMain.WAXED)) {
-                    state = CopperPipeMain.PREVIOUS_STAGE.get(stateGetBlock).withPropertiesOf(state);
+                Optional<Block> previous = WeatheringCopper.getPrevious(stateGetBlock);
+                if (previous.isPresent() && !state.is(CopperPipeMain.WAXED)) {
+                    state = previous.get().withPropertiesOf(state);
                 }
             }
             if (this.electricityCooldown == 79) {
-                sendElectricity(world, blockPos);
+                sendElectricity(level, blockPos);
             }
             if (this.electricityCooldown == 0) {
                 if (state.hasProperty(CopperPipeProperties.HAS_ELECTRICITY)) {
@@ -99,23 +103,23 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
                 }
             }
             if (state != blockState) {
-                world.setBlockAndUpdate(blockPos, state);
+                level.setBlockAndUpdate(blockPos, state);
             }
         }
     }
 
-    public static void sendElectricity(Level world, BlockPos blockPos) {
+    public static void sendElectricity(Level level, BlockPos blockPos) {
         for (Direction direction : Direction.values()) {
             BlockPos pos = blockPos.relative(direction);
-            if (world.hasChunkAt(pos)) {
-                BlockState state = world.getBlockState(pos);
+            if (level.hasChunkAt(pos)) {
+                BlockState state = level.getBlockState(pos);
                 if (state.hasProperty(CopperPipeProperties.HAS_ELECTRICITY)) {
-                    BlockEntity entity = world.getBlockEntity(pos);
+                    BlockEntity entity = level.getBlockEntity(pos);
                     if (entity instanceof AbstractSimpleCopperBlockEntity copperBlockEntity) {
                         int axis = state.hasProperty(BlockStateProperties.FACING) ? state.getValue(BlockStateProperties.FACING).getAxis().ordinal() : direction.getAxis().ordinal();
                         if (copperBlockEntity.electricityCooldown == -1) {
-                            world.levelEvent(3002, pos, axis);
-                            world.setBlockAndUpdate(pos, state.setValue(CopperPipeProperties.HAS_ELECTRICITY, true));
+                            level.levelEvent(3002, pos, axis);
+                            level.setBlockAndUpdate(pos, state.setValue(CopperPipeProperties.HAS_ELECTRICITY, true));
                         }
                     }
                 }
@@ -123,7 +127,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         }
     }
 
-    public void updateBlockEntityValues(Level world, BlockPos pos, BlockState state) {
+    public void updateBlockEntityValues(Level level, BlockPos pos, BlockState state) {
 
     }
 
@@ -135,31 +139,31 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         return true;
     }
 
-    public void tickMoveableNbt(ServerLevel world, BlockPos blockPos, BlockState blockState) {
+    public void tickMoveableNbt(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState) {
         for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : this.moveablePipeDataHandler.getSavedNbtList()) {
-            nbt.tick(world, blockPos, blockState, this);
+            nbt.tick(serverLevel, blockPos, blockState, this);
         }
     }
 
-    public void dispenseMoveableNbt(ServerLevel serverWorld, BlockPos blockPos, BlockState blockState) {
+    public void dispenseMoveableNbt(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState) {
 
     }
 
-    public void moveMoveableNbt(ServerLevel world, BlockPos blockPos, BlockState blockState) {
+    public void moveMoveableNbt(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState) {
         ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> nbtList = moveablePipeDataHandler.getSavedNbtList();
         ArrayList<MoveablePipeDataHandler.SaveableMovablePipeNbt> usedNbts = new ArrayList<>();
         if (!nbtList.isEmpty()) {
-            List<Direction> dirs = CopperPipeMain.shuffledDirections(world.getRandom());
+            List<Direction> dirs = Util.shuffledCopy(Direction.values(), serverLevel.getRandom());
             for (Direction direction : dirs) {
                 if (this.canMoveNbtInDirection(direction, blockState)) {
                     BlockPos newPos = blockPos.relative(direction);
-                    if (world.hasChunkAt(newPos)) {
-                        BlockState state = world.getBlockState(newPos);
-                        BlockEntity entity = world.getBlockEntity(newPos);
+                    if (serverLevel.hasChunkAt(newPos)) {
+                        BlockState state = serverLevel.getBlockState(newPos);
+                        BlockEntity entity = serverLevel.getBlockEntity(newPos);
                         if (entity instanceof AbstractSimpleCopperBlockEntity copperEntity) {
                             if (copperEntity.canAcceptMoveableNbt(this.moveType, direction, blockState)) {
                                 for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : nbtList) {
-                                    if (nbt.getShouldMove() && (!nbt.getCanOnlyGoThroughOnePipe() || !usedNbts.contains(nbt)) && nbt.canMove(world, newPos, state, copperEntity)) {
+                                    if (nbt.getShouldMove() && (!nbt.getCanOnlyGoThroughOnePipe() || !usedNbts.contains(nbt)) && nbt.canMove(serverLevel, newPos, state, copperEntity)) {
                                         MoveablePipeDataHandler.SaveableMovablePipeNbt onMove;
                                         if (nbt.getShouldCopy()) {
                                             onMove = nbt.copyOf();
@@ -167,7 +171,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
                                             onMove = nbt;
                                         }
                                         copperEntity.moveablePipeDataHandler.setMoveablePipeNbt(nbt.getNbtID(), onMove);
-                                        onMove.onMove(world, newPos, state, copperEntity);
+                                        onMove.onMove(serverLevel, newPos, state, copperEntity);
                                         if (!usedNbts.contains(nbt)) {
                                             usedNbts.add(nbt);
                                         }

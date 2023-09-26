@@ -1,24 +1,24 @@
 package net.lunade.copper;
 
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
+import net.fabricmc.fabric.api.registry.OxidizableBlocksRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.lunade.copper.block_entity.CopperFittingEntity;
-import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
+import net.lunade.copper.registry.RegisterCopperBlockEntities;
+import net.lunade.copper.registry.RegisterCopperBlocks;
 import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.Util;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,16 +28,10 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatFormatter;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public class CopperPipeMain implements ModInitializer {
 
@@ -47,20 +41,18 @@ public class CopperPipeMain implements ModInitializer {
 		return 1;
 	}
 
-	public static final String MOD_ID = "copper_pipe";
-	public static final String BLOCK_ID = "lunade";
+	public static final String MOD_ID = "simple_copper_pipes";
+	public static final String NAMESPACE = "lunade";
 
 	public static final ResourceLocation INSPECT_PIPE = id("inspect_copper_pipe");
+	public static final ResourceLocation INSPECT_FITTING = id("inspect_copper_fitting");
 	public static final ResourceLocation WATER = id("water");
 	public static final ResourceLocation SMOKE = id("smoke");
 
-	public static BlockEntityType<CopperPipeEntity> COPPER_PIPE_ENTITY;
-
-	public static BlockEntityType<CopperFittingEntity> COPPER_FITTING_ENTITY;
-
-	public static final TagKey<Block> UNSCRAPEABLE = TagKey.create(Registries.BLOCK, id("unscrapeable"));
 	public static final TagKey<Block> WAXED = TagKey.create(Registries.BLOCK, id("waxed"));
 	public static final TagKey<Block> SILENT_PIPES = TagKey.create(Registries.BLOCK, id("silent_pipes"));
+
+	public static final TagKey<Item> IGNORES_COPPER_PIPE_MENU = TagKey.create(Registries.ITEM, id("ignores_copper_pipe_menu"));
 
 	//SOUNDS
 	public static final SoundEvent ITEM_IN = SoundEvent.createVariableRangeEvent(id("block.copper_pipe.item_in"));
@@ -98,8 +90,36 @@ public class CopperPipeMain implements ModInitializer {
 	public void onInitialize() {
 		CopperPipeProperties.init();
 		SimpleCopperRegistries.initRegistry();
+		// make config file
+		SimpleCopperPipesConfig.get();
+
+		RegisterCopperBlocks.register();
+		RegisterCopperBlockEntities.init();
+
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperPipe.COPPER_PIPE, CopperPipe.EXPOSED_PIPE);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperPipe.EXPOSED_PIPE, CopperPipe.WEATHERED_PIPE);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperPipe.WEATHERED_PIPE, CopperPipe.OXIDIZED_PIPE);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperPipe.OXIDIZED_PIPE, CopperPipe.CORRODED_PIPE);
+
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperFitting.COPPER_FITTING, CopperFitting.EXPOSED_FITTING);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperFitting.EXPOSED_FITTING, CopperFitting.WEATHERED_FITTING);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperFitting.WEATHERED_FITTING, CopperFitting.OXIDIZED_FITTING);
+		OxidizableBlocksRegistry.registerOxidizableBlockPair(CopperFitting.OXIDIZED_FITTING, CopperFitting.CORRODED_FITTING);
+
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperPipe.COPPER_PIPE, CopperPipe.WAXED_COPPER_PIPE);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperPipe.EXPOSED_PIPE, CopperPipe.WAXED_EXPOSED_PIPE);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperPipe.WEATHERED_PIPE, CopperPipe.WAXED_WEATHERED_PIPE);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperPipe.OXIDIZED_PIPE, CopperPipe.WAXED_OXIDIZED_PIPE);
+
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperFitting.COPPER_FITTING, CopperFitting.WAXED_COPPER_FITTING);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperFitting.EXPOSED_FITTING, CopperFitting.WAXED_EXPOSED_FITTING);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperFitting.WEATHERED_FITTING, CopperFitting.WAXED_WEATHERED_FITTING);
+		OxidizableBlocksRegistry.registerWaxableBlockPair(CopperFitting.OXIDIZED_FITTING, CopperFitting.WAXED_OXIDIZED_FITTING);
+
+		RegisterCopperBlockEntities.init();
 
 		Registry.register(BuiltInRegistries.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
+		Registry.register(BuiltInRegistries.CUSTOM_STAT, INSPECT_FITTING, INSPECT_FITTING);
 		Stats.CUSTOM.get(INSPECT_PIPE, StatFormatter.DEFAULT);
 
 		//PARTICLE
@@ -118,111 +138,6 @@ public class CopperPipeMain implements ModInitializer {
 		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("purple_ink"), PURPLE_INK);
 		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("magenta_ink"), MAGENTA_INK);
 		Registry.register(BuiltInRegistries.PARTICLE_TYPE, id("pink_ink"), PINK_INK);
-
-		//NORMAL
-		registerBlock(CopperPipe.COPPER_PIPE, id("copper_pipe"));
-		registerBlock(CopperPipe.EXPOSED_PIPE, id("exposed_copper_pipe"));
-		registerBlock(CopperPipe.WEATHERED_PIPE, id("weathered_copper_pipe"));
-		registerBlock(CopperPipe.OXIDIZED_PIPE, id("oxidized_copper_pipe"));
-		registerBlock(CopperPipe.CORRODED_PIPE, id("corroded_pipe"));
-
-		registerBlock(CopperFitting.COPPER_FITTING, id("copper_fitting"));
-		registerBlock(CopperFitting.EXPOSED_FITTING, id("exposed_copper_fitting"));
-		registerBlock(CopperFitting.WEATHERED_FITTING, id("weathered_copper_fitting"));
-		registerBlock(CopperFitting.OXIDIZED_FITTING, id("oxidized_copper_fitting"));
-		registerBlock(CopperFitting.CORRODED_FITTING, id("corroded_fitting"));
-		
-		//WAXED
-		registerBlock(CopperPipe.WAXED_COPPER_PIPE, id("waxed_copper_pipe"));
-		registerBlock(CopperPipe.WAXED_EXPOSED_PIPE, id("waxed_exposed_copper_pipe"));
-		registerBlock(CopperPipe.WAXED_WEATHERED_PIPE, id("waxed_weathered_copper_pipe"));
-		registerBlock(CopperPipe.WAXED_OXIDIZED_PIPE, id("waxed_oxidized_copper_pipe"));
-
-		registerBlock(CopperFitting.WAXED_COPPER_FITTING, id("waxed_copper_fitting"));
-		registerBlock(CopperFitting.WAXED_EXPOSED_FITTING, id("waxed_exposed_copper_fitting"));
-		registerBlock(CopperFitting.WAXED_WEATHERED_FITTING, id("waxed_weathered_copper_fitting"));
-		registerBlock(CopperFitting.WAXED_OXIDIZED_FITTING, id("waxed_oxidized_copper_fitting"));
-
-		//COLOURED
-		registerColoured(CopperPipe.WHITE_PIPE, colourPipe("white"));
-		registerColoured(CopperPipe.GLOWING_WHITE_PIPE, glowingPipe("white"));
-		registerColoured(CopperPipe.LIGHT_GRAY_PIPE, colourPipe("light_gray"));
-		registerColoured(CopperPipe.GLOWING_LIGHT_GRAY_PIPE, glowingPipe("light_gray"));
-		registerColoured(CopperPipe.GRAY_PIPE, colourPipe("gray"));
-		registerColoured(CopperPipe.GLOWING_GRAY_PIPE, glowingPipe("gray"));
-		registerColoured(CopperPipe.BLACK_PIPE, colourPipe("black"));
-		registerColoured(CopperPipe.GLOWING_BLACK_PIPE, glowingPipe("black"));
-		registerColoured(CopperPipe.BROWN_PIPE, colourPipe("brown"));
-		registerColoured(CopperPipe.GLOWING_BROWN_PIPE, glowingPipe("brown"));
-		registerColoured(CopperPipe.RED_PIPE, colourPipe("red"));
-		registerColoured(CopperPipe.GLOWING_RED_PIPE, glowingPipe("red"));
-		registerColoured(CopperPipe.ORANGE_PIPE, colourPipe("orange"));
-		registerColoured(CopperPipe.GLOWING_ORANGE_PIPE, glowingPipe("orange"));
-		registerColoured(CopperPipe.YELLOW_PIPE, colourPipe("yellow"));
-		registerColoured(CopperPipe.GLOWING_YELLOW_PIPE, glowingPipe("yellow"));
-		registerColoured(CopperPipe.LIME_PIPE, colourPipe("lime"));
-		registerColoured(CopperPipe.GLOWING_LIME_PIPE, glowingPipe("lime"));
-		registerColoured(CopperPipe.GREEN_PIPE, colourPipe("green"));
-		registerColoured(CopperPipe.GLOWING_GREEN_PIPE, glowingPipe("green"));
-		registerColoured(CopperPipe.CYAN_PIPE, colourPipe("cyan"));
-		registerColoured(CopperPipe.GLOWING_CYAN_PIPE, glowingPipe("cyan"));
-		registerColoured(CopperPipe.LIGHT_BLUE_PIPE, colourPipe("light_blue"));
-		registerColoured(CopperPipe.GLOWING_LIGHT_BLUE_PIPE, glowingPipe("light_blue"));
-		registerColoured(CopperPipe.BLUE_PIPE, colourPipe("blue"));
-		registerColoured(CopperPipe.GLOWING_BLUE_PIPE, glowingPipe("blue"));
-		registerColoured(CopperPipe.PURPLE_PIPE, colourPipe("purple"));
-		registerColoured(CopperPipe.GLOWING_PURPLE_PIPE, glowingPipe("purple"));
-		registerColoured(CopperPipe.MAGENTA_PIPE, colourPipe("magenta"));
-		registerColoured(CopperPipe.GLOWING_MAGENTA_PIPE, glowingPipe("magenta"));
-		registerColoured(CopperPipe.PINK_PIPE, colourPipe("pink"));
-		registerColoured(CopperPipe.GLOWING_PINK_PIPE, glowingPipe("pink"));
-
-		COPPER_PIPE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, "lunade:copper_pipe", FabricBlockEntityTypeBuilder.create(CopperPipeEntity::new, CopperPipe.COPPER_PIPE, CopperPipe.EXPOSED_PIPE, CopperPipe.WEATHERED_PIPE, CopperPipe.OXIDIZED_PIPE, CopperPipe.WAXED_COPPER_PIPE, CopperPipe.WAXED_EXPOSED_PIPE, CopperPipe.WAXED_WEATHERED_PIPE, CopperPipe.WAXED_OXIDIZED_PIPE
-		,CopperPipe.BLACK_PIPE, CopperPipe.RED_PIPE, CopperPipe.GREEN_PIPE, CopperPipe.BROWN_PIPE, CopperPipe.BLUE_PIPE, CopperPipe.PURPLE_PIPE, CopperPipe.CYAN_PIPE, CopperPipe.LIGHT_GRAY_PIPE
-		,CopperPipe.GRAY_PIPE, CopperPipe.PINK_PIPE, CopperPipe.LIME_PIPE, CopperPipe.YELLOW_PIPE, CopperPipe.LIGHT_BLUE_PIPE, CopperPipe.MAGENTA_PIPE, CopperPipe.ORANGE_PIPE, CopperPipe.WHITE_PIPE
-				,CopperPipe.GLOWING_BLACK_PIPE, CopperPipe.GLOWING_RED_PIPE, CopperPipe.GLOWING_GREEN_PIPE, CopperPipe.GLOWING_BROWN_PIPE, CopperPipe.GLOWING_BLUE_PIPE, CopperPipe.GLOWING_PURPLE_PIPE, CopperPipe.GLOWING_CYAN_PIPE, CopperPipe.GLOWING_LIGHT_GRAY_PIPE
-				,CopperPipe.GLOWING_GRAY_PIPE, CopperPipe.GLOWING_PINK_PIPE, CopperPipe.GLOWING_LIME_PIPE, CopperPipe.GLOWING_YELLOW_PIPE, CopperPipe.GLOWING_LIGHT_BLUE_PIPE, CopperPipe.GLOWING_MAGENTA_PIPE, CopperPipe.GLOWING_ORANGE_PIPE, CopperPipe.GLOWING_WHITE_PIPE, CopperPipe.CORRODED_PIPE).build(null));
-
-
-		//COLOURED
-		registerColoured(CopperFitting.WHITE_FITTING, colourFitting("white"));
-		registerColoured(CopperFitting.GLOWING_WHITE_FITTING, glowingFitting("white"));
-		registerColoured(CopperFitting.LIGHT_GRAY_FITTING, colourFitting("light_gray"));
-		registerColoured(CopperFitting.GLOWING_LIGHT_GRAY_FITTING, glowingFitting("light_gray"));
-		registerColoured(CopperFitting.GRAY_FITTING, colourFitting("gray"));
-		registerColoured(CopperFitting.GLOWING_GRAY_FITTING, glowingFitting("gray"));
-		registerColoured(CopperFitting.BLACK_FITTING, colourFitting("black"));
-		registerColoured(CopperFitting.GLOWING_BLACK_FITTING, glowingFitting("black"));
-		registerColoured(CopperFitting.BROWN_FITTING, colourFitting("brown"));
-		registerColoured(CopperFitting.GLOWING_BROWN_FITTING, glowingFitting("brown"));
-		registerColoured(CopperFitting.RED_FITTING, colourFitting("red"));
-		registerColoured(CopperFitting.GLOWING_RED_FITTING, glowingFitting("red"));
-		registerColoured(CopperFitting.ORANGE_FITTING, colourFitting("orange"));
-		registerColoured(CopperFitting.GLOWING_ORANGE_FITTING, glowingFitting("orange"));
-		registerColoured(CopperFitting.YELLOW_FITTING, colourFitting("yellow"));
-		registerColoured(CopperFitting.GLOWING_YELLOW_FITTING, glowingFitting("yellow"));
-		registerColoured(CopperFitting.LIME_FITTING, colourFitting("lime"));
-		registerColoured(CopperFitting.GLOWING_LIME_FITTING, glowingFitting("lime"));
-		registerColoured(CopperFitting.GREEN_FITTING, colourFitting("green"));
-		registerColoured(CopperFitting.GLOWING_GREEN_FITTING, glowingFitting("green"));
-		registerColoured(CopperFitting.CYAN_FITTING, colourFitting("cyan"));
-		registerColoured(CopperFitting.GLOWING_CYAN_FITTING, glowingFitting("cyan"));
-		registerColoured(CopperFitting.LIGHT_BLUE_FITTING, colourFitting("light_blue"));
-		registerColoured(CopperFitting.GLOWING_LIGHT_BLUE_FITTING, glowingFitting("light_blue"));
-		registerColoured(CopperFitting.BLUE_FITTING, colourFitting("blue"));
-		registerColoured(CopperFitting.GLOWING_BLUE_FITTING, glowingFitting("blue"));
-		registerColoured(CopperFitting.PURPLE_FITTING, colourFitting("purple"));
-		registerColoured(CopperFitting.GLOWING_PURPLE_FITTING, glowingFitting("purple"));
-		registerColoured(CopperFitting.MAGENTA_FITTING, colourFitting("magenta"));
-		registerColoured(CopperFitting.GLOWING_MAGENTA_FITTING, glowingFitting("magenta"));
-		registerColoured(CopperFitting.PINK_FITTING, colourFitting("pink"));
-		registerColoured(CopperFitting.GLOWING_PINK_FITTING, glowingFitting("pink"));
-
-		COPPER_FITTING_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, "lunade:copper_fitting", FabricBlockEntityTypeBuilder.create(CopperFittingEntity::new, CopperFitting.COPPER_FITTING, CopperFitting.EXPOSED_FITTING, CopperFitting.WEATHERED_FITTING, CopperFitting.OXIDIZED_FITTING, CopperFitting.WAXED_COPPER_FITTING, CopperFitting.WAXED_EXPOSED_FITTING, CopperFitting.WAXED_WEATHERED_FITTING, CopperFitting.WAXED_OXIDIZED_FITTING
-				,CopperFitting.BLACK_FITTING, CopperFitting.RED_FITTING, CopperFitting.GREEN_FITTING, CopperFitting.BROWN_FITTING, CopperFitting.BLUE_FITTING, CopperFitting.PURPLE_FITTING, CopperFitting.CYAN_FITTING, CopperFitting.LIGHT_GRAY_FITTING
-				,CopperFitting.GRAY_FITTING, CopperFitting.PINK_FITTING, CopperFitting.LIME_FITTING, CopperFitting.YELLOW_FITTING, CopperFitting.LIGHT_BLUE_FITTING, CopperFitting.MAGENTA_FITTING, CopperFitting.ORANGE_FITTING, CopperFitting.WHITE_FITTING
-				,CopperFitting.GLOWING_BLACK_FITTING, CopperFitting.GLOWING_RED_FITTING, CopperFitting.GLOWING_GREEN_FITTING, CopperFitting.GLOWING_BROWN_FITTING, CopperFitting.GLOWING_BLUE_FITTING, CopperFitting.GLOWING_PURPLE_FITTING, CopperFitting.GLOWING_CYAN_FITTING, CopperFitting.GLOWING_LIGHT_GRAY_FITTING
-				,CopperFitting.GLOWING_GRAY_FITTING, CopperFitting.GLOWING_PINK_FITTING, CopperFitting.GLOWING_LIME_FITTING, CopperFitting.GLOWING_YELLOW_FITTING, CopperFitting.GLOWING_LIGHT_BLUE_FITTING, CopperFitting.GLOWING_MAGENTA_FITTING, CopperFitting.GLOWING_ORANGE_FITTING, CopperFitting.GLOWING_WHITE_FITTING, CopperFitting.CORRODED_FITTING).build(null));
 
 		//SOUND
 		Registry.register(BuiltInRegistries.SOUND_EVENT, ITEM_IN.getLocation(), ITEM_IN);
@@ -259,54 +174,6 @@ public class CopperPipeMain implements ModInitializer {
 		});
 	}
 
-	public static List<Direction> shuffledDirections(RandomSource random) {
-		return Util.shuffledCopy(Direction.values(), random);
-	}
-
-	public static final Object2ObjectMap<Block, Block> NEXT_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
-		//PIPE
-		object2IntOpenHashMap.put(CopperPipe.COPPER_PIPE, CopperPipe.EXPOSED_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.EXPOSED_PIPE, CopperPipe.WEATHERED_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.WEATHERED_PIPE, CopperPipe.OXIDIZED_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.OXIDIZED_PIPE, CopperPipe.CORRODED_PIPE);
-		//FITTING
-		object2IntOpenHashMap.put(CopperFitting.COPPER_FITTING, CopperFitting.EXPOSED_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.EXPOSED_FITTING, CopperFitting.WEATHERED_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.WEATHERED_FITTING, CopperFitting.OXIDIZED_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.OXIDIZED_FITTING, CopperFitting.CORRODED_FITTING);
-	}));
-	public static final Object2ObjectMap<Block, Block> PREVIOUS_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
-		//PIPE
-		object2IntOpenHashMap.put(CopperPipe.CORRODED_PIPE, CopperPipe.OXIDIZED_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.OXIDIZED_PIPE, CopperPipe.WEATHERED_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.WEATHERED_PIPE, CopperPipe.EXPOSED_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.EXPOSED_PIPE, CopperPipe.COPPER_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.WAXED_COPPER_PIPE, CopperPipe.COPPER_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.WAXED_EXPOSED_PIPE, CopperPipe.EXPOSED_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.WAXED_WEATHERED_PIPE, CopperPipe.WEATHERED_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.WAXED_OXIDIZED_PIPE, CopperPipe.OXIDIZED_PIPE);
-		//FITTING
-		object2IntOpenHashMap.put(CopperFitting.CORRODED_FITTING, CopperFitting.OXIDIZED_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.OXIDIZED_FITTING, CopperFitting.WEATHERED_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.WEATHERED_FITTING, CopperFitting.EXPOSED_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.EXPOSED_FITTING, CopperFitting.COPPER_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.WAXED_COPPER_FITTING, CopperFitting.COPPER_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.WAXED_EXPOSED_FITTING, CopperFitting.EXPOSED_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.WAXED_WEATHERED_FITTING, CopperFitting.WEATHERED_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.WAXED_OXIDIZED_FITTING, CopperFitting.OXIDIZED_FITTING);
-	}));
-	public static final Object2ObjectMap<Block, Block> WAX_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
-		//PIPE
-		object2IntOpenHashMap.put(CopperPipe.COPPER_PIPE, CopperPipe.WAXED_COPPER_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.EXPOSED_PIPE, CopperPipe.WAXED_EXPOSED_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.WEATHERED_PIPE, CopperPipe.WAXED_WEATHERED_PIPE);
-		object2IntOpenHashMap.put(CopperPipe.OXIDIZED_PIPE, CopperPipe.WAXED_OXIDIZED_PIPE);
-		//FITTING
-		object2IntOpenHashMap.put(CopperFitting.COPPER_FITTING, CopperFitting.WAXED_COPPER_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.EXPOSED_FITTING, CopperFitting.WAXED_EXPOSED_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.WEATHERED_FITTING, CopperFitting.WAXED_WEATHERED_FITTING);
-		object2IntOpenHashMap.put(CopperFitting.OXIDIZED_FITTING, CopperFitting.WAXED_OXIDIZED_FITTING);
-	}));
 	public static final Object2ObjectMap<Block, Block> GLOW_STAGE = Object2ObjectMaps.unmodifiable(Util.make(new Object2ObjectOpenHashMap<>(), (object2IntOpenHashMap) -> {
 		//PIPE
 		object2IntOpenHashMap.put(CopperPipe.RED_PIPE, CopperPipe.GLOWING_RED_PIPE);
@@ -341,53 +208,11 @@ public class CopperPipeMain implements ModInitializer {
 		object2IntOpenHashMap.put(CopperFitting.BLACK_FITTING, CopperFitting.GLOWING_BLACK_FITTING);
 		object2IntOpenHashMap.put(CopperFitting.BROWN_FITTING, CopperFitting.GLOWING_BROWN_FITTING);
 	}));
-	public static final Object2IntMap<Block> OXIDIZATION_INT = Object2IntMaps.unmodifiable(Util.make(new Object2IntOpenHashMap<>(), (object2IntOpenHashMap) -> {
-		//PIPE
-		object2IntOpenHashMap.put(CopperPipe.COPPER_PIPE, 0);
-		object2IntOpenHashMap.put(CopperPipe.EXPOSED_PIPE, 1);
-		object2IntOpenHashMap.put(CopperPipe.WEATHERED_PIPE, 2);
-		object2IntOpenHashMap.put(CopperPipe.OXIDIZED_PIPE, 3);
-		//FITTING
-		object2IntOpenHashMap.put(CopperFitting.COPPER_FITTING, 0);
-		object2IntOpenHashMap.put(CopperFitting.EXPOSED_FITTING, 1);
-		object2IntOpenHashMap.put(CopperFitting.WEATHERED_FITTING, 2);
-		object2IntOpenHashMap.put(CopperFitting.OXIDIZED_FITTING, 3);
-	}));
 
 	public static ResourceLocation id(String path) {
-		return new ResourceLocation(BLOCK_ID, path);
-	}
-
-	public static ResourceLocation colourPipe(String colour) {
-		return id(colour + "_pipe");
-	}
-
-	public static ResourceLocation glowingPipe(String colour) {
-		return id("glowing_" + colour + "_pipe");
-	}
-
-	public static ResourceLocation colourFitting(String colour) {
-		return id(colour + "_fitting");
-	}
-
-	public static ResourceLocation glowingFitting(String colour) {
-		return id("glowing_" + colour + "_fitting");
+		return new ResourceLocation(NAMESPACE, path);
 	}
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("COPPER_PIPES");
-
-	public static void registerBlock(Block block, ResourceLocation resourceLocation) {
-		Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
-		Item item = new BlockItem(block, new FabricItemSettings());
-		Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.REDSTONE_BLOCKS).register((entries) -> entries.accept(item));
-	}
-
-	public static void registerColoured(Block block, ResourceLocation resourceLocation) {
-		Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
-		Item item = new BlockItem(block, new FabricItemSettings());
-		Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COLORED_BLOCKS).register((entries) -> entries.accept(item));
-	}
 
 }

@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "group": "glowing_pipe",
+  "group": "white_pipe",
   "ingredients": [
     {
       "item": "lunade:white_pipe"

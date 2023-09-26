@@ -121,6 +121,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	modApi("maven.modrinth:frozenlib:${project.frozenlib_version}")
+	include("maven.modrinth:frozenlib:${project.frozenlib_version}")
 
 	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
 		exclude(group: "net.fabricmc.fabric-api")

@@ -9,7 +9,7 @@
     "block.lunade.waxed_oxidized_copper_pipe": "Tubo de Cobre Oxidado Encerado",
     "block.lunade.corroded_pipe": "Tubo Corroído",
   
-    "block.lunade.copper_fitting": "encaixe de cobre",
+    "block.lunade.copper_fitting": "Encaixe de cobre",
     "block.lunade.exposed_copper_fitting": "Encaixe de cobre exposto",
     "block.lunade.weathered_copper_fitting": "Encaixe de cobre desgastado",
     "block.lunade.oxidized_copper_fitting": "Encaixe de Cobre Oxidado",
@@ -87,5 +87,18 @@
     "block.lunade.glowing_orange_fitting": "Encaixe Laranja Brilhante",
     "block.lunade.glowing_white_fitting": "Encaixe branco brilhante",
   
-    "stat.lunade.inspect_copper_pipe": "Tubos de cobre pesquisados"
+    "stat.lunade.inspect_copper_pipe": "Tubos de cobre pesquisados",
+    "stat.lunade.inspect_copper_fitting": "Encaixes de cobre pesquisados",
+
+    "option.lunade.component.title": "Simple Copper Pipes Config",
+    "option.lunade.false": "§cDisabled",
+    "option.lunade.true": "§aEnabled",
+
+    "option.lunade.openable_fittings": "Openable Fittings",
+    "tooltip.lunade.openable_fittings": "Whether or not Copper Fittings should have an interactable GUI.",
+
+    "option.lunade.dispensing": "Dispensing",
+    "tooltip.lunade.dispensing": "Whether or not Copper Pipes should be able to dispense items.",
+    "option.lunade.special_effect_dispensing": "Special Effect Dispensing",
+    "tooltip.lunade.special_effect_dispensing": "Whether or not Copper Pipes should be able to dispense special effects.\nThis includes things like Ink fountains and Vibration emitters."
   }

@@ -95,10 +95,10 @@
   "option.lunade.true": "§aEnabled",
 
   "option.lunade.openable_fittings": "Openable Fittings",
-  "tooltip.lunade.openable_fittings": "Whether or not copper fittings have an interactable GUI",
+  "tooltip.lunade.openable_fittings": "Whether or not Copper Fittings should have an interactable GUI.",
 
   "option.lunade.dispensing": "Dispensing",
-  "tooltip.lunade.dispensing": "Whether or not copper pipes should be able to dispense items",
+  "tooltip.lunade.dispensing": "Whether or not Copper Pipes should be able to dispense items.",
   "option.lunade.special_effect_dispensing": "Special Effect Dispensing",
-  "tooltip.lunade.special_effect_dispensing": "Whether or not copper pipes should be able to dispense special effects"
+  "tooltip.lunade.special_effect_dispensing": "Whether or not Copper Pipes should be able to dispense special effects.\nThis includes things like Ink fountains and Vibration emitters."
 }

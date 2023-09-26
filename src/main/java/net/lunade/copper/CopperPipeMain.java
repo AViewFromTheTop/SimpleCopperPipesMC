@@ -1,7 +1,5 @@
 package net.lunade.copper;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;

@@ -543,9 +543,9 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 
     public static Vec3 getOutputLocation(@NotNull BlockPos pos, @NotNull Direction facing) {
         return new Vec3(
-                pos.getX() + 0.7D * (double)facing.getStepX(),
-                pos.getY() + 0.7D * (double)facing.getStepY(),
-                pos.getZ() + 0.7D * (double)facing.getStepZ()
+                ((double)pos.getX() + 0.5D) + 0.7D * (double)facing.getStepX(),
+                ((double)pos.getY() + 0.5D) + 0.7D * (double)facing.getStepY(),
+                ((double)pos.getZ() + 0.5D) + 0.7D * (double)facing.getStepZ()
         );
     }
 

@@ -304,7 +304,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         if (powered) { //Special Behavior When Powered
             PoweredPipeDispenses.PoweredDispense poweredDispense = PoweredPipeDispenses.getDispense(itemStack2.getItem());
             if (poweredDispense != null) {
-                itemStack2=itemStack.split(1);
+                itemStack2 = itemStack.split(1);
                 poweredDispense.dispense(serverLevel, itemStack2, shotLength, direction, vec3, state, corroded, pos, this);
                 if (!fitting && !silent) {
                     serverLevel.playSound(null, pos, CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat()*0.25F) + 0.8F);

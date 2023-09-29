@@ -5,7 +5,8 @@ import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.registry.RegisterCopperBlockEntities;
-import net.minecraft.core.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -42,6 +43,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -539,11 +541,11 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         return this.weatherState;
     }
 
-    public static Position getOutputLocation(@NotNull BlockSource blockPointer, @NotNull Direction facing) {
-        return new PositionImpl(
-                blockPointer.x() + 0.7D * (double)facing.getStepX(),
-                blockPointer.y() + 0.7D * (double)facing.getStepY(),
-                blockPointer.z() + 0.7D * (double)facing.getStepZ()
+    public static Vec3 getOutputLocation(@NotNull BlockPos pos, @NotNull Direction facing) {
+        return new Vec3(
+                pos.getX() + 0.7D * (double)facing.getStepX(),
+                pos.getY() + 0.7D * (double)facing.getStepY(),
+                pos.getZ() + 0.7D * (double)facing.getStepZ()
         );
     }
 

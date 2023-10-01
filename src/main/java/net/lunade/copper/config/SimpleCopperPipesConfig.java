@@ -4,7 +4,6 @@ import net.frozenblock.lib.config.api.instance.Config;
 import net.frozenblock.lib.config.api.instance.json.JsonConfig;
 import net.frozenblock.lib.config.api.instance.json.JsonType;
 import net.frozenblock.lib.config.api.registry.ConfigRegistry;
-import net.frozenblock.lib.shadow.blue.endless.jankson.Comment;
 import net.lunade.copper.CopperPipeMain;
 
 public final class SimpleCopperPipesConfig {
@@ -17,12 +16,15 @@ public final class SimpleCopperPipesConfig {
             )
     );
 
-    @Comment("Whether or not copper fittings have an interactable GUI")
     public boolean openableFittings = false;
 
     public boolean dispensing = true;
 
     public boolean specialEffectDispensing = true;
+
+    public boolean dispenseSounds = true;
+
+    public boolean suctionSounds = true;
 
     public static SimpleCopperPipesConfig get() {
         return INSTANCE.config();

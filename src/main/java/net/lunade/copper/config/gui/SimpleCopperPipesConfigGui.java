@@ -53,6 +53,22 @@ public final class SimpleCopperPipesConfigGui {
                 .setYesNoTextSupplier(bool -> text(bool.toString()))
                 .build()
         );
+
+        category.addEntry(entryBuilder.startBooleanToggle(text("dispense_sounds"), config.dispenseSounds)
+                .setDefaultValue(defaultConfig.dispenseSounds)
+                .setSaveConsumer(newValue -> config.dispenseSounds = newValue)
+                .setTooltip(tooltip("dispense_sounds"))
+                .setYesNoTextSupplier(bool -> text(bool.toString()))
+                .build()
+        );
+
+        category.addEntry(entryBuilder.startBooleanToggle(text("suction_sounds"), config.suctionSounds)
+                .setDefaultValue(defaultConfig.suctionSounds)
+                .setSaveConsumer(newValue -> config.suctionSounds = newValue)
+                .setTooltip(tooltip("suction_sounds"))
+                .setYesNoTextSupplier(bool -> text(bool.toString()))
+                .build()
+        );
     }
 
     private static Component text(String key) {

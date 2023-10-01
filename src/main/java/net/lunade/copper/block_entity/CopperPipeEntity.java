@@ -148,7 +148,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             setCooldown(blockState);
             setChanged(level, blockPos, blockState);
             if (bl2 == 3) {
-                level.playSound(null, blockPos, CopperPipeMain.ITEM_IN, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
+                if (SimpleCopperPipesConfig.get().suctionSounds) {
+                    level.playSound(null, blockPos, CopperPipeMain.ITEM_IN, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
+                }
             }
         }
     }
@@ -273,11 +275,15 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                     int shotLength = 4;
                     if (this.shootsControlled) { //If Dropper
                         shotLength = 10;
-                        serverLevel.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat()*0.25F) + 0.8F);
+                        if (SimpleCopperPipesConfig.get().dispenseSounds) {
+                            serverLevel.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
+                        }
                     } else if (this.shootsSpecial) { //If Dispenser, Use Pipe-Specific Launch Length
                         if (blockState.getBlock() instanceof CopperPipe pipe) {
                             shotLength = pipe.dispenserShotLength;
-                            serverLevel.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat()*0.25F) + 0.8F);
+                            if (SimpleCopperPipesConfig.get().dispenseSounds) {
+                                serverLevel.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
+                            }
                         } else {
                             shotLength= 12;
                         }
@@ -307,7 +313,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 itemStack2 = itemStack.split(1);
                 poweredDispense.dispense(serverLevel, itemStack2, shotLength, direction, vec3, state, corroded, pos, this);
                 if (!fitting && !silent) {
-                    serverLevel.playSound(null, pos, CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat()*0.25F) + 0.8F);
+                    if (SimpleCopperPipesConfig.get().dispenseSounds) {
+                        serverLevel.playSound(null, pos, CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
+                    }
                     serverLevel.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
                 }
                 return itemStack;
@@ -333,7 +341,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 spawnItem(serverLevel, itemStack2, shotLength, direction, vec3, direction, corroded);
                 if (!silent) {
                     serverLevel.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
-                    serverLevel.playSound(null, pos, CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
+                    if (SimpleCopperPipesConfig.get().dispenseSounds) {
+                        serverLevel.playSound(null, pos, CopperPipeMain.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
+                    }
                 }
             }
         }

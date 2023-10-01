@@ -36,7 +36,7 @@ public class LeakingPipeDrips {
         register(Blocks.CAULDRON, ((lava, world, pos, state) -> {
             if (!lava) {
                 world.setBlockAndUpdate(pos, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 1));
-            } else if () {
+            } else {
                 world.setBlockAndUpdate(pos, Blocks.LAVA_CAULDRON.defaultBlockState();
             }
         }));

@@ -13,7 +13,8 @@ import net.lunade.copper.PipeMovementRestrictions;
 import net.lunade.copper.PoweredPipeDispenses;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.blocks.properties.CopperPipeProperties;
+import net.lunade.copper.blocks.properties.PipeFluid;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
@@ -118,7 +119,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             } else {
                 this.pipeMove(level, blockPos, blockState);
             }
-            if (blockState.getValue(CopperPipeProperties.HAS_WATER) && blockState.getValue(BlockStateProperties.FACING) != Direction.UP) {
+            if (blockState.getValue(CopperPipeProperties.FLUID) == PipeFluid.WATER && blockState.getValue(BlockStateProperties.FACING) != Direction.UP) {
                 LeakingPipeManager.addPos(level, blockPos);
             }
         }

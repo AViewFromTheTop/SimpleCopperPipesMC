@@ -3,6 +3,8 @@ package net.lunade.copper.blocks;
 import net.fabricmc.fabric.api.tag.convention.v1.TagUtil;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.block_entity.CopperFittingEntity;
+import net.lunade.copper.blocks.properties.CopperPipeProperties;
+import net.lunade.copper.blocks.properties.PipeFluid;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -34,6 +36,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
@@ -48,8 +51,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
-    public static final BooleanProperty HAS_WATER = CopperPipeProperties.HAS_WATER;
-    public static final BooleanProperty HAS_SMOKE = CopperPipeProperties.HAS_SMOKE;
+    public static final EnumProperty<PipeFluid> FLUID = CopperPipeProperties.FLUID;
     public static final BooleanProperty HAS_ELECTRICITY = CopperPipeProperties.HAS_ELECTRICITY;
     public static final BooleanProperty HAS_ITEM = CopperPipeProperties.HAS_ITEM;
     private static final VoxelShape FITTING_SHAPE = Block.box(2.5D, 2.5D, 2.5D, 13.5D, 13.5D, 13.5D);
@@ -63,7 +65,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
         this.weatherState = weatherState;
         this.cooldown = cooldown;
         this.ink = ink;
-        this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, false).setValue(WATERLOGGED, false).setValue(HAS_WATER, false).setValue(HAS_SMOKE, false).setValue(HAS_ELECTRICITY, false).setValue(HAS_ITEM, false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, false).setValue(WATERLOGGED, false).setValue(FLUID, PipeFluid.NONE).setValue(HAS_ELECTRICITY, false).setValue(HAS_ITEM, false));
     }
 
     public CopperFitting(Properties settings, int cooldown, ParticleOptions ink) {
@@ -189,7 +191,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 
     @Override
     protected void createBlockStateDefinition(@NotNull Builder<Block, BlockState> builder) {
-        builder.add(WATERLOGGED, POWERED, HAS_WATER, HAS_SMOKE, HAS_ELECTRICITY, HAS_ITEM);
+        builder.add(WATERLOGGED, POWERED, FLUID, HAS_ELECTRICITY, HAS_ITEM);
     }
 
     @Override

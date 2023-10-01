@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.registry.OxidizableBlocksRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.blocks.properties.CopperPipeProperties;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
@@ -35,10 +35,10 @@ import org.slf4j.LoggerFactory;
 
 public class CopperPipeMain implements ModInitializer {
 
-	public static final int CURRENT_FIX_VERSION = 2;
+	public static final int CURRENT_FIX_VERSION = 3;
 
 	public static int getCompatID() {
-		return 1;
+		return 2;
 	}
 
 	public static final String MOD_ID = "simple_copper_pipes";
@@ -47,6 +47,7 @@ public class CopperPipeMain implements ModInitializer {
 	public static final ResourceLocation INSPECT_PIPE = id("inspect_copper_pipe");
 	public static final ResourceLocation INSPECT_FITTING = id("inspect_copper_fitting");
 	public static final ResourceLocation WATER = id("water");
+	public static final ResourceLocation LAVA = id("lava");
 	public static final ResourceLocation SMOKE = id("smoke");
 
 	public static final TagKey<Block> WAXED = TagKey.create(Registries.BLOCK, id("waxed"));

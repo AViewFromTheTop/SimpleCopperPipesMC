@@ -208,7 +208,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
         if (state.getBlock() instanceof CopperFitting) {
             BlockEntity entity = level.getBlockEntity(pos);
             if (entity instanceof CopperFittingEntity fitting) {
-                fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED);
+                fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
             }
         }
     }

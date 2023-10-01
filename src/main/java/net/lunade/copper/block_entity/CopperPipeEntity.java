@@ -34,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -138,6 +139,14 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             this.shootsControlled = oppBlock == Blocks.DROPPER;
             this.shootsSpecial = oppBlock == Blocks.DISPENSER;
             this.canAccept = !(oppBlock instanceof CopperPipe) && !(oppBlock instanceof CopperFitting) && !oppState.isRedstoneConductor(level, pos);
+            this.canWater = (oppBlock == Blocks.WATER ||state.getValue(BlockStateProperties.WATERLOGGED) || (oppState.hasProperty(BlockStateProperties.WATERLOGGED) ? oppState.getValue(BlockStateProperties.WATERLOGGED) : false)) && SimpleCopperPipesConfig.get().carryWater;
+            this.canLava = oppBlock == Blocks.LAVA && SimpleCopperPipesConfig.get().carryLava;
+            boolean canWaterAndLava = this.canWater && this.canLava;
+            this.canSmoke = (oppBlock instanceof CampfireBlock && !this.canWater && !this.canLava ? oppState.getValue(BlockStateProperties.LIT) : canWaterAndLava) && SimpleCopperPipesConfig.get().carrySmoke;
+            if (canWaterAndLava) {
+                this.canWater = false;
+                this.canLava = false;
+            }
         }
     }
 

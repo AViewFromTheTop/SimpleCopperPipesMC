@@ -61,7 +61,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     public void serverTick(@NotNull Level level, BlockPos blockPos, BlockState blockState) {
         BlockState state = blockState;
         if (!level.isClientSide) {
-            if (this.lastFixVersion < CopperPipeMain.CURRENT_FIX_VERSION) {
+            if (this.lastFixVersion < CopperPipeMain.CURRENT_FIX_VERSION || CopperPipeMain.refreshValues) {
                 this.updateBlockEntityValues(level, blockPos, blockState);
                 this.lastFixVersion = CopperPipeMain.CURRENT_FIX_VERSION;
             }

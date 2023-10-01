@@ -80,7 +80,10 @@ public final class SimpleCopperPipesConfigGui {
 
         category.addEntry(entryBuilder.startBooleanToggle(text("carry_water"), config.carryWater)
                 .setDefaultValue(defaultConfig.carryWater)
-                .setSaveConsumer(newValue -> config.carryWater = newValue)
+                .setSaveConsumer(newValue -> {
+                    config.carryWater = newValue;
+                    CopperPipeMain.refreshValues = true;
+                })
                 .setTooltip(tooltip("carry_water"))
                 .setYesNoTextSupplier(bool -> text(bool.toString()))
                 .build()
@@ -88,7 +91,10 @@ public final class SimpleCopperPipesConfigGui {
 
         category.addEntry(entryBuilder.startBooleanToggle(text("carry_lava"), config.carryLava)
                 .setDefaultValue(defaultConfig.carryLava)
-                .setSaveConsumer(newValue -> config.carryLava = newValue)
+                .setSaveConsumer(newValue -> {
+                    config.carryLava = newValue;
+                    CopperPipeMain.refreshValues = true;
+                })
                 .setTooltip(tooltip("carry_lava"))
                 .setYesNoTextSupplier(bool -> text(bool.toString()))
                 .build()
@@ -96,7 +102,10 @@ public final class SimpleCopperPipesConfigGui {
 
         category.addEntry(entryBuilder.startBooleanToggle(text("carry_smoke"), config.carrySmoke)
                 .setDefaultValue(defaultConfig.carrySmoke)
-                .setSaveConsumer(newValue -> config.carrySmoke = newValue)
+                .setSaveConsumer(newValue -> {
+                    config.carrySmoke = newValue;
+                    CopperPipeMain.refreshValues = true;
+                })
                 .setTooltip(tooltip("carry_smoke"))
                 .setYesNoTextSupplier(bool -> text(bool.toString()))
                 .build()

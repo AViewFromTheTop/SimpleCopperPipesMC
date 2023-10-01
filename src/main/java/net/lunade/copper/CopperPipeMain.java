@@ -41,6 +41,8 @@ public class CopperPipeMain implements ModInitializer {
 		return 2;
 	}
 
+	public static boolean refreshValues = false;
+
 	public static final String MOD_ID = "simple_copper_pipes";
 	public static final String NAMESPACE = "lunade";
 
@@ -161,6 +163,7 @@ public class CopperPipeMain implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> LeakingPipeManager.clearAll());
 
 		ServerTickEvents.START_SERVER_TICK.register((listener) -> LeakingPipeManager.clearAndSwitch());
+		ServerTickEvents.END_SERVER_TICK.register((listener) -> refreshValues = false);
 
 		FabricLoader.getInstance().getEntrypointContainers("simplecopperpipes", CopperPipeEntrypoint.class).forEach(entrypoint -> {
 			try {

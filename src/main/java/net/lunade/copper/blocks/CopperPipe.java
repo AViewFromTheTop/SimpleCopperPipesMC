@@ -5,6 +5,7 @@ import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.properties.CopperPipeProperties;
 import net.lunade.copper.blocks.properties.PipeFluid;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -245,10 +246,10 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                 pipe.shootsControlled = oppBlock == Blocks.DROPPER;
                 pipe.shootsSpecial = oppBlock == Blocks.DISPENSER;
                 pipe.canAccept = !(oppBlock instanceof CopperPipe) && !(oppBlock instanceof CopperFitting) && !oppState.isRedstoneConductor(level, pos);
-                pipe.canWater = oppBlock == Blocks.WATER ||state.getValue(BlockStateProperties.WATERLOGGED) || (oppState.hasProperty(BlockStateProperties.WATERLOGGED) ? oppState.getValue(BlockStateProperties.WATERLOGGED) : false);
-                pipe.canLava = oppBlock == Blocks.LAVA;
+                pipe.canWater = (oppBlock == Blocks.WATER ||state.getValue(BlockStateProperties.WATERLOGGED) || (oppState.hasProperty(BlockStateProperties.WATERLOGGED) ? oppState.getValue(BlockStateProperties.WATERLOGGED) : false)) && SimpleCopperPipesConfig.get().carryWater;
+                pipe.canLava = oppBlock == Blocks.LAVA && SimpleCopperPipesConfig.get().carryLava;
                 boolean canWaterAndLava = pipe.canWater && pipe.canLava;
-                pipe.canSmoke = oppBlock instanceof CampfireBlock && !pipe.canWater && !pipe.canLava ? oppState.getValue(BlockStateProperties.LIT) : canWaterAndLava;
+                pipe.canSmoke = (oppBlock instanceof CampfireBlock && !pipe.canWater && !pipe.canLava ? oppState.getValue(BlockStateProperties.LIT) : canWaterAndLava) && SimpleCopperPipesConfig.get().carrySmoke;
                 if (canWaterAndLava) {
                     pipe.canWater = false;
                     pipe.canLava = false;
@@ -446,7 +447,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     @Override
     public boolean isRandomlyTicking(@NotNull BlockState blockState) {
         Block block = blockState.getBlock();
-        return block == CopperPipe.COPPER_PIPE || block == CopperPipe.EXPOSED_PIPE || block == CopperPipe.WEATHERED_PIPE || blockState.getValue(FLUID) == PipeFluid.WATER;
+        return block == CopperPipe.COPPER_PIPE || block == CopperPipe.EXPOSED_PIPE || block == CopperPipe.WEATHERED_PIPE || blockState.getValue(FLUID) == PipeFluid.WATER || blockState.getValue(FLUID) == PipeFluid.LAVA;
     }
 
     @Override

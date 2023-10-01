@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.lunade.copper.blocks.CopperFitting;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -144,7 +145,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
     @Override
     public void updateBlockEntityValues(Level level, BlockPos pos, @NotNull BlockState state) {
         if (state.getBlock() instanceof CopperFitting) {
-            this.canWater = state.getValue(BlockStateProperties.WATERLOGGED);
+            this.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
         }
     }
 

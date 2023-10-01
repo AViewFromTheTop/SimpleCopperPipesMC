@@ -3,6 +3,7 @@ package net.lunade.copper.block_entity;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.properties.CopperPipeProperties;
 import net.lunade.copper.blocks.properties.PipeFluid;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -64,29 +65,29 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
                 this.updateBlockEntityValues(level, blockPos, blockState);
                 this.lastFixVersion = CopperPipeMain.CURRENT_FIX_VERSION;
             }
-            if (this.canWater && !this.canLava) {
+            if (this.canWater && !this.canLava && SimpleCopperPipesConfig.get().carryWater) {
                 this.moveablePipeDataHandler.setMoveablePipeNbt(CopperPipeMain.WATER, new MoveablePipeDataHandler.SaveableMovablePipeNbt()
                         .withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withNBTID(CopperPipeMain.WATER));
             }
-            if (this.canLava && !this.canWater) {
+            if (this.canLava && !this.canWater && SimpleCopperPipesConfig.get().carryLava) {
                 this.moveablePipeDataHandler.setMoveablePipeNbt(CopperPipeMain.LAVA, new MoveablePipeDataHandler.SaveableMovablePipeNbt()
                         .withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withNBTID(CopperPipeMain.LAVA));
             }
-            if ((this.canSmoke && !this.canWater && !this.canLava) || (this.canWater && this.canLava)) {
+            if ((this.canSmoke && !this.canWater && !this.canLava) || (this.canWater && this.canLava) && SimpleCopperPipesConfig.get().carrySmoke) {
                 this.moveablePipeDataHandler.setMoveablePipeNbt(CopperPipeMain.SMOKE, new MoveablePipeDataHandler.SaveableMovablePipeNbt()
                         .withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withNBTID(CopperPipeMain.SMOKE));
             }
             MoveablePipeDataHandler.SaveableMovablePipeNbt waterNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.WATER);
             MoveablePipeDataHandler.SaveableMovablePipeNbt lavaNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.LAVA);
             MoveablePipeDataHandler.SaveableMovablePipeNbt smokeNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.SMOKE);
-            boolean validWater = isValidFluidNBT(waterNbt);
-            boolean validLava = isValidFluidNBT(lavaNbt);
-            boolean validSmoke = isValidFluidNBT(smokeNbt);
+            boolean validWater = isValidFluidNBT(waterNbt) && SimpleCopperPipesConfig.get().carryWater;
+            boolean validLava = isValidFluidNBT(lavaNbt) && SimpleCopperPipesConfig.get().carryLava;
+            boolean validSmoke = isValidFluidNBT(smokeNbt) && SimpleCopperPipesConfig.get().carrySmoke;
             if (this.canSmoke && ((this.canLava && !this.canWater) || (this.canWater && !this.canLava))) {
                 validSmoke = false;
             }
             if (this.canWater && this.canLava) {
-                validSmoke = true;
+                validSmoke = SimpleCopperPipesConfig.get().carrySmoke;
                 validWater = false;
                 validLava = false;
             }

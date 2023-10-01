@@ -26,6 +26,14 @@ public final class SimpleCopperPipesConfig {
 
     public boolean suctionSounds = true;
 
+    public boolean senseGameEvents = true;
+
+    public boolean carryWater = true;
+
+    public boolean carryLava = true;
+
+    public boolean carrySmoke = true;
+
     public static SimpleCopperPipesConfig get() {
         return INSTANCE.config();
     }

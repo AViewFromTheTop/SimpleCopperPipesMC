@@ -7,6 +7,7 @@ import net.lunade.copper.block_entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.core.BlockPos;
@@ -173,6 +174,9 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {
+            if (!SimpleCopperPipesConfig.get().carryWater) {
+                return false;
+            }
             MoveablePipeDataHandler.SaveableMovablePipeNbt movablePipeNbt = blockEntity.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.WATER);
             if (movablePipeNbt != null) {
                 return movablePipeNbt.getVec3d() == null || movablePipeNbt.getVec3d().x() <= nbt.getVec3d().x() - 1;
@@ -217,6 +221,9 @@ public class RegisterPipeNbtMethods {
                 }
             }
         }, (nbt, world, pos, blockState, blockEntity) -> {
+            if (!SimpleCopperPipesConfig.get().carryLava) {
+                return false;
+            }
             MoveablePipeDataHandler.SaveableMovablePipeNbt movablePipeNbt = blockEntity.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.LAVA);
             if (movablePipeNbt != null) {
                 return movablePipeNbt.getVec3d() == null || movablePipeNbt.getVec3d().x() <= nbt.getVec3d().x() - 1;
@@ -240,6 +247,9 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> {
 
         }, (nbt, world, pos, blockState, blockEntity) -> {
+            if (!SimpleCopperPipesConfig.get().carrySmoke) {
+                return false;
+            }
             MoveablePipeDataHandler.SaveableMovablePipeNbt movablePipeNbt = blockEntity.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.SMOKE);
             if (movablePipeNbt != null) {
                 return movablePipeNbt.getVec3d() == null || movablePipeNbt.getVec3d().x() <= nbt.getVec3d().x() - 1;

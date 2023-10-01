@@ -455,7 +455,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         BlockState offsetState = level.getBlockState(blockPos.relative(direction));
         FluidState fluidState = offsetState.getFluidState();
         boolean canWater = blockState.getValue(FLUID) == PipeFluid.WATER && direction != Direction.UP;
-        boolean canLava = blockState.getValue(FLUID) == PipeFluid.LAVA && random.nextInt(7) == 0 && direction != Direction.UP;
+        boolean canLava = blockState.getValue(FLUID) == PipeFluid.LAVA && random.nextInt(2) == 0 && direction != Direction.UP;
         boolean canSmoke = blockState.getValue(FLUID) == PipeFluid.SMOKE && random.nextInt(5) == 0;
         boolean canWaterOrLava = canWater || canLava;
         boolean hasSmokeOrWaterOrLava = canWaterOrLava || canSmoke;
@@ -493,7 +493,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                     direction.getStepY() * 0.7D,
                     direction.getStepZ() * 0.7D
             );
-            if (canLava && random.nextInt(7) == 0) {
+            if (canLava && random.nextInt(2) == 0) {
                 level.addParticle(ParticleTypes.SMOKE,
                         blockPos.getX() + getDripX(direction, random),
                         blockPos.getY() + getDripY(direction, random),

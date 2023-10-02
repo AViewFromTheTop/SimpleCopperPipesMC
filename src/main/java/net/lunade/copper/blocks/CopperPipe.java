@@ -453,7 +453,8 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
     @Override
     public void animateTick(@NotNull BlockState blockState, @NotNull Level level, @NotNull BlockPos blockPos, RandomSource random) {
         Direction direction = blockState.getValue(FACING);
-        BlockState offsetState = level.getBlockState(blockPos.relative(direction));
+        BlockPos offsetPos = blockPos.relative(direction);
+        BlockState offsetState = level.getBlockState(offsetPos);
         FluidState fluidState = offsetState.getFluidState();
         boolean canWater = blockState.getValue(FLUID) == PipeFluid.WATER && direction != Direction.UP;
         boolean canLava = blockState.getValue(FLUID) == PipeFluid.LAVA && random.nextInt(2) == 0 && direction != Direction.UP;
@@ -461,23 +462,23 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         boolean canWaterOrLava = canWater || canLava;
         boolean hasSmokeOrWaterOrLava = canWaterOrLava || canSmoke;
         if (hasSmokeOrWaterOrLava) {
-            double outX = blockPos.getX() + getDripX(direction);
-            double outY = blockPos.getY() + getDripY(direction);
-            double outZ = blockPos.getZ() + getDripZ(direction);
-            if (canWaterOrLava) {
+            double outX = blockPos.getX() + getDripX(direction, random);
+            double outY = blockPos.getY() + getDripY(direction, random);
+            double outZ = blockPos.getZ() + getDripZ(direction, random);
+            if (canWaterOrLava && (fluidState.isEmpty() || ((fluidState.getHeight(level, offsetPos)) + (double)offsetPos.getY()) < outY)) {
                 level.addParticle(canWater ? ParticleTypes.DRIPPING_WATER : ParticleTypes.DRIPPING_LAVA, outX, outY, outZ, 0, 0, 0);
             }
             if (canSmoke) {
                 level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, outX, outY, outZ, 0, 0.07D, 0);
             }
-            if ((!offsetState.isAir() && fluidState.isEmpty()) || direction == Direction.DOWN) {
+            if ((!offsetState.isAir() && fluidState.isEmpty())) {
                 double x = blockPos.getX() + getDripX(direction, random);
                 double y = blockPos.getY() + getDripY(direction, random);
                 double z = blockPos.getZ() + getDripZ(direction, random);
-                if (canWaterOrLava) {
+                if (canWaterOrLava && direction == Direction.DOWN) {
                     level.addParticle(canWater ? ParticleTypes.DRIPPING_WATER : ParticleTypes.DRIPPING_LAVA, x, outY, z, 0, 0, 0);
                 }
-                if (canSmoke) {
+                if (canSmoke && direction == Direction.UP) {
                     level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 0, 0.07D, 0);
                 }
             }
@@ -485,7 +486,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
         if (blockState.getValue(HAS_ELECTRICITY)) {
             ParticleUtils.spawnParticlesAlongAxis(direction.getAxis(), level, blockPos, 0.4D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
         }
-        if (fluidState.is(FluidTags.WATER)) {
+        if (fluidState.is(FluidTags.WATER) && (random.nextFloat() <= 0.1F || offsetState.getCollisionShape(level, offsetPos).isEmpty())) {
             level.addParticle(ParticleTypes.BUBBLE,
                     blockPos.getX() + getDripX(direction, random),
                     blockPos.getY() + getDripY(direction, random),
@@ -494,14 +495,14 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                     direction.getStepY() * 0.7D,
                     direction.getStepZ() * 0.7D
             );
-            if (canLava && random.nextInt(2) == 0) {
+            if ((canLava || canSmoke) && random.nextInt(2) == 0) {
                 level.addParticle(ParticleTypes.SMOKE,
                         blockPos.getX() + getDripX(direction, random),
                         blockPos.getY() + getDripY(direction, random),
                         blockPos.getZ() + getDripZ(direction, random),
-                        direction.getStepX() * 0.7D,
-                        direction.getStepY() * 0.7D,
-                        direction.getStepZ() * 0.7D
+                        direction.getStepX() * 0.05D,
+                        direction.getStepY() * 0.05D,
+                        direction.getStepZ() * 0.05D
                 );
             }
         }

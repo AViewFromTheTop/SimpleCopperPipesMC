@@ -1,7 +1,9 @@
 package net.lunade.copper.block_entity;
 
 import net.lunade.copper.CopperPipeMain;
-import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.blocks.properties.CopperPipeProperties;
+import net.lunade.copper.blocks.properties.PipeFluid;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -26,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +40,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     public int waterCooldown;
     public int electricityCooldown;
     public boolean canWater;
+    public boolean canLava;
     public boolean canSmoke;
 
     //DataFixing
@@ -57,25 +61,38 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     public void serverTick(@NotNull Level level, BlockPos blockPos, BlockState blockState) {
         BlockState state = blockState;
         if (!level.isClientSide) {
-            if (this.lastFixVersion < CopperPipeMain.CURRENT_FIX_VERSION) {
+            if (this.lastFixVersion < CopperPipeMain.CURRENT_FIX_VERSION || CopperPipeMain.refreshValues) {
                 this.updateBlockEntityValues(level, blockPos, blockState);
                 this.lastFixVersion = CopperPipeMain.CURRENT_FIX_VERSION;
             }
-            if (this.canWater) {
+            if (this.canWater && !this.canLava && SimpleCopperPipesConfig.get().carryWater) {
                 this.moveablePipeDataHandler.setMoveablePipeNbt(CopperPipeMain.WATER, new MoveablePipeDataHandler.SaveableMovablePipeNbt()
                         .withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withNBTID(CopperPipeMain.WATER));
             }
-            if (this.canSmoke) {
+            if (this.canLava && !this.canWater && SimpleCopperPipesConfig.get().carryLava) {
+                this.moveablePipeDataHandler.setMoveablePipeNbt(CopperPipeMain.LAVA, new MoveablePipeDataHandler.SaveableMovablePipeNbt()
+                        .withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withNBTID(CopperPipeMain.LAVA));
+            }
+            if ((this.canSmoke && !this.canWater && !this.canLava) || (this.canWater && this.canLava) && SimpleCopperPipesConfig.get().carrySmoke) {
                 this.moveablePipeDataHandler.setMoveablePipeNbt(CopperPipeMain.SMOKE, new MoveablePipeDataHandler.SaveableMovablePipeNbt()
                         .withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withNBTID(CopperPipeMain.SMOKE));
             }
             MoveablePipeDataHandler.SaveableMovablePipeNbt waterNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.WATER);
+            MoveablePipeDataHandler.SaveableMovablePipeNbt lavaNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.LAVA);
             MoveablePipeDataHandler.SaveableMovablePipeNbt smokeNbt = this.moveablePipeDataHandler.getMoveablePipeNbt(CopperPipeMain.SMOKE);
-            if (state.hasProperty(CopperPipeProperties.HAS_WATER)) {
-                state = state.setValue(CopperPipeProperties.HAS_WATER, this.canWater || waterNbt != null);
+            boolean validWater = isValidFluidNBT(waterNbt) && SimpleCopperPipesConfig.get().carryWater;
+            boolean validLava = isValidFluidNBT(lavaNbt) && SimpleCopperPipesConfig.get().carryLava;
+            boolean validSmoke = isValidFluidNBT(smokeNbt) && SimpleCopperPipesConfig.get().carrySmoke;
+            if (this.canSmoke && ((this.canLava && !this.canWater) || (this.canWater && !this.canLava))) {
+                validSmoke = false;
             }
-            if (state.hasProperty(CopperPipeProperties.HAS_SMOKE)) {
-                state = state.setValue(CopperPipeProperties.HAS_SMOKE, this.canSmoke || smokeNbt != null);
+            if (this.canWater && this.canLava) {
+                validSmoke = SimpleCopperPipesConfig.get().carrySmoke;
+                validWater = false;
+                validLava = false;
+            }
+            if (state.hasProperty(CopperPipeProperties.FLUID)) {
+                state = state.setValue(CopperPipeProperties.FLUID, validWater ? PipeFluid.WATER : validLava ? PipeFluid.LAVA : validSmoke ? PipeFluid.SMOKE : PipeFluid.NONE);
             }
             this.tickMoveableNbt((ServerLevel) level, blockPos, blockState);
             this.dispenseMoveableNbt((ServerLevel) level, blockPos, blockState);
@@ -106,6 +123,13 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
                 level.setBlockAndUpdate(blockPos, state);
             }
         }
+    }
+
+    public boolean isValidFluidNBT(@Nullable MoveablePipeDataHandler.SaveableMovablePipeNbt fluidNBT) {
+        if (fluidNBT != null) {
+            return fluidNBT.vec3d.x() > 0;
+        }
+        return false;
     }
 
     public static void sendElectricity(Level level, BlockPos blockPos) {
@@ -140,7 +164,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     }
 
     public void tickMoveableNbt(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState) {
-        for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : this.moveablePipeDataHandler.getSavedNbtList()) {
+        for (MoveablePipeDataHandler.SaveableMovablePipeNbt nbt : (List<MoveablePipeDataHandler.SaveableMovablePipeNbt>) this.moveablePipeDataHandler.getSavedNbtList().clone()) {
             nbt.tick(serverLevel, blockPos, blockState, this);
         }
     }
@@ -198,6 +222,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         this.waterCooldown = nbtCompound.getInt("WaterCooldown");
         this.electricityCooldown = nbtCompound.getInt("electricityCooldown");
         this.canWater = nbtCompound.getBoolean("canWater");
+        this.canLava = nbtCompound.getBoolean("canLava");
         this.canSmoke = nbtCompound.getBoolean("canSmoke");
         this.lastFixVersion = nbtCompound.getInt("lastFixVersion");
         this.moveablePipeDataHandler.readNbt(nbtCompound);
@@ -212,6 +237,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         nbtCompound.putInt("WaterCooldown", this.waterCooldown);
         nbtCompound.putInt("electricityCooldown", this.electricityCooldown);
         nbtCompound.putBoolean("canWater", this.canWater);
+        nbtCompound.putBoolean("canLava", this.canLava);
         nbtCompound.putBoolean("canSmoke", this.canSmoke);
         nbtCompound.putInt("lastFixVersion", this.lastFixVersion);
         this.moveablePipeDataHandler.writeNbt(nbtCompound);

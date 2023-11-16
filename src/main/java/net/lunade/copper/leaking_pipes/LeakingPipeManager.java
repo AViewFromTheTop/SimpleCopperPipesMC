@@ -1,7 +1,8 @@
 package net.lunade.copper.leaking_pipes;
 
 import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.blocks.CopperPipeProperties;
+import net.lunade.copper.blocks.properties.CopperPipeProperties;
+import net.lunade.copper.blocks.properties.PipeFluid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -67,7 +68,7 @@ public class LeakingPipeManager {
                     if (y < leakY && y >= leakY - 12) {
                         state = blockGetter.getBlockState(leakingPos.pos);
                         if (state.getBlock() instanceof CopperPipe) {
-                            return state.getValue(BlockStateProperties.FACING) != Direction.UP && state.getValue(CopperPipeProperties.HAS_WATER);
+                            return state.getValue(BlockStateProperties.FACING) != Direction.UP && state.getValue(CopperPipeProperties.FLUID) == PipeFluid.WATER;
                         }
                     }
                 }

@@ -100,5 +100,18 @@
   "option.lunade.dispensing": "Dispensing",
   "tooltip.lunade.dispensing": "Whether or not Copper Pipes should be able to dispense items.",
   "option.lunade.special_effect_dispensing": "Special Effect Dispensing",
-  "tooltip.lunade.special_effect_dispensing": "Whether or not Copper Pipes should be able to dispense special effects.\nThis includes things like Ink fountains and Vibration emitters."
+  "tooltip.lunade.special_effect_dispensing": "Whether or not Copper Pipes should be able to dispense special effects.\nThis includes things like Ink fountains and Vibration emitters.",
+  "option.lunade.dispense_sounds": "Dispense Sounds",
+  "tooltip.lunade.dispense_sounds": "Whether or not Copper Pipes will play a sound upon dispensing an item.",
+  "option.lunade.suction_sounds": "Suction Sounds",
+  "tooltip.lunade.suction_sounds": "Whether or not Copper Pipes will play a sound upon sucking in a new item.",
+  "option.lunade.sense_game_events": "Sense Game Events",
+  "tooltip.lunade.sense_game_events": "Whether or not Copper Pipes will pick up Game Events (Vibrations.)",
+
+  "option.lunade.carry_water": "Water Carrying",
+  "tooltip.lunade.carry_water": "Whether or not Copper Pipes and Fittings can carry Water.",
+  "option.lunade.carry_lava": "Lava Carrying",
+  "tooltip.lunade.carry_lava": "Whether or not Copper Pipes and Fittings can carry Lava.",
+  "option.lunade.carry_smoke": "Smoke Carrying",
+  "tooltip.lunade.carry_smoke": "Whether or not Copper Pipes and Fittings can carry Smoke."
 }

@@ -12,7 +12,9 @@ public final class SimpleCopperPipesConfig {
             new JsonConfig<>(
                     CopperPipeMain.MOD_ID,
                     SimpleCopperPipesConfig.class,
-                    JsonType.JSON5
+                    JsonType.JSON5,
+                    null,
+                    null
             )
     );
 

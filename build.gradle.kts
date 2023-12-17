@@ -96,7 +96,7 @@ dependencies {
 	})
 	modImplementation("net.fabricmc:fabric-loader:$loader_version")
 
-	modApi("io.github.llamalad7:mixinextras-fabric:$mixin_extras_version")
+	modApi("io.github.llamalad7:mixinextras-fabric:$mixin_extras_version")?.let { annotationProcessor(it) }
 
 	modCompileOnly("maven.modrinth:create-fabric:0.5.1-d-build.1161+mc1.20.1")
 

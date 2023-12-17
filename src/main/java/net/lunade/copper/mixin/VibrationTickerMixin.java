@@ -2,6 +2,7 @@ package net.lunade.copper.mixin;
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import net.lunade.copper.block_entity.CopperPipeEntity;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,8 +17,11 @@ public interface VibrationTickerMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;sendParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I"),
             method = "method_51408"
     )
-    private static boolean simpleCopperPipes$trySelectAndScheduleVibration() {
-        return false;
+    private static boolean simpleCopperPipes$trySelectAndScheduleVibration(
+            ServerLevel serverLevel, ParticleOptions particleOptions, double a, double b, double c, int d, double e, double f, double g, double h,
+            VibrationSystem.Data data, VibrationSystem.User user
+            ) {
+        return !(user instanceof CopperPipeEntity.VibrationUser);
     }
 
     @Inject(at = @At("HEAD"), method = "tryReloadVibrationParticle", cancellable = true)

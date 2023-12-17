@@ -24,9 +24,11 @@ public class EntityMixin {
         }
     }
 
-    @ModifyReturnValue(at = @At("RETURN"), method = "isInRain")
-    public boolean simpleCopperPipes$isInRain(boolean original) {
-        return original || this.simpleCopperPipes$hadWaterPipeNearby;
+    @Inject(at = @At("HEAD"), method = "isInRain", cancellable = true)
+    public void simpleCopperPipes$isInRain(CallbackInfoReturnable<Boolean> info) {
+        if (this.simpleCopperPipes$hadWaterPipeNearby) {
+            info.setReturnValue(true);
+        }
     }
 
     @Shadow

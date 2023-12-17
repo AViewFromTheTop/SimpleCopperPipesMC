@@ -1,22 +1,19 @@
 package net.lunade.copper.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.FarmBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(FarmBlock.class)
 public class FarmlandBlockMixin {
 
-    @Inject(at = @At("RETURN"), method = "isNearWater", cancellable = true)
-    private static void simpleCopperPipes$isNearWater(LevelReader worldView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
-        if (!info.getReturnValue() && LeakingPipeManager.isWaterPipeNearbyBlockGetter(worldView, blockPos, 6)) {
-            info.setReturnValue(true);
-        }
+    @ModifyReturnValue(at = @At("RETURN"), method = "isNearWater")
+    private static boolean simpleCopperPipes$isNearWater(boolean original, LevelReader worldView, BlockPos blockPos) {
+        return original || LeakingPipeManager.isWaterPipeNearbyBlockGetter(worldView, blockPos, 6);
     }
 
 }

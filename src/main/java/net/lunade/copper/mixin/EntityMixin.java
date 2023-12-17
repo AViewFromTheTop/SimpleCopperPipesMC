@@ -1,5 +1,6 @@
 package net.lunade.copper.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,11 +23,9 @@ public class EntityMixin {
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "isInRain", cancellable = true)
-    public void simpleCopperPipes$isInRain(CallbackInfoReturnable<Boolean> info) {
-        if (this.simpleCopperPipes$hadWaterPipeNearby) {
-            info.setReturnValue(true);
-        }
+    @ModifyReturnValue(at = @At("RETURN"), method = "isInRain")
+    public boolean simpleCopperPipes$isInRain(boolean original) {
+        return original || this.simpleCopperPipes$hadWaterPipeNearby;
     }
 
 }

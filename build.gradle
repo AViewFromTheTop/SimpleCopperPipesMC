@@ -65,10 +65,6 @@ repositories {
 			includeGroup "curse.maven"
 		}
 	}
-	/*maven {
-		name "Siphalor's Maven"
-		url "https://maven.siphalor.de"
-	}*/
 	maven {
 		url "https://maven.flashyreese.me/releases"
 	}
@@ -95,10 +91,6 @@ repositories {
 			includeGroup "maven.modrinth"
 		}
 	}
-	maven {
-		name = 'Quilt'
-		url = 'https://maven.quiltmc.org/repository/release'
-	}
 
 	flatDir {
 		dirs 'libs'
@@ -108,19 +100,15 @@ repositories {
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings(loom.layered {
-		// please annoy treetrain if this doesnt work
 		it.officialMojangMappings {
 			setNameSyntheticMembers(false)
 		}
 	})
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	modImplementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.2.0-rc.4"))
+	modApi("io.github.llamalad7:mixinextras-fabric:${mixin_extras_version}")
 
 	modCompileOnly("maven.modrinth:create-fabric:0.5.1-d-build.1161+mc1.20.1")
-
-	//modImplementation "de.guntram.mcmod:crowdin-translate:1.4+1.19"
-	//include "de.guntram.mcmod:crowdin-translate:1.4+1.19"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 

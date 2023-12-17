@@ -1,22 +1,19 @@
 package net.lunade.copper.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.CoralBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(CoralBlock.class)
 public class CoralBlockBlockMixin {
 
-    @Inject(at = @At("TAIL"), method = "scanForWater", cancellable = true)
-    protected void simpleCopperPipes$isInWater(BlockGetter blockView, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
-        if (LeakingPipeManager.isWaterPipeNearbyBlockGetter(blockView, blockPos, 2)) {
-            info.setReturnValue(true);
-        }
+    @ModifyReturnValue(at = @At("TAIL"), method = "scanForWater")
+    protected boolean simpleCopperPipes$isInWater(boolean original, BlockGetter blockView, BlockPos blockPos) {
+        return original || LeakingPipeManager.isWaterPipeNearbyBlockGetter(blockView, blockPos, 2);
     }
 
 }

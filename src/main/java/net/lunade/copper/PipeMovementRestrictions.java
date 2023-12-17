@@ -1,17 +1,21 @@
 package net.lunade.copper;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.lunade.copper.block_entity.CopperPipeEntity;
-import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 public class PipeMovementRestrictions {
+
+    public static Map<ResourceLocation, PipeMovementRestriction> PIPE_MOVEMENT_RESTRICTIONS = new Object2ObjectLinkedOpenHashMap<>();
 
     public record PipeMovementRestriction<T extends BlockEntity>(
             CanTransferTo<T> canTransferTo,
@@ -19,32 +23,32 @@ public class PipeMovementRestrictions {
     ) {}
 
     public static <T extends BlockEntity> void register(ResourceLocation id, CanTransferTo<T> canTransferTo, CanTakeFrom<T> canTakeFrom) {
-        Registry.register(SimpleCopperRegistries.PIPE_MOVEMENT_RESTRICTIONS, id, new PipeMovementRestriction<T>(canTransferTo, canTakeFrom));
+        PIPE_MOVEMENT_RESTRICTIONS.put(id, new PipeMovementRestriction<T>(canTransferTo, canTakeFrom));
     }
 
     @Nullable
     public static <T extends BlockEntity> CanTransferTo<T> getCanTransferTo(ResourceLocation id) {
-        if (SimpleCopperRegistries.PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) {
-            return SimpleCopperRegistries.PIPE_MOVEMENT_RESTRICTIONS.get(id).canTransferTo;
+        if (PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) {
+            return PIPE_MOVEMENT_RESTRICTIONS.get(id).canTransferTo;
         }
         return null;
     }
 
     @Nullable
     public static <T extends BlockEntity> CanTakeFrom<T> getCanTakeFrom(ResourceLocation id) {
-        if (SimpleCopperRegistries.PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) {
-            return SimpleCopperRegistries.PIPE_MOVEMENT_RESTRICTIONS.get(id).canTakeFrom;
+        if (PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) {
+            return PIPE_MOVEMENT_RESTRICTIONS.get(id).canTakeFrom;
         }
         return null;
     }
 
     @Nullable
-    public static <T extends BlockEntity> CanTransferTo<T> getCanTransferTo(T entity) {
+    public static <T extends BlockEntity> CanTransferTo<T> getCanTransferTo(@NotNull T entity) {
         return getCanTransferTo(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(entity.getType()));
     }
 
     @Nullable
-    public static <T extends BlockEntity> CanTakeFrom<T> getCanTakeFrom(T entity) {
+    public static <T extends BlockEntity> CanTakeFrom<T> getCanTakeFrom(@NotNull T entity) {
         return getCanTakeFrom(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(entity.getType()));
     }
 

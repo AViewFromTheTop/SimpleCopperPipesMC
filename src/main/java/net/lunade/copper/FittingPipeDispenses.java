@@ -1,5 +1,6 @@
 package net.lunade.copper;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
@@ -19,12 +20,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class FittingPipeDispenses {
 
-    private static final Map<ItemLike, FittingDispense> ITEMS_TO_DISPENSES = new HashMap<>();
+    private static final Map<ItemLike, FittingDispense> ITEMS_TO_DISPENSES = new Object2ObjectLinkedOpenHashMap<>();
 
     public static void register(ItemLike item, FittingDispense dispense) {
         ITEMS_TO_DISPENSES.put(item, dispense);

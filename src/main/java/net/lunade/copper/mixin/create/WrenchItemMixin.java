@@ -13,6 +13,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,11 +26,11 @@ public class WrenchItemMixin {
 
     @Inject(method = "useOn", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/equipment/wrench/WrenchItem;onItemUseOnOther(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     private void wrenchPickup(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir, Player player, BlockState state, Block block) {
-        rotateCopperPipes(context, cir);
+        simpleCopperPipes$rotateCopperPipes(context, cir);
     }
 
     @Unique
-    private void rotateCopperPipes(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
+    private void simpleCopperPipes$rotateCopperPipes(@NotNull UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
         Player player = context.getPlayer();
         if (player.isShiftKeyDown()) {
             return;

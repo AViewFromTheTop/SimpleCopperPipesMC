@@ -1,5 +1,6 @@
 package net.lunade.copper;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -9,10 +10,8 @@ import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
-import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -27,6 +26,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 import static net.lunade.copper.blocks.CopperFitting.CORRODED_FITTING;
 import static net.minecraft.world.level.block.NoteBlock.INSTRUMENT;
 import static net.minecraft.world.level.block.NoteBlock.NOTE;
@@ -34,8 +35,10 @@ import static net.minecraft.world.level.block.state.properties.BlockStatePropert
 
 public class RegisterPipeNbtMethods {
 
+    public static final Map<ResourceLocation, UniquePipeNbt> UNIQUE_PIPE_NBTS = new Object2ObjectLinkedOpenHashMap<>();
+
     public static void register(ResourceLocation id, DispenseMethod dispense, OnMoveMethod move, TickMethod tick, CanMoveMethod canMove) {
-        Registry.register(SimpleCopperRegistries.UNIQUE_PIPE_NBTS, id, new UniquePipeNbt(dispense, move, tick, canMove));
+        UNIQUE_PIPE_NBTS.put(id, new UniquePipeNbt(dispense, move, tick, canMove));
     }
 
     public record UniquePipeNbt(
@@ -47,8 +50,8 @@ public class RegisterPipeNbtMethods {
     
     @Nullable
     public static UniquePipeNbt getUniquePipeNbt(ResourceLocation id) {
-        if (SimpleCopperRegistries.UNIQUE_PIPE_NBTS.containsKey(id)) {
-            return SimpleCopperRegistries.UNIQUE_PIPE_NBTS.get(id);
+        if (UNIQUE_PIPE_NBTS.containsKey(id)) {
+            return UNIQUE_PIPE_NBTS.get(id);
         }
         return null;
     }

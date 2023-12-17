@@ -1,4 +1,4 @@
-package net.lunade.copper;
+package net.lunade.copper.mixin.plugin;
 
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import java.util.List;
 import java.util.Set;
 
-public class CopperPipePlugin implements IMixinConfigPlugin {
+public class CopperPipeMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {}

@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -39,7 +40,7 @@ public class MoveablePipeDataHandler {
 
     }
 
-    public void readNbt(CompoundTag nbtCompound) {
+    public void readNbt(@NotNull CompoundTag nbtCompound) {
         if (nbtCompound.contains("saveableMoveableNbtList", 9)) {
             this.clear();
             DataResult<List<SaveableMovablePipeNbt>> var10000 = SaveableMovablePipeNbt.CODEC.listOf().parse(new Dynamic<>(NbtOps.INSTANCE, nbtCompound.getList("saveableMoveableNbtList", 10)));
@@ -64,7 +65,7 @@ public class MoveablePipeDataHandler {
         var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbtCompound.put("saveableMoveableNbtList", nbtElement));
     }
 
-    public void addSaveableMoveablePipeNbt(SaveableMovablePipeNbt nbt) {
+    public void addSaveableMoveablePipeNbt(@NotNull SaveableMovablePipeNbt nbt) {
         if (!this.savedIds.contains(nbt.getNbtID())) {
             this.savedList.add(nbt);
             this.savedIds.add(nbt.getNbtID());

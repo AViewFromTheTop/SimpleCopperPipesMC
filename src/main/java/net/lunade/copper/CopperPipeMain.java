@@ -17,7 +17,6 @@ import net.lunade.copper.leaking_pipes.LeakingPipeDrips;
 import net.lunade.copper.leaking_pipes.LeakingPipeManager;
 import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.lunade.copper.registry.RegisterCopperBlocks;
-import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -38,7 +37,7 @@ public class CopperPipeMain implements ModInitializer {
 	public static final int CURRENT_FIX_VERSION = 3;
 
 	public static int getCompatID() {
-		return 2;
+		return 3;
 	}
 
 	public static boolean refreshValues = false;
@@ -92,7 +91,6 @@ public class CopperPipeMain implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		CopperPipeProperties.init();
-		SimpleCopperRegistries.initRegistry();
 		// make config file
 		SimpleCopperPipesConfig.get();
 

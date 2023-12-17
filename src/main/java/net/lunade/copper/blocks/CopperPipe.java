@@ -1,5 +1,6 @@
 package net.lunade.copper.blocks;
 
+import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.tag.convention.v1.TagUtil;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.block_entity.CopperPipeEntity;
@@ -440,14 +441,12 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
                 }
             }
         }
-
-        this.onRandomTick(blockState, serverLevel, blockPos, random);
+        this.changeOverTime(blockState, serverLevel, blockPos, random);
     }
 
     @Override
     public boolean isRandomlyTicking(@NotNull BlockState blockState) {
-        Block block = blockState.getBlock();
-        return block == CopperPipe.COPPER_PIPE || block == CopperPipe.EXPOSED_PIPE || block == CopperPipe.WEATHERED_PIPE || blockState.getValue(FLUID) == PipeFluid.WATER || blockState.getValue(FLUID) == PipeFluid.LAVA;
+        return WeatheringCopper.getNext(blockState.getBlock()).isPresent() || blockState.getValue(FLUID) == PipeFluid.WATER || blockState.getValue(FLUID) == PipeFluid.LAVA;
     }
 
     @Override
@@ -612,6 +611,11 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             }
         }
         return false;
+    }
+
+    @Override
+    protected MapCodec<? extends CopperPipe> codec() {
+        return null;
     }
 
     public static final Block COPPER_PIPE = new CopperPipe(WeatherState.UNAFFECTED, Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 2, 20, ParticleTypes.SQUID_INK);

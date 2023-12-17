@@ -1,5 +1,6 @@
 package net.lunade.copper.blocks;
 
+import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.tag.convention.v1.TagUtil;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.block_entity.CopperFittingEntity;
@@ -201,7 +202,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 
     @Override
     public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource random) {
-        this.onRandomTick(blockState, serverLevel, blockPos, random);
+        this.changeOverTime(blockState, serverLevel, blockPos, random);
     }
 
     public static void updateBlockEntityValues(Level level, BlockPos pos, @NotNull BlockState state) {
@@ -215,8 +216,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 
     @Override
     public boolean isRandomlyTicking(@NotNull BlockState blockState) {
-        Block block = blockState.getBlock();
-        return block == CopperFitting.COPPER_FITTING || block == CopperFitting.EXPOSED_FITTING || block == CopperFitting.WEATHERED_FITTING;
+        return WeatheringCopper.getNext(blockState.getBlock()).isPresent();
     }
 
     @Override
@@ -242,6 +242,11 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
     @Override
     public WeatherState getAge() {
         return this.weatherState;
+    }
+
+    @Override
+    protected MapCodec<? extends CopperFitting> codec() {
+        return null;
     }
 
     public static final Block COPPER_FITTING = new CopperFitting(WeatherState.UNAFFECTED, Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3.0F).sound(SoundType.COPPER), 1, ParticleTypes.SQUID_INK);

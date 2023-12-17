@@ -75,7 +75,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i, corroded, random1, random2);
             double velY = getVelY(axis, direction.getStepY(), i, corroded, random1);
             double velZ = getVelZ(axis, direction.getStepZ(), i, corroded, random2);
-            Arrow shotEntity = new Arrow(world,d,e,f);
+            Arrow shotEntity = new Arrow(world, d, e, f, stack);
             shotEntity.pickup = AbstractArrow.Pickup.ALLOWED;
             shotEntity.setDeltaMovement(velX, velY, velZ);
             world.addFreshEntity(shotEntity);
@@ -92,7 +92,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i, corroded, random1, random2);
             double velY = getVelY(axis, direction.getStepY(), i, corroded, random1);
             double velZ = getVelZ(axis, direction.getStepZ(), i, corroded, random2);
-            SpectralArrow shotEntity = new SpectralArrow(world,d,e,f);
+            SpectralArrow shotEntity = new SpectralArrow(world, d, e, f,stack);
             shotEntity.pickup = AbstractArrow.Pickup.ALLOWED;
             shotEntity.setDeltaMovement(velX, velY, velZ);
             world.addFreshEntity(shotEntity);
@@ -109,7 +109,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i, corroded, random1, random2);
             double velY = getVelY(axis, direction.getStepY(), i, corroded, random1);
             double velZ = getVelZ(axis, direction.getStepZ(), i, corroded, random2);
-            Arrow shotEntity = new Arrow(world,d,e,f);
+            Arrow shotEntity = new Arrow(world, d, e, f, stack);
             shotEntity.setEffectsFromItem(stack);
             shotEntity.pickup = AbstractArrow.Pickup.ALLOWED;
             shotEntity.setDeltaMovement(velX, velY, velZ);

@@ -303,7 +303,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                         itemStack2 = canonShoot(serverLevel, blockPos, itemStack, blockState, shotLength, powered, true, silent, this.corroded);
                     } else {
                         itemStack2 = canonShoot(serverLevel, blockPos, itemStack, blockState, shotLength, powered, false, silent, this.corroded);
-                        serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, blockPos, direction.get3DDataValue());
+                        serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT_WHITE_SMOKE, blockPos, direction.get3DDataValue());
                     }
                     this.setItem(i, itemStack2);
                     return true;
@@ -341,13 +341,13 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 if (SimpleCopperPipesConfig.get().dispensing) {
                     itemStack2 = itemStack.split(1);
                     spawnItem(serverLevel, itemStack2, shotLength, direction, vec3, direction, corroded);
-                    serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, pos, direction.get3DDataValue());
+                    serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT_WHITE_SMOKE, pos, direction.get3DDataValue());
                 }
             }
         } else {
             if (SimpleCopperPipesConfig.get().dispensing) {
                 itemStack2 = itemStack.split(1);
-                serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT, pos, direction.get3DDataValue());
+                serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT_WHITE_SMOKE, pos, direction.get3DDataValue());
                 spawnItem(serverLevel, itemStack2, shotLength, direction, vec3, direction, corroded);
                 if (!silent) {
                     serverLevel.gameEvent(null, GameEvent.ENTITY_PLACE, pos);

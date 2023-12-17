@@ -15,7 +15,8 @@ public class CampfireBlockMixin {
 
     @WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/CampfireBlock;isLitCampfire(Lnet/minecraft/world/level/block/state/BlockState;)Z"), method = "isSmokeyPos")
     private static boolean simpleCopperPipes$isSmokeyPos(BlockState blockState, Operation<Boolean> operation) {
-        return operation.call(blockState) || (blockState.getBlock() instanceof CopperPipe && blockState.getValue(CopperPipeProperties.FLUID) == PipeFluid.SMOKE);
+        return operation.call(blockState)
+                || (blockState.getBlock() instanceof CopperPipe && blockState.getValue(CopperPipeProperties.FLUID) == PipeFluid.SMOKE);
     }
 
 }

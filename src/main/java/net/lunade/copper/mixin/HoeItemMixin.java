@@ -14,19 +14,24 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(HoeItem.class)
 public class HoeItemMixin {
 
-    @Inject(at = @At("HEAD"), method = "useOn", cancellable = true)
-    public void simpleCopperPipes$useOn(UseOnContext itemUsageContext, CallbackInfoReturnable<InteractionResult> info) {
-        Level world = itemUsageContext.getLevel();
-        BlockPos blockPos = itemUsageContext.getClickedPos();
-        BlockState blockState = world.getBlockState(blockPos);
+    @Inject(
+            at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/HoeItem;TILLABLES:Ljava/util/Map;", opcode = Opcodes.GETSTATIC, ordinal = 0),
+            method = "useOn",
+            cancellable = true,
+            locals = LocalCapture.CAPTURE_FAILSOFT
+    )
+    public void simpleCopperPipes$useOn(UseOnContext itemUsageContext, CallbackInfoReturnable<InteractionResult> info, Level level, BlockPos blockPos) {
+        BlockState blockState = level.getBlockState(blockPos);
 
         if (blockState.getBlock() instanceof CopperPipe) {
             Player playerEntity = itemUsageContext.getPlayer();
@@ -38,17 +43,17 @@ public class HoeItemMixin {
             Direction face = itemUsageContext.getClickedFace();
             if (face != blockState.getValue(CopperPipe.FACING)) {
                 BlockState state = blockState.setValue(CopperPipe.FACING, face)
-                        .setValue(CopperPipe.BACK_CONNECTED, CopperPipe.canConnectBack(world, blockPos, face))
-                        .setValue(CopperPipe.FRONT_CONNECTED, CopperPipe.canConnectFront(world, blockPos, face))
-                        .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(world, blockPos, face));
+                        .setValue(CopperPipe.BACK_CONNECTED, CopperPipe.canConnectBack(level, blockPos, face))
+                        .setValue(CopperPipe.FRONT_CONNECTED, CopperPipe.canConnectFront(level, blockPos, face))
+                        .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(level, blockPos, face));
 
-                world.setBlockAndUpdate(blockPos, state);
-                world.playSound(null, blockPos, CopperPipeMain.TURN, SoundSource.BLOCKS, 0.5F, 1F);
+                level.setBlockAndUpdate(blockPos, state);
+                level.playSound(null, blockPos, CopperPipeMain.TURN, SoundSource.BLOCKS, 0.5F, 1F);
                 if (playerEntity != null) {
                     itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> playerEntityx.broadcastBreakEvent(itemUsageContext.getHand()));
                 }
             }
-            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
+            info.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide));
         }
     }
 

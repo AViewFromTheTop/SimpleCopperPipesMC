@@ -20,7 +20,14 @@ import java.util.Optional;
 @Mixin(VibrationSystem.Listener.class)
 public class VibrationListenerMixin {
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Listener;scheduleVibration(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Data;Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/world/level/gameevent/GameEvent$Context;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.AFTER), method = "handleGameEvent", locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Listener;scheduleVibration(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/gameevent/vibrations/VibrationSystem$Data;Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/world/level/gameevent/GameEvent$Context;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;)V",
+                    shift = At.Shift.AFTER),
+            method = "handleGameEvent",
+            locals = LocalCapture.CAPTURE_FAILSOFT
+    )
     public void simpleCopperPipes$handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, CallbackInfoReturnable<Boolean> cir, VibrationSystem.Data data, VibrationSystem.User user, Optional optional, Vec3 vec32) {
         BlockEntity blockEntity = serverLevel.getBlockEntity(BlockPos.containing(vec3));
         if (blockEntity instanceof CopperPipeEntity pipeEntity) {

@@ -20,7 +20,7 @@ public interface VibrationTickerMixin {
     private static boolean simpleCopperPipes$trySelectAndScheduleVibration(
             ServerLevel serverLevel, ParticleOptions particleOptions, double a, double b, double c, int d, double e, double f, double g, double h,
             VibrationSystem.Data data, VibrationSystem.User user
-            ) {
+    ) {
         return !(user instanceof CopperPipeEntity.VibrationUser);
     }
 

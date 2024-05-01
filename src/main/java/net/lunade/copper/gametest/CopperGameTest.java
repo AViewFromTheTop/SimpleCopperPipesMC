@@ -32,6 +32,18 @@ public class CopperGameTest implements FabricGameTest {
     private static final String DIRECT_PIPE_TRANSFER = "copper_pipe:direct_pipe_transfer";
     private static final String STORAGE_UNIFICATION = "copper_pipe:storage_unification";
 
+    private static long moveResources(GameTestHelper helper, TrackedPosition<BlockPos> inventoryPos, ItemVariant resource, long maxAmount, MoveDirection direction, boolean simulate) {
+        Storage<ItemVariant> inventory = CopperPipeEntity.getStorageAt(helper.getLevel(), inventoryPos.absolute(), null);
+        helper.assertTrue(inventory != null, "Inventory not found at " + inventoryPos.relative());
+
+        Transaction transaction = Transaction.openOuter();
+        long amountMoved = simulate
+                ? direction.simulateMoveResources(inventory, resource, maxAmount, transaction)
+                : direction.moveResources(inventory, resource, maxAmount, transaction);
+        transaction.commit();
+        return amountMoved;
+    }
+
     @GameTest(template = AXE_INTERACTION)
     public void axeInteraction(GameTestHelper helper) {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
@@ -105,7 +117,8 @@ public class CopperGameTest implements FabricGameTest {
         moveResources(helper, source, inputResource, 32, MoveDirection.IN, false);
         helper.runAfterDelay(75L, () -> {
             long amountInChest = moveResources(helper, output, outputResource, 32, MoveDirection.OUT, true);
-            if (amountInChest > 0) helper.succeed(); else helper.fail("No items in chest");
+            if (amountInChest > 0) helper.succeed();
+            else helper.fail("No items in chest");
         });
     }
 
@@ -125,7 +138,7 @@ public class CopperGameTest implements FabricGameTest {
     @GameTest(template = STORAGE_UNIFICATION, timeoutTicks = 700)
     public void storageUnification(GameTestHelper helper) {
         ItemVariant resource = ItemVariant.of(Blocks.MANGROVE_LOG);
-        for (int z = 0; z < 10; z +=  2) {
+        for (int z = 0; z < 10; z += 2) {
             TrackedPosition<BlockPos> chestPos = TrackedPosition.createRelative(helper, Blocks.CHEST, new BlockPos(9, 2, z));
             moveResources(helper, chestPos, resource, 128, MoveDirection.IN, false);
         }
@@ -135,18 +148,6 @@ public class CopperGameTest implements FabricGameTest {
             long amountInChest = moveResources(helper, chestPos, resource, 640, MoveDirection.OUT, true);
             if (amountInChest == 640) helper.succeed();
         });
-    }
-
-    private static long moveResources(GameTestHelper helper, TrackedPosition<BlockPos> inventoryPos, ItemVariant resource, long maxAmount, MoveDirection direction, boolean simulate) {
-        Storage<ItemVariant> inventory = CopperPipeEntity.getStorageAt(helper.getLevel(), inventoryPos.absolute(), null);
-        helper.assertTrue(inventory != null, "Inventory not found at " + inventoryPos.relative());
-
-        Transaction transaction = Transaction.openOuter();
-        long amountMoved = simulate
-                ? direction.simulateMoveResources(inventory, resource, maxAmount, transaction)
-                : direction.moveResources(inventory, resource, maxAmount, transaction);
-        transaction.commit();
-        return amountMoved;
     }
 
 }

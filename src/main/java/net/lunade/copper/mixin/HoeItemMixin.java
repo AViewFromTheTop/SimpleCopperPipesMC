@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.ItemStack;
@@ -50,7 +51,7 @@ public class HoeItemMixin {
                 level.setBlockAndUpdate(blockPos, state);
                 level.playSound(null, blockPos, CopperPipeMain.TURN, SoundSource.BLOCKS, 0.5F, 1F);
                 if (playerEntity != null) {
-                    itemStack.hurtAndBreak(1, playerEntity, (playerEntityx) -> playerEntityx.broadcastBreakEvent(itemUsageContext.getHand()));
+                    itemUsageContext.getItemInHand().hurtAndBreak(1, playerEntity, LivingEntity.getSlotForHand(itemUsageContext.getHand()));
                 }
             }
             info.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide));

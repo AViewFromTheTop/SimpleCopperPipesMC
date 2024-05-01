@@ -6,6 +6,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.projectile.*;
@@ -33,11 +34,6 @@ public class PoweredPipeDispenses {
         return null;
     }
 
-    @FunctionalInterface
-    public interface PoweredDispense {
-        void dispense(ServerLevel world, ItemStack itemStack, int i, Direction direction, Position position, BlockState state, boolean corroded, BlockPos pos, CopperPipeEntity pipe);
-    }
-
     public static double getYOffset(Direction.Axis axis, double e) {
         if (axis == Direction.Axis.Y) {
             return e - 0.125D;
@@ -45,11 +41,11 @@ public class PoweredPipeDispenses {
             return e - 0.15625D;
         }
     }
-    
+
     public static double getRandom(RandomSource random) {
         return (random.nextDouble() * 0.6) - 0.3;
     }
-    
+
     public static double getVelX(Direction.Axis axis, int offX, int i, boolean corroded, double random1, double random2) {
         return axis == Direction.Axis.X ? (i * offX) * 0.1 : corroded ? (axis == Direction.Axis.Z ? random2 : random1) : 0;
     }
@@ -92,7 +88,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i, corroded, random1, random2);
             double velY = getVelY(axis, direction.getStepY(), i, corroded, random1);
             double velZ = getVelZ(axis, direction.getStepZ(), i, corroded, random2);
-            SpectralArrow shotEntity = new SpectralArrow(world, d, e, f,stack);
+            SpectralArrow shotEntity = new SpectralArrow(world, d, e, f, stack);
             shotEntity.pickup = AbstractArrow.Pickup.ALLOWED;
             shotEntity.setDeltaMovement(velX, velY, velZ);
             world.addFreshEntity(shotEntity);
@@ -110,7 +106,7 @@ public class PoweredPipeDispenses {
             double velY = getVelY(axis, direction.getStepY(), i, corroded, random1);
             double velZ = getVelZ(axis, direction.getStepZ(), i, corroded, random2);
             Arrow shotEntity = new Arrow(world, d, e, f, stack);
-            shotEntity.setEffectsFromItem(stack);
+            shotEntity.setPotionContents(stack.getComponents().get(DataComponents.POTION_CONTENTS));
             shotEntity.pickup = AbstractArrow.Pickup.ALLOWED;
             shotEntity.setDeltaMovement(velX, velY, velZ);
             world.addFreshEntity(shotEntity);
@@ -131,7 +127,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i, corroded, random1, random2);
             double velY = getVelY(axis, direction.getStepY(), i, corroded, random1);
             double velZ = getVelZ(axis, direction.getStepZ(), i, corroded, random2);
-            Snowball shotEntity = new Snowball(world,d,e,f);
+            Snowball shotEntity = new Snowball(world, d, e, f);
             shotEntity.setDeltaMovement(velX, velY, velZ);
             world.addFreshEntity(shotEntity);
         });
@@ -147,7 +143,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i, corroded, random1, random2);
             double velY = getVelY(axis, direction.getStepY(), i, corroded, random1);
             double velZ = getVelZ(axis, direction.getStepZ(), i, corroded, random2);
-            ThrownEgg shotEntity = new ThrownEgg(world,d,e,f);
+            ThrownEgg shotEntity = new ThrownEgg(world, d, e, f);
             shotEntity.setDeltaMovement(velX, velY, velZ);
             world.addFreshEntity(shotEntity);
         });
@@ -163,7 +159,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i, corroded, random1, random2);
             double velY = getVelY(axis, direction.getStepY(), i, corroded, random1);
             double velZ = getVelZ(axis, direction.getStepZ(), i, corroded, random2);
-            ThrownExperienceBottle shotEntity = new ThrownExperienceBottle(world,d,e,f);
+            ThrownExperienceBottle shotEntity = new ThrownExperienceBottle(world, d, e, f);
             shotEntity.setDeltaMovement(velX, velY, velZ);
             world.addFreshEntity(shotEntity);
         });
@@ -215,6 +211,11 @@ public class PoweredPipeDispenses {
             world.addFreshEntity(Util.make(smallFireballEntity, (smallFireballEntityx) -> smallFireballEntityx.setItem(stack)));
             smallFireballEntity.setDeltaMovement(velX, velY, velZ);
         });
+    }
+
+    @FunctionalInterface
+    public interface PoweredDispense {
+        void dispense(ServerLevel world, ItemStack itemStack, int i, Direction direction, Position position, BlockState state, boolean corroded, BlockPos pos, CopperPipeEntity pipe);
     }
 
 }

@@ -1,16 +1,22 @@
 plugins {
-	id("fabric-loom") version("1.4-SNAPSHOT")
+	id("fabric-loom") version("+")
+	id("org.quiltmc.gradle.licenser") version("+")
+	id("org.ajoberstar.grgit") version("+")
+	id("com.modrinth.minotaur") version("+")
 	`maven-publish`
 	eclipse
 	idea
 	`java-library`
+	java
 }
 
 val minecraft_version: String by project
+val quilt_mappings: String by project
+val parchment_mappings: String by project
 val loader_version: String by project
-val mixin_extras_version: String by project
 
 val mod_version: String by project
+val mod_id: String by project
 val maven_group: String by project
 val archives_base_name: String by project
 
@@ -18,6 +24,8 @@ val fabric_api_version: String by project
 val frozenlib_version: String by project
 val modmenu_version: String by project
 val cloth_config_version: String by project
+
+val local_frozenlib = findProject(":FrozenLib") != null
 
 base {
 	archivesName = archives_base_name
@@ -58,10 +66,13 @@ configurations {
 
 repositories {
 	maven("https://jitpack.io")
-	maven("https://api.modrinth.com/maven") {
-		name = "Modrinth"
-
-		content {
+	exclusiveContent {
+		forRepository {
+			maven("https://api.modrinth.com/maven") {
+				name = "Modrinth"
+			}
+		}
+		filter {
 			includeGroup("maven.modrinth")
 		}
 	}
@@ -70,40 +81,47 @@ repositories {
 			includeGroup("com.terraformersmc")
 		}
 	}
-	maven("https://maven.shedaniel.me")
-	maven("https://cursemaven.com") {
+
+	maven("https://maven.shedaniel.me/")
+	maven("https://maven.minecraftforge.net/")
+	maven("https://maven.parchmentmc.org")
+	maven("https://maven.quiltmc.org/repository/release") {
+		name = "Quilt"
+	}
+	maven("https://maven.jamieswhiteshirt.com/libs-release") {
 		content {
-			includeGroup("curse.maven")
+			includeGroup("com.jamieswhiteshirt")
 		}
 	}
-	maven("https://maven.flashyreese.me/releases")
-	maven("https://maven.flashyreese.me/snapshots")
-	maven("https://maven.minecraftforge.net")
-	maven("https://maven.parchmentmc.org")
-	maven("https://minecraft.guntram.de/maven")
 
 	flatDir {
 		dirs("libs")
 	}
+	mavenCentral()
 }
+
 
 dependencies {
 	minecraft("com.mojang:minecraft:$minecraft_version")
 	mappings(loom.layered {
+		// please annoy treetrain if this doesnt work
+		mappings("org.quiltmc:quilt-mappings:$quilt_mappings:intermediary-v2")
+		parchment("org.parchmentmc.data:parchment-$parchment_mappings@zip")
 		officialMojangMappings {
 			nameSyntheticMembers = false
 		}
 	})
 	modImplementation("net.fabricmc:fabric-loader:$loader_version")
 
-	modApi("io.github.llamalad7:mixinextras-fabric:$mixin_extras_version")?.let { annotationProcessor(it) }
-
 	modCompileOnly("maven.modrinth:create-fabric:0.5.1-d-build.1161+mc1.20.1")
 
 	modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_api_version")
 
-	modApi("maven.modrinth:frozenlib:$frozenlib_version")
-	include("maven.modrinth:frozenlib:$frozenlib_version")
+	// FrozenLib
+	if (local_frozenlib)
+		api(project(":FrozenLib", configuration = "namedElements"))?.let { include(it) }
+	else
+		modApi("maven.modrinth:frozenlib:$frozenlib_version")?.let { include(it) }
 
 	modApi("me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version") {
 		exclude(group = "net.fabricmc.fabric-api")
@@ -113,30 +131,66 @@ dependencies {
 	modImplementation("maven.modrinth:modmenu:$modmenu_version")
 }
 
-tasks.processResources {
-	inputs.property("version", project.version)
+tasks {
+	processResources {
+		val properties = mapOf(
+			"mod_id" to mod_id,
+			"version" to version,
+			"minecraft_version" to minecraft_version,
 
-	filesMatching("fabric.mod.json") {
-		expand("version" to project.version)
+			"fabric_api_version" to ">=$fabric_api_version",
+			"frozenlib_version" to ">=${frozenlib_version.split('-').firstOrNull()}-"
+		)
+
+		properties.forEach { (a, b) -> inputs.property(a, b) }
+
+		filesNotMatching(
+			listOf(
+				"**/*.java",
+				"**/sounds.json",
+				"**/lang/*.json",
+				"**/.cache/*",
+				"**/*.accesswidener",
+				"**/*.nbt",
+				"**/*.png",
+				"**/*.ogg",
+				"**/*.mixins.json"
+			)
+		) {
+			expand(properties)
+		}
 	}
-}
 
-val javadocJar = tasks.register("javadocJar", Jar::class) {
-	dependsOn(tasks.javadoc)
-	archiveClassifier = "javadoc"
-	from(tasks.javadoc.get().destinationDir)
-}
 
-val sourcesJar = tasks.register("sourcesJar", Jar::class) {
-	dependsOn(tasks.classes)
-	archiveClassifier = "sources"
-	from(sourceSets.main.get().allSource)
+	register("javadocJar", Jar::class) {
+		dependsOn(javadoc)
+		archiveClassifier.set("javadoc")
+		from(javadoc.get().destinationDir)
+	}
+
+	register("sourcesJar", Jar::class) {
+		dependsOn(classes)
+		archiveClassifier.set("sources")
+		from(sourceSets.main.get().allSource)
+	}
+
+	withType(JavaCompile::class) {
+		options.encoding = "UTF-8"
+		// Minecraft 1.20.5 (24w14a) upwards uses Java 21.
+		options.release.set(21)
+		options.isFork = true
+		options.isIncremental = true
+	}
+
+	withType(Test::class) {
+		maxParallelForks = Runtime.getRuntime().availableProcessors().div(2)
+	}
 }
 
 tasks.withType(JavaCompile::class) {
 	options.encoding = "UTF-8"
 	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-	options.release = 17
+	options.release = 21
 	options.isFork = true
 	options.isIncremental = true
 }
@@ -146,8 +200,8 @@ tasks.withType(Test::class) {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 
 	withSourcesJar()
 }
@@ -156,11 +210,6 @@ tasks.jar {
 	from("LICENSE") {
 		rename { "${it}_${base.archivesName}"}
 	}
-}
-
-artifacts {
-	archives(sourcesJar)
-	archives(javadocJar)
 }
 
 publishing {

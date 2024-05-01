@@ -17,11 +17,6 @@ public class PipeMovementRestrictions {
 
     public static Map<ResourceLocation, PipeMovementRestriction> PIPE_MOVEMENT_RESTRICTIONS = new Object2ObjectLinkedOpenHashMap<>();
 
-    public record PipeMovementRestriction<T extends BlockEntity>(
-            CanTransferTo<T> canTransferTo,
-            CanTakeFrom<T> canTakeFrom
-    ) {}
-
     public static <T extends BlockEntity> void register(ResourceLocation id, CanTransferTo<T> canTransferTo, CanTakeFrom<T> canTakeFrom) {
         PIPE_MOVEMENT_RESTRICTIONS.put(id, new PipeMovementRestriction<T>(canTransferTo, canTakeFrom));
     }
@@ -52,6 +47,10 @@ public class PipeMovementRestrictions {
         return getCanTakeFrom(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(entity.getType()));
     }
 
+    public static void init() {
+
+    }
+
     @FunctionalInterface
     public interface CanTransferTo<T extends BlockEntity> {
         boolean canTransfer(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe, T toEntity);
@@ -62,7 +61,9 @@ public class PipeMovementRestrictions {
         boolean canTake(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe, T toEntity);
     }
 
-    public static void init() {
-
+    public record PipeMovementRestriction<T extends BlockEntity>(
+            CanTransferTo<T> canTransferTo,
+            CanTakeFrom<T> canTakeFrom
+    ) {
     }
 }

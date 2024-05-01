@@ -38,11 +38,6 @@ public class FittingPipeDispenses {
         return null;
     }
 
-    @FunctionalInterface
-    public interface FittingDispense {
-        void dispense(ServerLevel world, ItemStack itemStack, int i, Direction direction, Position position, BlockState state, boolean corroded, BlockPos pos, CopperPipeEntity pipe);
-    }
-
     public static double getYOffset(Direction.Axis axis, double e) {
         if (axis == Direction.Axis.Y) {
             return e - 0.125D;
@@ -134,6 +129,11 @@ public class FittingPipeDispenses {
             BlockPositionSource blockSource = new BlockPositionSource(BlockPos.containing(vibX, vibY, vibZ));
             world.sendParticles(new VibrationParticleOption(blockSource, 32), position.x(), position.y(), position.z(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
         });
+    }
+
+    @FunctionalInterface
+    public interface FittingDispense {
+        void dispense(ServerLevel world, ItemStack itemStack, int i, Direction direction, Position position, BlockState state, boolean corroded, BlockPos pos, CopperPipeEntity pipe);
     }
 
 }

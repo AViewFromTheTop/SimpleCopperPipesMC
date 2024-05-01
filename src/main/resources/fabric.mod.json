@@ -1,19 +1,18 @@
 {
   "schemaVersion": 1,
   "id": "simple_copper_pipes",
+  "version": "${version}",
   "provides": [
     "copper_pipe"
   ],
-  "version": "${version}",
+
   "name": "Simple Copper Pipes",
   "description": "Adds Copper Pipes with unique mechanics to Minecraft.",
   "authors": [
-    "Lunade",
+    "Luna",
     "Treetrain1"
   ],
-  "contributors": [
-    "I_am_Merp"
-  ],
+
   "contact": {
     "homepage": "https://github.com/AViewFromTheTop/SimpleCopperPipesMC",
     "issues": "https://github.com/AViewFromTheTop/SimpleCopperPipesMC/issues",
@@ -38,6 +37,7 @@
       "net.lunade.copper.config.gui.ModMenuIntegration"
     ]
   },
+
   "mixins": [
     "simple_copper_pipes.mixins.json"
   ],
@@ -45,13 +45,25 @@
   "accessWidener": "simple_copper_pipes.accesswidener",
 
   "depends": {
-    "frozenlib": ">=1.5.2-",
-    "fabric-api": ">=0.91.0",
-    "minecraft": ">=1.20.4",
-    "java": ">=17"
+    "frozenlib": "${frozenlib_version}",
+    "fabric-api": "${fabric_api_version}",
+    "minecraft": "${minecraft_version}",
+    "java": ">=21"
   },
+
   "suggests": {
     "cloth-config": "*",
     "modmenu": "*"
+  },
+
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/frozenblock-modding-oasis-780746010614956112",
+        "modmenu.modrinth": "https://modrinth.com/mod/luna-slimes",
+        "modmenu.twitter": "https://twitter.com/LunadeModding",
+        "modmenu.youtube": "https://www.youtube.com/@LunadeMusic"
+      }
+    }
   }
 }

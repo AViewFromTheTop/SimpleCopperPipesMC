@@ -13,8 +13,8 @@ public enum PipeFluid implements StringRepresentable {
     LAVA("lava", Optional.of(CopperPipeMain.LAVA)),
     SMOKE("smoke", Optional.of(CopperPipeMain.SMOKE));
 
-    private final String name;
     public final Optional<ResourceLocation> nbtID;
+    private final String name;
 
     PipeFluid(String name, Optional<ResourceLocation> nbtID) {
         this.name = name;

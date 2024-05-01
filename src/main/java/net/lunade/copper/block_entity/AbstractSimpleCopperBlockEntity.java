@@ -8,6 +8,7 @@ import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -36,18 +37,16 @@ import java.util.Optional;
 
 public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockEntity implements Container {
 
+    public final MOVE_TYPE moveType;
     public NonNullList<ItemStack> inventory;
     public int waterCooldown;
     public int electricityCooldown;
     public boolean canWater;
     public boolean canLava;
     public boolean canSmoke;
-
     //DataFixing
     public int lastFixVersion;
-
     public MoveablePipeDataHandler moveablePipeDataHandler;
-    public final MOVE_TYPE moveType;
 
     public AbstractSimpleCopperBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState, MOVE_TYPE moveType) {
         super(blockEntityType, blockPos, blockState);
@@ -56,6 +55,25 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         this.electricityCooldown = -1;
         this.moveablePipeDataHandler = new MoveablePipeDataHandler();
         this.moveType = moveType;
+    }
+
+    public static void sendElectricity(Level level, BlockPos blockPos) {
+        for (Direction direction : Direction.values()) {
+            BlockPos pos = blockPos.relative(direction);
+            if (level.hasChunkAt(pos)) {
+                BlockState state = level.getBlockState(pos);
+                if (state.hasProperty(CopperPipeProperties.HAS_ELECTRICITY)) {
+                    BlockEntity entity = level.getBlockEntity(pos);
+                    if (entity instanceof AbstractSimpleCopperBlockEntity copperBlockEntity) {
+                        int axis = state.hasProperty(BlockStateProperties.FACING) ? state.getValue(BlockStateProperties.FACING).getAxis().ordinal() : direction.getAxis().ordinal();
+                        if (copperBlockEntity.electricityCooldown == -1) {
+                            level.levelEvent(3002, pos, axis);
+                            level.setBlockAndUpdate(pos, state.setValue(CopperPipeProperties.HAS_ELECTRICITY, true));
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void serverTick(@NotNull Level level, BlockPos blockPos, BlockState blockState) {
@@ -132,25 +150,6 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
         return false;
     }
 
-    public static void sendElectricity(Level level, BlockPos blockPos) {
-        for (Direction direction : Direction.values()) {
-            BlockPos pos = blockPos.relative(direction);
-            if (level.hasChunkAt(pos)) {
-                BlockState state = level.getBlockState(pos);
-                if (state.hasProperty(CopperPipeProperties.HAS_ELECTRICITY)) {
-                    BlockEntity entity = level.getBlockEntity(pos);
-                    if (entity instanceof AbstractSimpleCopperBlockEntity copperBlockEntity) {
-                        int axis = state.hasProperty(BlockStateProperties.FACING) ? state.getValue(BlockStateProperties.FACING).getAxis().ordinal() : direction.getAxis().ordinal();
-                        if (copperBlockEntity.electricityCooldown == -1) {
-                            level.levelEvent(3002, pos, axis);
-                            level.setBlockAndUpdate(pos, state.setValue(CopperPipeProperties.HAS_ELECTRICITY, true));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     public void updateBlockEntityValues(Level level, BlockPos pos, BlockState state) {
 
     }
@@ -213,11 +212,11 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     }
 
     @Override
-    public void load(CompoundTag nbtCompound) {
-        super.load(nbtCompound);
+    public void loadAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
+        super.loadAdditional(nbtCompound, lookupProvider);
         this.inventory = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         if (!this.tryLoadLootTable(nbtCompound)) {
-            ContainerHelper.loadAllItems(nbtCompound, this.inventory);
+            ContainerHelper.loadAllItems(nbtCompound, this.inventory, lookupProvider);
         }
         this.waterCooldown = nbtCompound.getInt("WaterCooldown");
         this.electricityCooldown = nbtCompound.getInt("electricityCooldown");
@@ -229,10 +228,10 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
     }
 
     @Override
-    protected void saveAdditional(CompoundTag nbtCompound) {
-        super.saveAdditional(nbtCompound);
+    protected void saveAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
+        super.saveAdditional(nbtCompound, lookupProvider);
         if (!this.trySaveLootTable(nbtCompound)) {
-            ContainerHelper.saveAllItems(nbtCompound, this.inventory);
+            ContainerHelper.saveAllItems(nbtCompound, this.inventory, lookupProvider);
         }
         nbtCompound.putInt("WaterCooldown", this.waterCooldown);
         nbtCompound.putInt("electricityCooldown", this.electricityCooldown);

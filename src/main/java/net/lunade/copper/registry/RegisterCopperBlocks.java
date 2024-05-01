@@ -1,6 +1,5 @@
 package net.lunade.copper.registry;
 
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperFitting;
@@ -140,7 +139,7 @@ public final class RegisterCopperBlocks {
 
     public static Block registerBlock(Block block, ResourceLocation resourceLocation) {
         var registered = Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
-        Item item = new BlockItem(block, new FabricItemSettings());
+        Item item = new BlockItem(block, new Item.Properties());
         Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.REDSTONE_BLOCKS).register((entries) -> entries.accept(item));
         return registered;
@@ -152,7 +151,7 @@ public final class RegisterCopperBlocks {
 
     public static Block registerColoured(Block block, ResourceLocation resourceLocation) {
         var registered = Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
-        Item item = new BlockItem(block, new FabricItemSettings());
+        Item item = new BlockItem(block, new Item.Properties());
         Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COLORED_BLOCKS).register((entries) -> entries.accept(item));
         return registered;

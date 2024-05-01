@@ -1,23 +1,19 @@
 package net.lunade.copper;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.lunade.copper.block_entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
+import net.lunade.copper.networking.packet.CopperPipeNoteParticlePacket;
 import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,13 +37,6 @@ public class RegisterPipeNbtMethods {
         UNIQUE_PIPE_NBTS.put(id, new UniquePipeNbt(dispense, move, tick, canMove));
     }
 
-    public record UniquePipeNbt(
-            DispenseMethod dispenseMethod,
-            OnMoveMethod onMoveMethod,
-            TickMethod tickMethod,
-            CanMoveMethod canMoveMethod
-    ) {}
-    
     @Nullable
     public static UniquePipeNbt getUniquePipeNbt(ResourceLocation id) {
         if (UNIQUE_PIPE_NBTS.containsKey(id)) {
@@ -92,32 +81,12 @@ public class RegisterPipeNbtMethods {
         return null;
     }
 
-    @FunctionalInterface
-    public interface DispenseMethod {
-        void dispense(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe);
-    }
-
-    @FunctionalInterface
-    public interface OnMoveMethod {
-        void onMove(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
-    }
-
-    @FunctionalInterface
-    public interface TickMethod {
-        void tick(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
-    }
-
-    @FunctionalInterface
-    public interface CanMoveMethod {
-        boolean canMove(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
-    }
-
     public static void init() {
         register(new ResourceLocation("lunade", "default"), (nbt, world, pos, blockState, pipe) -> {
             Direction direction = blockState.getValue(FACING);
             Direction directionOpp = direction.getOpposite();
             boolean noteBlock = false;
-            if (BuiltInRegistries.GAME_EVENT.get(nbt.getSavedID()) == GameEvent.NOTE_BLOCK_PLAY) {
+            if (BuiltInRegistries.GAME_EVENT.get(nbt.getSavedID()) == GameEvent.NOTE_BLOCK_PLAY.value()) {
                 pipe.noteBlockCooldown = 40;
                 boolean corroded;
                 float volume = 3.0F;
@@ -135,16 +104,10 @@ public class RegisterPipeNbtMethods {
                     float f = (float) Math.pow(2.0D, (double) (k - 12) / 12.0D);
                     world.playSound(null, pos, state.getValue(INSTRUMENT).getSoundEvent().value(), SoundSource.RECORDS, volume, f);
                     //Send NoteBlock Particle Packet To Client
-                    FriendlyByteBuf buf = PacketByteBufs.create();
-                    buf.writeBlockPos(pos);
-                    buf.writeInt(k);
-                    buf.writeInt(getDirection(world.getBlockState(pos).getValue(FACING)));
-                    for (ServerPlayer player : PlayerLookup.tracking(world, pos)) {
-                        ServerPlayNetworking.send(player, CopperPipeMain.NOTE_PACKET, buf);
-                    }
+                    CopperPipeNoteParticlePacket.sendToAll(world, pos, k, world.getBlockState(pos).getValue(FACING));
                 }
             }
-            world.gameEvent(nbt.getEntity(world), BuiltInRegistries.GAME_EVENT.get(nbt.getSavedID()), pos);
+            world.gameEvent(nbt.getEntity(world), BuiltInRegistries.GAME_EVENT.getHolder(nbt.getSavedID()).orElse(GameEvent.BLOCK_CHANGE), pos);
             if (noteBlock || pipe.noteBlockCooldown > 0) {
                 if (nbt.useCount == 0) {
                     world.sendParticles(new VibrationParticleOption(new BlockPositionSource(nbt.getBlockPos()), 5), nbt.getVec3d().x, nbt.getVec3d().y, nbt.getVec3d().z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
@@ -260,7 +223,7 @@ public class RegisterPipeNbtMethods {
             return true;
         });
 
-        }
+    }
 
     public static int getDirection(Direction direction) {
         if (direction == Direction.UP) {
@@ -282,6 +245,34 @@ public class RegisterPipeNbtMethods {
             return 6;
         }
         return 3;
+    }
+
+    @FunctionalInterface
+    public interface DispenseMethod {
+        void dispense(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe);
+    }
+
+    @FunctionalInterface
+    public interface OnMoveMethod {
+        void onMove(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
+    }
+
+    @FunctionalInterface
+    public interface TickMethod {
+        void tick(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
+    }
+
+    @FunctionalInterface
+    public interface CanMoveMethod {
+        boolean canMove(MoveablePipeDataHandler.SaveableMovablePipeNbt nbt, ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
+    }
+
+    public record UniquePipeNbt(
+            DispenseMethod dispenseMethod,
+            OnMoveMethod onMoveMethod,
+            TickMethod tickMethod,
+            CanMoveMethod canMoveMethod
+    ) {
     }
 
 

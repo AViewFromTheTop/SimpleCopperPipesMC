@@ -27,11 +27,6 @@ public class LeakingPipeDrips {
         return null;
     }
 
-    @FunctionalInterface
-    public interface DripOn {
-        void dripOn(boolean lava, ServerLevel world, BlockPos pos, BlockState state);
-    }
-
     public static void init() {
         register(Blocks.CAULDRON, ((lava, world, pos, state) -> {
             if (!lava) {
@@ -58,6 +53,11 @@ public class LeakingPipeDrips {
                 world.destroyBlock(pos, true);
             }
         }));
+    }
+
+    @FunctionalInterface
+    public interface DripOn {
+        void dripOn(boolean lava, ServerLevel world, BlockPos pos, BlockState state);
     }
 
 }

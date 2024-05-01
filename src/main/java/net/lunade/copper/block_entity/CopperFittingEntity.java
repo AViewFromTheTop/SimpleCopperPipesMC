@@ -11,6 +11,7 @@ import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -27,6 +28,11 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
     public CopperFittingEntity(BlockPos blockPos, BlockState blockState) {
         super(RegisterCopperBlockEntities.COPPER_FITTING_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_FITTING);
+    }
+
+    public static boolean canTransfer(@NotNull Level level, BlockPos pos, Direction direction, boolean to) {
+        BlockState blockState = level.getBlockState(pos);
+        return level.getBlockEntity(pos) instanceof CopperPipeEntity pipe && (!to || pipe.transferCooldown <= 0) && blockState.hasProperty(BlockStateProperties.FACING) && blockState.getValue(BlockStateProperties.FACING) == direction;
     }
 
     @Override
@@ -59,11 +65,6 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
             setCooldown(blockState);
             setChanged(level, blockPos, blockState);
         }
-    }
-
-    public static boolean canTransfer(@NotNull Level level, BlockPos pos, Direction direction, boolean to) {
-        BlockState blockState = level.getBlockState(pos);
-        return level.getBlockEntity(pos) instanceof CopperPipeEntity pipe && (!to || pipe.transferCooldown <= 0) && blockState.hasProperty(BlockStateProperties.FACING) && blockState.getValue(BlockStateProperties.FACING) == direction;
     }
 
     private boolean moveIn(Level level, @NotNull BlockPos blockPos, RandomSource randomSource) {
@@ -150,14 +151,14 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag nbtCompound) {
-        super.load(nbtCompound);
+    public void loadAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
+        super.loadAdditional(nbtCompound, lookupProvider);
         this.transferCooldown = nbtCompound.getInt("transferCooldown");
     }
 
     @Override
-    protected void saveAdditional(CompoundTag nbtCompound) {
-        super.saveAdditional(nbtCompound);
+    protected void saveAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
+        super.saveAdditional(nbtCompound, lookupProvider);
         nbtCompound.putInt("transferCooldown", this.transferCooldown);
     }
 

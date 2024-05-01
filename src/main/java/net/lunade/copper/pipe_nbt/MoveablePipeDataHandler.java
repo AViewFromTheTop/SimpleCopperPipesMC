@@ -32,9 +32,9 @@ import java.util.Optional;
 
 public class MoveablePipeDataHandler {
 
+    private static final Logger LOGGER = LogUtils.getLogger();
     public ArrayList<SaveableMovablePipeNbt> savedList = new ArrayList<>();
     public ArrayList<ResourceLocation> savedIds = new ArrayList<>();
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     public MoveablePipeDataHandler() {
 
@@ -143,22 +143,6 @@ public class MoveablePipeDataHandler {
 
     public static class SaveableMovablePipeNbt {
 
-        public ResourceLocation savedID;
-        public Vec3 vec3d;
-        public Vec3 vec3d2;
-        public String string;
-        public int useCount;
-        public BlockPos blockPos;
-        public boolean shouldSave;
-        public boolean shouldMove;
-        private boolean canOnlyBeUsedOnce;
-        private boolean canOnlyGoThroughOnePipe;
-        private boolean shouldCopy;
-        private ResourceLocation nbtID;
-
-        //TEMP STORAGE
-        public Entity foundEntity;
-
         public static final Codec<SaveableMovablePipeNbt> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
                 ResourceLocation.CODEC.fieldOf("savedID").forGetter(SaveableMovablePipeNbt::getSavedID),
                 Vec3.CODEC.fieldOf("vec3d").forGetter(SaveableMovablePipeNbt::getVec3d),
@@ -173,6 +157,20 @@ public class MoveablePipeDataHandler {
                 Codec.BOOL.fieldOf("shouldCopy").forGetter(SaveableMovablePipeNbt::getShouldCopy),
                 ResourceLocation.CODEC.fieldOf("nbtId").forGetter(SaveableMovablePipeNbt::getNbtID)
         ).apply(instance, SaveableMovablePipeNbt::new));
+        public ResourceLocation savedID;
+        public Vec3 vec3d;
+        public Vec3 vec3d2;
+        public String string;
+        public int useCount;
+        public BlockPos blockPos;
+        public boolean shouldSave;
+        public boolean shouldMove;
+        //TEMP STORAGE
+        public Entity foundEntity;
+        private boolean canOnlyBeUsedOnce;
+        private boolean canOnlyGoThroughOnePipe;
+        private boolean shouldCopy;
+        private ResourceLocation nbtID;
 
         public SaveableMovablePipeNbt(ResourceLocation id, Vec3 vec3d, Vec3 vec3d2, String string, int useCount, BlockPos blockPos, boolean shouldSave, boolean shouldMove, boolean canOnlyBeUsedOnce, boolean canOnlyGoThroughOnePipe, boolean shouldCopy, ResourceLocation nbtId) {
             this.savedID = id;
@@ -229,10 +227,10 @@ public class MoveablePipeDataHandler {
 
         public SaveableMovablePipeNbt() {
             this.savedID = new ResourceLocation("lunade", "none");
-            this.vec3d = new Vec3(0,-64,0);
-            this.vec3d2 = new Vec3(0,-64,0);
+            this.vec3d = new Vec3(0, -64, 0);
+            this.vec3d2 = new Vec3(0, -64, 0);
             this.string = "none";
-            this.blockPos = new BlockPos(0,-64,0);
+            this.blockPos = new BlockPos(0, -64, 0);
             this.nbtID = new ResourceLocation("lunade", "none");
             this.useCount = 0;
             this.canOnlyGoThroughOnePipe = false;

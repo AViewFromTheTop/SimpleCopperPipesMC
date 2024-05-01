@@ -44,7 +44,8 @@ public class WrenchItemMixin {
             cir.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide)); // Don't do anything if the player isn't shifting.
         }
         if (block instanceof CopperPipe) {
-            IWrenchable wrenchable = new IWrenchable() {};
+            IWrenchable wrenchable = new IWrenchable() {
+            };
             BlockState rotated = wrenchable.getRotatedBlockState(blockState, context.getClickedFace());
 
             BlockState state = rotated

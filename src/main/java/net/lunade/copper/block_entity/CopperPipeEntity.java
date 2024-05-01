@@ -21,6 +21,8 @@ import net.lunade.copper.pipe_nbt.MoveablePipeDataHandler;
 import net.lunade.copper.registry.RegisterCopperBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -52,11 +54,12 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
-public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements GameEventListener.Holder<VibrationSystem.Listener>, VibrationSystem {
+public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements GameEventListener.Provider<VibrationSystem.Listener>, VibrationSystem {
 
     private static final int VIBRATION_RANGE = 8;
     private static final int MAX_TRANSFER_AMOUNT = 1;
-
+    private final VibrationSystem.Listener vibrationListener;
+    private final VibrationSystem.User vibrationUser;
     public int transferCooldown;
     public int dispenseCooldown;
     public int noteBlockCooldown;
@@ -65,13 +68,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     public boolean shootsControlled;
     public boolean shootsSpecial;
     public boolean canAccept;
-
-    private VibrationSystem.Data vibrationData;
-    private final VibrationSystem.Listener vibrationListener;
-    private final VibrationSystem.User vibrationUser;
-
     public BlockPos inputGameEventPos;
     public Vec3 gameEventNbtVec3;
+    private VibrationSystem.Data vibrationData;
 
     public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
         super(RegisterCopperBlockEntities.COPPER_PIPE_ENTITY, blockPos, blockState, MOVE_TYPE.FROM_PIPE);
@@ -79,6 +78,82 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.vibrationUser = this.createVibrationUser();
         this.vibrationData = new VibrationSystem.Data();
         this.vibrationListener = new VibrationSystem.Listener(this);
+    }
+
+    public static boolean canTransfer(Level level, BlockPos pos, boolean to, @NotNull CopperPipeEntity copperPipe, @Nullable Storage<ItemVariant> inventory, @Nullable Storage<ItemVariant> pipeInventory) {
+        if (copperPipe.transferCooldown > 0) {
+            return false;
+        }
+        boolean transferApiCheck = true;
+        boolean usingTransferApi = false;
+        if (inventory != null) {
+            usingTransferApi = true;
+            transferApiCheck = to
+                    ? inventory.supportsInsertion() && (pipeInventory == null || pipeInventory.supportsExtraction())
+                    : inventory.supportsExtraction() && (pipeInventory == null || pipeInventory.supportsInsertion());
+        }
+        BlockEntity entity = level.getBlockEntity(pos);
+        if (entity != null) {
+            if (entity instanceof CopperPipeEntity pipe) {
+                return (to || pipe.transferCooldown <= 0) && transferApiCheck;
+            }
+            if (entity instanceof CopperFittingEntity) {
+                return false;
+            }
+            if (to) {
+                PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
+                if (canTransfer != null) {
+                    return canTransfer.canTransfer((ServerLevel) level, pos, level.getBlockState(pos), copperPipe, entity) && transferApiCheck;
+                }
+            } else {
+                PipeMovementRestrictions.CanTakeFrom<BlockEntity> canTake = PipeMovementRestrictions.getCanTakeFrom(entity);
+                if (canTake != null) {
+                    return canTake.canTake((ServerLevel) level, pos, level.getBlockState(pos), copperPipe, entity) && transferApiCheck;
+                }
+            }
+        }
+        return usingTransferApi && transferApiCheck;
+    }
+
+    public static long addItem(ItemVariant resource, @NotNull Storage<ItemVariant> inventory, Transaction transaction) {
+        if (inventory.supportsInsertion()) {
+            return inventory.insert(resource, MAX_TRANSFER_AMOUNT, transaction);
+        }
+        return 0L;
+    }
+
+    public static void spawnItem(Level level, ItemStack itemStack, int shotLength, @NotNull Direction direction, @NotNull Vec3 vec3, Direction facing, boolean corroded) { //Simply Spawn An Item
+        double d = vec3.x();
+        double e = vec3.y();
+        double f = vec3.z();
+        if (direction.getAxis() == Direction.Axis.Y) {
+            e -= 0.125D;
+        } else {
+            e -= 0.15625D;
+        }
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        Direction.Axis axis = facing.getAxis();
+        BiFunction<Boolean, Double, Double> fun = (corr, pos) -> Boolean.TRUE.equals(corr) ? (level.random.nextDouble() * 0.6) - 0.3 : pos;
+        x = axis == Direction.Axis.X ? (shotLength * facing.getStepX()) * 0.1 : fun.apply(corroded, x);
+        y = axis == Direction.Axis.Y ? (shotLength * facing.getStepY()) * 0.1 : fun.apply(corroded, y);
+        z = axis == Direction.Axis.Z ? (shotLength * facing.getStepZ()) * 0.1 : fun.apply(corroded, z);
+        ItemEntity itemEntity = new ItemEntity(level, d, e, f, itemStack);
+        itemEntity.setDeltaMovement(x, y, z);
+        level.addFreshEntity(itemEntity);
+    }
+
+    public static void setCooldown(@NotNull Level level, BlockPos blockPos) {
+        BlockEntity entity = level.getBlockEntity(blockPos);
+        BlockState state = level.getBlockState(blockPos);
+        if (entity instanceof CopperPipeEntity pipe) {
+            pipe.setCooldown(state);
+        }
+    }
+
+    public static Storage<ItemVariant> getStorageAt(Level level, BlockPos blockPos, Direction direction) {
+        return ItemStorage.SIDED.find(level, blockPos, level.getBlockState(blockPos), level.getBlockEntity(blockPos), direction);
     }
 
     @Override
@@ -139,7 +214,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             this.shootsControlled = oppBlock == Blocks.DROPPER;
             this.shootsSpecial = oppBlock == Blocks.DISPENSER;
             this.canAccept = !(oppBlock instanceof CopperPipe) && !(oppBlock instanceof CopperFitting) && !oppState.isRedstoneConductor(level, pos);
-            this.canWater = (oppBlock == Blocks.WATER ||state.getValue(BlockStateProperties.WATERLOGGED) || (oppState.hasProperty(BlockStateProperties.WATERLOGGED) ? oppState.getValue(BlockStateProperties.WATERLOGGED) : false)) && SimpleCopperPipesConfig.get().carryWater;
+            this.canWater = (oppBlock == Blocks.WATER || state.getValue(BlockStateProperties.WATERLOGGED) || (oppState.hasProperty(BlockStateProperties.WATERLOGGED) ? oppState.getValue(BlockStateProperties.WATERLOGGED) : false)) && SimpleCopperPipesConfig.get().carryWater;
             this.canLava = oppBlock == Blocks.LAVA && SimpleCopperPipesConfig.get().carryLava;
             boolean canWaterAndLava = this.canWater && this.canLava;
             this.canSmoke = (oppBlock instanceof CampfireBlock && !this.canWater && !this.canLava ? oppState.getValue(BlockStateProperties.LIT) : canWaterAndLava) && SimpleCopperPipesConfig.get().carrySmoke;
@@ -163,41 +238,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 }
             }
         }
-    }
-
-    public static boolean canTransfer(Level level, BlockPos pos, boolean to, @NotNull CopperPipeEntity copperPipe, @Nullable Storage<ItemVariant> inventory, @Nullable Storage<ItemVariant> pipeInventory) {
-        if (copperPipe.transferCooldown > 0) {
-            return false;
-        }
-        boolean transferApiCheck = true;
-        boolean usingTransferApi = false;
-        if (inventory != null) {
-            usingTransferApi = true;
-            transferApiCheck = to
-                    ? inventory.supportsInsertion() && (pipeInventory == null || pipeInventory.supportsExtraction())
-                    : inventory.supportsExtraction() && (pipeInventory == null || pipeInventory.supportsInsertion());
-        }
-        BlockEntity entity = level.getBlockEntity(pos);
-        if (entity != null) {
-            if (entity instanceof CopperPipeEntity pipe) {
-                return (to || pipe.transferCooldown <= 0) && transferApiCheck;
-            }
-            if (entity instanceof CopperFittingEntity) {
-                return false;
-            }
-            if (to) {
-                PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
-                if (canTransfer != null) {
-                    return canTransfer.canTransfer((ServerLevel)level, pos, level.getBlockState(pos), copperPipe, entity) && transferApiCheck;
-                }
-            } else {
-                PipeMovementRestrictions.CanTakeFrom<BlockEntity> canTake = PipeMovementRestrictions.getCanTakeFrom(entity);
-                if (canTake != null) {
-                    return canTake.canTake((ServerLevel)level, pos, level.getBlockState(pos), copperPipe, entity) && transferApiCheck;
-                }
-            }
-        }
-        return usingTransferApi && transferApiCheck;
     }
 
     private int moveIn(Level level, @NotNull BlockPos blockPos, BlockState blockState, @NotNull Direction facing) {
@@ -231,13 +271,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             }
         }
         return 0;
-    }
-
-    public static long addItem(ItemVariant resource, @NotNull Storage<ItemVariant> inventory, Transaction transaction) {
-        if (inventory.supportsInsertion()) {
-            return inventory.insert(resource, MAX_TRANSFER_AMOUNT, transaction);
-        }
-        return 0L;
     }
 
     private boolean moveOut(Level level, @NotNull BlockPos blockPos, Direction facing) {
@@ -295,7 +328,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                                 serverLevel.playSound(null, blockPos, CopperPipeMain.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
                             }
                         } else {
-                            shotLength= 12;
+                            shotLength = 12;
                         }
                     }
                     boolean silent = blockState.is(CopperPipeMain.SILENT_PIPES);
@@ -360,28 +393,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return itemStack;
     }
 
-    public static void spawnItem(Level level, ItemStack itemStack, int shotLength, @NotNull Direction direction, @NotNull Vec3 vec3, Direction facing, boolean corroded) { //Simply Spawn An Item
-        double d = vec3.x();
-        double e = vec3.y();
-        double f = vec3.z();
-        if (direction.getAxis() == Direction.Axis.Y) {
-            e -= 0.125D;
-        } else {
-            e -= 0.15625D;
-        }
-        double x = 0;
-        double y = 0;
-        double z = 0;
-        Direction.Axis axis = facing.getAxis();
-        BiFunction<Boolean, Double, Double> fun = (corr, pos) -> Boolean.TRUE.equals(corr) ? (level.random.nextDouble() * 0.6) - 0.3 : pos;
-        x = axis == Direction.Axis.X ? (shotLength * facing.getStepX()) * 0.1 : fun.apply(corroded, x);
-        y = axis == Direction.Axis.Y ? (shotLength * facing.getStepY()) * 0.1 : fun.apply(corroded, y);
-        z = axis == Direction.Axis.Z ? (shotLength * facing.getStepZ()) * 0.1 : fun.apply(corroded, z);
-        ItemEntity itemEntity = new ItemEntity(level, d, e, f, itemStack);
-        itemEntity.setDeltaMovement(x, y, z);
-        level.addFreshEntity(itemEntity);
-    }
-
     public int chooseNonEmptySlot(RandomSource random) {
         this.unpackLootTable(null);
         int i = -1;
@@ -390,7 +401,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
             if (!this.inventory.get(k).isEmpty() && random.nextInt(j++) == 0) {
                 i = k;
             }
-        } return i;
+        }
+        return i;
     }
 
     public void setCooldown(@NotNull BlockState state) {
@@ -401,21 +413,9 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         this.transferCooldown = i;
     }
 
-    public static void setCooldown(@NotNull Level level, BlockPos blockPos) {
-        BlockEntity entity = level.getBlockEntity(blockPos);
-        BlockState state = level.getBlockState(blockPos);
-        if (entity instanceof CopperPipeEntity pipe) {
-            pipe.setCooldown(state);
-        }
-    }
-
-    public static Storage<ItemVariant> getStorageAt(Level level, BlockPos blockPos, Direction direction) {
-        return ItemStorage.SIDED.find(level, blockPos, level.getBlockState(blockPos), level.getBlockEntity(blockPos), direction);
-    }
-
     @Override
-    public void load(CompoundTag nbtCompound) {
-        super.load(nbtCompound);
+    public void loadAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
+        super.loadAdditional(nbtCompound, lookupProvider);
         this.transferCooldown = nbtCompound.getInt("transferCooldown");
         this.dispenseCooldown = nbtCompound.getInt("dispenseCooldown");
         this.noteBlockCooldown = nbtCompound.getInt("noteBlockCooldown");
@@ -432,8 +432,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
     }
 
     @Override
-    protected void saveAdditional(CompoundTag nbtCompound) {
-        super.saveAdditional(nbtCompound);
+    protected void saveAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
+        super.saveAdditional(nbtCompound, lookupProvider);
         nbtCompound.putInt("transferCooldown", this.transferCooldown);
         nbtCompound.putInt("dispenseCooldown", this.dispenseCooldown);
         nbtCompound.putInt("noteBlockCooldown", this.noteBlockCooldown);
@@ -469,62 +469,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
         return this.vibrationListener;
     }
 
-    public class VibrationUser implements VibrationSystem.User {
-        protected final BlockPos blockPos;
-        private final PositionSource positionSource;
-
-        public VibrationUser(BlockPos blockPos) {
-            this.blockPos = blockPos;
-            this.positionSource = new BlockPositionSource(blockPos);
-        }
-
-        @Override
-        public int getListenerRadius() {
-            return VIBRATION_RANGE;
-        }
-
-        @Override
-        @NotNull
-        public PositionSource getPositionSource() {
-            return this.positionSource;
-        }
-
-        @Override
-        public boolean canTriggerAvoidVibration() {
-            return false;
-        }
-
-        @Override
-        public boolean canReceiveVibration(@NotNull ServerLevel serverLevel, BlockPos blockPos, GameEvent gameEvent, @Nullable GameEvent.Context context) {
-            if (SimpleCopperPipesConfig.get().senseGameEvents) {
-                boolean placeDestroy = gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE;
-                if ((serverLevel.getBlockState(blockPos).getBlock() instanceof CopperPipe) || (blockPos == CopperPipeEntity.this.getBlockPos() && placeDestroy)) {
-                    return false;
-                }
-                if (CopperPipeEntity.this.canAccept) {
-                    CopperPipeEntity.this.moveablePipeDataHandler.addSaveableMoveablePipeNbt(new MoveablePipeDataHandler.SaveableMovablePipeNbt(gameEvent, Vec3.atCenterOf(blockPos), context, CopperPipeEntity.this.getBlockPos()).withShouldMove(true).withShouldSave(true));
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public void onReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, float f) {
-
-        }
-
-        @Override
-        public void onDataChanged() {
-            CopperPipeEntity.this.setChanged();
-        }
-
-        @Override
-        public boolean requiresAdjacentChunksToBeTicking() {
-            return true;
-        }
-    }
-
     @Override
     public boolean canAcceptMoveableNbt(MOVE_TYPE moveType, Direction moveDirection, BlockState fromState) {
         if (moveType == MOVE_TYPE.FROM_FITTING) {
@@ -550,6 +494,57 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 }
                 this.moveMoveableNbt(serverLevel, blockPos, blockState);
             }
+        }
+    }
+
+    public class VibrationUser implements VibrationSystem.User {
+        protected final BlockPos blockPos;
+        private final PositionSource positionSource;
+
+        public VibrationUser(BlockPos blockPos) {
+            this.blockPos = blockPos;
+            this.positionSource = new BlockPositionSource(blockPos);
+        }
+
+        @Override
+        public int getListenerRadius() {
+            return VIBRATION_RANGE;
+        }
+
+        @Override
+        @NotNull
+        public PositionSource getPositionSource() {
+            return this.positionSource;
+        }
+
+        @Override
+        public boolean canReceiveVibration(@NotNull ServerLevel serverLevel, @NotNull BlockPos blockPos, @NotNull Holder<GameEvent> gameEvent, @Nullable GameEvent.Context context) {
+            if (SimpleCopperPipesConfig.get().senseGameEvents) {
+                boolean placeDestroy = gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE;
+                if ((serverLevel.getBlockState(blockPos).getBlock() instanceof CopperPipe) || (blockPos == CopperPipeEntity.this.getBlockPos() && placeDestroy)) {
+                    return false;
+                }
+                if (CopperPipeEntity.this.canAccept) {
+                    CopperPipeEntity.this.moveablePipeDataHandler.addSaveableMoveablePipeNbt(new MoveablePipeDataHandler.SaveableMovablePipeNbt(gameEvent.value(), Vec3.atCenterOf(blockPos), context, CopperPipeEntity.this.getBlockPos()).withShouldMove(true).withShouldSave(true));
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void onReceiveVibration(@NotNull ServerLevel serverLevel, @NotNull BlockPos blockPos, @NotNull Holder<GameEvent> gameEvent, @Nullable Entity entity, @Nullable Entity entity2, float f) {
+
+        }
+
+        @Override
+        public void onDataChanged() {
+            CopperPipeEntity.this.setChanged();
+        }
+
+        @Override
+        public boolean requiresAdjacentChunksToBeTicking() {
+            return true;
         }
     }
 

@@ -15,7 +15,9 @@
     "SugarCaneBlockMixin",
     "VibrationListenerMixin",
     "VibrationTickerMixin",
-    "create.WrenchItemMixin"
+    "create.WrenchItemMixin",
+    "datafix.DataFixersMixin",
+    "datafix.V3438Mixin"
   ],
   "injectors": {
     "defaultRequire": 1

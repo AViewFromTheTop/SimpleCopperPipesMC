@@ -1,7 +1,0 @@
-{
-	"parent": "lunade:block/template_fitting",
-	"textures": {
-		"particle": "lunade:block/orange_fitting",
-		"texture": "lunade:block/orange_fitting"
-	}
-}

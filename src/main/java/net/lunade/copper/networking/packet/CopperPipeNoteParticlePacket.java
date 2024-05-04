@@ -2,7 +2,7 @@ package net.lunade.copper.networking.packet;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.lunade.copper.CopperPipeMain;
+import net.lunade.copper.SimpleCopperPipesSharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,11 +12,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
-public record CopperPipeNoteParticlePacket(BlockPos blockPos, int pitch,
-                                           Direction direction) implements CustomPacketPayload {
+public record CopperPipeNoteParticlePacket(BlockPos blockPos, int pitch, Direction direction) implements CustomPacketPayload {
 
     public static final Type<CopperPipeNoteParticlePacket> PACKET_TYPE = CustomPacketPayload.createType(
-            CopperPipeMain.id("note_particle").toString()
+            SimpleCopperPipesSharedConstants.id("note_particle").toString()
     );
 
     public static final StreamCodec<FriendlyByteBuf, CopperPipeNoteParticlePacket> CODEC = StreamCodec.ofMember(CopperPipeNoteParticlePacket::write, CopperPipeNoteParticlePacket::new);

@@ -1,8 +1,0 @@
-{
-	"parent": "lunade:block/template_pipe_back_extension",
-	"textures": {
-		"particle": "lunade:block/weathered_copper_pipe",
-		"side": "lunade:block/weathered_copper_pipe",
-		"front": "lunade:block/weathered_copper_pipe_front"
-	}
-}

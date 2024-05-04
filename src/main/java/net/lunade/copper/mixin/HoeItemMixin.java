@@ -1,7 +1,7 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.CopperPipeMain;
 import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.registry.RegisterSoundEvents;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -49,7 +49,7 @@ public class HoeItemMixin {
                         .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(level, blockPos, face));
 
                 level.setBlockAndUpdate(blockPos, state);
-                level.playSound(null, blockPos, CopperPipeMain.TURN, SoundSource.BLOCKS, 0.5F, 1F);
+                level.playSound(null, blockPos, RegisterSoundEvents.TURN, SoundSource.BLOCKS, 0.5F, 1F);
                 if (playerEntity != null) {
                     itemUsageContext.getItemInHand().hurtAndBreak(1, playerEntity, LivingEntity.getSlotForHand(itemUsageContext.getHand()));
                 }

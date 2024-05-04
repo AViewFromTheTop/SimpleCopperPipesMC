@@ -1,7 +1,7 @@
 package net.lunade.copper.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import net.lunade.copper.leaking_pipes.LeakingPipeManager;
+import net.lunade.copper.blocks.block_entity.leaking_pipes.LeakingPipeManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;

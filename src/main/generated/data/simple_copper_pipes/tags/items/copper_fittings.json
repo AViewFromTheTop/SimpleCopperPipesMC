@@ -1,0 +1,12 @@
+{
+  "values": [
+    "simple_copper_pipes:copper_fitting",
+    "simple_copper_pipes:exposed_copper_fitting",
+    "simple_copper_pipes:weathered_copper_fitting",
+    "simple_copper_pipes:oxidized_copper_fitting",
+    "simple_copper_pipes:waxed_copper_fitting",
+    "simple_copper_pipes:waxed_exposed_copper_fitting",
+    "simple_copper_pipes:waxed_weathered_copper_fitting",
+    "simple_copper_pipes:waxed_oxidized_copper_fitting"
+  ]
+}

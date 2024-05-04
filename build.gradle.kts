@@ -17,6 +17,7 @@ val loader_version: String by project
 
 val mod_version: String by project
 val mod_id: String by project
+val protocol_version: String by project
 val maven_group: String by project
 val archives_base_name: String by project
 
@@ -34,6 +35,11 @@ base {
 version = mod_version
 group = maven_group
 
+val datagen by sourceSets.registering {
+	compileClasspath += sourceSets.main.get().compileClasspath
+	runtimeClasspath += sourceSets.main.get().runtimeClasspath
+}
+
 loom {
 	runtimeOnlyLog4j = true
 
@@ -45,6 +51,28 @@ loom {
 	interfaceInjection {
 		// When enabled, injected interfaces from dependencies will be applied.
 		enableDependencyInterfaceInjection = false
+	}
+
+	runs {
+		register("datagen") {
+			client()
+			name("Data Generation")
+			source(datagen.get())
+			vmArg("-Dfabric-api.datagen")
+			vmArg("-Dfabric-api.datagen.output-dir=${file("src/main/generated")}")
+			//vmArg("-Dfabric-api.datagen.strict-validation")
+			vmArg("-Dfabric-api.datagen.modid=$mod_id")
+
+			ideConfigGenerated(true)
+			runDir = "build/datagen"
+		}
+
+		named("client") {
+			ideConfigGenerated(true)
+		}
+		named("server") {
+			ideConfigGenerated(true)
+		}
 	}
 }
 
@@ -113,8 +141,10 @@ dependencies {
 	})
 	modImplementation("net.fabricmc:fabric-loader:$loader_version")
 
+	// Create
 	modCompileOnly("maven.modrinth:create-fabric:0.5.1-d-build.1161+mc1.20.1")
 
+	// Fabric API
 	modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_api_version")
 
 	// FrozenLib
@@ -123,12 +153,15 @@ dependencies {
 	else
 		modApi("maven.modrinth:frozenlib:$frozenlib_version")?.let { include(it) }
 
+	// Cloth Config
 	modApi("me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version") {
 		exclude(group = "net.fabricmc.fabric-api")
 		exclude(group = "com.terraformersmc")
 	}
-
+	// ModMenu
 	modImplementation("maven.modrinth:modmenu:$modmenu_version")
+
+	"datagenImplementation"(sourceSets.main.get().output)
 }
 
 tasks {
@@ -136,6 +169,7 @@ tasks {
 		val properties = mapOf(
 			"mod_id" to mod_id,
 			"version" to version,
+			"protocol_version" to protocol_version,
 			"minecraft_version" to minecraft_version,
 
 			"fabric_api_version" to ">=$fabric_api_version",

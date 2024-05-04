@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "simple_copper_pipes:waxed_weathered_copper_fitting"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_weathered_copper_fitting": {
+      "conditions": {
+        "items": [
+          {
+            "items": "simple_copper_pipes:weathered_copper_fitting"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_weathered_copper_fitting"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "simple_copper_pipes:waxed_weathered_copper_fitting"
+    ]
+  }
+}

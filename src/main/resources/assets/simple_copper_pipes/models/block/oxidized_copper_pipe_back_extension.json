@@ -1,0 +1,8 @@
+{
+	"parent": "simple_copper_pipes:block/template_pipe_back_extension",
+	"textures": {
+		"particle": "simple_copper_pipes:block/oxidized_copper_pipe",
+		"side": "simple_copper_pipes:block/oxidized_copper_pipe",
+		"front": "simple_copper_pipes:block/oxidized_copper_pipe_front"
+	}
+}

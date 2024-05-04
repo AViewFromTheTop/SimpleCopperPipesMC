@@ -5,13 +5,13 @@ import net.frozenblock.lib.config.api.instance.json.JsonConfig;
 import net.frozenblock.lib.config.api.instance.json.JsonType;
 import net.frozenblock.lib.config.api.registry.ConfigRegistry;
 import net.frozenblock.lib.config.api.sync.annotation.EntrySyncData;
-import net.lunade.copper.CopperPipeMain;
+import net.lunade.copper.SimpleCopperPipesSharedConstants;
 
 public final class SimpleCopperPipesConfig {
 
     public static final Config<SimpleCopperPipesConfig> INSTANCE = ConfigRegistry.register(
             new JsonConfig<>(
-                    CopperPipeMain.MOD_ID,
+                    SimpleCopperPipesSharedConstants.MOD_ID,
                     SimpleCopperPipesConfig.class,
                     JsonType.JSON5,
                     null,
@@ -24,9 +24,6 @@ public final class SimpleCopperPipesConfig {
 
     @EntrySyncData("dispensing")
     public boolean dispensing = true;
-
-    @EntrySyncData("specialEffectDispensing")
-    public boolean specialEffectDispensing = true;
 
     @EntrySyncData("dispenseSounds")
     public boolean dispenseSounds = true;

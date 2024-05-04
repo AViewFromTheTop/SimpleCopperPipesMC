@@ -1,7 +1,0 @@
-{
-	"parent": "lunade:block/template_pipe_double_extension",
-	"textures": {
-		"particle": "lunade:block/brown_pipe",
-		"side": "lunade:block/brown_pipe"
-	}
-}

@@ -1,0 +1,195 @@
+{
+  "variants": {
+    "facing=down,front_connected=false,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe",
+      "x": 90
+    },
+    "facing=up,front_connected=false,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe",
+      "x": 270
+    },
+    "facing=east,front_connected=false,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe",
+      "y": 90
+    },
+    "facing=north,front_connected=false,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe"
+    },
+    "facing=south,front_connected=false,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe",
+      "y": 180
+    },
+    "facing=west,front_connected=false,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe",
+      "y": 270
+    },
+
+    "facing=down,front_connected=true,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension",
+      "x": 90
+    },
+    "facing=up,front_connected=true,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension",
+      "x": 270
+    },
+    "facing=east,front_connected=true,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension",
+      "y": 90
+    },
+    "facing=north,front_connected=true,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension"
+    },
+    "facing=south,front_connected=true,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension",
+      "y": 180
+    },
+    "facing=west,front_connected=true,back_connected=false,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension",
+      "y": 270
+    },
+
+    "facing=down,front_connected=true,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension",
+      "x": 90
+    },
+    "facing=up,front_connected=true,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension",
+      "x": 270
+    },
+    "facing=east,front_connected=true,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension",
+      "y": 90
+    },
+    "facing=north,front_connected=true,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension"
+    },
+    "facing=south,front_connected=true,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension",
+      "y": 180
+    },
+    "facing=west,front_connected=true,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension",
+      "y": 270
+    },
+
+    "facing=down,front_connected=true,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension",
+      "x": 90
+    },
+    "facing=up,front_connected=true,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension",
+      "x": 270
+    },
+    "facing=east,front_connected=true,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension",
+      "y": 90
+    },
+    "facing=north,front_connected=true,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension"
+    },
+    "facing=south,front_connected=true,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension",
+      "y": 180
+    },
+    "facing=west,front_connected=true,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_double_extension",
+      "y": 270
+    },
+
+    "facing=down,front_connected=true,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension",
+      "x": 90
+    },
+    "facing=up,front_connected=true,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension",
+      "x": 270
+    },
+    "facing=east,front_connected=true,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension",
+      "y": 90
+    },
+    "facing=north,front_connected=true,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension"
+    },
+    "facing=south,front_connected=true,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension",
+      "y": 180
+    },
+    "facing=west,front_connected=true,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_forward_extension",
+      "y": 270
+    },
+
+    "facing=down,front_connected=false,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_smooth",
+      "x": 90
+    },
+    "facing=up,front_connected=false,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_smooth",
+      "x": 270
+    },
+    "facing=east,front_connected=false,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_smooth",
+      "y": 90
+    },
+    "facing=north,front_connected=false,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_smooth"
+    },
+    "facing=south,front_connected=false,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_smooth",
+      "y": 180
+    },
+    "facing=west,front_connected=false,back_connected=false,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_smooth",
+      "y": 270
+    },
+
+    "facing=down,front_connected=false,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_extension",
+      "x": 90
+    },
+    "facing=up,front_connected=false,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_extension",
+      "x": 270
+    },
+    "facing=east,front_connected=false,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_extension",
+      "y": 90
+    },
+    "facing=north,front_connected=false,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_extension"
+    },
+    "facing=south,front_connected=false,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_extension",
+      "y": 180
+    },
+    "facing=west,front_connected=false,back_connected=true,smooth=false": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_extension",
+      "y": 270
+    },
+
+    "facing=down,front_connected=false,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_smooth",
+      "x": 90
+    },
+    "facing=up,front_connected=false,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_smooth",
+      "x": 270
+    },
+    "facing=east,front_connected=false,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_smooth",
+      "y": 90
+    },
+    "facing=north,front_connected=false,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_smooth"
+    },
+    "facing=south,front_connected=false,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_smooth",
+      "y": 180
+    },
+    "facing=west,front_connected=false,back_connected=true,smooth=true": {
+      "model": "simple_copper_pipes:block/exposed_copper_pipe_back_smooth",
+      "y": 270
+    }
+  }
+}

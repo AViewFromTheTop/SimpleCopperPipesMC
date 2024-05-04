@@ -7,7 +7,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.frozenblock.lib.config.api.instance.Config;
 import net.frozenblock.lib.config.clothconfig.FrozenClothConfig;
-import net.lunade.copper.CopperPipeMain;
+import net.lunade.copper.SimpleCopperPipesMain;
+import net.lunade.copper.SimpleCopperPipesSharedConstants;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -68,20 +69,6 @@ public final class SimpleCopperPipesConfigGui {
 
         category.addEntry(
                 FrozenClothConfig.syncedEntry(
-                        entryBuilder.startBooleanToggle(text("special_effect_dispensing"), modifiedConfig.specialEffectDispensing)
-                                .setDefaultValue(defaultConfig.specialEffectDispensing)
-                                .setSaveConsumer(newValue -> config.specialEffectDispensing = newValue)
-                                .setTooltip(tooltip("special_effect_dispensing"))
-                                .setYesNoTextSupplier(bool -> text(bool.toString()))
-                                .build(),
-                        clazz,
-                        "specialEffectDispensing",
-                        configInstance
-                )
-        );
-
-        category.addEntry(
-                FrozenClothConfig.syncedEntry(
                         entryBuilder.startBooleanToggle(text("dispense_sounds"), modifiedConfig.dispenseSounds)
                                 .setDefaultValue(defaultConfig.dispenseSounds)
                                 .setSaveConsumer(newValue -> config.dispenseSounds = newValue)
@@ -128,7 +115,7 @@ public final class SimpleCopperPipesConfigGui {
                                 .setDefaultValue(defaultConfig.carryWater)
                                 .setSaveConsumer(newValue -> {
                                     config.carryWater = newValue;
-                                    CopperPipeMain.refreshValues = true;
+                                    SimpleCopperPipesMain.refreshValues = true;
                                 })
                                 .setTooltip(tooltip("carry_water"))
                                 .setYesNoTextSupplier(bool -> text(bool.toString()))
@@ -145,7 +132,7 @@ public final class SimpleCopperPipesConfigGui {
                                 .setDefaultValue(defaultConfig.carryLava)
                                 .setSaveConsumer(newValue -> {
                                     config.carryLava = newValue;
-                                    CopperPipeMain.refreshValues = true;
+                                    SimpleCopperPipesMain.refreshValues = true;
                                 })
                                 .setTooltip(tooltip("carry_lava"))
                                 .setYesNoTextSupplier(bool -> text(bool.toString()))
@@ -162,7 +149,7 @@ public final class SimpleCopperPipesConfigGui {
                                 .setDefaultValue(defaultConfig.carrySmoke)
                                 .setSaveConsumer(newValue -> {
                                     config.carrySmoke = newValue;
-                                    CopperPipeMain.refreshValues = true;
+                                    SimpleCopperPipesMain.refreshValues = true;
                                 })
                                 .setTooltip(tooltip("carry_smoke"))
                                 .setYesNoTextSupplier(bool -> text(bool.toString()))
@@ -177,12 +164,12 @@ public final class SimpleCopperPipesConfigGui {
     @NotNull
     @Contract(value = "_ -> new", pure = true)
     private static Component text(String key) {
-        return Component.translatable("option." + CopperPipeMain.NAMESPACE + "." + key);
+        return Component.translatable("option." + SimpleCopperPipesSharedConstants.NAMESPACE + "." + key);
     }
 
     @NotNull
     @Contract(value = "_ -> new", pure = true)
     private static Component tooltip(String key) {
-        return Component.translatable("tooltip." + CopperPipeMain.NAMESPACE + "." + key);
+        return Component.translatable("tooltip." + SimpleCopperPipesSharedConstants.NAMESPACE + "." + key);
     }
 }

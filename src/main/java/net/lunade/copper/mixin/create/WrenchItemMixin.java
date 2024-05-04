@@ -24,15 +24,23 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(WrenchItem.class)
 public class WrenchItemMixin {
 
-    @Inject(method = "useOn", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/equipment/wrench/WrenchItem;onItemUseOnOther(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    private void wrenchPickup(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir, Player player, BlockState state, Block block) {
-        simpleCopperPipes$rotateCopperPipes(context, cir);
+    @Inject(
+            method = "useOn",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lcom/simibubi/create/content/equipment/wrench/WrenchItem;onItemUseOnOther(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;"
+            ),
+            locals = LocalCapture.CAPTURE_FAILHARD,
+            cancellable = true
+    )
+    private void simpleCopperPipes$wrenchPickup(UseOnContext context, CallbackInfoReturnable<InteractionResult> info, Player player, BlockState state, Block block) {
+        this.simpleCopperPipes$rotateCopperPipes(context, info);
     }
 
     @Unique
-    private void simpleCopperPipes$rotateCopperPipes(@NotNull UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
+    private void simpleCopperPipes$rotateCopperPipes(@NotNull UseOnContext context, CallbackInfoReturnable<InteractionResult> info) {
         Player player = context.getPlayer();
-        if (player.isShiftKeyDown()) {
+        if (player == null || player.isShiftKeyDown()) {
             return;
         }
         Level world = context.getLevel();
@@ -41,7 +49,7 @@ public class WrenchItemMixin {
         Block block = blockState.getBlock();
 
         if (block instanceof CopperFitting) {
-            cir.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide)); // Don't do anything if the player isn't shifting.
+            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide)); // Don't do anything if the player isn't shifting.
         }
         if (block instanceof CopperPipe) {
             IWrenchable wrenchable = new IWrenchable() {
@@ -54,8 +62,8 @@ public class WrenchItemMixin {
                     .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(world, blockPos, rotated.getValue(CopperPipe.FACING)));
 
             world.setBlockAndUpdate(blockPos, state);
-            AllSoundEvents.WRENCH_ROTATE.playOnServer(world, blockPos, 1, Create.RANDOM.nextFloat() + 0.5F);
-            cir.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
+            AllSoundEvents.WRENCH_ROTATE.playOnServer(world, blockPos, 1, context.getLevel().getRandom().nextFloat() + 0.5F);
+            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
         }
     }
 }

@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:smelting",
-  "ingredient": {
-    "item": "lunade:oxidized_copper_fitting"
-  },
-  "result": "lunade:corroded_fitting",
-  "experience": 0.3,
-  "cookingtime": 200
-}

@@ -1,0 +1,27 @@
+{
+	"block.copper_pipe.item_in": {
+		"sounds": [
+			"simple_copper_pipes:block/copper_pipe/item_in1",
+			"simple_copper_pipes:block/copper_pipe/item_in2",
+			"simple_copper_pipes:block/copper_pipe/item_in3"
+		]
+	},
+	"block.copper_pipe.item_out": {
+		"sounds": [
+			"simple_copper_pipes:block/copper_pipe/item_out1",
+			"simple_copper_pipes:block/copper_pipe/item_out2"
+		]
+	},
+	"block.copper_pipe.launch": {
+		"sounds": [
+			"simple_copper_pipes:block/copper_pipe/launch"
+		]
+	},
+	"block.copper_pipe.turn": {
+		"sounds": [
+			"simple_copper_pipes:block/copper_pipe/turn1",
+			"simple_copper_pipes:block/copper_pipe/turn2",
+			"simple_copper_pipes:block/copper_pipe/turn3"
+		]
+	}
+}

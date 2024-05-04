@@ -1,8 +1,0 @@
-{
-	"parent": "lunade:block/template_pipe_back_extension",
-	"textures": {
-		"particle": "lunade:block/cyan_pipe",
-		"side": "lunade:block/cyan_pipe",
-		"front": "lunade:block/cyan_pipe_front"
-	}
-}

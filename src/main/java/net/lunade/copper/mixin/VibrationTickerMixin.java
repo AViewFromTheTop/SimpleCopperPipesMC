@@ -1,7 +1,7 @@
 package net.lunade.copper.mixin;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import net.lunade.copper.block_entity.CopperPipeEntity;
+import net.lunade.copper.blocks.block_entity.CopperPipeEntity;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;

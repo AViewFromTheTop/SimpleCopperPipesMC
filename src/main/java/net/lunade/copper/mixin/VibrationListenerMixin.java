@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.block_entity.CopperPipeEntity;
+import net.lunade.copper.blocks.block_entity.CopperPipeEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.VibrationParticleOption;

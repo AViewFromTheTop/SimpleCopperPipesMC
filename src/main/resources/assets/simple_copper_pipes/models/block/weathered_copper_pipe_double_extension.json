@@ -1,0 +1,7 @@
+{
+	"parent": "simple_copper_pipes:block/template_pipe_double_extension",
+	"textures": {
+		"particle": "simple_copper_pipes:block/weathered_copper_pipe",
+		"side": "simple_copper_pipes:block/weathered_copper_pipe"
+	}
+}

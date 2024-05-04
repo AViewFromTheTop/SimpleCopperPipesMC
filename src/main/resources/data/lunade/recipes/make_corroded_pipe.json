@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:smelting",
-  "ingredient": {
-    "item": "lunade:oxidized_copper_pipe"
-  },
-  "result": "lunade:corroded_pipe",
-  "experience": 0.3,
-  "cookingtime": 200
-}

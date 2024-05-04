@@ -8,6 +8,7 @@
 
   "name": "Simple Copper Pipes",
   "description": "Adds Copper Pipes with unique mechanics to Minecraft.",
+
   "authors": [
     "Luna",
     "Treetrain1"
@@ -25,13 +26,16 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.lunade.copper.CopperPipeMain"
+      "net.lunade.copper.SimpleCopperPipesMain"
     ],
     "client": [
-      "net.lunade.copper.CopperPipeClient"
+      "net.lunade.copper.SimpleCopperPipesClient"
     ],
     "fabric-gametest": [
-      "net.lunade.copper.gametest.CopperGameTest"
+      "net.lunade.copper.gametest.SimpleCopperPipesGameTest"
+    ],
+    "fabric-datagen": [
+      "net.lunade.copper.datagen.SimpleCopperPipesDataGenerator"
     ],
     "modmenu": [
       "net.lunade.copper.config.gui.ModMenuIntegration"
@@ -64,6 +68,9 @@
         "modmenu.twitter": "https://twitter.com/LunadeModding",
         "modmenu.youtube": "https://www.youtube.com/@LunadeMusic"
       }
+    },
+    "frozenlib_registry": {
+      "mod_protocol": $protocol_version
     }
   }
 }

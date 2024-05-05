@@ -40,6 +40,14 @@ val datagen by sourceSets.registering {
 	runtimeClasspath += sourceSets.main.get().runtimeClasspath
 }
 
+sourceSets {
+	main {
+		resources {
+			srcDirs("src/main/generated")
+		}
+	}
+}
+
 loom {
 	runtimeOnlyLog4j = true
 
@@ -52,7 +60,9 @@ loom {
 		// When enabled, injected interfaces from dependencies will be applied.
 		enableDependencyInterfaceInjection = false
 	}
+}
 
+loom {
 	runs {
 		register("datagen") {
 			client()

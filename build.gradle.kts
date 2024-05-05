@@ -221,6 +221,15 @@ tasks {
 	}
 }
 
+val applyLicenses: Task by tasks
+val test: Task by tasks
+val runClient: Task by tasks
+val runDatagen: Task by tasks
+
+val remapJar: Task by tasks
+val sourcesJar: Task by tasks
+val javadocJar: Task by tasks
+
 tasks.withType(JavaCompile::class) {
 	options.encoding = "UTF-8"
 	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.

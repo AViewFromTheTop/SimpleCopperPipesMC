@@ -56,7 +56,7 @@ public final class SimpleCopperPipesBlockTagProvider extends FabricTagProvider.B
 
 		this.getOrCreateTagBuilder(SimpleCopperPipesBlockTags.SILENT_PIPES);
 
-		this.getOrCreateTagBuilder(TagKey.create(Registries.BLOCK,  new ResourceLocation("create", "wrench_pickup")))
+		this.getOrCreateTagBuilder(TagKey.create(Registries.BLOCK,  ResourceLocation.tryBuild("create", "wrench_pickup")))
 				.addOptionalTag(SimpleCopperPipesBlockTags.COPPER_PIPES)
 				.addOptionalTag(SimpleCopperPipesBlockTags.COPPER_FITTINGS);
 	}

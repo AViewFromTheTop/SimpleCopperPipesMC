@@ -1,11 +1,10 @@
 package net.lunade.copper.blocks.properties;
 
+import java.util.Optional;
 import net.lunade.copper.registry.RegisterPipeNbtMethods;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
 
 public enum PipeFluid implements StringRepresentable {
     NONE("none", Optional.empty()),

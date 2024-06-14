@@ -1,31 +1,29 @@
 package net.lunade.copper.registry;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.lunade.copper.config.SimpleCopperPipesConfig;
-import net.minecraft.core.BlockPos;
+import java.util.Map;
 import net.lunade.copper.SimpleCopperPipesSharedConstants;
 import net.lunade.copper.blocks.block_entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.blocks.block_entity.CopperFittingEntity;
 import net.lunade.copper.blocks.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.block_entity.pipe_nbt.MoveablePipeDataHandler;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.networking.packet.SimpleCopperPipesNoteParticlePacket;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
+import static net.minecraft.world.level.block.NoteBlock.INSTRUMENT;
+import static net.minecraft.world.level.block.NoteBlock.NOTE;
 import net.minecraft.world.level.block.state.BlockState;
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
-
-import static net.minecraft.world.level.block.NoteBlock.INSTRUMENT;
-import static net.minecraft.world.level.block.NoteBlock.NOTE;
-import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
 
 public class RegisterPipeNbtMethods {
     public static final ResourceLocation WATER = SimpleCopperPipesSharedConstants.id("water");
@@ -82,7 +80,7 @@ public class RegisterPipeNbtMethods {
     }
 
     public static void init() {
-        register(new ResourceLocation("lunade", "default"), (nbt, world, pos, blockState, pipe) -> {
+        register(ResourceLocation.tryBuild("lunade", "default"), (nbt, world, pos, blockState, pipe) -> {
             boolean noteBlock = false;
             if (BuiltInRegistries.GAME_EVENT.get(nbt.getSavedID()) == GameEvent.NOTE_BLOCK_PLAY.value()) {
                 pipe.noteBlockCooldown = 40;

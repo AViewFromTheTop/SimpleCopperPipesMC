@@ -12,6 +12,11 @@ public class SimpleCopperPipesSharedConstants {
 
     @Contract("_ -> new")
     public static @NotNull ResourceLocation id(String path) {
-        return new ResourceLocation(NAMESPACE, path);
+        return ResourceLocation.tryBuild(NAMESPACE, path);
     }
+
+	@Contract("_ -> new")
+	public static @NotNull ResourceLocation legacyId(String path) {
+		return ResourceLocation.tryBuild(LEGACY_NAMESPACE, path);
+	}
 }

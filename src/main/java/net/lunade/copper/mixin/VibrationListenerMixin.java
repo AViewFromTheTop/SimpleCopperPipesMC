@@ -1,5 +1,6 @@
 package net.lunade.copper.mixin;
 
+import java.util.Optional;
 import net.lunade.copper.blocks.block_entity.CopperPipeEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -15,8 +16,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.util.Optional;
 
 @Mixin(VibrationSystem.Listener.class)
 public class VibrationListenerMixin {

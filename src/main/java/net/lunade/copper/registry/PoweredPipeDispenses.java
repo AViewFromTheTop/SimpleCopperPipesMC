@@ -1,6 +1,7 @@
 package net.lunade.copper.registry;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import java.util.Map;
 import net.lunade.copper.blocks.block_entity.CopperPipeEntity;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -9,15 +10,21 @@ import net.minecraft.core.Position;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.projectile.*;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.entity.projectile.SpectralArrow;
+import net.minecraft.world.entity.projectile.ThrownEgg;
+import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
+import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
 
 public class PoweredPipeDispenses {
 
@@ -69,7 +76,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i);
             double velY = getVelY(axis, direction.getStepY(), i);
             double velZ = getVelZ(axis, direction.getStepZ(), i);
-            Arrow shotEntity = new Arrow(world, d, e, f, stack);
+            Arrow shotEntity = new Arrow(world, d, e, f, stack, null);
             shotEntity.pickup = AbstractArrow.Pickup.ALLOWED;
             shotEntity.setDeltaMovement(velX, velY, velZ);
             world.addFreshEntity(shotEntity);
@@ -83,7 +90,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i);
             double velY = getVelY(axis, direction.getStepY(), i);
             double velZ = getVelZ(axis, direction.getStepZ(), i);
-            SpectralArrow shotEntity = new SpectralArrow(world, d, e, f, stack);
+            SpectralArrow shotEntity = new SpectralArrow(world, d, e, f, stack, null);
             shotEntity.pickup = AbstractArrow.Pickup.ALLOWED;
             shotEntity.setDeltaMovement(velX, velY, velZ);
             world.addFreshEntity(shotEntity);
@@ -97,7 +104,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i);
             double velY = getVelY(axis, direction.getStepY(), i);
             double velZ = getVelZ(axis, direction.getStepZ(), i);
-            Arrow shotEntity = new Arrow(world, d, e, f, stack);
+            Arrow shotEntity = new Arrow(world, d, e, f, stack, null);
             shotEntity.setPotionContents(stack.getComponents().get(DataComponents.POTION_CONTENTS));
             shotEntity.pickup = AbstractArrow.Pickup.ALLOWED;
             shotEntity.setDeltaMovement(velX, velY, velZ);
@@ -181,7 +188,7 @@ public class PoweredPipeDispenses {
             double velX = getVelX(axis, direction.getStepX(), i);
             double velY = getVelY(axis, direction.getStepY(), i);
             double velZ = getVelZ(axis, direction.getStepZ(), i);
-            SmallFireball smallFireballEntity = new SmallFireball(world, d, e, f, velX, velY, velZ);
+            SmallFireball smallFireballEntity = new SmallFireball(world, d, e, f, new Vec3(velX, velY, velZ));
             world.addFreshEntity(Util.make(smallFireballEntity, (smallFireballEntityx) -> smallFireballEntityx.setItem(stack)));
             smallFireballEntity.setDeltaMovement(velX, velY, velZ);
         });

@@ -2,6 +2,8 @@ package net.lunade.copper.blocks.block_entity;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
+import java.util.ArrayList;
+import java.util.Objects;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -50,9 +52,6 @@ import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.Objects;
 
 public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements GameEventListener.Provider<VibrationSystem.Listener>, VibrationSystem {
 

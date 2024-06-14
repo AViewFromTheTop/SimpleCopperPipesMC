@@ -15,8 +15,8 @@ import org.jetbrains.annotations.NotNull;
 public record SimpleCopperPipesNoteParticlePacket(BlockPos blockPos, int pitch,
                                                   Direction direction) implements CustomPacketPayload {
 
-    public static final Type<SimpleCopperPipesNoteParticlePacket> PACKET_TYPE = CustomPacketPayload.createType(
-            SimpleCopperPipesSharedConstants.id("note_particle").toString()
+    public static final Type<SimpleCopperPipesNoteParticlePacket> PACKET_TYPE = new Type<>(
+            SimpleCopperPipesSharedConstants.id("note_particle")
     );
 
     public static final StreamCodec<FriendlyByteBuf, SimpleCopperPipesNoteParticlePacket> CODEC = StreamCodec.ofMember(SimpleCopperPipesNoteParticlePacket::write, SimpleCopperPipesNoteParticlePacket::new);

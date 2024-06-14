@@ -80,11 +80,11 @@ public final class RegisterBlocks {
     }
 
     public static ResourceLocation id(String path) {
-        return new ResourceLocation(SimpleCopperPipesSharedConstants.NAMESPACE, path);
+        return ResourceLocation.tryBuild(SimpleCopperPipesSharedConstants.NAMESPACE, path);
     }
 
     public static ResourceLocation legacyId(String path) {
-        return new ResourceLocation(SimpleCopperPipesSharedConstants.LEGACY_NAMESPACE, path);
+        return ResourceLocation.tryBuild(SimpleCopperPipesSharedConstants.LEGACY_NAMESPACE, path);
     }
 
     public static ResourceLocation legacyColoredPipe(String colour) {

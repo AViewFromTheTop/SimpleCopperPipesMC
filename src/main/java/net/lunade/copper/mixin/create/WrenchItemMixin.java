@@ -1,7 +1,6 @@
 package net.lunade.copper.mixin.create;
 
 import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.Create;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
 import net.lunade.copper.blocks.CopperFitting;

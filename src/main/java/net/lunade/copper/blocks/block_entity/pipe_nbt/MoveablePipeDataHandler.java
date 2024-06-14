@@ -5,6 +5,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import net.lunade.copper.blocks.block_entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.blocks.block_entity.CopperPipeEntity;
 import net.lunade.copper.registry.RegisterPipeNbtMethods;
@@ -24,11 +28,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 public class MoveablePipeDataHandler {
 
@@ -197,7 +196,7 @@ public class MoveablePipeDataHandler {
                 this.string = "noEntity";
             }
             this.blockPos = pipePos;
-            this.nbtID = new ResourceLocation("lunade", "default");
+            this.nbtID = ResourceLocation.tryBuild("lunade", "default");
             this.useCount = 0;
             this.canOnlyGoThroughOnePipe = false;
             this.canOnlyBeUsedOnce = false;
@@ -216,7 +215,7 @@ public class MoveablePipeDataHandler {
                 this.string = "noEntity";
             }
             this.blockPos = pipePos;
-            this.nbtID = new ResourceLocation("lunade", "default");
+            this.nbtID = ResourceLocation.tryBuild("lunade", "default");
             this.useCount = 0;
             this.canOnlyGoThroughOnePipe = false;
             this.canOnlyBeUsedOnce = false;
@@ -226,12 +225,12 @@ public class MoveablePipeDataHandler {
         }
 
         public SaveableMovablePipeNbt() {
-            this.savedID = new ResourceLocation("lunade", "none");
+            this.savedID = ResourceLocation.tryBuild("lunade", "none");
             this.vec3d = new Vec3(0, -64, 0);
             this.vec3d2 = new Vec3(0, -64, 0);
             this.string = "none";
             this.blockPos = new BlockPos(0, -64, 0);
-            this.nbtID = new ResourceLocation("lunade", "none");
+            this.nbtID = ResourceLocation.tryBuild("lunade", "none");
             this.useCount = 0;
             this.canOnlyGoThroughOnePipe = false;
             this.canOnlyBeUsedOnce = false;

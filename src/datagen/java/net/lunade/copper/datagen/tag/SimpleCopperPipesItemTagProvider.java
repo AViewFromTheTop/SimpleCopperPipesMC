@@ -40,6 +40,6 @@ public final class SimpleCopperPipesItemTagProvider extends FabricTagProvider.It
 		this.getOrCreateTagBuilder(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)
 				.addOptionalTag(SimpleCopperPipesItemTags.COPPER_PIPES)
 				.addOptionalTag(SimpleCopperPipesItemTags.COPPER_FITTINGS)
-				.addOptional(new ResourceLocation("create", "wrench"));
+				.addOptional(ResourceLocation.tryBuild("create", "wrench"));
 	}
 }

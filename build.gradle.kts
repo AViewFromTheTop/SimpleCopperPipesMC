@@ -164,12 +164,12 @@ dependencies {
 		modApi("maven.modrinth:frozenlib:$frozenlib_version")?.let { include(it) }
 
 	// Cloth Config
-	modApi("me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version") {
+    modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version") {
 		exclude(group = "net.fabricmc.fabric-api")
 		exclude(group = "com.terraformersmc")
 	}
 	// ModMenu
-	modImplementation("maven.modrinth:modmenu:$modmenu_version")
+	modCompileOnly("maven.modrinth:modmenu:$modmenu_version")
 
 	"datagenImplementation"(sourceSets.main.get().output)
 }
@@ -180,7 +180,7 @@ tasks {
 			"mod_id" to mod_id,
 			"version" to version,
 			"protocol_version" to protocol_version,
-			"minecraft_version" to minecraft_version,
+			"minecraft_version" to ">=$minecraft_version",
 
 			"fabric_api_version" to ">=$fabric_api_version",
 			"frozenlib_version" to ">=${frozenlib_version.split('-').firstOrNull()}-"

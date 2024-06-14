@@ -11,8 +11,13 @@ import net.lunade.copper.blocks.properties.CopperPipeProperties;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.datafix.SimpleCopperPipesDataFixer;
 import net.lunade.copper.networking.SimpleCopperPipesNetworking;
-import net.lunade.copper.registry.*;
-import net.minecraft.resources.ResourceLocation;
+import net.lunade.copper.registry.PipeMovementRestrictions;
+import net.lunade.copper.registry.PoweredPipeDispenses;
+import net.lunade.copper.registry.RegisterBlockEntities;
+import net.lunade.copper.registry.RegisterBlocks;
+import net.lunade.copper.registry.RegisterPipeNbtMethods;
+import net.lunade.copper.registry.RegisterSoundEvents;
+import net.lunade.copper.registry.RegisterStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

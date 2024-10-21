@@ -8,15 +8,15 @@ import net.minecraft.world.level.ItemLike;
 public class SimpleCopperPipesCreativeInventorySorting {
     
     public static void init() {
-        addInBuildingBlocksAfter(Items.COPPER_TRAPDOOR, SimpleCopperPipesBlocks.COPPER_PIPE);
-        addInBuildingBlocksAfter(Items.EXPOSED_COPPER_TRAPDOOR, SimpleCopperPipesBlocks.EXPOSED_COPPER_PIPE);
-        addInBuildingBlocksAfter(Items.WEATHERED_COPPER_TRAPDOOR, SimpleCopperPipesBlocks.WEATHERED_COPPER_PIPE);
-        addInBuildingBlocksAfter(Items.OXIDIZED_COPPER_TRAPDOOR, SimpleCopperPipesBlocks.OXIDIZED_COPPER_PIPE);
+        addInBuildingBlocksAfter(Items.COPPER_BULB, SimpleCopperPipesBlocks.COPPER_PIPE);
+        addInBuildingBlocksAfter(Items.EXPOSED_COPPER_BULB, SimpleCopperPipesBlocks.EXPOSED_COPPER_PIPE);
+        addInBuildingBlocksAfter(Items.WEATHERED_COPPER_BULB, SimpleCopperPipesBlocks.WEATHERED_COPPER_PIPE);
+        addInBuildingBlocksAfter(Items.OXIDIZED_COPPER_BULB, SimpleCopperPipesBlocks.OXIDIZED_COPPER_PIPE);
 
-        addInBuildingBlocksAfter(Items.WAXED_COPPER_TRAPDOOR, SimpleCopperPipesBlocks.WAXED_COPPER_PIPE);
-        addInBuildingBlocksAfter(Items.WAXED_EXPOSED_COPPER_TRAPDOOR, SimpleCopperPipesBlocks.WAXED_EXPOSED_COPPER_PIPE);
-        addInBuildingBlocksAfter(Items.WAXED_WEATHERED_COPPER_TRAPDOOR, SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_PIPE);
-        addInBuildingBlocksAfter(Items.WAXED_OXIDIZED_COPPER_TRAPDOOR, SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_PIPE);
+        addInBuildingBlocksAfter(Items.WAXED_COPPER_BULB, SimpleCopperPipesBlocks.WAXED_COPPER_PIPE);
+        addInBuildingBlocksAfter(Items.WAXED_EXPOSED_COPPER_BULB, SimpleCopperPipesBlocks.WAXED_EXPOSED_COPPER_PIPE);
+        addInBuildingBlocksAfter(Items.WAXED_WEATHERED_COPPER_BULB, SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_PIPE);
+        addInBuildingBlocksAfter(Items.WAXED_OXIDIZED_COPPER_BULB, SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_PIPE);
 
         addInRedstoneAfter(Items.WAXED_COPPER_BULB, SimpleCopperPipesBlocks.WAXED_COPPER_PIPE);
         addInRedstoneAfter(Items.WAXED_EXPOSED_COPPER_BULB, SimpleCopperPipesBlocks.WAXED_EXPOSED_COPPER_PIPE);

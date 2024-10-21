@@ -1,6 +1,6 @@
 package net.lunade.copper.tag;
 
-import net.lunade.copper.SimpleCopperPipesSharedConstants;
+import net.lunade.copper.SimpleCopperPipesConstants;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -13,6 +13,6 @@ public class SimpleCopperPipesItemTags {
 
     @NotNull
     private static TagKey<Item> bind(@NotNull String path) {
-        return TagKey.create(Registries.ITEM, SimpleCopperPipesSharedConstants.id(path));
+        return TagKey.create(Registries.ITEM, SimpleCopperPipesConstants.id(path));
     }
 }

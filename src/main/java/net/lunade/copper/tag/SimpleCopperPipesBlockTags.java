@@ -1,6 +1,6 @@
 package net.lunade.copper.tag;
 
-import net.lunade.copper.SimpleCopperPipesSharedConstants;
+import net.lunade.copper.SimpleCopperPipesConstants;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -14,6 +14,6 @@ public class SimpleCopperPipesBlockTags {
 
     @NotNull
     private static TagKey<Block> bind(@NotNull String path) {
-        return TagKey.create(Registries.BLOCK, SimpleCopperPipesSharedConstants.id(path));
+        return TagKey.create(Registries.BLOCK, SimpleCopperPipesConstants.id(path));
     }
 }

@@ -1,34 +1,38 @@
 package net.lunade.copper.registry;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import java.util.Map;
-import net.lunade.copper.SimpleCopperPipesSharedConstants;
-import net.lunade.copper.blocks.block_entity.AbstractSimpleCopperBlockEntity;
-import net.lunade.copper.blocks.block_entity.CopperFittingEntity;
-import net.lunade.copper.blocks.block_entity.CopperPipeEntity;
-import net.lunade.copper.blocks.block_entity.pipe_nbt.MoveablePipeDataHandler;
+import net.lunade.copper.SimpleCopperPipesConstants;
+import net.lunade.copper.block.entity.AbstractSimpleCopperBlockEntity;
+import net.lunade.copper.block.entity.CopperFittingEntity;
+import net.lunade.copper.block.entity.CopperPipeEntity;
+import net.lunade.copper.block.entity.nbt.MoveablePipeDataHandler;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.networking.packet.SimpleCopperPipesNoteParticlePacket;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
-import static net.minecraft.world.level.block.NoteBlock.INSTRUMENT;
-import static net.minecraft.world.level.block.NoteBlock.NOTE;
 import net.minecraft.world.level.block.state.BlockState;
-import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+import java.util.Optional;
+
+import static net.minecraft.world.level.block.NoteBlock.INSTRUMENT;
+import static net.minecraft.world.level.block.NoteBlock.NOTE;
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
+
 public class RegisterPipeNbtMethods {
-    public static final ResourceLocation WATER = SimpleCopperPipesSharedConstants.id("water");
-    public static final ResourceLocation LAVA = SimpleCopperPipesSharedConstants.id("lava");
-    public static final ResourceLocation SMOKE = SimpleCopperPipesSharedConstants.id("smoke");
+    public static final ResourceLocation WATER = SimpleCopperPipesConstants.id("water");
+    public static final ResourceLocation LAVA = SimpleCopperPipesConstants.id("lava");
+    public static final ResourceLocation SMOKE = SimpleCopperPipesConstants.id("smoke");
     private static final Map<ResourceLocation, UniquePipeNbt> UNIQUE_PIPE_NBTS = new Object2ObjectLinkedOpenHashMap<>();
 
     public static void register(ResourceLocation id, DispenseMethod dispense, OnMoveMethod move, TickMethod tick, CanMoveMethod canMove) {
@@ -82,7 +86,8 @@ public class RegisterPipeNbtMethods {
     public static void init() {
         register(ResourceLocation.tryBuild("lunade", "default"), (nbt, world, pos, blockState, pipe) -> {
             boolean noteBlock = false;
-            if (BuiltInRegistries.GAME_EVENT.get(nbt.getSavedID()) == GameEvent.NOTE_BLOCK_PLAY.value()) {
+            Optional<Holder.Reference<GameEvent>> optionalGameEvent = BuiltInRegistries.GAME_EVENT.get(nbt.getSavedID());
+            if (optionalGameEvent.isPresent() && optionalGameEvent.get().value() == GameEvent.NOTE_BLOCK_PLAY.value()) {
                 pipe.noteBlockCooldown = 40;
                 float volume = 3.0F;
                 BlockPos originPos = BlockPos.containing(nbt.getVec3d());
@@ -96,7 +101,7 @@ public class RegisterPipeNbtMethods {
                     SimpleCopperPipesNoteParticlePacket.sendToAll(world, pos, k, world.getBlockState(pos).getValue(FACING));
                 }
             }
-            world.gameEvent(nbt.getEntity(world), BuiltInRegistries.GAME_EVENT.getHolder(nbt.getSavedID()).orElse(GameEvent.BLOCK_CHANGE), pos);
+            world.gameEvent(nbt.getEntity(world), optionalGameEvent.orElse(GameEvent.BLOCK_CHANGE), pos);
             if (noteBlock || pipe.noteBlockCooldown > 0) {
                 if (nbt.useCount == 0) {
                     world.sendParticles(new VibrationParticleOption(new BlockPositionSource(nbt.getBlockPos()), 5), nbt.getVec3d().x, nbt.getVec3d().y, nbt.getVec3d().z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
@@ -119,7 +124,7 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> {
             if (blockEntity instanceof CopperFittingEntity) {
                 nbt.vec3d = new Vec3(11, 0, 0);
-            } else if (!blockEntity.canWater && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MOVE_TYPE.FROM_PIPE) {
+            } else if (!blockEntity.canWater && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MoveType.FROM_PIPE) {
                 nbt.vec3d = nbt.getVec3d().add(-1, 0, 0);
                 if (nbt.getVec3d().x() <= 0) {
                     nbt.shouldSave = false;
@@ -145,7 +150,7 @@ public class RegisterPipeNbtMethods {
             if (blockEntity.moveablePipeDataHandler.getMoveablePipeNbt(WATER) == null) {
                 if (blockEntity instanceof CopperFittingEntity) {
                     nbt.vec3d = new Vec3(11, 0, 0);
-                } else if (!blockEntity.canSmoke && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MOVE_TYPE.FROM_PIPE) {
+                } else if (!blockEntity.canSmoke && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MoveType.FROM_PIPE) {
                     nbt.vec3d = nbt.getVec3d().add(-1, 0, 0);
                     if (nbt.getVec3d().x() <= 0) {
                         nbt.shouldSave = false;
@@ -192,7 +197,7 @@ public class RegisterPipeNbtMethods {
         }, (nbt, world, pos, blockState, blockEntity) -> {
             if (blockEntity instanceof CopperFittingEntity) {
                 nbt.vec3d = new Vec3(11, 0, 0);
-            } else if (!blockEntity.canSmoke && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MOVE_TYPE.FROM_PIPE) {
+            } else if (!blockEntity.canSmoke && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MoveType.FROM_PIPE) {
                 nbt.vec3d = nbt.getVec3d().add(-1, 0, 0);
                 if (nbt.getVec3d().x() <= 0) {
                     nbt.shouldSave = false;

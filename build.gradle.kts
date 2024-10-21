@@ -1,5 +1,5 @@
 plugins {
-	id("fabric-loom") version("+")
+	id("fabric-loom") version("1.7.+")
 	id("org.quiltmc.gradle.licenser") version("+")
 	id("org.ajoberstar.grgit") version("+")
 	id("com.modrinth.minotaur") version("+")
@@ -143,8 +143,8 @@ dependencies {
 	minecraft("com.mojang:minecraft:$minecraft_version")
 	mappings(loom.layered {
 		// please annoy treetrain if this doesnt work
-		mappings("org.quiltmc:quilt-mappings:$quilt_mappings:intermediary-v2")
-		parchment("org.parchmentmc.data:parchment-$parchment_mappings@zip")
+		//mappings("org.quiltmc:quilt-mappings:$quilt_mappings:intermediary-v2")
+		//parchment("org.parchmentmc.data:parchment-$parchment_mappings@zip")
 		officialMojangMappings {
 			nameSyntheticMembers = false
 		}
@@ -180,7 +180,7 @@ tasks {
 			"mod_id" to mod_id,
 			"version" to version,
 			"protocol_version" to protocol_version,
-			"minecraft_version" to ">=$minecraft_version",
+			"minecraft_version" to "~1.21-",//minecraft_version,
 
 			"fabric_api_version" to ">=$fabric_api_version",
 			"frozenlib_version" to ">=${frozenlib_version.split('-').firstOrNull()}-"
@@ -204,7 +204,6 @@ tasks {
 			expand(properties)
 		}
 	}
-
 
 	register("javadocJar", Jar::class) {
 		dependsOn(javadoc)

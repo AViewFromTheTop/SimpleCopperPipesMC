@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "redstone",
   "ingredients": [
-    {
-      "item": "simple_copper_pipes:oxidized_copper_fitting"
-    },
-    {
-      "item": "minecraft:honeycomb"
-    }
+    "simple_copper_pipes:oxidized_copper_fitting",
+    "minecraft:honeycomb"
   ],
   "result": {
     "count": 1,

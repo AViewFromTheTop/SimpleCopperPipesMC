@@ -1,7 +1,8 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.blocks.CopperPipe;
-import net.lunade.copper.registry.RegisterSoundEvents;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.lunade.copper.block.CopperPipe;
+import net.lunade.copper.registry.SimpleCopperPipesSoundEvents;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,12 +27,20 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public class HoeItemMixin {
 
     @Inject(
-            at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/HoeItem;TILLABLES:Ljava/util/Map;", opcode = Opcodes.GETSTATIC, ordinal = 0),
             method = "useOn",
+            at = @At(
+                    value = "FIELD",
+                    target = "Lnet/minecraft/world/item/HoeItem;TILLABLES:Ljava/util/Map;",
+                    opcode = Opcodes.GETSTATIC,
+                    ordinal = 0
+            ),
             cancellable = true,
             locals = LocalCapture.CAPTURE_FAILSOFT
     )
-    public void simpleCopperPipes$useOn(UseOnContext itemUsageContext, CallbackInfoReturnable<InteractionResult> info, Level level, BlockPos blockPos) {
+    public void simpleCopperPipes$useOn(
+            UseOnContext itemUsageContext, CallbackInfoReturnable<InteractionResult> info,
+            @Local Level level, @Local BlockPos blockPos
+    ) {
         BlockState blockState = level.getBlockState(blockPos);
 
         if (blockState.getBlock() instanceof CopperPipe) {
@@ -49,12 +58,12 @@ public class HoeItemMixin {
                         .setValue(CopperPipe.SMOOTH, CopperPipe.isSmooth(level, blockPos, face));
 
                 level.setBlockAndUpdate(blockPos, state);
-                level.playSound(null, blockPos, RegisterSoundEvents.TURN, SoundSource.BLOCKS, 0.5F, 1F);
+                level.playSound(null, blockPos, SimpleCopperPipesSoundEvents.TURN, SoundSource.BLOCKS, 0.5F, 1F);
                 if (playerEntity != null) {
                     itemUsageContext.getItemInHand().hurtAndBreak(1, playerEntity, LivingEntity.getSlotForHand(itemUsageContext.getHand()));
                 }
             }
-            info.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide));
+            info.setReturnValue(InteractionResult.SUCCESS);
         }
     }
 

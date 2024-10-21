@@ -1,6 +1,6 @@
 package net.lunade.copper.mixin;
 
-import net.lunade.copper.blocks.block_entity.leaking_pipes.LeakingPipeManager;
+import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SugarCaneBlock;
@@ -14,8 +14,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class SugarCaneBlockMixin {
 
     @Inject(
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/core/BlockPos;below()Lnet/minecraft/core/BlockPos;", ordinal = 1, shift = At.Shift.AFTER),
             method = "canSurvive",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/core/BlockPos;below()Lnet/minecraft/core/BlockPos;",
+                    ordinal = 1,
+                    shift = At.Shift.AFTER
+            ),
             cancellable = true
     )
     public void simpleCopperPipes$canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {

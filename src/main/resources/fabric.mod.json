@@ -15,7 +15,7 @@
   ],
 
   "contact": {
-    "homepage": "https://github.com/AViewFromTheTop/SimpleCopperPipesMC",
+    "homepage": "https://modrinth.com/mod/simple-copper-pipes",
     "issues": "https://github.com/AViewFromTheTop/SimpleCopperPipesMC/issues",
     "sources": "https://github.com/AViewFromTheTop/SimpleCopperPipesMC"
   },
@@ -26,7 +26,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.lunade.copper.SimpleCopperPipesMain"
+      "net.lunade.copper.SimpleCopperPipes"
     ],
     "client": [
       "net.lunade.copper.SimpleCopperPipesClient"
@@ -63,10 +63,12 @@
   "custom": {
     "modmenu": {
       "links": {
+        "X": "https://x.com/FB_Oasis",
+        "Bluesky": "https://bsky.app/profile/frozenblock.bsky.social",
         "modmenu.discord": "https://discord.gg/frozenblock-modding-oasis-780746010614956112",
-        "modmenu.modrinth": "https://modrinth.com/mod/luna-slimes",
-        "modmenu.twitter": "https://twitter.com/LunadeModding",
-        "modmenu.youtube": "https://www.youtube.com/@LunadeMusic"
+        "modmenu.modrinth": "https://modrinth.com/mod/simple-copper-pipes",
+        "modmenu.youtube": "https://www.youtube.com/@frozenblockmoddingoasismod",
+        "modmenu.kofi": "https://ko-fi.com/frozenblock"
       }
     },
     "frozenlib_registry": {

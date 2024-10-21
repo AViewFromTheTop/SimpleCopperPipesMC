@@ -3,8 +3,8 @@ package net.lunade.copper.mixin.create;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
-import net.lunade.copper.blocks.CopperFitting;
-import net.lunade.copper.blocks.CopperPipe;
+import net.lunade.copper.block.CopperFitting;
+import net.lunade.copper.block.CopperPipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -30,7 +30,8 @@ public class WrenchItemMixin {
                     target = "Lcom/simibubi/create/content/equipment/wrench/WrenchItem;onItemUseOnOther(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;"
             ),
             locals = LocalCapture.CAPTURE_FAILHARD,
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     private void simpleCopperPipes$wrenchPickup(UseOnContext context, CallbackInfoReturnable<InteractionResult> info, Player player, BlockState state, Block block) {
         this.simpleCopperPipes$rotateCopperPipes(context, info);
@@ -48,7 +49,7 @@ public class WrenchItemMixin {
         Block block = blockState.getBlock();
 
         if (block instanceof CopperFitting) {
-            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide)); // Don't do anything if the player isn't shifting.
+            info.setReturnValue(InteractionResult.SUCCESS); // Don't do anything if the player isn't shifting.
         }
         if (block instanceof CopperPipe) {
             IWrenchable wrenchable = new IWrenchable() {
@@ -62,7 +63,7 @@ public class WrenchItemMixin {
 
             world.setBlockAndUpdate(blockPos, state);
             AllSoundEvents.WRENCH_ROTATE.playOnServer(world, blockPos, 1, context.getLevel().getRandom().nextFloat() + 0.5F);
-            info.setReturnValue(InteractionResult.sidedSuccess(world.isClientSide));
+            info.setReturnValue(InteractionResult.SUCCESS);
         }
     }
 }

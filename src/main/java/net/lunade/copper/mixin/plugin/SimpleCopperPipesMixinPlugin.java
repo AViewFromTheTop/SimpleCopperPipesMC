@@ -2,7 +2,7 @@ package net.lunade.copper.mixin.plugin;
 
 import java.util.List;
 import java.util.Set;
-import net.fabricmc.loader.api.FabricLoader;
+
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -21,7 +21,6 @@ public class SimpleCopperPipesMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, @NotNull String mixinClassName) {
-        if (mixinClassName.contains("create.")) return FabricLoader.getInstance().isModLoaded("create");
         return true;
     }
 

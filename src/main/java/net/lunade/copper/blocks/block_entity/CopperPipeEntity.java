@@ -283,7 +283,6 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
                 for (StorageView<ItemVariant> storageView : pipeInventory) {
                     if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
                         Transaction transaction = Transaction.openOuter();
-                        setCooldown(level, offsetPos);
                         var resource = storageView.getResource();
                         long inserted = inventory.insert(resource, MAX_TRANSFER_AMOUNT, transaction);
                         if (inserted > 0) { // successfully inserted item

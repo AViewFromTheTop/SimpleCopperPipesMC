@@ -13,9 +13,7 @@ public final class SimpleCopperPipesConfig {
             new JsonConfig<>(
                     SimpleCopperPipesSharedConstants.MOD_ID,
                     SimpleCopperPipesConfig.class,
-                    JsonType.JSON5,
-                    null,
-                    null
+                    JsonType.JSON5
             )
     );
 

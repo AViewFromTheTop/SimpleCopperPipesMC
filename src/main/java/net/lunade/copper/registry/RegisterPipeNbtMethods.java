@@ -82,18 +82,20 @@ public class RegisterPipeNbtMethods {
 	}
 
 	public static void init() {
-		register(ResourceLocation.tryBuild("lunade", "default"), (nbt, world, pos, blockState, pipe) -> {
-			boolean noteBlock = false;
+		register(ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "default"), (nbt, world, pos, blockState, pipe) -> {
+            pipe.inputGameEventPos = nbt.getBlockPos();
+            pipe.gameEventNbtVec3 = nbt.getVec3d();
+            boolean noteBlock = false;
 			Optional<Holder.Reference<GameEvent>> optionalGameEvent = BuiltInRegistries.GAME_EVENT.get(nbt.getSavedID());
 			if (optionalGameEvent.isPresent() && optionalGameEvent.get().value() == GameEvent.NOTE_BLOCK_PLAY.value()) {
 				pipe.noteBlockCooldown = 40;
-				float volume = 3.0F;
+				float volume = 3F;
 				BlockPos originPos = BlockPos.containing(nbt.getVec3d());
 				BlockState state = world.getBlockState(originPos);
 				noteBlock = state.is(Blocks.NOTE_BLOCK);
 				if (noteBlock) {
 					int k = state.getValue(NOTE);
-					float f = (float) Math.pow(2.0D, (double) (k - 12) / 12.0D);
+					float f = (float) Math.pow(2.0D, (double) (k - 12) / 12D);
 					world.playSound(null, pos, state.getValue(INSTRUMENT).getSoundEvent().value(), SoundSource.RECORDS, volume, f);
 					//Send NoteBlock Particle Packet To Client
 					SimpleCopperPipesNoteParticlePacket.sendToAll(world, pos, k, world.getBlockState(pos).getValue(FACING));
@@ -106,8 +108,6 @@ public class RegisterPipeNbtMethods {
 					nbt.useCount = 1;
 				}
 			}
-			pipe.inputGameEventPos = nbt.getBlockPos();
-			pipe.gameEventNbtVec3 = nbt.getVec3d();
 		}, (nbt, world, pos, blockState, blockEntity) -> {
 
 		}, (nbt, world, pos, blockState, blockEntity) -> {

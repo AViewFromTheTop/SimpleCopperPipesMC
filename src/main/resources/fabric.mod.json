@@ -7,7 +7,7 @@
   ],
 
   "name": "Simple Copper Pipes",
-  "description": "Adds Copper Pipes with unique mechanics to Minecraft.",
+  "description": "Adds intuitive and simple-to-understand Copper Pipes to Minecraft.",
 
   "authors": [
     "Luna",
@@ -50,7 +50,7 @@
 
   "depends": {
     "frozenlib": "${frozenlib_version}",
-    "fabric-api": "${fabric_api_version}",
+    "fabric-api": "*",
     "minecraft": "${minecraft_version}",
     "java": ">=21"
   },

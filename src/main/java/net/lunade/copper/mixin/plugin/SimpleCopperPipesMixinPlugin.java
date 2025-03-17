@@ -1,12 +1,11 @@
 package net.lunade.copper.mixin.plugin;
 
+import java.util.List;
+import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-
-import java.util.List;
-import java.util.Set;
 
 public class SimpleCopperPipesMixinPlugin implements IMixinConfigPlugin {
 

@@ -8,14 +8,11 @@ import net.frozenblock.lib.config.api.sync.annotation.EntrySyncData;
 import net.lunade.copper.SimpleCopperPipesConstants;
 
 public final class SimpleCopperPipesConfig {
-
 	public static final Config<SimpleCopperPipesConfig> INSTANCE = ConfigRegistry.register(
 		new JsonConfig<>(
 			SimpleCopperPipesConstants.MOD_ID,
 			SimpleCopperPipesConfig.class,
-			JsonType.JSON5,
-			null,
-			null
+			JsonType.JSON5
 		)
 	);
 

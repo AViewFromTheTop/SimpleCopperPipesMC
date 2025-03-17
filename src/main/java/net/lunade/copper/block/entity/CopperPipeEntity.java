@@ -1,9 +1,7 @@
 package net.lunade.copper.block.entity;
 
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Dynamic;
 import java.util.ArrayList;
-import java.util.Objects;
+
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -29,6 +27,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -403,11 +402,13 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		this.shootsControlled = nbtCompound.getBoolean("shootsControlled");
 		this.shootsSpecial = nbtCompound.getBoolean("shootsSpecial");
 		this.canAccept = nbtCompound.getBoolean("canAccept");
-		if (nbtCompound.contains("listener", 10)) {
-			DataResult<Data> var10000 = Data.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, nbtCompound.getCompound("listener")));
-			Objects.requireNonNull(SimpleCopperPipes.LOGGER);
-			var10000.resultOrPartial(SimpleCopperPipes.LOGGER::error).ifPresent((data) -> this.vibrationData = data);
-		}
+
+        RegistryOps<Tag> registryOps = lookupProvider.createSerializationContext(NbtOps.INSTANCE);
+        if (nbtCompound.contains("listener", 10)) {
+            Data.CODEC.parse(registryOps, nbtCompound.getCompound("listener"))
+                    .resultOrPartial((string) -> SimpleCopperPipes.LOGGER.error("Failed to parse vibration listener for Copper Pipe: '{}'", string))
+                    .ifPresent((data) -> this.vibrationData = data);
+        }
 	}
 
 	@Override
@@ -420,9 +421,11 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		nbtCompound.putBoolean("shootsControlled", this.shootsControlled);
 		nbtCompound.putBoolean("shootsSpecial", this.shootsSpecial);
 		nbtCompound.putBoolean("canAccept", this.canAccept);
-		DataResult<Tag> dataResult = Data.CODEC.encodeStart(NbtOps.INSTANCE, this.vibrationData);
-		Objects.requireNonNull(SimpleCopperPipes.LOGGER);
-		dataResult.resultOrPartial(SimpleCopperPipes.LOGGER::error).ifPresent((tag) -> nbtCompound.put("listener", tag));
+
+        RegistryOps<Tag> registryOps = lookupProvider.createSerializationContext(NbtOps.INSTANCE);
+        Data.CODEC.encodeStart(registryOps, this.vibrationData)
+                .resultOrPartial((string) -> SimpleCopperPipes.LOGGER.error("Failed to encode vibration listener for Copper Pipe: '{}'", string))
+                .ifPresent((tag) -> nbtCompound.put("listener", tag));
 	}
 
 	public VibrationSystem.User createVibrationUser() {

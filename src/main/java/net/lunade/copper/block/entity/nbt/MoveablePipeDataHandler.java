@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
+import net.lunade.copper.SimpleCopperPipesConstants;
 import net.lunade.copper.block.entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block.entity.CopperPipeEntity;
 import net.lunade.copper.registry.RegisterPipeNbtMethods;
@@ -175,7 +176,7 @@ public class MoveablePipeDataHandler {
 				this.string = "noEntity";
 			}
 			this.blockPos = pipePos;
-			this.nbtID = ResourceLocation.tryBuild("lunade", "default");
+			this.nbtID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "default");
 			this.useCount = 0;
 			this.canOnlyGoThroughOnePipe = false;
 			this.canOnlyBeUsedOnce = false;
@@ -194,7 +195,7 @@ public class MoveablePipeDataHandler {
 				this.string = "noEntity";
 			}
 			this.blockPos = pipePos;
-			this.nbtID = ResourceLocation.tryBuild("lunade", "default");
+			this.nbtID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "default");
 			this.useCount = 0;
 			this.canOnlyGoThroughOnePipe = false;
 			this.canOnlyBeUsedOnce = false;
@@ -204,12 +205,12 @@ public class MoveablePipeDataHandler {
 		}
 
 		public SaveableMovablePipeNbt() {
-			this.savedID = ResourceLocation.tryBuild("lunade", "none");
+			this.savedID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "none");
 			this.vec3d = new Vec3(0, -64, 0);
 			this.vec3d2 = new Vec3(0, -64, 0);
 			this.string = "none";
 			this.blockPos = new BlockPos(0, -64, 0);
-			this.nbtID = ResourceLocation.tryBuild("lunade", "none");
+			this.nbtID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "none");
 			this.useCount = 0;
 			this.canOnlyGoThroughOnePipe = false;
 			this.canOnlyBeUsedOnce = false;

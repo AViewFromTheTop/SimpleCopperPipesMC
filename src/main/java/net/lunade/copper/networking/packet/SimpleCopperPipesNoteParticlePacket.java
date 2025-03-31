@@ -12,8 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
-public record SimpleCopperPipesNoteParticlePacket(BlockPos blockPos, int pitch,
-												  Direction direction) implements CustomPacketPayload {
+public record SimpleCopperPipesNoteParticlePacket(BlockPos blockPos, int pitch, Direction direction) implements CustomPacketPayload {
 	public static final Type<SimpleCopperPipesNoteParticlePacket> PACKET_TYPE = new Type<>(
 		SimpleCopperPipesConstants.id("note_particle")
 	);

@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.lunade.copper.SimpleCopperPipes;
 import net.lunade.copper.block.CopperFitting;
 import net.lunade.copper.block.CopperPipe;
 import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
@@ -395,20 +394,16 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 	@Override
 	public void loadAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
 		super.loadAdditional(nbtCompound, lookupProvider);
-		this.transferCooldown = nbtCompound.getInt("transferCooldown");
-		this.dispenseCooldown = nbtCompound.getInt("dispenseCooldown");
-		this.noteBlockCooldown = nbtCompound.getInt("noteBlockCooldown");
-		this.canDispense = nbtCompound.getBoolean("canDispense");
-		this.shootsControlled = nbtCompound.getBoolean("shootsControlled");
-		this.shootsSpecial = nbtCompound.getBoolean("shootsSpecial");
-		this.canAccept = nbtCompound.getBoolean("canAccept");
+		this.transferCooldown = nbtCompound.getIntOr("transferCooldown", 0);
+		this.dispenseCooldown = nbtCompound.getIntOr("dispenseCooldown", 0);
+		this.noteBlockCooldown = nbtCompound.getIntOr("noteBlockCooldown", 0);
+		this.canDispense = nbtCompound.getBooleanOr("canDispense", false);
+		this.shootsControlled = nbtCompound.getBooleanOr("shootsControlled", false);
+		this.shootsSpecial = nbtCompound.getBooleanOr("shootsSpecial", false);
+		this.canAccept = nbtCompound.getBooleanOr("canAccept", false);
 
         RegistryOps<Tag> registryOps = lookupProvider.createSerializationContext(NbtOps.INSTANCE);
-        if (nbtCompound.contains("listener", 10)) {
-            Data.CODEC.parse(registryOps, nbtCompound.getCompound("listener"))
-                    .resultOrPartial((string) -> SimpleCopperPipes.LOGGER.error("Failed to parse vibration listener for Copper Pipe: '{}'", string))
-                    .ifPresent((data) -> this.vibrationData = data);
-        }
+		this.vibrationData = nbtCompound.read("listener", Data.CODEC, registryOps).orElseGet(VibrationSystem.Data::new);
 	}
 
 	@Override
@@ -423,9 +418,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		nbtCompound.putBoolean("canAccept", this.canAccept);
 
         RegistryOps<Tag> registryOps = lookupProvider.createSerializationContext(NbtOps.INSTANCE);
-        Data.CODEC.encodeStart(registryOps, this.vibrationData)
-                .resultOrPartial((string) -> SimpleCopperPipes.LOGGER.error("Failed to encode vibration listener for Copper Pipe: '{}'", string))
-                .ifPresent((tag) -> nbtCompound.put("listener", tag));
+		nbtCompound.store("listener", Data.CODEC, registryOps, this.vibrationData);
 	}
 
 	public VibrationSystem.User createVibrationUser() {

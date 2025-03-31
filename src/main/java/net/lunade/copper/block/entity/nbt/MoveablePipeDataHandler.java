@@ -1,14 +1,9 @@
 package net.lunade.copper.block.entity.nbt;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import net.lunade.copper.block.entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block.entity.CopperPipeEntity;
 import net.lunade.copper.registry.RegisterPipeNbtMethods;
@@ -16,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -27,41 +21,26 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 public class MoveablePipeDataHandler {
-
-	private static final Logger LOGGER = LogUtils.getLogger();
 	public ArrayList<SaveableMovablePipeNbt> savedList = new ArrayList<>();
 	public ArrayList<ResourceLocation> savedIds = new ArrayList<>();
 
 	public MoveablePipeDataHandler() {
-
 	}
 
 	public void readNbt(@NotNull CompoundTag nbtCompound) {
-		if (nbtCompound.contains("saveableMoveableNbtList", 9)) {
-			this.clear();
-			DataResult<List<SaveableMovablePipeNbt>> var10000 = SaveableMovablePipeNbt.CODEC.listOf().parse(new Dynamic<>(NbtOps.INSTANCE, nbtCompound.getList("saveableMoveableNbtList", 10)));
-			Logger var10001 = LOGGER;
-			Objects.requireNonNull(var10001);
-			Optional<List<SaveableMovablePipeNbt>> list = var10000.resultOrPartial(var10001::error);
-
-			if (list.isPresent()) {
-				for (SaveableMovablePipeNbt saveableMovablePipeNbt : list.get()) {
-					if (saveableMovablePipeNbt.shouldSave) {
-						this.addSaveableMoveablePipeNbt(saveableMovablePipeNbt);
-					}
+		nbtCompound.read("saveableMoveableNbtList", SaveableMovablePipeNbt.CODEC.listOf(), NbtOps.INSTANCE).ifPresent(list -> {
+			for (SaveableMovablePipeNbt saveableMovablePipeNbt : list) {
+				if (saveableMovablePipeNbt.shouldSave) {
+					this.addSaveableMoveablePipeNbt(saveableMovablePipeNbt);
 				}
 			}
-		}
+		});
 	}
 
-	public void writeNbt(CompoundTag nbtCompound) {
-		DataResult<Tag> var10000 = SaveableMovablePipeNbt.CODEC.listOf().encodeStart(NbtOps.INSTANCE, this.savedList);
-		Logger var10001 = LOGGER;
-		Objects.requireNonNull(var10001);
-		var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbtCompound.put("saveableMoveableNbtList", nbtElement));
+	public void writeNbt(@NotNull CompoundTag nbtCompound) {
+		nbtCompound.store("saveableMoveableNbtList", SaveableMovablePipeNbt.CODEC.listOf(), NbtOps.INSTANCE, this.savedList);
 	}
 
 	public void addSaveableMoveablePipeNbt(@NotNull SaveableMovablePipeNbt nbt) {

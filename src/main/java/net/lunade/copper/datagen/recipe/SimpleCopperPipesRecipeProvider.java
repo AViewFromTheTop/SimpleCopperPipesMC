@@ -17,7 +17,7 @@ public class SimpleCopperPipesRecipeProvider extends FabricRecipeProvider {
 	}
 
 	@Override
-	protected RecipeProvider createRecipeProvider(HolderLookup.Provider registryLookup, RecipeOutput exporter) {
+	protected @NotNull RecipeProvider createRecipeProvider(HolderLookup.Provider registryLookup, RecipeOutput exporter) {
 		return new RecipeProvider(registryLookup, exporter) {
 			@Override
 			public void buildRecipes() {

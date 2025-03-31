@@ -247,16 +247,9 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void affectNeighborsAfterRemoval(BlockState blockState, ServerLevel level, BlockPos blockPos, boolean bl) {
 		updateBlockEntityValues(level, blockPos, blockState);
-		if (blockState.hasBlockEntity() && !(blockState2.getBlock() instanceof CopperFitting)) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof CopperFittingEntity) {
-				Containers.dropContents(level, blockPos, (CopperFittingEntity) blockEntity);
-				level.updateNeighbourForOutputSignal(blockPos, this);
-			}
-			level.removeBlockEntity(blockPos);
-		}
+		Containers.updateNeighboursAfterDestroy(blockState, level, blockPos);
 	}
 
 	@Override

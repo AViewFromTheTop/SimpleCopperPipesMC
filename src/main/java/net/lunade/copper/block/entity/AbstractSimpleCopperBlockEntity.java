@@ -216,12 +216,12 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		if (!this.tryLoadLootTable(nbtCompound)) {
 			ContainerHelper.loadAllItems(nbtCompound, this.inventory, lookupProvider);
 		}
-		this.waterCooldown = nbtCompound.getInt("WaterCooldown");
-		this.electricityCooldown = nbtCompound.getInt("electricityCooldown");
-		this.canWater = nbtCompound.getBoolean("canWater");
-		this.canLava = nbtCompound.getBoolean("canLava");
-		this.canSmoke = nbtCompound.getBoolean("canSmoke");
-		this.lastFixVersion = nbtCompound.getInt("lastFixVersion");
+		this.waterCooldown = nbtCompound.getIntOr("WaterCooldown", 0);
+		this.electricityCooldown = nbtCompound.getIntOr("electricityCooldown", 0);
+		this.canWater = nbtCompound.getBooleanOr("canWater", false);
+		this.canLava = nbtCompound.getBooleanOr("canLava", false);
+		this.canSmoke = nbtCompound.getBooleanOr("canSmoke", false);
+		this.lastFixVersion = nbtCompound.getIntOr("lastFixVersion", 0);
 		this.moveablePipeDataHandler.readNbt(nbtCompound);
 	}
 

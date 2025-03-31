@@ -31,9 +31,6 @@
     "client": [
       "net.lunade.copper.SimpleCopperPipesClient"
     ],
-    "fabric-gametest": [
-      "net.lunade.copper.gametest.SimpleCopperPipesGameTest"
-    ],
     "fabric-datagen": [
       "net.lunade.copper.datagen.SimpleCopperPipesDataGenerator"
     ],

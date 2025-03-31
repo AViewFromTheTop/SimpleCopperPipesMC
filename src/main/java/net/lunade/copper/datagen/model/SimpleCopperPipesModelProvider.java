@@ -9,8 +9,6 @@ import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.blockstates.PropertyDispatch;
-import net.minecraft.client.data.models.blockstates.Variant;
-import net.minecraft.client.data.models.blockstates.VariantProperties;
 import net.minecraft.client.data.models.model.ModelLocationUtils;
 import net.minecraft.client.data.models.model.ModelTemplate;
 import net.minecraft.client.data.models.model.TextureMapping;
@@ -115,19 +113,19 @@ public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 		generators.registerSimpleItemModel(outputPipeBlock, model);
 		generators.blockStateOutput
 			.accept(
-				MultiVariantGenerator.multiVariant(outputPipeBlock)
-					.with(BlockModelGenerators.createFacingDispatch())
+				MultiVariantGenerator.dispatch(outputPipeBlock)
 					.with(
-						PropertyDispatch.properties(CopperPipe.FRONT_CONNECTED, CopperPipe.BACK_CONNECTED, CopperPipe.SMOOTH)
-							.select(false, false, false, Variant.variant().with(VariantProperties.MODEL, model))
-							.select(true, false, false, Variant.variant().with(VariantProperties.MODEL, frontExtensionModel))
-							.select(true, true, false, Variant.variant().with(VariantProperties.MODEL, doubleExtensionModel))
-							.select(true, true, true, Variant.variant().with(VariantProperties.MODEL, doubleExtensionModel))
-							.select(true, false, true, Variant.variant().with(VariantProperties.MODEL, frontExtensionModel))
-							.select(false, false, true, Variant.variant().with(VariantProperties.MODEL, smoothModel))
-							.select(false, true, false, Variant.variant().with(VariantProperties.MODEL, backExtensionModel))
-							.select(false, true, true, Variant.variant().with(VariantProperties.MODEL, backSmoothModel))
+						PropertyDispatch.initial(CopperPipe.FRONT_CONNECTED, CopperPipe.BACK_CONNECTED, CopperPipe.SMOOTH)
+							.select(false, false, false, BlockModelGenerators.plainVariant(model))
+							.select(true, false, false, BlockModelGenerators.plainVariant(frontExtensionModel))
+							.select(true, true, false, BlockModelGenerators.plainVariant(doubleExtensionModel))
+							.select(true, true, true, BlockModelGenerators.plainVariant(doubleExtensionModel))
+							.select(true, false, true, BlockModelGenerators.plainVariant(frontExtensionModel))
+							.select(false, false, true, BlockModelGenerators.plainVariant(smoothModel))
+							.select(false, true, false, BlockModelGenerators.plainVariant(backExtensionModel))
+							.select(false, true, true, BlockModelGenerators.plainVariant(backSmoothModel))
 					)
+					.with(BlockModelGenerators.ROTATION_FACING)
 			);
 	}
 
@@ -141,6 +139,6 @@ public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 
 		ResourceLocation model = ModelLocationUtils.getModelLocation(fittingBlock);
 		generators.registerSimpleItemModel(outputFittingBlock, model);
-		generators.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(outputFittingBlock, model));
+		generators.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(outputFittingBlock, BlockModelGenerators.plainVariant(model)));
 	}
 }

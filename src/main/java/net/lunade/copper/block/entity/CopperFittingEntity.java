@@ -153,7 +153,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 	@Override
 	public void loadAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
 		super.loadAdditional(nbtCompound, lookupProvider);
-		this.transferCooldown = nbtCompound.getInt("transferCooldown");
+		this.transferCooldown = nbtCompound.getIntOr("transferCooldown", 0);
 	}
 
 	@Override

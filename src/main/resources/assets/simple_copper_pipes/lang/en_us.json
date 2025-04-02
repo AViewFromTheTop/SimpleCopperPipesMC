@@ -34,7 +34,7 @@
   "option.simple_copper_pipes.suction_sounds": "Suction Sounds",
   "tooltip.simple_copper_pipes.suction_sounds": "Whether Copper Pipes will play a sound upon sucking in a new item.",
   "option.simple_copper_pipes.sense_game_events": "Sense Game Events",
-  "tooltip.simple_copper_pipes.sense_game_events": "Whether Copper Pipes will pick up Game Events (Vibrations.)",
+  "tooltip.simple_copper_pipes.sense_game_events": "Whether Copper Pipes will pick up Game Events (Vibrations).",
 
   "option.simple_copper_pipes.carry_water": "Water Carrying",
   "tooltip.simple_copper_pipes.carry_water": "Whether Copper Pipes and Fittings can carry Water.",

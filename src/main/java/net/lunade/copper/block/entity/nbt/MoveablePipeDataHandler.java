@@ -10,14 +10,14 @@ import net.lunade.copper.block.entity.CopperPipeEntity;
 import net.lunade.copper.registry.RegisterPipeNbtMethods;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -30,18 +30,16 @@ public class MoveablePipeDataHandler {
 	public MoveablePipeDataHandler() {
 	}
 
-	public void readNbt(@NotNull CompoundTag nbtCompound) {
-		nbtCompound.read("saveableMoveableNbtList", SaveableMovablePipeNbt.CODEC.listOf(), NbtOps.INSTANCE).ifPresent(list -> {
+	public void load(@NotNull ValueInput input) {
+		input.read("saveableMoveableNbtList", SaveableMovablePipeNbt.CODEC.listOf()).ifPresent(list -> {
 			for (SaveableMovablePipeNbt saveableMovablePipeNbt : list) {
-				if (saveableMovablePipeNbt.shouldSave) {
-					this.addSaveableMoveablePipeNbt(saveableMovablePipeNbt);
-				}
+				if (saveableMovablePipeNbt.shouldSave) this.addSaveableMoveablePipeNbt(saveableMovablePipeNbt);
 			}
 		});
 	}
 
-	public void writeNbt(@NotNull CompoundTag nbtCompound) {
-		nbtCompound.store("saveableMoveableNbtList", SaveableMovablePipeNbt.CODEC.listOf(), NbtOps.INSTANCE, this.savedList);
+	public void save(@NotNull ValueOutput output) {
+		output.store("saveableMoveableNbtList", SaveableMovablePipeNbt.CODEC.listOf(), this.savedList);
 	}
 
 	public void addSaveableMoveablePipeNbt(@NotNull SaveableMovablePipeNbt nbt) {
@@ -53,9 +51,7 @@ public class MoveablePipeDataHandler {
 
 	@Nullable
 	public SaveableMovablePipeNbt getMoveablePipeNbt(ResourceLocation id) {
-		if (this.savedIds.contains(id) && !this.savedList.isEmpty()) {
-			return this.savedList.get(this.savedIds.indexOf(id));
-		}
+		if (this.savedIds.contains(id) && !this.savedList.isEmpty()) return this.savedList.get(this.savedIds.indexOf(id));
 		return null;
 	}
 
@@ -85,9 +81,7 @@ public class MoveablePipeDataHandler {
 		this.savedList.clear();
 		this.savedIds.clear();
 		for (SaveableMovablePipeNbt nbt : this.savedList) {
-			if (nbt.getShouldMove()) {
-				nbtToRemove.add(nbt);
-			}
+			if (nbt.getShouldMove()) nbtToRemove.add(nbt);
 		}
 		for (SaveableMovablePipeNbt nbt : nbtToRemove) {
 			if (this.savedList.contains(nbt)) {
@@ -103,9 +97,7 @@ public class MoveablePipeDataHandler {
 		this.savedList.clear();
 		this.savedIds.clear();
 		for (SaveableMovablePipeNbt nbt : this.savedList) {
-			if (!nbt.getShouldMove()) {
-				nbtToRemove.add(nbt);
-			}
+			if (!nbt.getShouldMove()) nbtToRemove.add(nbt);
 		}
 		for (SaveableMovablePipeNbt nbt : nbtToRemove) {
 			if (this.savedList.contains(nbt)) {
@@ -288,36 +280,26 @@ public class MoveablePipeDataHandler {
 
 		public void onMove(ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) {
 			RegisterPipeNbtMethods.OnMoveMethod method = RegisterPipeNbtMethods.getMove(this.getNbtID());
-			if (method != null) {
-				method.onMove(this, world, pos, state, blockEntity);
-			}
+			if (method != null) method.onMove(this, world, pos, state, blockEntity);
 		}
 
 		public void tick(ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) { //Will be called at the CURRENT location, not the Pipe/Fitting it moves to on that tick - it can run this method and be dispensed on the same tick.
 			RegisterPipeNbtMethods.TickMethod method = RegisterPipeNbtMethods.getTick(this.getNbtID());
-			if (method != null) {
-				method.tick(this, world, pos, state, blockEntity);
-			}
+			if (method != null) method.tick(this, world, pos, state, blockEntity);
 		}
 
 		public boolean canMove(ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) {
 			RegisterPipeNbtMethods.CanMoveMethod method = RegisterPipeNbtMethods.getCanMove(this.getNbtID());
-			if (method != null) {
-				return method.canMove(this, world, pos, state, blockEntity);
-			} else {
-				return true;
-			}
+			if (method != null) return method.canMove(this, world, pos, state, blockEntity);
+			return true;
 		}
 
 		@Nullable
 		public Entity getEntity(Level world) {
 			if (!this.string.equals("noEntity")) {
 				if (this.foundEntity != null) {
-					if (this.foundEntity.getUUID().toString().equals(this.string)) {
-						return this.foundEntity;
-					} else {
-						this.foundEntity = null;
-					}
+					if (this.foundEntity.getUUID().toString().equals(this.string)) return this.foundEntity;
+					this.foundEntity = null;
 				}
 				AABB box = new AABB(this.vec3d2.add(-32, -32, -32), this.vec3d2.add(32, 32, 32));
 				List<Entity> entities = world.getEntitiesOfClass(Entity.class, box);
@@ -385,7 +367,20 @@ public class MoveablePipeDataHandler {
 		}
 
 		public SaveableMovablePipeNbt copyOf() {
-			return new SaveableMovablePipeNbt(this.savedID, this.vec3d, this.vec3d2, this.string, this.useCount, this.blockPos, this.shouldSave, this.shouldMove, this.canOnlyBeUsedOnce, this.canOnlyGoThroughOnePipe, this.shouldCopy, this.nbtID);
+			return new SaveableMovablePipeNbt(
+				this.savedID,
+				this.vec3d,
+				this.vec3d2,
+				this.string,
+				this.useCount,
+				this.blockPos,
+				this.shouldSave,
+				this.shouldMove,
+				this.canOnlyBeUsedOnce,
+				this.canOnlyGoThroughOnePipe,
+				this.shouldCopy,
+				this.nbtID
+			);
 		}
 	}
 

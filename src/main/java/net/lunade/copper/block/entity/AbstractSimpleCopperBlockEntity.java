@@ -11,12 +11,9 @@ import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.RegisterPipeNbtMethods;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
@@ -33,9 +30,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.Util;
 
 public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockEntity implements Container {
 	public final MoveType moveType;
@@ -208,36 +208,35 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 			this.setChanged();
 		}
 	}
-
 	@Override
-	public void loadAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
-		super.loadAdditional(nbtCompound, lookupProvider);
+	public void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
 		this.inventory = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-		if (!this.tryLoadLootTable(nbtCompound)) {
-			ContainerHelper.loadAllItems(nbtCompound, this.inventory, lookupProvider);
+		if (!this.tryLoadLootTable(input)) {
+			ContainerHelper.loadAllItems(input, this.inventory);
 		}
-		this.waterCooldown = nbtCompound.getIntOr("WaterCooldown", 0);
-		this.electricityCooldown = nbtCompound.getIntOr("electricityCooldown", 0);
-		this.canWater = nbtCompound.getBooleanOr("canWater", false);
-		this.canLava = nbtCompound.getBooleanOr("canLava", false);
-		this.canSmoke = nbtCompound.getBooleanOr("canSmoke", false);
-		this.lastFixVersion = nbtCompound.getIntOr("lastFixVersion", 0);
-		this.moveablePipeDataHandler.readNbt(nbtCompound);
+		this.waterCooldown = input.getIntOr("WaterCooldown", 0);
+		this.electricityCooldown = input.getIntOr("electricityCooldown", 0);
+		this.canWater = input.getBooleanOr("canWater", false);
+		this.canLava = input.getBooleanOr("canLava", false);
+		this.canSmoke = input.getBooleanOr("canSmoke", false);
+		this.lastFixVersion = input.getIntOr("lastFixVersion", 0);
+		this.moveablePipeDataHandler.load(input);
 	}
 
 	@Override
-	protected void saveAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
-		super.saveAdditional(nbtCompound, lookupProvider);
-		if (!this.trySaveLootTable(nbtCompound)) {
-			ContainerHelper.saveAllItems(nbtCompound, this.inventory, lookupProvider);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
+		if (!this.trySaveLootTable(output)) {
+			ContainerHelper.saveAllItems(output, this.inventory);
 		}
-		nbtCompound.putInt("WaterCooldown", this.waterCooldown);
-		nbtCompound.putInt("electricityCooldown", this.electricityCooldown);
-		nbtCompound.putBoolean("canWater", this.canWater);
-		nbtCompound.putBoolean("canLava", this.canLava);
-		nbtCompound.putBoolean("canSmoke", this.canSmoke);
-		nbtCompound.putInt("lastFixVersion", this.lastFixVersion);
-		this.moveablePipeDataHandler.writeNbt(nbtCompound);
+		output.putInt("WaterCooldown", this.waterCooldown);
+		output.putInt("electricityCooldown", this.electricityCooldown);
+		output.putBoolean("canWater", this.canWater);
+		output.putBoolean("canLava", this.canLava);
+		output.putBoolean("canSmoke", this.canSmoke);
+		output.putInt("lastFixVersion", this.lastFixVersion);
+		this.moveablePipeDataHandler.save(output);
 	}
 
 	@Override

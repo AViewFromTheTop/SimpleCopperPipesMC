@@ -123,25 +123,18 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 		BlockState neighborState,
 		RandomSource randomSource
 	) {
-		if (blockState.getValue(WATERLOGGED)) {
-			scheduledTickAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelReader));
-		}
+		if (blockState.getValue(WATERLOGGED)) scheduledTickAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelReader));
+
 		boolean electricity = blockState.getValue(HAS_ELECTRICITY);
 		if (neighborState.getBlock() instanceof LightningRodBlock) {
-			if (neighborState.getValue(POWERED)) {
-				electricity = true;
-			}
+			if (neighborState.getValue(POWERED)) electricity = true;
 		}
 		return blockState.setValue(HAS_ELECTRICITY, electricity);
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, @NotNull Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
-		if (level.hasNeighborSignal(blockPos)) {
-			level.setBlockAndUpdate(blockPos, blockState.setValue(CopperFitting.POWERED, true));
-		} else {
-			level.setBlockAndUpdate(blockPos, blockState.setValue(CopperFitting.POWERED, false));
-		}
+	protected void neighborChanged(@NotNull BlockState blockState, @NotNull Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
+		level.setBlockAndUpdate(blockPos, blockState.setValue(CopperFitting.POWERED, level.hasNeighborSignal(blockPos)));
 		updateBlockEntityValues(level, blockPos, blockState);
 	}
 
@@ -174,16 +167,13 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 	@Override
 	@NotNull
 	public FluidState getFluidState(@NotNull BlockState blockState) {
-		if (blockState.getValue(WATERLOGGED)) {
-			return Fluids.WATER.getSource(false);
-		}
+		if (blockState.getValue(WATERLOGGED)) return Fluids.WATER.getSource(false);
 		return super.getFluidState(blockState);
 	}
 
 	@Override
 	protected @NotNull InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-		if (!SimpleCopperPipesConfig.get().openableFittings)
-			return super.useWithoutItem(state, level, pos, player, hitResult);
+		if (!SimpleCopperPipesConfig.get().openableFittings) return super.useWithoutItem(state, level, pos, player, hitResult);
 
 		BlockEntity blockEntity = level.getBlockEntity(pos);
 		if (blockEntity instanceof CopperFittingEntity fittingEntity) {
@@ -204,9 +194,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 		InteractionHand hand,
 		BlockHitResult hitResult
 	) {
-		if (stack.is(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)) {
-			return InteractionResult.PASS;
-		}
+		if (stack.is(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)) return InteractionResult.PASS;
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 

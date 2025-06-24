@@ -8,17 +8,17 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.lunade.copper.block.CopperFitting;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
+import net.minecraft.Util;
 
 public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
@@ -38,12 +38,10 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 	@Override
 	public void setItem(int i, ItemStack itemStack) {
 		this.unpackLootTable(null);
-		if (itemStack != null) {
-			this.getItems().set(i, itemStack);
-			if (itemStack.getCount() > this.getMaxStackSize()) {
-				itemStack.setCount(this.getMaxStackSize());
-			}
-		}
+		if (itemStack == null) return;
+
+		this.getItems().set(i, itemStack);
+		if (itemStack.getCount() > this.getMaxStackSize()) itemStack.setCount(this.getMaxStackSize());
 	}
 
 	@Override
@@ -127,9 +125,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
 	public void setCooldown(@NotNull BlockState state) {
 		int i = 2;
-		if (state.getBlock() instanceof CopperFitting fitting) {
-			i = fitting.cooldown;
-		}
+		if (state.getBlock() instanceof CopperFitting fitting) i = fitting.cooldown;
 		this.transferCooldown = i;
 	}
 
@@ -151,15 +147,15 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 	}
 
 	@Override
-	public void loadAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
-		super.loadAdditional(nbtCompound, lookupProvider);
-		this.transferCooldown = nbtCompound.getIntOr("transferCooldown", 0);
+	public void loadAdditional(@NotNull ValueInput input) {
+		super.loadAdditional(input);
+		this.transferCooldown = input.getIntOr("transferCooldown", 0);
 	}
 
 	@Override
-	protected void saveAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
-		super.saveAdditional(nbtCompound, lookupProvider);
-		nbtCompound.putInt("transferCooldown", this.transferCooldown);
+	protected void saveAdditional(@NotNull ValueOutput output) {
+		super.saveAdditional(output);
+		output.putInt("transferCooldown", this.transferCooldown);
 	}
 
 }

@@ -1,6 +1,7 @@
 package net.lunade.copper.registry;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import java.util.Map;
 import net.lunade.copper.block.entity.CopperPipeEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -15,7 +16,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import java.util.Map;
 
 public class CopperPipeDispenseBehaviors {
 	private static final Map<ItemLike, PoweredDispense> ITEMS_TO_DISPENSES = new Object2ObjectLinkedOpenHashMap<>();
@@ -47,20 +47,15 @@ public class CopperPipeDispenseBehaviors {
 
 	@Nullable
 	public static PoweredDispense getDispense(ItemLike item) {
-		if (ITEMS_TO_DISPENSES.containsKey(item)) {
-			return ITEMS_TO_DISPENSES.get(item);
-		} else if (item instanceof ProjectileItem) {
-			return PROJECTILE_ITEM_DISPENSE;
-		}
+		if (ITEMS_TO_DISPENSES.containsKey(item)) return ITEMS_TO_DISPENSES.get(item);
+		if (item instanceof ProjectileItem) return PROJECTILE_ITEM_DISPENSE;
 		return null;
 	}
 
 	public static double getYOffset(Direction.Axis axis, double e) {
-		if (axis == Direction.Axis.Y) {
-			return e - 0.125D;
-		} else {
-			return e - 0.15625D;
-		}
+		if (axis == Direction.Axis.Y) return e - 0.125D;
+		return e - 0.15625D;
+
 	}
 
 	public static double getRandom(@NotNull RandomSource random) {

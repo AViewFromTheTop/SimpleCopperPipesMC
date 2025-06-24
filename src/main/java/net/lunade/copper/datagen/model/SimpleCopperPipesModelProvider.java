@@ -1,5 +1,6 @@
 package net.lunade.copper.datagen.model;
 
+import java.util.Optional;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.lunade.copper.SimpleCopperPipesConstants;
@@ -16,7 +17,6 @@ import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
-import java.util.Optional;
 
 public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 	private static final ModelTemplate PIPE_MODEL = new ModelTemplate(

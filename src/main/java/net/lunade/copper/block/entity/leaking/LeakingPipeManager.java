@@ -15,15 +15,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
 public class LeakingPipeManager {
+	private static final ArrayList<LeakingPipePos> LEAK_POSES_A = new ArrayList<>();
+	private static final ArrayList<LeakingPipePos> LEAK_POSES_B = new ArrayList<>();
+	private static boolean IS_ALT_LIST;
 
-	private static final ArrayList<LeakingPipePos> leakingPipePosesOne = new ArrayList<>();
-	private static final ArrayList<LeakingPipePos> leakingPipePosesTwo = new ArrayList<>();
-
-	private static boolean isAlt;
-
-	public static boolean isWaterPipeNearby(Entity entity, int i) {
+	public static boolean isWaterPipeNearby(@NotNull Entity entity, int i) {
 		ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) getPoses().clone();
 		int x = entity.getBlockX();
 		int y = entity.getBlockY();
@@ -40,10 +39,14 @@ public class LeakingPipeManager {
 					if (zVal >= -i && zVal <= i) {
 						int leakY = leakPos.getY();
 						if (y < leakY && y >= leakY - 12) {
-							BlockHitResult hitResult = entity.level().clip(new ClipContext(entityPos, new Vec3(leakPos.getX() + 0.5, leakPos.getY() + 0.5, leakPos.getZ() + 0.5), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
-							if (hitResult.getBlockPos().equals(leakPos)) {
-								return true;
-							}
+							BlockHitResult hitResult = entity.level().clip(
+								new ClipContext(
+									entityPos,
+									Vec3.atCenterOf(leakPos),
+									ClipContext.Block.COLLIDER,
+									ClipContext.Fluid.NONE, entity)
+							);
+							if (hitResult.getBlockPos().equals(leakPos)) return true;
 						}
 					}
 				}
@@ -52,7 +55,7 @@ public class LeakingPipeManager {
 		return false;
 	}
 
-	public static boolean isWaterPipeNearbyBlockGetter(BlockGetter blockGetter, BlockPos blockPos, int i) {
+	public static boolean isWaterPipeNearbyBlockGetter(BlockGetter blockGetter, @NotNull BlockPos blockPos, int i) {
 		ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) getPoses().clone();
 		int x = blockPos.getX();
 		int y = blockPos.getY();
@@ -77,11 +80,11 @@ public class LeakingPipeManager {
 	}
 
 	public static ArrayList<LeakingPipePos> getPoses() {
-		return !isAlt ? leakingPipePosesOne : leakingPipePosesTwo;
+		return !IS_ALT_LIST ? LEAK_POSES_A : LEAK_POSES_B;
 	}
 
 	public static ArrayList<LeakingPipePos> getAltList() {
-		return isAlt ? leakingPipePosesOne : leakingPipePosesTwo;
+		return IS_ALT_LIST ? LEAK_POSES_A : LEAK_POSES_B;
 	}
 
 	public static void clear() {
@@ -89,21 +92,20 @@ public class LeakingPipeManager {
 	}
 
 	public static void clearAll() {
-		leakingPipePosesOne.clear();
-		leakingPipePosesTwo.clear();
+		LEAK_POSES_A.clear();
+		LEAK_POSES_B.clear();
 	}
 
 	public static void clearAndSwitch() {
 		clear();
-		isAlt = !isAlt;
+		IS_ALT_LIST = !IS_ALT_LIST;
 	}
 
-	public static void addPos(Level level, BlockPos pos) {
+	public static void addPos(@NotNull Level level, BlockPos pos) {
 		getAltList().add(new LeakingPipePos(pos, level.dimension().location()));
 	}
 
 	public record LeakingPipePos(BlockPos pos, ResourceLocation dimension) {
-
 	}
 
 }

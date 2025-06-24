@@ -20,9 +20,7 @@ public class LeakingPipeDripBehaviors {
 
 	@Nullable
 	public static DripOn getDrip(Block block) {
-		if (BLOCKS_TO_DRIPS.containsKey(block)) {
-			return BLOCKS_TO_DRIPS.get(block);
-		}
+		if (BLOCKS_TO_DRIPS.containsKey(block)) return BLOCKS_TO_DRIPS.get(block);
 		return null;
 	}
 
@@ -42,15 +40,11 @@ public class LeakingPipeDripBehaviors {
 		}));
 
 		register(Blocks.DIRT, ((lava, world, pos, state) -> {
-			if (!lava) {
-				world.setBlockAndUpdate(pos, Blocks.MUD.defaultBlockState());
-			}
+			if (!lava) world.setBlockAndUpdate(pos, Blocks.MUD.defaultBlockState());
 		}));
 
 		register(Blocks.FIRE, ((lava, world, pos, state) -> {
-			if (!lava) {
-				world.destroyBlock(pos, true);
-			}
+			if (!lava) world.destroyBlock(pos, true);
 		}));
 	}
 

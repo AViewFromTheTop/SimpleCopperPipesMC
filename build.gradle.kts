@@ -58,7 +58,7 @@ loom {
 	accessWidenerPath = file("src/main/resources/simple_copper_pipes.accesswidener")
 	interfaceInjection {
 		// When enabled, injected interfaces from dependencies will be applied.
-		enableDependencyInterfaceInjection = false
+		enableDependencyInterfaceInjection = true
 	}
 }
 

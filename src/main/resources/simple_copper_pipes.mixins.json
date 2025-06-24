@@ -13,7 +13,6 @@
     "HoeItemMixin",
     "SugarCaneBlockMixin",
     "VibrationListenerMixin",
-    "VibrationTickerMixin",
     "datafix.DataFixersMixin",
     "datafix.V3438Mixin"
   ],

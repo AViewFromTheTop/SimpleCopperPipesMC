@@ -62,6 +62,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -204,7 +205,8 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 		return false;
 	}
 
-	public static Vec3 getOutputLocation(@NotNull BlockPos pos, @NotNull Direction facing) {
+	@Contract("_, _ -> new")
+	public static @NotNull Vec3 getOutputLocation(@NotNull BlockPos pos, @NotNull Direction facing) {
 		return new Vec3(
 			((double) pos.getX() + 0.5D) + 0.7D * (double) facing.getStepX(),
 			((double) pos.getY() + 0.5D) + 0.7D * (double) facing.getStepY(),
@@ -214,9 +216,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 
 	public static boolean isReceivingRedstonePower(BlockPos blockPos, Level level) {
 		for (Direction direction : Direction.values()) {
-			if (level.getSignal(blockPos.relative(direction), direction) > 0) {
-				return true;
-			}
+			if (level.getSignal(blockPos.relative(direction), direction) > 0) return true;
 		}
 		return false;
 	}
@@ -364,9 +364,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 	@Nullable
 	@Override
 	public <T extends BlockEntity> GameEventListener getListener(ServerLevel serverLevel, T blockEntity) {
-		if (blockEntity instanceof CopperPipeEntity pipeEntity) {
-			return pipeEntity.getListener();
-		}
+		if (blockEntity instanceof CopperPipeEntity pipeEntity) return pipeEntity.getListener();
 		return null;
 	}
 
@@ -379,9 +377,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 	@Override
 	@NotNull
 	public FluidState getFluidState(@NotNull BlockState blockState) {
-		if (blockState.getValue(WATERLOGGED)) {
-			return Fluids.WATER.getSource(false);
-		}
+		if (blockState.getValue(WATERLOGGED)) return Fluids.WATER.getSource(false);
 		return super.getFluidState(blockState);
 	}
 
@@ -406,9 +402,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 		InteractionHand hand,
 		BlockHitResult hitResult
 	) {
-		if (stack.is(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)) {
-			return InteractionResult.PASS;
-		}
+		if (stack.is(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)) return InteractionResult.PASS;
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
@@ -471,9 +465,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 							dripOn.dripOn(isLava, serverLevel, mutableBlockPos, state);
 							break;
 						}
-						if (state.getCollisionShape(serverLevel, mutableBlockPos) != Shapes.empty()) {
-							break;
-						}
+						if (state.getCollisionShape(serverLevel, mutableBlockPos) != Shapes.empty()) break;
 					} else {
 						break;
 					}

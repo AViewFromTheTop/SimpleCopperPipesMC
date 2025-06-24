@@ -17,11 +17,9 @@ public final class SimpleCopperPipesDataGenerator implements DataGeneratorEntryp
 		final FabricDataGenerator.Pack pack = dataGenerator.createPack();
 
 		// ASSETS
-
 		pack.addProvider(SimpleCopperPipesModelProvider::new);
 
 		// DATA
-
 		pack.addProvider(SimpleCopperPipesBlockLootProvider::new);
 		pack.addProvider(SimpleCopperPipesBlockTagProvider::new);
 		pack.addProvider(SimpleCopperPipesItemTagProvider::new);

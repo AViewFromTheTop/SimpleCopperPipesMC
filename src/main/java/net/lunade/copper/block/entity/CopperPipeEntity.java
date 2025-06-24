@@ -1,7 +1,6 @@
 package net.lunade.copper.block.entity;
 
 import java.util.ArrayList;
-
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -22,11 +21,6 @@ import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -47,6 +41,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -77,9 +73,8 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 	}
 
 	public static boolean canTransfer(Level level, BlockPos pos, boolean to, @NotNull CopperPipeEntity copperPipe, @Nullable Storage<ItemVariant> inventory, @Nullable Storage<ItemVariant> pipeInventory) {
-		if (copperPipe.transferCooldown > 0) {
-			return false;
-		}
+		if (copperPipe.transferCooldown > 0) return false;
+
 		boolean transferApiCheck = true;
 		boolean usingTransferApi = false;
 		if (inventory != null) {
@@ -90,31 +85,22 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		}
 		BlockEntity entity = level.getBlockEntity(pos);
 		if (entity != null) {
-			if (entity instanceof CopperPipeEntity pipe) {
-				return (to || pipe.transferCooldown <= 0) && transferApiCheck;
-			}
-			if (entity instanceof CopperFittingEntity) {
-				return false;
-			}
+			if (entity instanceof CopperPipeEntity pipe) return (to || pipe.transferCooldown <= 0) && transferApiCheck;
+			if (entity instanceof CopperFittingEntity) return false;
+
 			if (to) {
 				PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(entity);
-				if (canTransfer != null) {
-					return canTransfer.canTransfer((ServerLevel) level, pos, level.getBlockState(pos), copperPipe, entity) && transferApiCheck;
-				}
+				if (canTransfer != null) return canTransfer.canTransfer((ServerLevel) level, pos, level.getBlockState(pos), copperPipe, entity) && transferApiCheck;
 			} else {
 				PipeMovementRestrictions.CanTakeFrom<BlockEntity> canTake = PipeMovementRestrictions.getCanTakeFrom(entity);
-				if (canTake != null) {
-					return canTake.canTake((ServerLevel) level, pos, level.getBlockState(pos), copperPipe, entity) && transferApiCheck;
-				}
+				if (canTake != null) return canTake.canTake((ServerLevel) level, pos, level.getBlockState(pos), copperPipe, entity) && transferApiCheck;
 			}
 		}
 		return usingTransferApi && transferApiCheck;
 	}
 
 	public static long addItem(ItemVariant resource, @NotNull Storage<ItemVariant> inventory, Transaction transaction) {
-		if (inventory.supportsInsertion()) {
-			return inventory.insert(resource, MAX_TRANSFER_AMOUNT, transaction);
-		}
+		if (inventory.supportsInsertion()) return inventory.insert(resource, MAX_TRANSFER_AMOUNT, transaction);
 		return 0L;
 	}
 
@@ -142,9 +128,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 	public static void setCooldown(@NotNull Level level, BlockPos blockPos) {
 		BlockEntity entity = level.getBlockEntity(blockPos);
 		BlockState state = level.getBlockState(blockPos);
-		if (entity instanceof CopperPipeEntity pipe) {
-			pipe.setCooldown(state);
-		}
+		if (entity instanceof CopperPipeEntity pipe) pipe.setCooldown(state);
 	}
 
 	public static Storage<ItemVariant> getStorageAt(Level level, BlockPos blockPos, Direction direction) {
@@ -156,9 +140,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		this.unpackLootTable(null);
 		if (itemStack != null) {
 			this.getItems().set(i, itemStack);
-			if (itemStack.getCount() > this.getMaxStackSize()) {
-				itemStack.setCount(this.getMaxStackSize());
-			}
+			if (itemStack.getCount() > this.getMaxStackSize()) itemStack.setCount(this.getMaxStackSize());
 		}
 	}
 
@@ -167,9 +149,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		VibrationSystem.Ticker.tick(this.level, this.getVibrationData(), this.createVibrationUser());
 		super.serverTick(level, blockPos, blockState);
 		if (!level.isClientSide) {
-			if (this.noteBlockCooldown > 0) {
-				--this.noteBlockCooldown;
-			}
+			if (this.noteBlockCooldown > 0) --this.noteBlockCooldown;
 			if (this.dispenseCooldown > 0) {
 				--this.dispenseCooldown;
 			} else {
@@ -249,14 +229,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 						long inserted = addItem(resource, pipeInventory, transaction);
 						if (inserted > 0) { // successfully inserted item
 							transaction.commit(); // applies the changes
-							if (blockState.is(SimpleCopperPipesBlockTags.SILENT_PIPES)) {
-								return 2;
-							}
+							if (blockState.is(SimpleCopperPipesBlockTags.SILENT_PIPES)) return 2;
 
 							Block block = level.getBlockState(offsetOppPos).getBlock();
-							if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) {
-								return 3;
-							}
+							if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) return 3;
 							return 2;
 						}
 					}
@@ -274,24 +250,22 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		if (inventory != null && pipeInventory != null && canTransfer(level, offsetPos, true, this, inventory, pipeInventory)) {
 			boolean canMove = true;
 			BlockState state = level.getBlockState(offsetPos);
-			if (state.getBlock() instanceof CopperPipe) {
-				canMove = state.getValue(BlockStateProperties.FACING) != facing;
-			}
-			if (canMove) {
-				for (StorageView<ItemVariant> storageView : pipeInventory) {
-					if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
-						Transaction transaction = Transaction.openOuter();
-						var resource = storageView.getResource();
-						long inserted = inventory.insert(resource, MAX_TRANSFER_AMOUNT, transaction);
-						if (inserted > 0) { // successfully inserted item
-							long extracted = pipeInventory.extract(resource, MAX_TRANSFER_AMOUNT, transaction);
-							if (extracted > 0) { // successfully extracted item
-								transaction.commit(); // applies the changes
-								return true;
-							}
+			if (state.getBlock() instanceof CopperPipe) canMove = state.getValue(BlockStateProperties.FACING) != facing;
+			if (!canMove) return false;
+
+			for (StorageView<ItemVariant> storageView : pipeInventory) {
+				if (!storageView.isResourceBlank() && storageView.getAmount() > 0) {
+					Transaction transaction = Transaction.openOuter();
+					var resource = storageView.getResource();
+					long inserted = inventory.insert(resource, MAX_TRANSFER_AMOUNT, transaction);
+					if (inserted > 0) { // successfully inserted item
+						long extracted = pipeInventory.extract(resource, MAX_TRANSFER_AMOUNT, transaction);
+						if (extracted > 0) { // successfully extracted item
+							transaction.commit(); // applies the changes
+							return true;
 						}
-						transaction.close(); // if it can't commit, close it.
 					}
+					transaction.close(); // if it can't commit, close it.
 				}
 			}
 		}
@@ -303,38 +277,37 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		Direction directionOpp = direction.getOpposite();
 		boolean powered = blockState.getValue(CopperPipe.POWERED);
 		if (this.canDispense) {
-			int i = this.chooseNonEmptySlot(serverLevel.random);
-			if (i >= 0) {
-				ItemStack itemStack = this.getItem(i);
-				if (!itemStack.isEmpty()) {
-					ItemStack itemStack2;
-					int shotLength = 4;
-					if (this.shootsControlled) { //If Dropper
-						shotLength = 10;
-						if (SimpleCopperPipesConfig.get().dispenseSounds) {
-							serverLevel.playSound(null, blockPos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
-						}
-					} else if (this.shootsSpecial) { //If Dispenser, Use Pipe-Specific Launch Length
-						if (blockState.getBlock() instanceof CopperPipe pipe) {
-							shotLength = pipe.dispenseShotLength;
-							if (SimpleCopperPipesConfig.get().dispenseSounds) {
-								serverLevel.playSound(null, blockPos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
-							}
-						} else {
-							shotLength = 12;
-						}
+			int slot = this.chooseNonEmptySlot(serverLevel.random);
+			if (slot < 0) return false;
+			ItemStack itemStack = this.getItem(slot);
+			if (itemStack.isEmpty()) return false;
+
+			ItemStack shotItem;
+			int shotLength = 4;
+			if (this.shootsControlled) { //If Dropper
+				shotLength = 10;
+				if (SimpleCopperPipesConfig.get().dispenseSounds) {
+					serverLevel.playSound(null, blockPos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
+				}
+			} else if (this.shootsSpecial) { //If Dispenser, Use Pipe-Specific Launch Length
+				if (blockState.getBlock() instanceof CopperPipe pipe) {
+					shotLength = pipe.dispenseShotLength;
+					if (SimpleCopperPipesConfig.get().dispenseSounds) {
+						serverLevel.playSound(null, blockPos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (serverLevel.random.nextFloat() * 0.25F) + 0.8F);
 					}
-					boolean silent = blockState.is(SimpleCopperPipesBlockTags.SILENT_PIPES);
-					if (serverLevel.getBlockState(blockPos.relative(directionOpp)).getBlock() instanceof CopperFitting) {
-						itemStack2 = canonShoot(serverLevel, blockPos, itemStack, blockState, shotLength, powered, true, silent);
-					} else {
-						itemStack2 = canonShoot(serverLevel, blockPos, itemStack, blockState, shotLength, powered, false, silent);
-						serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT_WHITE_SMOKE, blockPos, direction.get3DDataValue());
-					}
-					this.setItem(i, itemStack2);
-					return true;
+				} else {
+					shotLength = 12;
 				}
 			}
+			boolean silent = blockState.is(SimpleCopperPipesBlockTags.SILENT_PIPES);
+			if (serverLevel.getBlockState(blockPos.relative(directionOpp)).getBlock() instanceof CopperFitting) {
+				shotItem = canonShoot(serverLevel, blockPos, itemStack, blockState, shotLength, powered, true, silent);
+			} else {
+				shotItem = canonShoot(serverLevel, blockPos, itemStack, blockState, shotLength, powered, false, silent);
+				serverLevel.levelEvent(LevelEvent.PARTICLES_SHOOT_WHITE_SMOKE, blockPos, direction.get3DDataValue());
+			}
+			this.setItem(slot, shotItem);
+			return true;
 		}
 		return false;
 	}
@@ -376,49 +349,41 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		int i = -1;
 		int j = 1;
 		for (int k = 0; k < this.inventory.size(); ++k) {
-			if (!this.inventory.get(k).isEmpty() && random.nextInt(j++) == 0) {
-				i = k;
-			}
+			if (!this.inventory.get(k).isEmpty() && random.nextInt(j++) == 0) i = k;
 		}
 		return i;
 	}
 
 	public void setCooldown(@NotNull BlockState state) {
 		int i = 2;
-		if (state.getBlock() instanceof CopperPipe pipe) {
-			i = pipe.cooldown;
-		}
+		if (state.getBlock() instanceof CopperPipe pipe) i = pipe.cooldown;
 		this.transferCooldown = i;
 	}
 
 	@Override
-	public void loadAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
-		super.loadAdditional(nbtCompound, lookupProvider);
-		this.transferCooldown = nbtCompound.getIntOr("transferCooldown", 0);
-		this.dispenseCooldown = nbtCompound.getIntOr("dispenseCooldown", 0);
-		this.noteBlockCooldown = nbtCompound.getIntOr("noteBlockCooldown", 0);
-		this.canDispense = nbtCompound.getBooleanOr("canDispense", false);
-		this.shootsControlled = nbtCompound.getBooleanOr("shootsControlled", false);
-		this.shootsSpecial = nbtCompound.getBooleanOr("shootsSpecial", false);
-		this.canAccept = nbtCompound.getBooleanOr("canAccept", false);
-
-        RegistryOps<Tag> registryOps = lookupProvider.createSerializationContext(NbtOps.INSTANCE);
-		this.vibrationData = nbtCompound.read("listener", Data.CODEC, registryOps).orElseGet(VibrationSystem.Data::new);
+	public void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		this.transferCooldown = input.getIntOr("transferCooldown", 0);
+		this.dispenseCooldown = input.getIntOr("dispenseCooldown", 0);
+		this.noteBlockCooldown = input.getIntOr("noteBlockCooldown", 0);
+		this.canDispense = input.getBooleanOr("canDispense", false);
+		this.shootsControlled = input.getBooleanOr("shootsControlled", false);
+		this.shootsSpecial = input.getBooleanOr("shootsSpecial", false);
+		this.canAccept = input.getBooleanOr("canAccept", false);
+		this.vibrationData = input.read("listener", Data.CODEC).orElseGet(VibrationSystem.Data::new);
 	}
 
 	@Override
-	protected void saveAdditional(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider lookupProvider) {
-		super.saveAdditional(nbtCompound, lookupProvider);
-		nbtCompound.putInt("transferCooldown", this.transferCooldown);
-		nbtCompound.putInt("dispenseCooldown", this.dispenseCooldown);
-		nbtCompound.putInt("noteBlockCooldown", this.noteBlockCooldown);
-		nbtCompound.putBoolean("canDispense", this.canDispense);
-		nbtCompound.putBoolean("shootsControlled", this.shootsControlled);
-		nbtCompound.putBoolean("shootsSpecial", this.shootsSpecial);
-		nbtCompound.putBoolean("canAccept", this.canAccept);
-
-        RegistryOps<Tag> registryOps = lookupProvider.createSerializationContext(NbtOps.INSTANCE);
-		nbtCompound.store("listener", Data.CODEC, registryOps, this.vibrationData);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
+		output.putInt("transferCooldown", this.transferCooldown);
+		output.putInt("dispenseCooldown", this.dispenseCooldown);
+		output.putInt("noteBlockCooldown", this.noteBlockCooldown);
+		output.putBoolean("canDispense", this.canDispense);
+		output.putBoolean("shootsControlled", this.shootsControlled);
+		output.putBoolean("shootsSpecial", this.shootsSpecial);
+		output.putBoolean("canAccept", this.canAccept);
+		output.store("listener", Data.CODEC, this.vibrationData);
 	}
 
 	public VibrationSystem.User createVibrationUser() {

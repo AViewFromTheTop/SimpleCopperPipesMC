@@ -6,6 +6,8 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.lunade.copper.tag.SimpleCopperPipesItemTags;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,7 +18,7 @@ public final class SimpleCopperPipesItemTagProvider extends FabricTagProvider.It
 
 	@Override
 	protected void addTags(@NotNull HolderLookup.Provider provider) {
-		this.getOrCreateTagBuilder(SimpleCopperPipesItemTags.COPPER_PIPES)
+		this.valueLookupBuilder(SimpleCopperPipesItemTags.COPPER_PIPES)
 			.add(SimpleCopperPipesBlocks.COPPER_PIPE.asItem())
 			.add(SimpleCopperPipesBlocks.EXPOSED_COPPER_PIPE.asItem())
 			.add(SimpleCopperPipesBlocks.WEATHERED_COPPER_PIPE.asItem())
@@ -26,7 +28,7 @@ public final class SimpleCopperPipesItemTagProvider extends FabricTagProvider.It
 			.add(SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_PIPE.asItem())
 			.add(SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_PIPE.asItem());
 
-		this.getOrCreateTagBuilder(SimpleCopperPipesItemTags.COPPER_FITTINGS)
+		this.valueLookupBuilder(SimpleCopperPipesItemTags.COPPER_FITTINGS)
 			.add(SimpleCopperPipesBlocks.COPPER_FITTING.asItem())
 			.add(SimpleCopperPipesBlocks.EXPOSED_COPPER_FITTING.asItem())
 			.add(SimpleCopperPipesBlocks.WEATHERED_COPPER_FITTING.asItem())
@@ -36,9 +38,9 @@ public final class SimpleCopperPipesItemTagProvider extends FabricTagProvider.It
 			.add(SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_FITTING.asItem())
 			.add(SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_FITTING.asItem());
 
-		this.getOrCreateTagBuilder(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)
+		this.builder(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)
 			.addOptionalTag(SimpleCopperPipesItemTags.COPPER_PIPES)
 			.addOptionalTag(SimpleCopperPipesItemTags.COPPER_FITTINGS)
-			.addOptional(ResourceLocation.tryBuild("create", "wrench"));
+			.addOptional(ResourceKey.create(Registries.ITEM, ResourceLocation.tryBuild("create", "wrench")));
 	}
 }

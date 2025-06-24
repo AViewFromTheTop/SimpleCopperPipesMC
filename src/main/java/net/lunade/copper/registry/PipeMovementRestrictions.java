@@ -22,17 +22,13 @@ public class PipeMovementRestrictions {
 
 	@Nullable
 	public static <T extends BlockEntity> CanTransferTo<T> getCanTransferTo(ResourceLocation id) {
-		if (PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) {
-			return PIPE_MOVEMENT_RESTRICTIONS.get(id).canTransferTo;
-		}
+		if (PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) return PIPE_MOVEMENT_RESTRICTIONS.get(id).canTransferTo;
 		return null;
 	}
 
 	@Nullable
 	public static <T extends BlockEntity> CanTakeFrom<T> getCanTakeFrom(ResourceLocation id) {
-		if (PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) {
-			return PIPE_MOVEMENT_RESTRICTIONS.get(id).canTakeFrom;
-		}
+		if (PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) return PIPE_MOVEMENT_RESTRICTIONS.get(id).canTakeFrom;
 		return null;
 	}
 

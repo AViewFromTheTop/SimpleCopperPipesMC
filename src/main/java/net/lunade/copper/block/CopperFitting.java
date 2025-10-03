@@ -150,7 +150,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-		if (!level.isClientSide) {
+		if (!level.isClientSide()) {
 			return createTickerHelper(blockEntityType, SimpleCopperPipesBlockEntityTypes.COPPER_FITTING_ENTITY, (level1, blockPos, blockState1, copperFittingEntity) ->
 				copperFittingEntity.serverTick(level1, blockPos, blockState1)
 			);
@@ -210,7 +210,7 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, @NotNull Level level, BlockPos blockPos) {
+	public int getAnalogOutputSignal(BlockState blockState, @NotNull Level level, BlockPos blockPos, Direction direction) {
 		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(blockPos));
 	}
 

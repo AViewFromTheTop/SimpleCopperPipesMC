@@ -2,6 +2,7 @@ package net.lunade.copper.datafix;
 
 import com.mojang.datafixers.schemas.Schema;
 import net.fabricmc.loader.api.ModContainer;
+import net.lunade.copper.datafix.fix.TransferableDataFieldRenameFix;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.BlockEntityRenameFix;
@@ -12,7 +13,7 @@ import org.quiltmc.qsl.frozenblock.misc.datafixerupper.api.QuiltDataFixes;
 import org.quiltmc.qsl.frozenblock.misc.datafixerupper.api.SimpleFixes;
 
 public class SimpleCopperPipesDataFixer {
-	public static final int DATA_VERSION = 2;
+	public static final int DATA_VERSION = 3;
 
 	public static void applyDataFixes(final @NotNull ModContainer mod) {
 		var builder = new QuiltDataFixerBuilder(DATA_VERSION);
@@ -248,6 +249,10 @@ public class SimpleCopperPipesDataFixer {
 				)
 			)
 		);
+
+		Schema schemaV3 = builder.addSchema(3, NamespacedSchema::new);
+		builder.addFixer(new TransferableDataFieldRenameFix(TransferableDataFieldRenameFix.COPPER_PIPE, schemaV3));
+		builder.addFixer(new TransferableDataFieldRenameFix(TransferableDataFieldRenameFix.COPPER_FITTING, schemaV3));
 
 		QuiltDataFixes.buildAndRegisterFixer(mod, builder);
 	}

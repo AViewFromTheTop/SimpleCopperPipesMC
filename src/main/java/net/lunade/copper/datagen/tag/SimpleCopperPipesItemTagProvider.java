@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public final class SimpleCopperPipesItemTagProvider extends FabricTagProvider.ItemTagProvider {
+
 	public SimpleCopperPipesItemTagProvider(@NotNull FabricDataOutput output, @NotNull CompletableFuture<HolderLookup.Provider> registries) {
 		super(output, registries);
 	}
@@ -41,6 +42,7 @@ public final class SimpleCopperPipesItemTagProvider extends FabricTagProvider.It
 		this.builder(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)
 			.addOptionalTag(SimpleCopperPipesItemTags.COPPER_PIPES)
 			.addOptionalTag(SimpleCopperPipesItemTags.COPPER_FITTINGS)
+			.addOptional(ResourceKey.create(Registries.ITEM, ResourceLocation.tryBuild("thecopperierage", "wrench")))
 			.addOptional(ResourceKey.create(Registries.ITEM, ResourceLocation.tryBuild("create", "wrench")));
 	}
 }

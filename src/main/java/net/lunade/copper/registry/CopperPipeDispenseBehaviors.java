@@ -25,24 +25,23 @@ public class CopperPipeDispenseBehaviors {
 	}
 
 	private static final PoweredDispense PROJECTILE_ITEM_DISPENSE = (world, stack, i, direction, position, state, pos, pipe) -> {
-		if (stack.getItem() instanceof ProjectileItem projectileItem) {
-			double d = position.x();
-			double e = position.y();
-			double f = position.z();
-			Direction.Axis axis = direction.getAxis();
-			e = getYOffset(axis, e);
-			ProjectileItem.DispenseConfig dispenseConfig = projectileItem.createDispenseConfig();
-			Projectile.spawnProjectileUsingShoot(
-				projectileItem.asProjectile(world, new Vec3(d, e, f), stack, direction),
-				world,
-				stack,
-				direction.getStepX(),
-				direction.getStepY(),
-				direction.getStepZ(),
-				dispenseConfig.power() * 2F,
-				dispenseConfig.uncertainty() * 2F
-			);
-		}
+		if (!(stack.getItem() instanceof ProjectileItem projectileItem)) return;
+		final Direction.Axis axis = direction.getAxis();
+		final double x = position.x();
+		final double y = getYOffset(axis, position.y());
+		final double z = position.z();
+
+		final ProjectileItem.DispenseConfig dispenseConfig = projectileItem.createDispenseConfig();
+		Projectile.spawnProjectileUsingShoot(
+			projectileItem.asProjectile(world, new Vec3(x, y, z), stack, direction),
+			world,
+			stack,
+			direction.getStepX(),
+			direction.getStepY(),
+			direction.getStepZ(),
+			dispenseConfig.power() * 2F,
+			dispenseConfig.uncertainty() * 2F
+		);
 	};
 
 	@Nullable
@@ -52,26 +51,25 @@ public class CopperPipeDispenseBehaviors {
 		return null;
 	}
 
-	public static double getYOffset(Direction.Axis axis, double e) {
-		if (axis == Direction.Axis.Y) return e - 0.125D;
-		return e - 0.15625D;
-
+	public static double getYOffset(Direction.Axis axis, double y) {
+		if (axis == Direction.Axis.Y) return y - 0.125D;
+		return y - 0.15625D;
 	}
 
 	public static double getRandom(@NotNull RandomSource random) {
 		return (random.nextDouble() * 0.6D) - 0.3D;
 	}
 
-	public static double getVelX(Direction.Axis axis, int offX, int i) {
-		return axis == Direction.Axis.X ? (i * offX) * 0.1D : 0D;
+	public static double getVelX(Direction.Axis axis, int offX, int offset) {
+		return axis == Direction.Axis.X ? (offset * offX) * 0.1D : 0D;
 	}
 
-	public static double getVelY(Direction.Axis axis, int offY, int i) {
-		return axis == Direction.Axis.Y ? (i * offY) * 0.1D : 0D;
+	public static double getVelY(Direction.Axis axis, int offY, int offset) {
+		return axis == Direction.Axis.Y ? (offset * offY) * 0.1D : 0D;
 	}
 
-	public static double getVelZ(Direction.Axis axis, int offZ, int i) {
-		return axis == Direction.Axis.Z ? (i * offZ) * 0.1D : 0D;
+	public static double getVelZ(Direction.Axis axis, int offZ, int offset) {
+		return axis == Direction.Axis.Z ? (offset * offZ) * 0.1D : 0D;
 	}
 
 	public static void init() {
@@ -79,7 +77,7 @@ public class CopperPipeDispenseBehaviors {
 
 	@FunctionalInterface
 	public interface PoweredDispense {
-		void dispense(ServerLevel world, ItemStack itemStack, int i, Direction direction, Position position, BlockState state, BlockPos pos, CopperPipeEntity pipe);
+		void dispense(ServerLevel world, ItemStack itemStack, int shotPower, Direction direction, Position position, BlockState state, BlockPos pos, CopperPipeEntity pipe);
 	}
 
 }

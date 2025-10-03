@@ -1,4 +1,4 @@
-package net.lunade.copper.block.entity.nbt;
+package net.lunade.copper.block.entity.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -7,7 +7,7 @@ import java.util.List;
 import net.lunade.copper.SimpleCopperPipesConstants;
 import net.lunade.copper.block.entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block.entity.CopperPipeEntity;
-import net.lunade.copper.registry.RegisterPipeNbtMethods;
+import net.lunade.copper.registry.TransferablePipeData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -23,111 +23,108 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class MoveablePipeDataHandler {
-	public ArrayList<SaveableMovablePipeNbt> savedList = new ArrayList<>();
+public class TransferablePipeDataHandler {
+	public ArrayList<SaveableTransferablePipeData> savedData = new ArrayList<>();
 	public ArrayList<ResourceLocation> savedIds = new ArrayList<>();
 
-	public MoveablePipeDataHandler() {
+	public TransferablePipeDataHandler() {
 	}
 
 	public void load(@NotNull ValueInput input) {
-		input.read("saveableMoveableNbtList", SaveableMovablePipeNbt.CODEC.listOf()).ifPresent(list -> {
-			for (SaveableMovablePipeNbt saveableMovablePipeNbt : list) {
-				if (saveableMovablePipeNbt.shouldSave) this.addSaveableMoveablePipeNbt(saveableMovablePipeNbt);
+		input.read("transferablePipeData", SaveableTransferablePipeData.CODEC.listOf()).ifPresent(list -> {
+			for (SaveableTransferablePipeData saveableTransferablePipeData : list) {
+				if (saveableTransferablePipeData.shouldSave) this.addSaveableMoveablePipeNbt(saveableTransferablePipeData);
 			}
 		});
 	}
 
 	public void save(@NotNull ValueOutput output) {
-		output.store("saveableMoveableNbtList", SaveableMovablePipeNbt.CODEC.listOf(), this.savedList);
+		output.store("transferablePipeData", SaveableTransferablePipeData.CODEC.listOf(), this.savedData);
 	}
 
-	public void addSaveableMoveablePipeNbt(@NotNull SaveableMovablePipeNbt nbt) {
-		if (!this.savedIds.contains(nbt.getNbtID())) {
-			this.savedList.add(nbt);
-			this.savedIds.add(nbt.getNbtID());
-		}
+	public void addSaveableMoveablePipeNbt(@NotNull TransferablePipeDataHandler.SaveableTransferablePipeData nbt) {
+		if (this.savedIds.contains(nbt.getID())) return;
+		this.savedData.add(nbt);
+		this.savedIds.add(nbt.getID());
 	}
 
 	@Nullable
-	public SaveableMovablePipeNbt getMoveablePipeNbt(ResourceLocation id) {
-		if (this.savedIds.contains(id) && !this.savedList.isEmpty()) return this.savedList.get(this.savedIds.indexOf(id));
+	public TransferablePipeDataHandler.SaveableTransferablePipeData getTransferablePipeData(ResourceLocation id) {
+		if (this.savedIds.contains(id) && !this.savedData.isEmpty()) return this.savedData.get(this.savedIds.indexOf(id));
 		return null;
 	}
 
-	public void removeMoveablePipeNbt(ResourceLocation id) {
-		if (this.savedIds.contains(id)) {
-			this.savedList.remove(this.savedIds.indexOf(id));
-			this.savedIds.remove(id);
-		}
+	public void removeTransferablePipeData(ResourceLocation id) {
+		if (!this.savedIds.contains(id)) return;
+		this.savedData.remove(this.savedIds.indexOf(id));
+		this.savedIds.remove(id);
 	}
 
-	public void setMoveablePipeNbt(ResourceLocation id, SaveableMovablePipeNbt nbt) {
+	public void setTransferablePipeData(ResourceLocation id, SaveableTransferablePipeData nbt) {
 		if (this.savedIds.contains(id)) {
-			this.savedList.set(this.savedIds.indexOf(id), nbt);
+			this.savedData.set(this.savedIds.indexOf(id), nbt);
 		} else {
 			this.savedIds.add(id);
-			this.savedList.add(nbt);
+			this.savedData.add(nbt);
 		}
 	}
 
 	public void clear() {
-		this.savedList.clear();
+		this.savedData.clear();
 		this.savedIds.clear();
 	}
 
 	public void clearAllButNonMoveable() {
-		ArrayList<SaveableMovablePipeNbt> nbtToRemove = new ArrayList<>();
-		this.savedList.clear();
+		ArrayList<SaveableTransferablePipeData> nbtToRemove = new ArrayList<>();
+		this.savedData.clear();
 		this.savedIds.clear();
-		for (SaveableMovablePipeNbt nbt : this.savedList) {
-			if (nbt.getShouldMove()) nbtToRemove.add(nbt);
+		for (SaveableTransferablePipeData nbt : this.savedData) {
+			if (nbt.shouldMove()) nbtToRemove.add(nbt);
 		}
-		for (SaveableMovablePipeNbt nbt : nbtToRemove) {
-			if (this.savedList.contains(nbt)) {
-				int index = this.savedList.indexOf(nbt);
-				this.savedList.remove(index);
+		for (SaveableTransferablePipeData nbt : nbtToRemove) {
+			if (this.savedData.contains(nbt)) {
+				int index = this.savedData.indexOf(nbt);
+				this.savedData.remove(index);
 				this.savedIds.remove(index);
 			}
 		}
 	}
 
 	public void clearAllButMoveable() {
-		ArrayList<SaveableMovablePipeNbt> nbtToRemove = new ArrayList<>();
-		this.savedList.clear();
+		ArrayList<SaveableTransferablePipeData> nbtToRemove = new ArrayList<>();
+		this.savedData.clear();
 		this.savedIds.clear();
-		for (SaveableMovablePipeNbt nbt : this.savedList) {
-			if (!nbt.getShouldMove()) nbtToRemove.add(nbt);
+		for (SaveableTransferablePipeData nbt : this.savedData) {
+			if (!nbt.shouldMove()) nbtToRemove.add(nbt);
 		}
-		for (SaveableMovablePipeNbt nbt : nbtToRemove) {
-			if (this.savedList.contains(nbt)) {
-				int index = this.savedList.indexOf(nbt);
-				this.savedList.remove(index);
+		for (SaveableTransferablePipeData nbt : nbtToRemove) {
+			if (this.savedData.contains(nbt)) {
+				int index = this.savedData.indexOf(nbt);
+				this.savedData.remove(index);
 				this.savedIds.remove(index);
 			}
 		}
 	}
 
-	public ArrayList<SaveableMovablePipeNbt> getSavedNbtList() {
-		return this.savedList;
+	public ArrayList<SaveableTransferablePipeData> getSavedDataList() {
+		return this.savedData;
 	}
 
-	public static class SaveableMovablePipeNbt {
-
-		public static final Codec<SaveableMovablePipeNbt> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-			ResourceLocation.CODEC.fieldOf("savedID").forGetter(SaveableMovablePipeNbt::getSavedID),
-			Vec3.CODEC.fieldOf("vec3d").forGetter(SaveableMovablePipeNbt::getVec3d),
-			Vec3.CODEC.fieldOf("vec3d2").forGetter(SaveableMovablePipeNbt::getVec3d2),
-			Codec.STRING.fieldOf("string").forGetter(SaveableMovablePipeNbt::getString),
-			Codec.INT.fieldOf("useCount").forGetter(SaveableMovablePipeNbt::getUseCount),
-			BlockPos.CODEC.fieldOf("blockPos").forGetter(SaveableMovablePipeNbt::getBlockPos),
-			Codec.BOOL.fieldOf("shouldSave").forGetter(SaveableMovablePipeNbt::getShouldSave),
-			Codec.BOOL.fieldOf("shouldMove").forGetter(SaveableMovablePipeNbt::getShouldMove),
-			Codec.BOOL.fieldOf("canOnlyBeUsedOnce").forGetter(SaveableMovablePipeNbt::getCanOnlyBeUsedOnce),
-			Codec.BOOL.fieldOf("canOnlyGoThroughOnePipe").forGetter(SaveableMovablePipeNbt::getCanOnlyGoThroughOnePipe),
-			Codec.BOOL.fieldOf("shouldCopy").forGetter(SaveableMovablePipeNbt::getShouldCopy),
-			ResourceLocation.CODEC.fieldOf("nbtId").forGetter(SaveableMovablePipeNbt::getNbtID)
-		).apply(instance, SaveableMovablePipeNbt::new));
+	public static class SaveableTransferablePipeData {
+		public static final Codec<SaveableTransferablePipeData> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+			ResourceLocation.CODEC.fieldOf("savedID").forGetter(SaveableTransferablePipeData::getSavedID),
+			Vec3.CODEC.fieldOf("vec3d").forGetter(SaveableTransferablePipeData::getVec3d),
+			Vec3.CODEC.fieldOf("vec3d2").forGetter(SaveableTransferablePipeData::getVec3d2),
+			Codec.STRING.fieldOf("string").forGetter(SaveableTransferablePipeData::getString),
+			Codec.INT.fieldOf("useCount").forGetter(SaveableTransferablePipeData::getUseCount),
+			BlockPos.CODEC.fieldOf("blockPos").forGetter(SaveableTransferablePipeData::blockPos),
+			Codec.BOOL.fieldOf("shouldSave").forGetter(SaveableTransferablePipeData::shouldSave),
+			Codec.BOOL.fieldOf("shouldMove").forGetter(SaveableTransferablePipeData::shouldMove),
+			Codec.BOOL.fieldOf("canOnlyBeUsedOnce").forGetter(SaveableTransferablePipeData::canOnlyBeUsedOnce),
+			Codec.BOOL.fieldOf("canOnlyGoThroughOnePipe").forGetter(SaveableTransferablePipeData::canOnlyGoThroughOnePipe),
+			Codec.BOOL.fieldOf("shouldCopy").forGetter(SaveableTransferablePipeData::shouldCopy),
+			ResourceLocation.CODEC.fieldOf("nbtId").forGetter(SaveableTransferablePipeData::getID)
+		).apply(instance, SaveableTransferablePipeData::new));
 		public ResourceLocation savedID;
 		public Vec3 vec3d;
 		public Vec3 vec3d2;
@@ -141,9 +138,9 @@ public class MoveablePipeDataHandler {
 		private boolean canOnlyBeUsedOnce;
 		private boolean canOnlyGoThroughOnePipe;
 		private boolean shouldCopy;
-		private ResourceLocation nbtID;
+		private ResourceLocation ID;
 
-		public SaveableMovablePipeNbt(ResourceLocation id, Vec3 vec3d, Vec3 vec3d2, String string, int useCount, BlockPos blockPos, boolean shouldSave, boolean shouldMove, boolean canOnlyBeUsedOnce, boolean canOnlyGoThroughOnePipe, boolean shouldCopy, ResourceLocation nbtId) {
+		public SaveableTransferablePipeData(ResourceLocation id, Vec3 vec3d, Vec3 vec3d2, String string, int useCount, BlockPos blockPos, boolean shouldSave, boolean shouldMove, boolean canOnlyBeUsedOnce, boolean canOnlyGoThroughOnePipe, boolean shouldCopy, ResourceLocation nbtId) {
 			this.savedID = id;
 			this.vec3d = vec3d;
 			this.vec3d2 = vec3d2;
@@ -155,10 +152,10 @@ public class MoveablePipeDataHandler {
 			this.canOnlyBeUsedOnce = canOnlyBeUsedOnce;
 			this.canOnlyGoThroughOnePipe = canOnlyGoThroughOnePipe;
 			this.shouldCopy = shouldCopy;
-			this.nbtID = nbtId;
+			this.ID = nbtId;
 		}
 
-		public SaveableMovablePipeNbt(GameEvent event, Vec3 originPos, @Nullable GameEvent.Context emitter, BlockPos pipePos) {
+		public SaveableTransferablePipeData(GameEvent event, Vec3 originPos, @Nullable GameEvent.Context emitter, BlockPos pipePos) {
 			this.savedID = BuiltInRegistries.GAME_EVENT.getKey(event);
 			this.vec3d = originPos;
 			this.vec3d2 = originPos;
@@ -168,7 +165,7 @@ public class MoveablePipeDataHandler {
 				this.string = "noEntity";
 			}
 			this.blockPos = pipePos;
-			this.nbtID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "default");
+			this.ID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "default");
 			this.useCount = 0;
 			this.canOnlyGoThroughOnePipe = false;
 			this.canOnlyBeUsedOnce = false;
@@ -177,7 +174,7 @@ public class MoveablePipeDataHandler {
 			this.shouldCopy = false;
 		}
 
-		public SaveableMovablePipeNbt(GameEvent event, Vec3 originPos, @Nullable Entity entity, BlockPos pipePos) {
+		public SaveableTransferablePipeData(GameEvent event, Vec3 originPos, @Nullable Entity entity, BlockPos pipePos) {
 			this.savedID = BuiltInRegistries.GAME_EVENT.getKey(event);
 			this.vec3d = originPos;
 			this.vec3d2 = originPos;
@@ -187,7 +184,7 @@ public class MoveablePipeDataHandler {
 				this.string = "noEntity";
 			}
 			this.blockPos = pipePos;
-			this.nbtID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "default");
+			this.ID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "default");
 			this.useCount = 0;
 			this.canOnlyGoThroughOnePipe = false;
 			this.canOnlyBeUsedOnce = false;
@@ -196,13 +193,13 @@ public class MoveablePipeDataHandler {
 			this.shouldCopy = false;
 		}
 
-		public SaveableMovablePipeNbt() {
+		public SaveableTransferablePipeData() {
 			this.savedID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "none");
 			this.vec3d = new Vec3(0, -64, 0);
 			this.vec3d2 = new Vec3(0, -64, 0);
 			this.string = "none";
 			this.blockPos = new BlockPos(0, -64, 0);
-			this.nbtID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "none");
+			this.ID = ResourceLocation.tryBuild(SimpleCopperPipesConstants.MOD_ID, "none");
 			this.useCount = 0;
 			this.canOnlyGoThroughOnePipe = false;
 			this.canOnlyBeUsedOnce = false;
@@ -211,85 +208,85 @@ public class MoveablePipeDataHandler {
 			this.shouldCopy = false;
 		}
 
-		public SaveableMovablePipeNbt withSavedId(ResourceLocation id) {
-			this.setNbtID(id);
+		public SaveableTransferablePipeData withSavedId(ResourceLocation id) {
+			this.setID(id);
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withVec3d(Vec3 pos) {
+		public SaveableTransferablePipeData withVec3d(Vec3 pos) {
 			this.vec3d = pos;
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withVec3d2(Vec3 pos) {
+		public SaveableTransferablePipeData withVec3d2(Vec3 pos) {
 			this.vec3d2 = pos;
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withString(String string) {
+		public SaveableTransferablePipeData withString(String string) {
 			this.string = string;
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withUseCount(int count) {
+		public SaveableTransferablePipeData withUseCount(int count) {
 			this.useCount = count;
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withBlockPos(BlockPos pos) {
+		public SaveableTransferablePipeData withBlockPos(BlockPos pos) {
 			this.blockPos = pos;
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withShouldSave(boolean bool) {
+		public SaveableTransferablePipeData withShouldSave(boolean bool) {
 			this.shouldSave = bool;
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withShouldMove(boolean bool) {
+		public SaveableTransferablePipeData withShouldMove(boolean bool) {
 			this.shouldMove = bool;
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withOnlyUseableOnce(boolean bool) {
+		public SaveableTransferablePipeData withOnlyUseableOnce(boolean bool) {
 			this.canOnlyBeUsedOnce = bool;
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withOnlyThroughOnePipe(boolean bool) {
+		public SaveableTransferablePipeData withOnlyThroughOnePipe(boolean bool) {
 			this.canOnlyGoThroughOnePipe = bool;
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withShouldCopy(boolean bool) {
+		public SaveableTransferablePipeData withShouldCopy(boolean bool) {
 			this.shouldCopy = bool;
 			return this;
 		}
 
-		public SaveableMovablePipeNbt withNBTID(ResourceLocation id) {
-			this.setNbtID(id);
+		public SaveableTransferablePipeData withID(ResourceLocation id) {
+			this.setID(id);
 			return this;
 		}
 
 		public void dispense(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipeEntity) {
-			RegisterPipeNbtMethods.DispenseMethod method = RegisterPipeNbtMethods.getDispense(this.getNbtID());
+			TransferablePipeData.Dispsense method = TransferablePipeData.getDispenseBehavior(this.getID());
 			if (method != null) {
 				method.dispense(this, world, pos, state, pipeEntity);
 			}
 		}
 
 		public void onMove(ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) {
-			RegisterPipeNbtMethods.OnMoveMethod method = RegisterPipeNbtMethods.getMove(this.getNbtID());
+			TransferablePipeData.Move method = TransferablePipeData.getMoveBehavior(this.getID());
 			if (method != null) method.onMove(this, world, pos, state, blockEntity);
 		}
 
 		public void tick(ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) { //Will be called at the CURRENT location, not the Pipe/Fitting it moves to on that tick - it can run this method and be dispensed on the same tick.
-			RegisterPipeNbtMethods.TickMethod method = RegisterPipeNbtMethods.getTick(this.getNbtID());
+			TransferablePipeData.Tick method = TransferablePipeData.getTickBehavior(this.getID());
 			if (method != null) method.tick(this, world, pos, state, blockEntity);
 		}
 
 		public boolean canMove(ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) {
-			RegisterPipeNbtMethods.CanMoveMethod method = RegisterPipeNbtMethods.getCanMove(this.getNbtID());
+			TransferablePipeData.CanMove method = TransferablePipeData.getCanMovePredicate(this.getID());
 			if (method != null) return method.canMove(this, world, pos, state, blockEntity);
 			return true;
 		}
@@ -334,40 +331,40 @@ public class MoveablePipeDataHandler {
 			return this.useCount;
 		}
 
-		public BlockPos getBlockPos() {
+		public BlockPos blockPos() {
 			return this.blockPos;
 		}
 
-		public boolean getShouldSave() {
+		public boolean shouldSave() {
 			return this.shouldSave;
 		}
 
-		public boolean getShouldMove() {
+		public boolean shouldMove() {
 			return this.shouldMove;
 		}
 
-		public boolean getCanOnlyBeUsedOnce() {
+		public boolean canOnlyBeUsedOnce() {
 			return this.canOnlyBeUsedOnce;
 		}
 
-		public boolean getCanOnlyGoThroughOnePipe() {
+		public boolean canOnlyGoThroughOnePipe() {
 			return this.canOnlyGoThroughOnePipe;
 		}
 
-		public boolean getShouldCopy() {
+		public boolean shouldCopy() {
 			return this.shouldCopy;
 		}
 
-		public ResourceLocation getNbtID() {
-			return this.nbtID;
+		public ResourceLocation getID() {
+			return this.ID;
 		}
 
-		public void setNbtID(ResourceLocation id) {
-			this.nbtID = id;
+		public void setID(ResourceLocation id) {
+			this.ID = id;
 		}
 
-		public SaveableMovablePipeNbt copyOf() {
-			return new SaveableMovablePipeNbt(
+		public SaveableTransferablePipeData copyOf() {
+			return new SaveableTransferablePipeData(
 				this.savedID,
 				this.vec3d,
 				this.vec3d2,
@@ -379,7 +376,7 @@ public class MoveablePipeDataHandler {
 				this.canOnlyBeUsedOnce,
 				this.canOnlyGoThroughOnePipe,
 				this.shouldCopy,
-				this.nbtID
+				this.ID
 			);
 		}
 	}

@@ -2,12 +2,14 @@ package net.lunade.copper.mixin.plugin;
 
 import java.util.List;
 import java.util.Set;
+import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 public class SimpleCopperPipesMixinPlugin implements IMixinConfigPlugin {
+	private final boolean hasTheCopperierAge = FabricLoader.getInstance().isModLoaded("thecopperierage");
 
 	@Override
 	public void onLoad(String mixinPackage) {
@@ -19,7 +21,8 @@ public class SimpleCopperPipesMixinPlugin implements IMixinConfigPlugin {
 	}
 
 	@Override
-	public boolean shouldApplyMixin(String targetClassName, @NotNull String mixinClassName) {
+	public boolean shouldApplyMixin(@NotNull String targetClassName, @NotNull String mixinClassName) {
+		if (targetClassName.contains("thecopperierage.")) return this.hasTheCopperierAge;
 		return true;
 	}
 

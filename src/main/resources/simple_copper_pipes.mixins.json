@@ -10,7 +10,7 @@
     "CoralParentBlockMixin",
     "EntityMixin",
     "FarmlandBlockMixin",
-    "HoeItemMixin",
+    "thecopperierage.WrenchItemMixin",
     "SugarCaneBlockMixin",
     "VibrationListenerMixin",
     "datafix.DataFixersMixin",

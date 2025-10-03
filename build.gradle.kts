@@ -1,5 +1,5 @@
 plugins {
-	id("fabric-loom") version("+")
+	id("fabric-loom") version("1.11-SNAPSHOT")
 	id("org.quiltmc.gradle.licenser") version("+")
 	id("org.ajoberstar.grgit") version("+")
 	id("com.modrinth.minotaur") version("+")
@@ -23,6 +23,7 @@ val archives_base_name: String by project
 
 val fabric_api_version: String by project
 val frozenlib_version: String by project
+val thecopperierage_version: String by project
 val modmenu_version: String by project
 val cloth_config_version: String by project
 
@@ -50,10 +51,6 @@ sourceSets {
 
 loom {
 	runtimeOnlyLog4j = true
-
-	mixin {
-		defaultRefmapName = "mixins.simple_copper_pipes.refmap.json"
-	}
 
 	accessWidenerPath = file("src/main/resources/simple_copper_pipes.accesswidener")
 	interfaceInjection {
@@ -149,25 +146,26 @@ dependencies {
 			nameSyntheticMembers = false
 		}
 	})
+
 	modImplementation("net.fabricmc:fabric-loader:$loader_version")
-
-	// Create
-	modCompileOnly("maven.modrinth:create-fabric:0.5.1-d-build.1161+mc1.20.1")
-
-	// Fabric API
 	modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_api_version")
 
-	// FrozenLib
-	if (local_frozenlib)
-		api(project(":FrozenLib", configuration = "namedElements"))?.let { include(it) }
-	else
-		modApi("maven.modrinth:frozenlib:$frozenlib_version")?.let { include(it) }
+    // FrozenLib
+    if (local_frozenlib) {
+        api(project(":FrozenLib", configuration = "namedElements"))
+        modCompileOnly(project(":FrozenLib"))?.let { include(it) }
+    } else
+        modApi("maven.modrinth:frozenlib:$frozenlib_version")?.let { include(it) }
+
+    // The Copperier Age
+    modImplementation("maven.modrinth:the-copperier-age:$thecopperierage_version")
 
 	// Cloth Config
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version") {
 		exclude(group = "net.fabricmc.fabric-api")
 		exclude(group = "com.terraformersmc")
 	}
+
 	// ModMenu
 	modCompileOnly("maven.modrinth:modmenu:$modmenu_version")
 
@@ -175,35 +173,36 @@ dependencies {
 }
 
 tasks {
-	processResources {
-		val properties = mapOf(
-			"mod_id" to mod_id,
-			"version" to version,
-			"protocol_version" to protocol_version,
-			"minecraft_version" to "~1.21-",
+    processResources {
+        val properties = mapOf(
+            "mod_id" to mod_id,
+            "version" to version,
+            "protocol_version" to protocol_version,
+            "minecraft_version" to "~1.21-",//minecraft_version,
 
-			"fabric_api_version" to ">=$fabric_api_version",
-			"frozenlib_version" to ">=${frozenlib_version.split('-').firstOrNull()}-"
-		)
+            "fabric_api_version" to ">=$fabric_api_version",
+            "frozenlib_version" to ">=${frozenlib_version.split('-').firstOrNull()}-"
+        )
 
-		properties.forEach { (a, b) -> inputs.property(a, b) }
+        properties.forEach { (a, b) -> inputs.property(a, b) }
 
-		filesNotMatching(
-			listOf(
-				"**/*.java",
-				"**/sounds.json",
-				"**/lang/*.json",
-				"**/.cache/*",
-				"**/*.accesswidener",
-				"**/*.nbt",
-				"**/*.png",
-				"**/*.ogg",
-				"**/*.mixins.json"
-			)
-		) {
-			expand(properties)
-		}
-	}
+        filesNotMatching(
+            listOf(
+                "**/*.java",
+                "**/sounds.json",
+                "**/lang/*.json",
+                "**/.cache/*",
+                "**/*.accesswidener",
+                "**/*.nbt",
+                "**/*.png",
+                "**/*.ogg",
+                "**/*.mixins.json",
+                "**/*.zip"
+            )
+        ) {
+            expand(properties)
+        }
+    }
 
 	register("javadocJar", Jar::class) {
 		dependsOn(javadoc)

@@ -2,6 +2,7 @@ package net.lunade.copper.block.entity.leaking;
 
 import java.util.HashMap;
 import java.util.Map;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
@@ -11,8 +12,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.jetbrains.annotations.Nullable;
 
 public class LeakingPipeDripBehaviors {
-
-	private static final Map<Block, DripOn> BLOCKS_TO_DRIPS = new HashMap<>();
+	private static final Map<Block, DripOn> BLOCKS_TO_DRIPS = new Object2ObjectLinkedOpenHashMap<>();
 
 	public static void register(Block block, DripOn drip) {
 		BLOCKS_TO_DRIPS.put(block, drip);
@@ -20,8 +20,7 @@ public class LeakingPipeDripBehaviors {
 
 	@Nullable
 	public static DripOn getDrip(Block block) {
-		if (BLOCKS_TO_DRIPS.containsKey(block)) return BLOCKS_TO_DRIPS.get(block);
-		return null;
+		return BLOCKS_TO_DRIPS.get(block);
 	}
 
 	public static void init() {

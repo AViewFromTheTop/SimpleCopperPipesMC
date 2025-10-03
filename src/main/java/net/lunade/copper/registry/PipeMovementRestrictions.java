@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class PipeMovementRestrictions {
-
 	public static Map<ResourceLocation, PipeMovementRestriction> PIPE_MOVEMENT_RESTRICTIONS = new Object2ObjectLinkedOpenHashMap<>();
 
 	public static <T extends BlockEntity> void register(ResourceLocation id, CanTransferTo<T> canTransferTo, CanTakeFrom<T> canTakeFrom) {
@@ -22,13 +21,15 @@ public class PipeMovementRestrictions {
 
 	@Nullable
 	public static <T extends BlockEntity> CanTransferTo<T> getCanTransferTo(ResourceLocation id) {
-		if (PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) return PIPE_MOVEMENT_RESTRICTIONS.get(id).canTransferTo;
+		final PipeMovementRestriction restriction = PIPE_MOVEMENT_RESTRICTIONS.get(id);
+		if (restriction != null) return restriction.canTransferTo;
 		return null;
 	}
 
 	@Nullable
 	public static <T extends BlockEntity> CanTakeFrom<T> getCanTakeFrom(ResourceLocation id) {
-		if (PIPE_MOVEMENT_RESTRICTIONS.containsKey(id)) return PIPE_MOVEMENT_RESTRICTIONS.get(id).canTakeFrom;
+		final PipeMovementRestriction restriction = PIPE_MOVEMENT_RESTRICTIONS.get(id);
+		if (restriction != null) return restriction.canTakeFrom;
 		return null;
 	}
 
@@ -43,7 +44,6 @@ public class PipeMovementRestrictions {
 	}
 
 	public static void init() {
-
 	}
 
 	@FunctionalInterface

@@ -109,17 +109,17 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 		WeatherState.CODEC.fieldOf("weather_state").forGetter((copperPipe -> copperPipe.weatherState)),
 		propertiesCodec(),
 		Codec.INT.fieldOf("cooldown").forGetter((copperPipe) -> copperPipe.cooldown),
-		Codec.INT.fieldOf("dispense_shot_length").forGetter((copperPipe) -> copperPipe.dispenseShotLength)
+		Codec.INT.fieldOf("dispense_shot_power").forGetter((copperPipe) -> copperPipe.dispenseShotPower)
 	).apply(instance, CopperPipe::new));
 	public final int cooldown;
-	public final int dispenseShotLength;
+	public final int dispenseShotPower;
 	private final WeatherState weatherState;
 
-	public CopperPipe(WeatherState weatherState, Properties settings, int cooldown, int dispenseShotLength) {
+	public CopperPipe(WeatherState weatherState, Properties settings, int cooldown, int dispenseShotPower) {
 		super(settings);
 		this.weatherState = weatherState;
 		this.cooldown = cooldown;
-		this.dispenseShotLength = dispenseShotLength;
+		this.dispenseShotPower = dispenseShotPower;
 		this.registerDefaultState(this.stateDefinition.any()
 			.setValue(FACING, Direction.DOWN)
 			.setValue(SMOOTH, false)
@@ -159,49 +159,37 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 
 	public static boolean canConnectFront(@NotNull LevelReader level, @NotNull BlockPos blockPos, Direction direction) {
 		BlockState state = level.getBlockState(blockPos.relative(direction));
-		if (state.getBlock() instanceof CopperPipe) {
-			return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
-		}
+		if (state.getBlock() instanceof CopperPipe) return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
 		return state.getBlock() instanceof CopperFitting;
 	}
 
 	public static boolean canConnectBack(@NotNull LevelReader level, @NotNull BlockPos blockPos, @NotNull Direction direction) {
 		BlockState state = level.getBlockState(blockPos.relative(direction.getOpposite()));
-		if (state.getBlock() instanceof CopperPipe) {
-			return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
-		}
+		if (state.getBlock() instanceof CopperPipe) return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
 		return state.getBlock() instanceof CopperFitting;
 	}
 
 	public static boolean isSmooth(@NotNull LevelReader level, @NotNull BlockPos blockPos, Direction direction) {
 		BlockState state = level.getBlockState(blockPos.relative(direction));
-		if (state.getBlock() instanceof CopperPipe) {
-			return state.getValue(CopperPipe.FACING) == direction && !canConnectFront(level, blockPos, direction);
-		}
+		if (state.getBlock() instanceof CopperPipe) return state.getValue(CopperPipe.FACING) == direction && !canConnectFront(level, blockPos, direction);
 		return false;
 	}
 
 	public static boolean canConnectFront(@NotNull LevelAccessor level, @NotNull BlockPos blockPos, Direction direction) {
 		BlockState state = level.getBlockState(blockPos.relative(direction));
-		if (state.getBlock() instanceof CopperPipe) {
-			return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
-		}
+		if (state.getBlock() instanceof CopperPipe) return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
 		return state.getBlock() instanceof CopperFitting;
 	}
 
 	public static boolean canConnectBack(@NotNull LevelAccessor level, @NotNull BlockPos blockPos, @NotNull Direction direction) {
 		BlockState state = level.getBlockState(blockPos.relative(direction.getOpposite()));
-		if (state.getBlock() instanceof CopperPipe) {
-			return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
-		}
+		if (state.getBlock() instanceof CopperPipe) return state.getValue(CopperPipe.FACING) != direction.getOpposite() && state.getValue(CopperPipe.FACING) != direction;
 		return state.getBlock() instanceof CopperFitting;
 	}
 
 	public static boolean isSmooth(@NotNull LevelAccessor level, @NotNull BlockPos blockPos, Direction direction) {
 		BlockState state = level.getBlockState(blockPos.relative(direction));
-		if (state.getBlock() instanceof CopperPipe) {
-			return state.getValue(CopperPipe.FACING) == direction && !canConnectFront(level, blockPos, direction);
-		}
+		if (state.getBlock() instanceof CopperPipe) return state.getValue(CopperPipe.FACING) == direction && !canConnectFront(level, blockPos, direction);
 		return false;
 	}
 
@@ -353,7 +341,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-		if (!level.isClientSide) {
+		if (!level.isClientSide()) {
 			return createTickerHelper(blockEntityType, SimpleCopperPipesBlockEntityTypes.COPPER_PIPE_ENTITY, (level1, blockPos, blockState1, copperPipeEntity) ->
 				copperPipeEntity.serverTick(level1, blockPos, blockState1)
 			);
@@ -418,7 +406,7 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, @NotNull Level level, BlockPos blockPos) {
+	public int getAnalogOutputSignal(BlockState blockState, @NotNull Level level, BlockPos blockPos, Direction direction) {
 		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(blockPos));
 	}
 

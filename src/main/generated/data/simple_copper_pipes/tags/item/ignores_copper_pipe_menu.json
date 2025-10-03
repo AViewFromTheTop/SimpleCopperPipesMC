@@ -9,6 +9,10 @@
       "required": false
     },
     {
+      "id": "thecopperierage:wrench",
+      "required": false
+    },
+    {
       "id": "create:wrench",
       "required": false
     }

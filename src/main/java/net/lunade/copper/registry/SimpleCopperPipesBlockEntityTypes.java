@@ -18,7 +18,7 @@ public final class SimpleCopperPipesBlockEntityTypes {
 
 	@NotNull
 	private static <T extends BlockEntity> BlockEntityType<T> register(@NotNull String path, @NotNull FabricBlockEntityTypeBuilder.Factory<T> blockEntity, @NotNull Block... blocks) {
-		return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, SimpleCopperPipesConstants.id(path), FabricBlockEntityTypeBuilder.create(blockEntity, blocks).build(null));
+		return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, SimpleCopperPipesConstants.id(path), FabricBlockEntityTypeBuilder.create(blockEntity, blocks).build());
 	}
 
 	public static final BlockEntityType<CopperPipeEntity> COPPER_PIPE_ENTITY = register(

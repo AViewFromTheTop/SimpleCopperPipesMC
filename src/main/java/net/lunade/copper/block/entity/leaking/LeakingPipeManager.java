@@ -1,6 +1,7 @@
 package net.lunade.copper.block.entity.leaking;
 
 import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
 import net.lunade.copper.block.CopperPipe;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
@@ -23,14 +24,14 @@ public class LeakingPipeManager {
 	private static boolean IS_ALT_LIST;
 
 	public static boolean isWaterPipeNearby(@NotNull Entity entity, int i) {
-		ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) getPoses().clone();
-		int x = entity.getBlockX();
-		int y = entity.getBlockY();
-		int z = entity.getBlockZ();
-		Vec3 entityPos = entity.getEyePosition();
-		ResourceLocation dimension = entity.level().dimension().location();
+		final int x = entity.getBlockX();
+		final int y = entity.getBlockY();
+		final int z = entity.getBlockZ();
+		final Vec3 entityPos = entity.getEyePosition();
+		final ResourceLocation dimension = entity.level().dimension().location();
+
 		BlockPos leakPos;
-		for (LeakingPipePos leakingPos : copiedList) {
+		for (LeakingPipePos leakingPos : ImmutableList.copyOf(getPoses())) {
 			if (leakingPos.dimension.equals(dimension)) {
 				leakPos = leakingPos.pos;
 				double xVal = leakPos.getX() - x;
@@ -56,12 +57,12 @@ public class LeakingPipeManager {
 	}
 
 	public static boolean isWaterPipeNearbyBlockGetter(BlockGetter blockGetter, @NotNull BlockPos blockPos, int i) {
-		ArrayList<LeakingPipePos> copiedList = (ArrayList<LeakingPipePos>) getPoses().clone();
-		int x = blockPos.getX();
-		int y = blockPos.getY();
-		int z = blockPos.getZ();
+		final int x = blockPos.getX();
+		final int y = blockPos.getY();
+		final int z = blockPos.getZ();
+
 		BlockState state;
-		for (LeakingPipePos leakingPos : copiedList) {
+		for (LeakingPipePos leakingPos : ImmutableList.copyOf(getPoses())) {
 			int xVal = leakingPos.pos.getX() - x;
 			if (xVal >= -i && xVal <= i) {
 				int zVal = leakingPos.pos.getZ() - z;
@@ -69,9 +70,8 @@ public class LeakingPipeManager {
 					int leakY = leakingPos.pos.getY();
 					if (y < leakY && y >= leakY - 12) {
 						state = blockGetter.getBlockState(leakingPos.pos);
-						if (state.getBlock() instanceof CopperPipe) {
-							return state.getValue(BlockStateProperties.FACING) != Direction.UP && state.getValue(SimpleCopperPipesBlockStateProperties.FLUID) == PipeFluid.WATER;
-						}
+						if (!(state.getBlock() instanceof CopperPipe)) continue;
+						return state.getValue(BlockStateProperties.FACING) != Direction.UP && state.getValue(SimpleCopperPipesBlockStateProperties.FLUID) == PipeFluid.WATER;
 					}
 				}
 			}

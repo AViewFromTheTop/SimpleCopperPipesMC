@@ -13,7 +13,7 @@ import net.lunade.copper.datafix.SimpleCopperPipesDataFixer;
 import net.lunade.copper.networking.SimpleCopperPipesNetworking;
 import net.lunade.copper.registry.CopperPipeDispenseBehaviors;
 import net.lunade.copper.registry.PipeMovementRestrictions;
-import net.lunade.copper.registry.RegisterPipeNbtMethods;
+import net.lunade.copper.registry.TransferablePipeData;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
@@ -45,7 +45,7 @@ public class SimpleCopperPipes extends FrozenModInitializer {
 		SimpleCopperPipesSoundEvents.init();
 		SimpleCopperPipesStats.init();
 
-		RegisterPipeNbtMethods.init();
+		TransferablePipeData.init();
 		CopperPipeDispenseBehaviors.init();
 		PipeMovementRestrictions.init();
 		LeakingPipeDripBehaviors.init();

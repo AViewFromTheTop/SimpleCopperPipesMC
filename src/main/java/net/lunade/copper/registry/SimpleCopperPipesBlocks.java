@@ -142,9 +142,7 @@ public final class SimpleCopperPipesBlocks {
 	}
 
 	private static <T extends Block> T doRegister(ResourceLocation id, T block) {
-		if (BuiltInRegistries.BLOCK.getOptional(id).isEmpty()) {
-			return Registry.register(BuiltInRegistries.BLOCK, id, block);
-		}
+		if (BuiltInRegistries.BLOCK.getOptional(id).isEmpty()) return Registry.register(BuiltInRegistries.BLOCK, id, block);
 		throw new IllegalArgumentException("Block with id " + id + " is already in the block registry.");
 	}
 

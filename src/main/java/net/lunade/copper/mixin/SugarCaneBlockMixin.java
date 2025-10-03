@@ -24,9 +24,7 @@ public class SugarCaneBlockMixin {
 		cancellable = true
 	)
 	public void simpleCopperPipes$canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
-		if (LeakingPipeManager.isWaterPipeNearbyBlockGetter(levelReader, blockPos, 3)) {
-			info.setReturnValue(true);
-		}
+		if (LeakingPipeManager.isWaterPipeNearbyBlockGetter(levelReader, blockPos, 3)) info.setReturnValue(true);
 	}
 
 }

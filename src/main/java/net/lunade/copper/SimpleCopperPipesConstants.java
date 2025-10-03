@@ -12,11 +12,11 @@ public class SimpleCopperPipesConstants {
 
 	@Contract("_ -> new")
 	public static @NotNull ResourceLocation id(String path) {
-		return ResourceLocation.tryBuild(NAMESPACE, path);
+		return ResourceLocation.fromNamespaceAndPath(NAMESPACE, path);
 	}
 
 	@Contract("_ -> new")
 	public static @NotNull ResourceLocation legacyId(String path) {
-		return ResourceLocation.tryBuild(LEGACY_NAMESPACE, path);
+		return ResourceLocation.fromNamespaceAndPath(LEGACY_NAMESPACE, path);
 	}
 }

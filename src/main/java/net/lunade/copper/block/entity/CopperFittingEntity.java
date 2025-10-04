@@ -5,8 +5,8 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.lunade.copper.block.CopperFitting;
-import net.lunade.copper.block.CopperPipe;
+import net.lunade.copper.block.CopperFittingBlock;
+import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.minecraft.core.BlockPos;
@@ -28,14 +28,14 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 	public int transferCooldown;
 
 	public CopperFittingEntity(BlockPos blockPos, BlockState blockState) {
-		super(SimpleCopperPipesBlockEntityTypes.COPPER_FITTING_ENTITY, blockPos, blockState, MoveType.FROM_FITTING);
+		super(SimpleCopperPipesBlockEntityTypes.COPPER_FITTING, blockPos, blockState, MoveType.FROM_FITTING);
 	}
 
 	public static boolean canTransfer(@NotNull Level level, BlockPos pos, Direction direction, boolean to) {
 		if (!(level.getBlockEntity(pos) instanceof CopperPipeEntity pipe)) return false;
 
 		final BlockState state = level.getBlockState(pos);
-		return (!to || pipe.transferCooldown <= 0) && state.hasProperty(CopperPipe.FACING) && state.getValue(CopperPipe.FACING) == direction;
+		return (!to || pipe.transferCooldown <= 0) && state.hasProperty(CopperPipeBlock.FACING) && state.getValue(CopperPipeBlock.FACING) == direction;
 	}
 
 	@Override
@@ -127,7 +127,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 	}
 
 	public void setCooldown(@NotNull BlockState state) {
-		this.transferCooldown = state.getBlock() instanceof CopperFitting fitting ? fitting.cooldown : 2;
+		this.transferCooldown = state.getBlock() instanceof CopperFittingBlock fitting ? fitting.getCooldown() : 2;
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 
 	@Override
 	public void updateBlockEntityValues(Level level, BlockPos pos, @NotNull BlockState state) {
-		if (state.getBlock() instanceof CopperFitting) this.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
+		if (state.getBlock() instanceof CopperFittingBlock) this.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
 	}
 
 	@Override

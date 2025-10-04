@@ -57,7 +57,6 @@ public class SimpleCopperPipes extends FrozenModInitializer {
 		VibrationParticleVisibilityApi.registerVisibilityTest((data, user) -> !(user instanceof CopperPipeEntity.VibrationUser));
 
 		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> LeakingPipeManager.clearAll());
-
 		ServerTickEvents.START_SERVER_TICK.register((listener) -> LeakingPipeManager.clearAndSwitch());
 		ServerTickEvents.END_SERVER_TICK.register((listener) -> REFRESH_VALUES = false);
 	}

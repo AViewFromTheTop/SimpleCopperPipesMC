@@ -2,7 +2,7 @@ package net.lunade.copper.block.entity.leaking;
 
 import java.util.ArrayList;
 import com.google.common.collect.ImmutableList;
-import net.lunade.copper.block.CopperPipe;
+import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.minecraft.core.BlockPos;
@@ -70,7 +70,7 @@ public class LeakingPipeManager {
 					int leakY = leakingPos.pos.getY();
 					if (y < leakY && y >= leakY - 12) {
 						state = blockGetter.getBlockState(leakingPos.pos);
-						if (!(state.getBlock() instanceof CopperPipe)) continue;
+						if (!(state.getBlock() instanceof CopperPipeBlock)) continue;
 						return state.getValue(BlockStateProperties.FACING) != Direction.UP && state.getValue(SimpleCopperPipesBlockStateProperties.FLUID) == PipeFluid.WATER;
 					}
 				}

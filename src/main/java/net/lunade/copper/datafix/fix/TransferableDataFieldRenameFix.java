@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TransferableDataFieldRenameFix extends DataFix {
 	public static final String COPPER_PIPE = SimpleCopperPipesConstants.id("copper_pipe").toString();
-	public static final String COPPER_FITTING = SimpleCopperPipesConstants.id("fitting").toString();
+	public static final String COPPER_FITTING = SimpleCopperPipesConstants.id("copper_fitting").toString();
 	private final String blockEntity;
 
 	public TransferableDataFieldRenameFix(String blockEntity, Schema outputSchema) {

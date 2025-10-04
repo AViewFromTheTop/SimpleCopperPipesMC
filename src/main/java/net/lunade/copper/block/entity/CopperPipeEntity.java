@@ -6,8 +6,8 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.lunade.copper.block.CopperFitting;
-import net.lunade.copper.block.CopperPipe;
+import net.lunade.copper.block.CopperFittingBlock;
+import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
 import net.lunade.copper.block.entity.data.TransferablePipeDataHandler;
 import net.lunade.copper.block.properties.PipeFluid;
@@ -66,7 +66,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 	private VibrationSystem.Data vibrationData;
 
 	public CopperPipeEntity(BlockPos blockPos, BlockState blockState) {
-		super(SimpleCopperPipesBlockEntityTypes.COPPER_PIPE_ENTITY, blockPos, blockState, MoveType.FROM_PIPE);
+		super(SimpleCopperPipesBlockEntityTypes.COPPER_PIPE, blockPos, blockState, MoveType.FROM_PIPE);
 		this.noteBlockCooldown = 0;
 		this.vibrationUser = this.createVibrationUser();
 		this.vibrationData = new VibrationSystem.Data();
@@ -151,12 +151,10 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		} else {
 			this.dispense((ServerLevel) level, blockPos, blockState);
 			int i = 0;
-			if (level.getBlockState(blockPos.relative(blockState.getValue(BlockStateProperties.FACING).getOpposite())).getBlock() instanceof CopperFitting fitting) {
-				i = fitting.cooldown;
+			if (level.getBlockState(blockPos.relative(blockState.getValue(BlockStateProperties.FACING).getOpposite())).getBlock() instanceof CopperFittingBlock fitting) {
+				i = fitting.getCooldown();
 			} else {
-				if (blockState.getBlock() instanceof CopperPipe pipe) {
-					i = Mth.floor(pipe.cooldown * 0.5);
-				}
+				if (blockState.getBlock() instanceof CopperPipeBlock pipe) i = Mth.floor(pipe.getCooldown() * 0.5);
 			}
 			this.dispenseCooldown = i;
 		}
@@ -174,7 +172,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 
 	@Override
 	public void updateBlockEntityValues(Level level, BlockPos pos, @NotNull BlockState state) {
-		if (!(state.getBlock() instanceof CopperPipe)) return;
+		if (!(state.getBlock() instanceof CopperPipeBlock)) return;
 
 		final Direction facing = state.getValue(BlockStateProperties.FACING);
 		final Direction facingAway = facing.getOpposite();
@@ -187,7 +185,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		this.canDispense = !facingState.isFaceSturdy(level, facingPos, facing, SupportType.CENTER) && facingState.isFaceSturdy(level, facingPos, facing, SupportType.CENTER);
 		this.shootsControlled = oppositeBlock == Blocks.DROPPER;
 		this.shootsSpecial = oppositeBlock == Blocks.DISPENSER;
-		this.canAccept = !(oppositeBlock instanceof CopperPipe) && !(oppositeBlock instanceof CopperFitting) && !oppositeState.isRedstoneConductor(level, pos);
+		this.canAccept = !(oppositeBlock instanceof CopperPipeBlock) && !(oppositeBlock instanceof CopperFittingBlock) && !oppositeState.isRedstoneConductor(level, pos);
 		this.canWater = (oppositeState.getFluidState().is(FluidTags.WATER) || state.getValue(BlockStateProperties.WATERLOGGED) || oppositeState.getValueOrElse(BlockStateProperties.WATERLOGGED, false)) && config.carryWater;
 		this.canLava = oppositeState.getFluidState().is(FluidTags.LAVA) && config.carryLava;
 		final boolean canWaterAndLava = this.canWater && this.canLava;
@@ -232,7 +230,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 					if (state.is(SimpleCopperPipesBlockTags.SILENT_PIPES)) return 2;
 
 					final Block block = level.getBlockState(facingAwayPos).getBlock();
-					if (!(block instanceof CopperPipe) && !(block instanceof CopperFitting)) return 3;
+					if (!(block instanceof CopperPipeBlock) && !(block instanceof CopperFittingBlock)) return 3;
 					return 2;
 				}
 			}
@@ -249,7 +247,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		if (inventory == null || pipeInventory == null || !canTransfer(level, facingPos, true, this, inventory, pipeInventory)) return false;
 
 		final BlockState facingState = level.getBlockState(facingPos);
-		final boolean canMove = !(facingState.getBlock() instanceof CopperPipe) || facingState.getValue(CopperPipe.FACING) != facing;
+		final boolean canMove = !(facingState.getBlock() instanceof CopperPipeBlock) || facingState.getValue(CopperPipeBlock.FACING) != facing;
 		if (!canMove) return false;
 
 		for (StorageView<ItemVariant> storageView : pipeInventory) {
@@ -288,7 +286,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 				level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
 			}
 		} else if (this.shootsSpecial) { //If Dispenser, Use Pipe-Specific Launch Length
-			if (state.getBlock() instanceof CopperPipe pipe) {
+			if (state.getBlock() instanceof CopperPipeBlock pipe) {
 				shotPower = pipe.dispenseShotPower;
 				if (SimpleCopperPipesConfig.get().dispenseSounds) {
 					level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
@@ -300,7 +298,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 
 		final Direction facing = state.getValue(BlockStateProperties.FACING);
 		final boolean silent = state.is(SimpleCopperPipesBlockTags.SILENT_PIPES);
-		if (level.getBlockState(pos.relative(facing.getOpposite())).getBlock() instanceof CopperFitting) {
+		if (level.getBlockState(pos.relative(facing.getOpposite())).getBlock() instanceof CopperFittingBlock) {
 			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, true, silent);
 		} else {
 			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, false, silent);
@@ -320,11 +318,11 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 		boolean fitting,
 		boolean silent
 	) {
-		final Vec3 output = CopperPipe.getOutputLocation(pos, facing);
+		final Vec3 output = pos.getCenter().relative(facing, 0.7D);;
 		ItemStack usableStack = stack;
 		final SimpleCopperPipesConfig config = SimpleCopperPipesConfig.get();
 
-		if (state.getValue(CopperPipe.POWERED)) { //Special Behavior When Powered
+		if (state.getValue(CopperPipeBlock.POWERED)) { //Special Behavior When Powered
 			CopperPipeDispenseBehaviors.PoweredDispense poweredDispense = CopperPipeDispenseBehaviors.getDispense(usableStack.getItem());
 			if (poweredDispense != null) {
 				usableStack = stack.split(1);
@@ -363,9 +361,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 	}
 
 	public void setCooldown(@NotNull BlockState state) {
-		int i = 2;
-		if (state.getBlock() instanceof CopperPipe pipe) i = pipe.cooldown;
-		this.transferCooldown = i;
+		this.transferCooldown = state.getBlock() instanceof CopperPipeBlock pipe ? pipe.getCooldown() : 2;
 	}
 
 	@Override
@@ -465,7 +461,7 @@ public class CopperPipeEntity extends AbstractSimpleCopperBlockEntity implements
 			if (!SimpleCopperPipesConfig.get().senseGameEvents) return false;
 
 			boolean placeDestroy = gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE;
-			if ((serverLevel.getBlockState(blockPos).getBlock() instanceof CopperPipe) || (blockPos == CopperPipeEntity.this.getBlockPos() && placeDestroy)) return false;
+			if ((serverLevel.getBlockState(blockPos).getBlock() instanceof CopperPipeBlock) || (blockPos == CopperPipeEntity.this.getBlockPos() && placeDestroy)) return false;
 
 			if (CopperPipeEntity.this.canAccept) {
 				CopperPipeEntity.this.transferableDataHandler.addSaveableMoveablePipeNbt(new TransferablePipeDataHandler.SaveableTransferablePipeData(gameEvent.value(), Vec3.atCenterOf(blockPos), context, CopperPipeEntity.this.getBlockPos()).withShouldMove(true).withShouldSave(true));

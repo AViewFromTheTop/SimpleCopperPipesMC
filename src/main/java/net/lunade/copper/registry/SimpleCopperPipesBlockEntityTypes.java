@@ -13,15 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class SimpleCopperPipesBlockEntityTypes {
 
-	public static void init() {
-	}
-
-	@NotNull
-	private static <T extends BlockEntity> BlockEntityType<T> register(@NotNull String path, @NotNull FabricBlockEntityTypeBuilder.Factory<T> blockEntity, @NotNull Block... blocks) {
-		return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, SimpleCopperPipesConstants.id(path), FabricBlockEntityTypeBuilder.create(blockEntity, blocks).build());
-	}
-
-	public static final BlockEntityType<CopperPipeEntity> COPPER_PIPE_ENTITY = register(
+	public static final BlockEntityType<CopperPipeEntity> COPPER_PIPE = register(
 		"copper_pipe",
 		CopperPipeEntity::new,
 		SimpleCopperPipesBlocks.COPPER_PIPE,
@@ -34,7 +26,7 @@ public final class SimpleCopperPipesBlockEntityTypes {
 		SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_PIPE
 	);
 
-	public static final BlockEntityType<CopperFittingEntity> COPPER_FITTING_ENTITY = register(
+	public static final BlockEntityType<CopperFittingEntity> COPPER_FITTING = register(
 		"copper_fitting",
 		CopperFittingEntity::new,
 		SimpleCopperPipesBlocks.COPPER_FITTING,
@@ -47,5 +39,12 @@ public final class SimpleCopperPipesBlockEntityTypes {
 		SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_FITTING
 	);
 
+	public static void init() {
+	}
+
+	@NotNull
+	private static <T extends BlockEntity> BlockEntityType<T> register(@NotNull String path, @NotNull FabricBlockEntityTypeBuilder.Factory<T> blockEntity, @NotNull Block... blocks) {
+		return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, SimpleCopperPipesConstants.id(path), FabricBlockEntityTypeBuilder.create(blockEntity, blocks).build());
+	}
 
 }

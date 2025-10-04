@@ -4,7 +4,7 @@ import java.util.Optional;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.lunade.copper.SimpleCopperPipesConstants;
-import net.lunade.copper.block.CopperPipe;
+import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
@@ -115,7 +115,7 @@ public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 			.accept(
 				MultiVariantGenerator.dispatch(outputPipeBlock)
 					.with(
-						PropertyDispatch.initial(CopperPipe.FRONT_CONNECTED, CopperPipe.BACK_CONNECTED, CopperPipe.SMOOTH)
+						PropertyDispatch.initial(CopperPipeBlock.FRONT_CONNECTED, CopperPipeBlock.BACK_CONNECTED, CopperPipeBlock.SMOOTH)
 							.select(false, false, false, BlockModelGenerators.plainVariant(model))
 							.select(true, false, false, BlockModelGenerators.plainVariant(frontExtensionModel))
 							.select(true, true, false, BlockModelGenerators.plainVariant(doubleExtensionModel))

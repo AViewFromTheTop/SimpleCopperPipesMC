@@ -2,7 +2,7 @@ package net.lunade.copper.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.lunade.copper.block.CopperPipe;
+import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.minecraft.world.level.block.CampfireBlock;
@@ -22,7 +22,7 @@ public class CampfireBlockMixin {
 	)
 	private static boolean simpleCopperPipes$isSmokeyPos(BlockState blockState, Operation<Boolean> operation) {
 		return operation.call(blockState)
-			|| (blockState.getBlock() instanceof CopperPipe && blockState.getValue(SimpleCopperPipesBlockStateProperties.FLUID) == PipeFluid.SMOKE);
+			|| (blockState.getBlock() instanceof CopperPipeBlock && blockState.getValue(SimpleCopperPipesBlockStateProperties.FLUID) == PipeFluid.SMOKE);
 	}
 
 }

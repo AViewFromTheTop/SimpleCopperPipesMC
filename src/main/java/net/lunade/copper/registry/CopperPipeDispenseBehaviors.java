@@ -24,7 +24,7 @@ public class CopperPipeDispenseBehaviors {
 		ITEMS_TO_DISPENSES.put(item, dispense);
 	}
 
-	private static final PoweredDispense PROJECTILE_ITEM_DISPENSE = (world, stack, i, direction, position, state, pos, pipe) -> {
+	private static final PoweredDispense PROJECTILE_ITEM_DISPENSE = (level, stack, i, direction, position, state, pos, pipe) -> {
 		if (!(stack.getItem() instanceof ProjectileItem projectileItem)) return;
 		final Direction.Axis axis = direction.getAxis();
 		final double x = position.x();
@@ -33,8 +33,8 @@ public class CopperPipeDispenseBehaviors {
 
 		final ProjectileItem.DispenseConfig dispenseConfig = projectileItem.createDispenseConfig();
 		Projectile.spawnProjectileUsingShoot(
-			projectileItem.asProjectile(world, new Vec3(x, y, z), stack, direction),
-			world,
+			projectileItem.asProjectile(level, new Vec3(x, y, z), stack, direction),
+			level,
 			stack,
 			direction.getStepX(),
 			direction.getStepY(),
@@ -77,7 +77,7 @@ public class CopperPipeDispenseBehaviors {
 
 	@FunctionalInterface
 	public interface PoweredDispense {
-		void dispense(ServerLevel world, ItemStack itemStack, int shotPower, Direction direction, Position position, BlockState state, BlockPos pos, CopperPipeEntity pipe);
+		void dispense(ServerLevel level, ItemStack stack, int shotPower, Direction direction, Position position, BlockState state, BlockPos pos, CopperPipeEntity pipe);
 	}
 
 }

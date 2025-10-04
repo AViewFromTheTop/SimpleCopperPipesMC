@@ -10,7 +10,9 @@
   "description": "Adds intuitive and simple-to-understand Copper Pipes to Minecraft.",
 
   "authors": [
-    "Luna",
+    "Luna/AViewFromTheTop"
+  ],
+  "contributors": [
     "Treetrain1"
   ],
 
@@ -54,7 +56,8 @@
 
   "suggests": {
     "cloth-config": "*",
-    "modmenu": "*"
+    "modmenu": "*",
+    "thecopperierage": "*"
   },
 
   "custom": {

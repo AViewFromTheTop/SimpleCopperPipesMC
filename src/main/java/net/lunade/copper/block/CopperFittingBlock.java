@@ -1,6 +1,5 @@
 package net.lunade.copper.block;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.lunade.copper.block.entity.CopperFittingEntity;
@@ -54,24 +53,18 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedBlock, WeatheringCopper {
-	public static final MapCodec<CopperFitting> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
-		WeatherState.CODEC.fieldOf("weather_state").forGetter((copperFitting -> copperFitting.weatherState)),
-		propertiesCodec(),
-		Codec.INT.fieldOf("cooldown").forGetter((copperFitting) -> copperFitting.cooldown)
-	).apply(instance, CopperFitting::new));
+public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
+	public static final MapCodec<CopperFittingBlock> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
+		propertiesCodec()
+	).apply(instance, CopperFittingBlock::new));
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final EnumProperty<PipeFluid> FLUID = SimpleCopperPipesBlockStateProperties.FLUID;
 	public static final BooleanProperty HAS_ELECTRICITY = SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY;
 	private static final VoxelShape FITTING_SHAPE = Block.box(2.5D, 2.5D, 2.5D, 13.5D, 13.5D, 13.5D);
-	public final int cooldown;
-	private final WeatherState weatherState;
 
-	public CopperFitting(WeatherState weatherState, Properties settings, int cooldown) {
+	public CopperFittingBlock(Properties settings) {
 		super(settings);
-		this.weatherState = weatherState;
-		this.cooldown = cooldown;
 		this.registerDefaultState(this.stateDefinition.any()
 			.setValue(POWERED, false)
 			.setValue(WATERLOGGED, false)
@@ -80,28 +73,21 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 		);
 	}
 
-	public CopperFitting(Properties settings, int cooldown) {
-		this(WeatherState.UNAFFECTED, settings, cooldown);
-	}
-
 	public static void updateBlockEntityValues(Level level, BlockPos pos, @NotNull BlockState state) {
-		if (state.getBlock() instanceof CopperFitting) {
-			BlockEntity entity = level.getBlockEntity(pos);
-			if (entity instanceof CopperFittingEntity fitting) {
-				fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
-			}
-		}
+		if (!(state.getBlock() instanceof CopperFittingBlock)) return;
+		if (!(level.getBlockEntity(pos) instanceof CopperFittingEntity fitting)) return;
+		fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
 	}
 
 	@Override
 	@NotNull
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos, CollisionContext shapeContext) {
+	public VoxelShape getShape(BlockState state, BlockGetter blockView, BlockPos pos, CollisionContext shapeContext) {
 		return FITTING_SHAPE;
 	}
 
 	@Override
 	@NotNull
-	public VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos) {
+	public VoxelShape getInteractionShape(BlockState state, BlockGetter blockView, BlockPos pos) {
 		return FITTING_SHAPE;
 	}
 
@@ -114,27 +100,25 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 
 	@Override
 	protected @NotNull BlockState updateShape(
-		@NotNull BlockState blockState,
-		LevelReader levelReader,
+		@NotNull BlockState state,
+		LevelReader level,
 		ScheduledTickAccess scheduledTickAccess,
-		BlockPos blockPos,
+		BlockPos pos,
 		Direction direction,
 		BlockPos neighborPos,
 		BlockState neighborState,
-		RandomSource randomSource
+		RandomSource random
 	) {
-		if (blockState.getValue(WATERLOGGED)) scheduledTickAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelReader));
+		if (state.getValue(WATERLOGGED)) scheduledTickAccess.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 
-		boolean electricity = blockState.getValue(HAS_ELECTRICITY);
-		if (neighborState.getBlock() instanceof LightningRodBlock) {
-			if (neighborState.getValue(POWERED)) electricity = true;
-		}
-		return blockState.setValue(HAS_ELECTRICITY, electricity);
+		boolean electricity = state.getValue(HAS_ELECTRICITY);
+		if (neighborState.getBlock() instanceof LightningRodBlock && neighborState.getValue(POWERED)) electricity = true;
+		return state.setValue(HAS_ELECTRICITY, electricity);
 	}
 
 	@Override
 	protected void neighborChanged(@NotNull BlockState blockState, @NotNull Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
-		level.setBlockAndUpdate(blockPos, blockState.setValue(CopperFitting.POWERED, level.hasNeighborSignal(blockPos)));
+		level.setBlockAndUpdate(blockPos, blockState.setValue(CopperFittingBlock.POWERED, level.hasNeighborSignal(blockPos)));
 		updateBlockEntityValues(level, blockPos, blockState);
 	}
 
@@ -150,12 +134,12 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-		if (!level.isClientSide()) {
-			return createTickerHelper(blockEntityType, SimpleCopperPipesBlockEntityTypes.COPPER_FITTING_ENTITY, (level1, blockPos, blockState1, copperFittingEntity) ->
-				copperFittingEntity.serverTick(level1, blockPos, blockState1)
-			);
-		}
-		return null;
+		if (level.isClientSide()) return null;
+		return createTickerHelper(
+			blockEntityType,
+			SimpleCopperPipesBlockEntityTypes.COPPER_FITTING,
+			(level1, blockPos, blockState1, copperFittingEntity) -> copperFittingEntity.serverTick(level1, blockPos, blockState1)
+		);
 	}
 
 	@Override
@@ -174,14 +158,10 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 	@Override
 	protected @NotNull InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
 		if (!SimpleCopperPipesConfig.get().openableFittings) return super.useWithoutItem(state, level, pos, player, hitResult);
-
-		BlockEntity blockEntity = level.getBlockEntity(pos);
-		if (blockEntity instanceof CopperFittingEntity fittingEntity) {
-			player.openMenu(fittingEntity);
-			player.awardStat(Stats.CUSTOM.get(SimpleCopperPipesStats.INSPECT_FITTING));
-			return InteractionResult.SUCCESS;
-		}
-		return InteractionResult.PASS;
+		if (!(level.getBlockEntity(pos) instanceof CopperFittingEntity fittingEntity)) return InteractionResult.PASS;
+		player.openMenu(fittingEntity);
+		player.awardStat(Stats.CUSTOM.get(SimpleCopperPipesStats.INSPECT_FITTING));
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
@@ -196,6 +176,10 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 	) {
 		if (stack.is(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)) return InteractionResult.PASS;
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
+	}
+
+	public int getCooldown() {
+		return 0;
 	}
 
 	@Override
@@ -225,11 +209,6 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource random) {
-		this.changeOverTime(blockState, serverLevel, blockPos, random);
-	}
-
-	@Override
 	public boolean isRandomlyTicking(@NotNull BlockState blockState) {
 		return WeatheringCopper.getNext(blockState.getBlock()).isPresent();
 	}
@@ -242,18 +221,11 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
 
 	@Override
 	public void animateTick(@NotNull BlockState blockState, Level level, BlockPos blockPos, RandomSource random) {
-		if (blockState.getValue(HAS_ELECTRICITY)) {
-			ParticleUtils.spawnParticlesAlongAxis(Direction.UP.getAxis(), level, blockPos, 0.55D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
-		}
+		if (blockState.getValue(HAS_ELECTRICITY)) ParticleUtils.spawnParticlesAlongAxis(Direction.UP.getAxis(), level, blockPos, 0.55D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
 	}
 
 	@Override
-	public @NotNull WeatherState getAge() {
-		return this.weatherState;
-	}
-
-	@Override
-	protected @NotNull MapCodec<? extends CopperFitting> codec() {
+	protected @NotNull MapCodec<? extends CopperFittingBlock> codec() {
 		return CODEC;
 	}
 }

@@ -5,7 +5,7 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import net.lunade.copper.SimpleCopperPipes;
 import net.lunade.copper.SimpleCopperPipesConstants;
-import net.lunade.copper.block.CopperPipe;
+import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.block.entity.data.TransferablePipeDataHandler;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
@@ -70,7 +70,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 			if (!(level.getBlockEntity(offsetPos) instanceof AbstractSimpleCopperBlockEntity copperBlockEntity)) continue;
 
 			if (copperBlockEntity.electricityCooldown == -1) {
-				final int axis = state.hasProperty(CopperPipe.FACING) ? state.getValue(CopperPipe.FACING).getAxis().ordinal() : direction.getAxis().ordinal();
+				final int axis = state.hasProperty(CopperPipeBlock.FACING) ? state.getValue(CopperPipeBlock.FACING).getAxis().ordinal() : direction.getAxis().ordinal();
 				level.levelEvent(LevelEvent.PARTICLES_ELECTRIC_SPARK, offsetPos, axis);
 				level.setBlockAndUpdate(offsetPos, state.setValue(SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY, true));
 			}

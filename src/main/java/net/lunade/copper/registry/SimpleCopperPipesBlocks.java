@@ -3,8 +3,10 @@ package net.lunade.copper.registry;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.registry.OxidizableBlocksRegistry;
 import net.lunade.copper.SimpleCopperPipesConstants;
-import net.lunade.copper.block.CopperFitting;
-import net.lunade.copper.block.CopperPipe;
+import net.lunade.copper.block.CopperFittingBlock;
+import net.lunade.copper.block.CopperPipeBlock;
+import net.lunade.copper.block.WeatheringCopperFittingBlock;
+import net.lunade.copper.block.WeatheringCopperPipeBlock;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -19,70 +21,70 @@ import net.minecraft.world.level.material.MapColor;
 
 public final class SimpleCopperPipesBlocks {
 	public static final Block COPPER_PIPE = register("copper_pipe",
-		properties -> new CopperPipe(WeatheringCopper.WeatherState.UNAFFECTED, properties, 2, 20),
+		properties -> new WeatheringCopperPipeBlock(WeatheringCopper.WeatherState.UNAFFECTED, properties, 20),
 		BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block EXPOSED_COPPER_PIPE = register("exposed_copper_pipe",
-		properties -> new CopperPipe(WeatheringCopper.WeatherState.EXPOSED, properties, 2, 18),
+		properties -> new WeatheringCopperPipeBlock(WeatheringCopper.WeatherState.EXPOSED, properties, 18),
 		BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block WEATHERED_COPPER_PIPE = register("weathered_copper_pipe",
-		properties -> new CopperPipe(WeatheringCopper.WeatherState.WEATHERED, properties, 2, 15),
+		properties -> new WeatheringCopperPipeBlock(WeatheringCopper.WeatherState.WEATHERED, properties, 15),
 		BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block OXIDIZED_COPPER_PIPE = register("oxidized_copper_pipe",
-		properties -> new CopperPipe(WeatheringCopper.WeatherState.WEATHERED, properties, 2, 12),
+		properties -> new WeatheringCopperPipeBlock(WeatheringCopper.WeatherState.OXIDIZED, properties, 12),
 		BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 
 	public static final Block WAXED_COPPER_PIPE = register("waxed_copper_pipe",
-		properties -> new CopperPipe(WeatheringCopper.WeatherState.UNAFFECTED, properties, 1, 20),
+		properties -> new CopperPipeBlock(properties, 20),
 		BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block WAXED_EXPOSED_COPPER_PIPE = register("waxed_exposed_copper_pipe",
-		properties -> new CopperPipe(WeatheringCopper.WeatherState.EXPOSED, properties, 1, 18),
+		properties -> new CopperPipeBlock(properties, 18),
 		BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block WAXED_WEATHERED_COPPER_PIPE = register("waxed_weathered_copper_pipe",
-		properties -> new CopperPipe(WeatheringCopper.WeatherState.WEATHERED, properties, 1, 15),
+		properties -> new CopperPipeBlock(properties, 15),
 		BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block WAXED_OXIDIZED_COPPER_PIPE = register("waxed_oxidized_copper_pipe",
-		properties -> new CopperPipe(WeatheringCopper.WeatherState.WEATHERED, properties, 1, 12),
+		properties -> new CopperPipeBlock(properties, 12),
 		BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 
 	public static final Block COPPER_FITTING = register("copper_fitting",
-		properties -> new CopperFitting(WeatheringCopper.WeatherState.UNAFFECTED, properties, 1),
+		properties -> new WeatheringCopperFittingBlock(WeatheringCopper.WeatherState.UNAFFECTED, properties),
 		BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block EXPOSED_COPPER_FITTING = register("exposed_copper_fitting",
-		properties -> new CopperFitting(WeatheringCopper.WeatherState.EXPOSED, properties, 1),
+		properties -> new WeatheringCopperFittingBlock(WeatheringCopper.WeatherState.EXPOSED, properties),
 		BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block WEATHERED_COPPER_FITTING = register("weathered_copper_fitting",
-		properties -> new CopperFitting(WeatheringCopper.WeatherState.WEATHERED, properties, 1),
+		properties -> new WeatheringCopperFittingBlock(WeatheringCopper.WeatherState.WEATHERED, properties),
 		BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block OXIDIZED_COPPER_FITTING = register("oxidized_copper_fitting",
-		properties -> new CopperFitting(WeatheringCopper.WeatherState.OXIDIZED, properties, 1),
+		properties -> new WeatheringCopperFittingBlock(WeatheringCopper.WeatherState.OXIDIZED, properties),
 		BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 
 	public static final Block WAXED_COPPER_FITTING = register("waxed_copper_fitting",
-		properties -> new CopperFitting(WeatheringCopper.WeatherState.UNAFFECTED, properties, 0),
+		CopperFittingBlock::new,
 		BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block WAXED_EXPOSED_COPPER_FITTING = register("waxed_exposed_copper_fitting",
-		properties -> new CopperFitting(WeatheringCopper.WeatherState.EXPOSED, properties, 0),
+		CopperFittingBlock::new,
 		BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block WAXED_WEATHERED_COPPER_FITTING = register("waxed_weathered_copper_fitting",
-		properties -> new CopperFitting(WeatheringCopper.WeatherState.WEATHERED, properties, 0),
+		CopperFittingBlock::new,
 		BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 	public static final Block WAXED_OXIDIZED_COPPER_FITTING = register("waxed_oxidized_copper_fitting",
-		properties -> new CopperFitting(WeatheringCopper.WeatherState.OXIDIZED, properties, 0),
+		CopperFittingBlock::new,
 		BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(1.5F, 3F).sound(SoundType.COPPER)
 	);
 

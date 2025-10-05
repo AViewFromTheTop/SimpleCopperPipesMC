@@ -15,20 +15,20 @@ import net.minecraft.util.datafix.fixes.References;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public final class TransferableDataFieldRenameFix extends DataFix {
+public final class CanAcceptFieldRenameFix extends DataFix {
 	private final String blockEntity;
 
-	public TransferableDataFieldRenameFix(String blockEntity, Schema outputSchema) {
+	public CanAcceptFieldRenameFix(String blockEntity, Schema outputSchema) {
 		super(outputSchema, false);
 		this.blockEntity = blockEntity;
 	}
 
 	@NotNull
 	private static Dynamic<?> fixOccupants(@NotNull Dynamic<?> dynamic) {
-		List<Dynamic<?>> oldDynamics = dynamic.get("saveableMoveableNbtList").orElseEmptyList().asStream().collect(Collectors.toCollection(ArrayList::new));
-		dynamic = dynamic.remove("saveableMoveableNbtList");
+		List<Dynamic<?>> oldDynamics = dynamic.get("canAccept").orElseEmptyList().asStream().collect(Collectors.toCollection(ArrayList::new));
+		dynamic = dynamic.remove("canAccept");
 
-		return dynamic.set("transferablePipeData", dynamic.createList(oldDynamics.stream()));
+		return dynamic.set("canAcceptGameEvents", dynamic.createList(oldDynamics.stream()));
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public final class TransferableDataFieldRenameFix extends DataFix {
 	private @NotNull Typed<?> fix(@NotNull Typed<?> typed) {
 		return typed.update(
 			DSL.remainderFinder(),
-			TransferableDataFieldRenameFix::fixOccupants
+			CanAcceptFieldRenameFix::fixOccupants
 		);
 	}
 }

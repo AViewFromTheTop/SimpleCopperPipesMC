@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.ModContainer;
 import net.frozenblock.lib.entrypoint.api.FrozenModInitializer;
 import net.frozenblock.lib.particle.api.VibrationParticleVisibilityApi;
-import net.lunade.copper.block.entity.CopperPipeEntity;
+import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.block.entity.leaking.LeakingPipeDripBehaviors;
 import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
@@ -54,7 +54,7 @@ public class SimpleCopperPipes extends FrozenModInitializer {
 
 		SimpleCopperPipesCreativeInventorySorting.init();
 
-		VibrationParticleVisibilityApi.registerVisibilityTest((data, user) -> !(user instanceof CopperPipeEntity.VibrationUser));
+		VibrationParticleVisibilityApi.registerVisibilityTest((data, user) -> !(user instanceof CopperPipeBlockEntity.VibrationUser));
 
 		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> LeakingPipeManager.clearAll());
 		ServerTickEvents.START_SERVER_TICK.register((listener) -> LeakingPipeManager.clearAndSwitch());

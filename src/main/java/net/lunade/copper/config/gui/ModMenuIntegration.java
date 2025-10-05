@@ -9,9 +9,7 @@ public class ModMenuIntegration implements ModMenuApi {
 
 	@Override
 	public ConfigScreenFactory<Screen> getModConfigScreenFactory() {
-		if (FrozenBools.HAS_CLOTH_CONFIG) {
-			return SimpleCopperPipesConfigGui::buildScreen;
-		}
+		if (FrozenBools.HAS_CLOTH_CONFIG) return SimpleCopperPipesConfigGui::buildScreen;
 		return null;
 	}
 }

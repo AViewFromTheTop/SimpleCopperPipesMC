@@ -45,8 +45,7 @@ public final class SimpleCopperPipesConfig {
 	}
 
 	public static SimpleCopperPipesConfig get(boolean real) {
-		if (real)
-			return INSTANCE.instance();
+		if (real) return INSTANCE.instance();
 		return INSTANCE.config();
 	}
 

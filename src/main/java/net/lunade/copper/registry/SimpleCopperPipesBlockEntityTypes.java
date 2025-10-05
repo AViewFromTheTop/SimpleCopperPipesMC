@@ -2,8 +2,8 @@ package net.lunade.copper.registry;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.lunade.copper.SimpleCopperPipesConstants;
-import net.lunade.copper.block.entity.CopperFittingEntity;
-import net.lunade.copper.block.entity.CopperPipeEntity;
+import net.lunade.copper.block.entity.CopperFittingBlockEntity;
+import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
@@ -13,9 +13,9 @@ import org.jetbrains.annotations.NotNull;
 
 public final class SimpleCopperPipesBlockEntityTypes {
 
-	public static final BlockEntityType<CopperPipeEntity> COPPER_PIPE = register(
+	public static final BlockEntityType<CopperPipeBlockEntity> COPPER_PIPE = register(
 		"copper_pipe",
-		CopperPipeEntity::new,
+		CopperPipeBlockEntity::new,
 		SimpleCopperPipesBlocks.COPPER_PIPE,
 		SimpleCopperPipesBlocks.EXPOSED_COPPER_PIPE,
 		SimpleCopperPipesBlocks.WEATHERED_COPPER_PIPE,
@@ -26,9 +26,9 @@ public final class SimpleCopperPipesBlockEntityTypes {
 		SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_PIPE
 	);
 
-	public static final BlockEntityType<CopperFittingEntity> COPPER_FITTING = register(
+	public static final BlockEntityType<CopperFittingBlockEntity> COPPER_FITTING = register(
 		"copper_fitting",
-		CopperFittingEntity::new,
+		CopperFittingBlockEntity::new,
 		SimpleCopperPipesBlocks.COPPER_FITTING,
 		SimpleCopperPipesBlocks.EXPOSED_COPPER_FITTING,
 		SimpleCopperPipesBlocks.WEATHERED_COPPER_FITTING,

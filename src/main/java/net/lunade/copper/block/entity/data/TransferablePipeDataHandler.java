@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.lunade.copper.SimpleCopperPipesConstants;
 import net.lunade.copper.block.entity.AbstractSimpleCopperBlockEntity;
-import net.lunade.copper.block.entity.CopperPipeEntity;
+import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.registry.TransferablePipeData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -238,28 +238,28 @@ public class TransferablePipeDataHandler {
 			return this;
 		}
 
-		public SaveableTransferablePipeData withShouldSave(boolean bool) {
-			this.shouldSave = bool;
+		public SaveableTransferablePipeData withShouldSave(boolean shouldSave) {
+			this.shouldSave = shouldSave;
 			return this;
 		}
 
-		public SaveableTransferablePipeData withShouldMove(boolean bool) {
-			this.shouldMove = bool;
+		public SaveableTransferablePipeData withShouldMove(boolean shouldMove) {
+			this.shouldMove = shouldMove;
 			return this;
 		}
 
-		public SaveableTransferablePipeData withOnlyUseableOnce(boolean bool) {
-			this.canOnlyBeUsedOnce = bool;
+		public SaveableTransferablePipeData withOnlyUseableOnce(boolean onlyUseableOnce) {
+			this.canOnlyBeUsedOnce = onlyUseableOnce;
 			return this;
 		}
 
-		public SaveableTransferablePipeData withOnlyThroughOnePipe(boolean bool) {
-			this.canOnlyGoThroughOnePipe = bool;
+		public SaveableTransferablePipeData withOnlyThroughOnePipe(boolean onlyThroughOnePipe) {
+			this.canOnlyGoThroughOnePipe = onlyThroughOnePipe;
 			return this;
 		}
 
-		public SaveableTransferablePipeData withShouldCopy(boolean bool) {
-			this.shouldCopy = bool;
+		public SaveableTransferablePipeData withShouldCopy(boolean shouldCopy) {
+			this.shouldCopy = shouldCopy;
 			return this;
 		}
 
@@ -268,7 +268,7 @@ public class TransferablePipeDataHandler {
 			return this;
 		}
 
-		public void dispense(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipeEntity) {
+		public void dispense(ServerLevel world, BlockPos pos, BlockState state, CopperPipeBlockEntity pipeEntity) {
 			TransferablePipeData.Dispsense method = TransferablePipeData.getDispenseBehavior(this.getID());
 			if (method != null) {
 				method.dispense(this, world, pos, state, pipeEntity);

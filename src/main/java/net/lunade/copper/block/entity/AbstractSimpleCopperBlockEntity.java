@@ -24,6 +24,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.HopperMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.WeatheringCopper;
@@ -125,9 +126,9 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 			);
 		}
 
-		this.tickMoveableNbt((ServerLevel) level, pos, originalState);
-		this.dispenseMoveableNbt((ServerLevel) level, pos, originalState);
-		this.moveMoveableNbt((ServerLevel) level, pos, originalState);
+		this.tickTransferableData((ServerLevel) level, pos, originalState);
+		this.dispenseTransferableData((ServerLevel) level, pos, originalState);
+		this.moveTransferableData((ServerLevel) level, pos, originalState);
 
 		if (this.electricityCooldown >= 0) --this.electricityCooldown;
 		if (this.electricityCooldown == -1 && state.getValue(SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY)) {
@@ -149,40 +150,40 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		return false;
 	}
 
-	public void updateBlockEntityValues(Level level, BlockPos pos, BlockState state) {
+	public void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state) {
 	}
 
-	public boolean canAcceptMoveableNbt(MoveType moveType, Direction moveDirection, BlockState fromState) {
+	public boolean canAcceptTransferableData(MoveType moveType, Direction moveDirection, BlockState fromState) {
 		return true;
 	}
 
-	public boolean canMoveNbtInDirection(Direction direction, BlockState state) {
+	public boolean canTransferDataInDirection(Direction direction, BlockState state) {
 		return true;
 	}
 
-	public void tickMoveableNbt(ServerLevel level, BlockPos pos, BlockState state) {
+	public void tickTransferableData(ServerLevel level, BlockPos pos, BlockState state) {
 		ImmutableList.copyOf(this.transferableDataHandler.getSavedDataList()).forEach(data -> {
 			data.tick(level, pos, state, this);
 		});
 	}
 
-	public void dispenseMoveableNbt(ServerLevel level, BlockPos pos, BlockState state) {
+	public void dispenseTransferableData(ServerLevel level, BlockPos pos, BlockState state) {
 	}
 
-	public void moveMoveableNbt(ServerLevel level, BlockPos pos, BlockState state) {
+	public void moveTransferableData(ServerLevel level, BlockPos pos, BlockState state) {
 		final ArrayList<TransferablePipeDataHandler.SaveableTransferablePipeData> dataList = transferableDataHandler.getSavedDataList();
 		final ArrayList<TransferablePipeDataHandler.SaveableTransferablePipeData> usedData = new ArrayList<>();
 		if (dataList.isEmpty()) return;
 
 		for (Direction direction : Util.shuffledCopy(Direction.values(), level.getRandom())) {
-			if (!this.canMoveNbtInDirection(direction, state)) continue;
+			if (!this.canTransferDataInDirection(direction, state)) continue;
 
 			final BlockPos offsetPos = pos.relative(direction);
 			if (!level.hasChunkAt(offsetPos)) continue;
 
 			final BlockEntity blockEntity = level.getBlockEntity(offsetPos);
 			if (!(blockEntity instanceof AbstractSimpleCopperBlockEntity copperBlockEntity)) continue;
-			if (!copperBlockEntity.canAcceptMoveableNbt(this.moveType, direction, state)) continue;
+			if (!copperBlockEntity.canAcceptTransferableData(this.moveType, direction, state)) continue;
 
 			final BlockState offsetState = level.getBlockState(offsetPos);
 			for (TransferablePipeDataHandler.SaveableTransferablePipeData data : dataList) {

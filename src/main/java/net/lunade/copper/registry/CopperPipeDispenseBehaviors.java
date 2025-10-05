@@ -2,7 +2,7 @@ package net.lunade.copper.registry;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import java.util.Map;
-import net.lunade.copper.block.entity.CopperPipeEntity;
+import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
@@ -77,7 +77,7 @@ public class CopperPipeDispenseBehaviors {
 
 	@FunctionalInterface
 	public interface PoweredDispense {
-		void dispense(ServerLevel level, ItemStack stack, int shotPower, Direction direction, Position position, BlockState state, BlockPos pos, CopperPipeEntity pipe);
+		void dispense(ServerLevel level, ItemStack stack, int shotPower, Direction direction, Position position, BlockState state, BlockPos pos, CopperPipeBlockEntity pipe);
 	}
 
 }

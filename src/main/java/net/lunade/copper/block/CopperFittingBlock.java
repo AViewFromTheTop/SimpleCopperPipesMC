@@ -2,7 +2,7 @@ package net.lunade.copper.block;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.lunade.copper.block.entity.CopperFittingEntity;
+import net.lunade.copper.block.entity.CopperFittingBlockEntity;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
@@ -75,7 +75,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 
 	public static void updateBlockEntityValues(Level level, BlockPos pos, @NotNull BlockState state) {
 		if (!(state.getBlock() instanceof CopperFittingBlock)) return;
-		if (!(level.getBlockEntity(pos) instanceof CopperFittingEntity fitting)) return;
+		if (!(level.getBlockEntity(pos) instanceof CopperFittingBlockEntity fitting)) return;
 		fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
 	}
 
@@ -124,7 +124,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 
 	@Override
 	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-		return new CopperFittingEntity(blockPos, blockState);
+		return new CopperFittingBlockEntity(blockPos, blockState);
 	}
 
 	@Override
@@ -138,7 +138,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 		return createTickerHelper(
 			blockEntityType,
 			SimpleCopperPipesBlockEntityTypes.COPPER_FITTING,
-			(level1, blockPos, blockState1, copperFittingEntity) -> copperFittingEntity.serverTick(level1, blockPos, blockState1)
+			(level1, blockPos, blockState1, copperFittingBlockEntity) -> copperFittingBlockEntity.serverTick(level1, blockPos, blockState1)
 		);
 	}
 
@@ -158,7 +158,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	@Override
 	protected @NotNull InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
 		if (!SimpleCopperPipesConfig.get().openableFittings) return super.useWithoutItem(state, level, pos, player, hitResult);
-		if (!(level.getBlockEntity(pos) instanceof CopperFittingEntity fittingEntity)) return InteractionResult.PASS;
+		if (!(level.getBlockEntity(pos) instanceof CopperFittingBlockEntity fittingEntity)) return InteractionResult.PASS;
 		player.openMenu(fittingEntity);
 		player.awardStat(Stats.CUSTOM.get(SimpleCopperPipesStats.INSPECT_FITTING));
 		return InteractionResult.SUCCESS;

@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Optional;
 import net.lunade.copper.SimpleCopperPipesConstants;
 import net.lunade.copper.block.entity.AbstractSimpleCopperBlockEntity;
-import net.lunade.copper.block.entity.CopperFittingEntity;
-import net.lunade.copper.block.entity.CopperPipeEntity;
+import net.lunade.copper.block.entity.CopperFittingBlockEntity;
+import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.block.entity.data.TransferablePipeDataHandler;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.networking.packet.SimpleCopperPipesNoteParticlePacket;
@@ -106,7 +106,7 @@ public class TransferablePipeData {
 		register(WATER, (data, level, pos, state, pipe) -> {
 
 		}, (data, level, pos, state, blockEntity) -> {
-			if (blockEntity instanceof CopperFittingEntity) {
+			if (blockEntity instanceof CopperFittingBlockEntity) {
 				data.vec3d = new Vec3(11, 0, 0);
 			} else if (!blockEntity.canWater && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MoveType.FROM_PIPE) {
 				data.vec3d = data.getVec3d().add(-1, 0, 0);
@@ -128,7 +128,7 @@ public class TransferablePipeData {
 
 		}, (data, level, pos, state, blockEntity) -> {
 			if (blockEntity.transferableDataHandler.getTransferablePipeData(WATER) == null) {
-				if (blockEntity instanceof CopperFittingEntity) {
+				if (blockEntity instanceof CopperFittingBlockEntity) {
 					data.vec3d = new Vec3(11, 0, 0);
 				} else if (!blockEntity.canSmoke && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MoveType.FROM_PIPE) {
 					data.vec3d = data.getVec3d().add(-1, 0, 0);
@@ -171,7 +171,7 @@ public class TransferablePipeData {
 		register(SMOKE, (data, level, pos, state, pipe) -> {
 
 		}, (data, level, pos, state, blockEntity) -> {
-			if (blockEntity instanceof CopperFittingEntity) {
+			if (blockEntity instanceof CopperFittingBlockEntity) {
 				data.vec3d = new Vec3(11, 0, 0);
 			} else if (!blockEntity.canSmoke && blockEntity.moveType == AbstractSimpleCopperBlockEntity.MoveType.FROM_PIPE) {
 				data.vec3d = data.getVec3d().add(-1, 0, 0);
@@ -193,7 +193,7 @@ public class TransferablePipeData {
 
 	@FunctionalInterface
 	public interface Dispsense {
-		void dispense(TransferablePipeDataHandler.SaveableTransferablePipeData data, ServerLevel level, BlockPos pos, BlockState state, CopperPipeEntity pipe);
+		void dispense(TransferablePipeDataHandler.SaveableTransferablePipeData data, ServerLevel level, BlockPos pos, BlockState state, CopperPipeBlockEntity pipe);
 	}
 
 	@FunctionalInterface

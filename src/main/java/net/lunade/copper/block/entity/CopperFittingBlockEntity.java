@@ -14,6 +14,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
@@ -21,18 +22,18 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import net.minecraft.Util;
 
-public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
+public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 
 	private static final int MAX_TRANSFER_AMOUNT = 1;
 
 	public int transferCooldown;
 
-	public CopperFittingEntity(BlockPos blockPos, BlockState blockState) {
+	public CopperFittingBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(SimpleCopperPipesBlockEntityTypes.COPPER_FITTING, blockPos, blockState, MoveType.FROM_FITTING);
 	}
 
 	public static boolean canTransfer(@NotNull Level level, BlockPos pos, Direction direction, boolean to) {
-		if (!(level.getBlockEntity(pos) instanceof CopperPipeEntity pipe)) return false;
+		if (!(level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe)) return false;
 
 		final BlockState state = level.getBlockState(pos);
 		return (!to || pipe.transferCooldown <= 0) && state.hasProperty(CopperPipeBlock.FACING) && state.getValue(CopperPipeBlock.FACING) == direction;
@@ -48,23 +49,23 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 	}
 
 	@Override
-	public void serverTick(@NotNull Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState) {
-		super.serverTick(level, blockPos, blockState);
+	public void serverTick(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state) {
+		super.serverTick(level, pos, state);
 		if (level.isClientSide()) return;
 
 		if (this.transferCooldown > 0) {
 			--this.transferCooldown;
 		} else {
-			this.fittingMove(level, blockPos, blockState);
+			this.fittingMove(level, pos, state);
 		}
 	}
 
-	public void fittingMove(@NotNull Level level, BlockPos blockPos, @NotNull BlockState blockState) {
-		final boolean movedOut = blockState.hasProperty(BlockStateProperties.POWERED) && !blockState.getValue(BlockStateProperties.POWERED) && this.moveOut(level, blockPos, level.random);
-		final boolean movedIn = this.moveIn(level, blockPos, level.random);
+	public void fittingMove(@NotNull Level level, BlockPos pos, @NotNull BlockState state) {
+		final boolean movedOut = state.hasProperty(BlockStateProperties.POWERED) && !state.getValue(BlockStateProperties.POWERED) && this.moveOut(level, pos, level.random);
+		final boolean movedIn = this.moveIn(level, pos, level.random);
 		if (movedOut || movedIn) {
-			setCooldown(blockState);
-			setChanged(level, blockPos, blockState);
+			setCooldown(state);
+			setChanged(level, pos, state);
 		}
 	}
 
@@ -73,8 +74,8 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 		for (Direction direction : Util.shuffledCopy(Direction.values(), random)) {
 			final Direction opposite = direction.getOpposite();
 			final BlockPos oppositePos = pos.relative(opposite);
-			final Storage<ItemVariant> inventory = CopperPipeEntity.getStorageAt(level, oppositePos, direction);
-			final Storage<ItemVariant> fittingInventory = CopperPipeEntity.getStorageAt(level, pos, opposite);
+			final Storage<ItemVariant> inventory = CopperPipeBlockEntity.getStorageAt(level, oppositePos, direction);
+			final Storage<ItemVariant> fittingInventory = CopperPipeBlockEntity.getStorageAt(level, pos, opposite);
 			if (inventory == null || fittingInventory == null || !canTransfer(level, oppositePos, direction, false)) continue;
 
 			for (StorageView<ItemVariant> storageView : inventory) {
@@ -84,7 +85,7 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 				final var resource = storageView.getResource();
 				final long extracted = inventory.extract(resource, MAX_TRANSFER_AMOUNT, transaction);
 				if (extracted > 0) {
-					long inserted = CopperPipeEntity.addItem(resource, fittingInventory, transaction);
+					long inserted = CopperPipeBlockEntity.addItem(resource, fittingInventory, transaction);
 					if (inserted > 0) {
 						transaction.commit(); // applies the changes
 						result = true;
@@ -131,12 +132,12 @@ public class CopperFittingEntity extends AbstractSimpleCopperBlockEntity {
 	}
 
 	@Override
-	public boolean canAcceptMoveableNbt(MoveType moveType, Direction moveDirection, BlockState fromState) {
+	public boolean canAcceptTransferableData(MoveType moveType, Direction moveDirection, BlockState fromState) {
 		return moveType == MoveType.FROM_PIPE && moveDirection == fromState.getValue(BlockStateProperties.FACING);
 	}
 
 	@Override
-	public void updateBlockEntityValues(Level level, BlockPos pos, @NotNull BlockState state) {
+	public void updateBlockEntityValues(LevelReader level, BlockPos pos, @NotNull BlockState state) {
 		if (state.getBlock() instanceof CopperFittingBlock) this.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
 	}
 

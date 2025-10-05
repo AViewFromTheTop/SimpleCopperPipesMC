@@ -12,7 +12,7 @@
     "FarmlandBlockMixin",
     "thecopperierage.WrenchItemMixin",
     "SugarCaneBlockMixin",
-    "VibrationListenerMixin",
+    "VibrationTickerMixin",
     "datafix.DataFixersMixin",
     "datafix.V3438Mixin"
   ],

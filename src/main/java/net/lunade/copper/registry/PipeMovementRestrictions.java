@@ -2,7 +2,7 @@ package net.lunade.copper.registry;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import java.util.Map;
-import net.lunade.copper.block.entity.CopperPipeEntity;
+import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -48,12 +48,12 @@ public class PipeMovementRestrictions {
 
 	@FunctionalInterface
 	public interface CanTransferTo<T extends BlockEntity> {
-		boolean canTransfer(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe, T toEntity);
+		boolean canTransfer(ServerLevel world, BlockPos pos, BlockState state, CopperPipeBlockEntity pipe, T toEntity);
 	}
 
 	@FunctionalInterface
 	public interface CanTakeFrom<T extends BlockEntity> {
-		boolean canTake(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipe, T toEntity);
+		boolean canTake(ServerLevel world, BlockPos pos, BlockState state, CopperPipeBlockEntity pipe, T toEntity);
 	}
 
 	public record PipeMovementRestriction<T extends BlockEntity>(

@@ -3,7 +3,7 @@ package net.lunade.copper.block;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.lunade.copper.block.entity.CopperPipeEntity;
+import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.block.entity.leaking.LeakingPipeDripBehaviors;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
@@ -101,8 +101,8 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 		);
 	}
 
-	public static void updateBlockEntityValues(@NotNull Level level, BlockPos pos, @NotNull BlockState state) {
-		if (level.getBlockEntity(pos) instanceof CopperPipeEntity pipe) pipe.updateBlockEntityValues(level, pos, state);
+	public static void updateBlockEntityValues(@NotNull LevelReader level, BlockPos pos, @NotNull BlockState state) {
+		if (level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe) pipe.updateBlockEntityValues(level, pos, state);
 	}
 
 	public static boolean canConnectFront(@NotNull LevelReader level, @NotNull BlockPos pos, Direction direction) {
@@ -195,11 +195,13 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 		if (neighborState.getBlock() instanceof LightningRodBlock && neighborState.getValue(POWERED)) electricity = true;
 
 		final Direction facing = state.getValue(FACING);
-		return state
+		final BlockState finalState = state
 			.setValue(FRONT_CONNECTED, canConnectFront(level, pos, facing))
 			.setValue(BACK_CONNECTED, canConnectBack(level, pos, facing))
 			.setValue(SMOOTH, isSmooth(level, pos, facing))
 			.setValue(HAS_ELECTRICITY, electricity);
+		if (direction.getAxis() == facing.getAxis()) updateBlockEntityValues(level, pos, finalState);
+		return finalState;
 	}
 
 	@Override
@@ -211,7 +213,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 
 	@Override
 	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-		return new CopperPipeEntity(blockPos, blockState);
+		return new CopperPipeBlockEntity(blockPos, blockState);
 	}
 
 	@Override
@@ -233,7 +235,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	@Nullable
 	@Override
 	public <T extends BlockEntity> GameEventListener getListener(ServerLevel level, T blockEntity) {
-		if (blockEntity instanceof CopperPipeEntity pipeEntity) return pipeEntity.getListener();
+		if (blockEntity instanceof CopperPipeBlockEntity pipeEntity) return pipeEntity.getListener();
 		return null;
 	}
 
@@ -252,8 +254,8 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 
 	@Override
 	protected @NotNull InteractionResult useWithoutItem(BlockState state, @NotNull Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-		if (!(level.getBlockEntity(pos) instanceof CopperPipeEntity copperPipeEntity)) return InteractionResult.PASS;
-		player.openMenu(copperPipeEntity);
+		if (!(level.getBlockEntity(pos) instanceof CopperPipeBlockEntity copperPipeBlockEntity)) return InteractionResult.PASS;
+		player.openMenu(copperPipeBlockEntity);
 		player.awardStat(Stats.CUSTOM.get(SimpleCopperPipesStats.INSPECT_PIPE));
 		return InteractionResult.SUCCESS;
 	}

@@ -16,12 +16,5 @@
 		"sounds": [
 			"simple_copper_pipes:block/copper_pipe/launch"
 		]
-	},
-	"block.copper_pipe.turn": {
-		"sounds": [
-			"simple_copper_pipes:block/copper_pipe/turn1",
-			"simple_copper_pipes:block/copper_pipe/turn2",
-			"simple_copper_pipes:block/copper_pipe/turn3"
-		]
 	}
 }

@@ -4,17 +4,20 @@
 			"simple_copper_pipes:block/copper_pipe/item_in1",
 			"simple_copper_pipes:block/copper_pipe/item_in2",
 			"simple_copper_pipes:block/copper_pipe/item_in3"
-		]
+		],
+    "subtitle": "subtitles.block.copper_pipe.item_in"
 	},
 	"block.copper_pipe.item_out": {
 		"sounds": [
 			"simple_copper_pipes:block/copper_pipe/item_out1",
 			"simple_copper_pipes:block/copper_pipe/item_out2"
-		]
+		],
+    "subtitle": "subtitles.block.copper_pipe.item_out"
 	},
 	"block.copper_pipe.launch": {
 		"sounds": [
 			"simple_copper_pipes:block/copper_pipe/launch"
-		]
+		],
+    "subtitle": "subtitles.block.copper_pipe.launch"
 	}
 }

@@ -17,6 +17,10 @@
   "block.simple_copper_pipes.waxed_weathered_copper_fitting": "Waxed Weathered Copper Fitting",
   "block.simple_copper_pipes.waxed_oxidized_copper_fitting": "Waxed Oxidized Copper Fitting",
 
+  "subtitles.block.copper_pipe.item_in": "Item enters pipe",
+  "subtitles.block.copper_pipe.item_out": "Item exits pipe",
+  "subtitles.block.copper_pipe.launch": "Item launched from pipe",
+
   "stat.simple_copper_pipes.inspect_copper_pipe": "Copper Pipes Searched",
   "stat.simple_copper_pipes.inspect_copper_fitting": "Copper Fittings Searched",
 

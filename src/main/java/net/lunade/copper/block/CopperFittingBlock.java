@@ -133,12 +133,12 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Nullable
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, BlockState state, BlockEntityType<T> blockEntityType) {
 		if (level.isClientSide()) return null;
 		return createTickerHelper(
 			blockEntityType,
 			SimpleCopperPipesBlockEntityTypes.COPPER_FITTING,
-			(level1, blockPos, blockState1, copperFittingBlockEntity) -> copperFittingBlockEntity.serverTick(level1, blockPos, blockState1)
+			(level1, pos1, state1, blockEntity) -> blockEntity.serverTick(level1, pos1, state1, SimpleCopperPipesConfig.get())
 		);
 	}
 

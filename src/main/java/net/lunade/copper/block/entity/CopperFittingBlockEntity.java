@@ -49,8 +49,8 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 	}
 
 	@Override
-	public void serverTick(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state) {
-		super.serverTick(level, pos, state);
+	public void serverTick(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, SimpleCopperPipesConfig config) {
+		super.serverTick(level, pos, state, config);
 		if (level.isClientSide()) return;
 
 		if (this.transferCooldown > 0) {
@@ -137,8 +137,8 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 	}
 
 	@Override
-	public void updateBlockEntityValues(LevelReader level, BlockPos pos, @NotNull BlockState state) {
-		if (state.getBlock() instanceof CopperFittingBlock) this.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
+	public void updateBlockEntityValues(LevelReader level, BlockPos pos, @NotNull BlockState state, SimpleCopperPipesConfig config) {
+		if (state.getBlock() instanceof CopperFittingBlock) this.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && config.carryWater;
 	}
 
 	@Override

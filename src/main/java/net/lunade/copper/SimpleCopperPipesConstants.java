@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public class SimpleCopperPipesConstants {
-	public static final int CURRENT_FIX_VERSION = 5;
+	public static final int CURRENT_FIX_VERSION = 6;
 	public static final String MOD_ID = "simple_copper_pipes";
 	public static final String LEGACY_NAMESPACE = "lunade";
 	public static final String NAMESPACE = MOD_ID;

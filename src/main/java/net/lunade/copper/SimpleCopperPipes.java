@@ -13,13 +13,13 @@ import net.lunade.copper.datafix.SimpleCopperPipesDataFixer;
 import net.lunade.copper.networking.SimpleCopperPipesNetworking;
 import net.lunade.copper.registry.CopperPipeDispenseBehaviors;
 import net.lunade.copper.registry.PipeMovementRestrictions;
-import net.lunade.copper.registry.TransferablePipeData;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.lunade.copper.registry.SimpleCopperPipesCreativeInventorySorting;
 import net.lunade.copper.registry.SimpleCopperPipesSoundEvents;
 import net.lunade.copper.registry.SimpleCopperPipesStats;
+import net.lunade.copper.registry.TransferablePipeData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

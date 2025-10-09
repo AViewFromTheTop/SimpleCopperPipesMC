@@ -1,7 +1,7 @@
 package net.lunade.copper.block.entity;
 
-import java.util.ArrayList;
 import com.mojang.serialization.Codec;
+import java.util.ArrayList;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -9,8 +9,8 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.lunade.copper.block.CopperFittingBlock;
 import net.lunade.copper.block.CopperPipeBlock;
-import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
 import net.lunade.copper.block.entity.data.TransferablePipeDataHandler;
+import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.CopperPipeDispenseBehaviors;
@@ -44,6 +44,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -142,17 +143,17 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 	}
 
 	@Override
-	public void serverTick(@NotNull Level level, BlockPos blockPos, BlockState state) {
+	public void serverTick(@NotNull Level level, BlockPos blockPos, BlockState state, SimpleCopperPipesConfig config) {
 		if (level.isClientSide()) return;
 
 		VibrationSystem.Ticker.tick(this.level, this.getVibrationData(), this.createVibrationUser());
-		super.serverTick(level, blockPos, state);
+		super.serverTick(level, blockPos, state, config);
 
 		if (this.noteBlockCooldown > 0) --this.noteBlockCooldown;
 		if (this.dispenseCooldown > 0) {
 			--this.dispenseCooldown;
 		} else {
-			this.dispense((ServerLevel) level, blockPos, state);
+			this.dispense((ServerLevel) level, blockPos, state, config);
 			int cooldown = 0;
 			if (level.getBlockState(blockPos.relative(state.getValue(CopperPipeBlock.FACING).getOpposite())).getBlock() instanceof CopperFittingBlock fitting) {
 				cooldown = fitting.getCooldown();
@@ -165,7 +166,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		if (this.transferCooldown > 0) {
 			--this.transferCooldown;
 		} else {
-			this.pipeMove(level, blockPos, state);
+			this.pipeMove(level, blockPos, state, config);
 		}
 
 		if (state.getValue(CopperPipeBlock.FLUID) == PipeFluid.WATER && state.getValue(CopperPipeBlock.FACING) != Direction.UP) {
@@ -174,7 +175,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 	}
 
 	@Override
-	public void updateBlockEntityValues(LevelReader level, BlockPos pos, @NotNull BlockState state) {
+	public void updateBlockEntityValues(LevelReader level, BlockPos pos, @NotNull BlockState state, SimpleCopperPipesConfig config) {
 		if (!(state.getBlock() instanceof CopperPipeBlock)) return;
 
 		final Direction facing = state.getValue(BlockStateProperties.FACING);
@@ -183,22 +184,41 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		final Direction opposite = facing.getOpposite();
 		final BlockPos oppositePos = pos.relative(opposite);
 		final BlockState oppositeState = level.getBlockState(oppositePos);
+		final FluidState oppositeFluidState = oppositeState.getFluidState();
 		final Block oppositeBlock = oppositeState.getBlock();
-		final SimpleCopperPipesConfig config = SimpleCopperPipesConfig.get();
+		final VoxelShape pipeShape = state.getBlockSupportShape(level, pos);
 
-		final VoxelShape pipeEntryShape = state.getBlockSupportShape(level, pos).getFaceShape(opposite);
-		final VoxelShape pipeExitShape = state.getBlockSupportShape(level, pos).getFaceShape(facing);
-		final VoxelShape facingShape = facingState.getBlockSupportShape(level, facingPos).getFaceShape(opposite);
-		final VoxelShape supportingShape = oppositeState.getBlockSupportShape(level, oppositePos).getFaceShape(facing);
-		final VoxelShape pipeAndSupportShape = Shapes.join(pipeEntryShape, supportingShape, BooleanOp.AND);
-		final VoxelShape pipeAndFacingShape = Shapes.join(pipeExitShape, facingShape, BooleanOp.AND);
-		final boolean backConnected = state.getValue(CopperPipeBlock.BACK_CONNECTED);
+		// ENTRY
+		boolean isEntrySupported = state.getValue(CopperPipeBlock.BACK_CONNECTED);
+		if (!isEntrySupported) {
+			final boolean checkEntrySupportShape = oppositeState.is(SimpleCopperPipesBlockTags.COPPER_PIPE_CHECKS_SUPPORT_SHAPE);
+			if (checkEntrySupportShape) {
+				final VoxelShape pipeEntryShape = pipeShape.getFaceShape(opposite);
+				final VoxelShape supportingShape = oppositeState.getBlockSupportShape(level, oppositePos).getFaceShape(facing);
+				final VoxelShape pipeAndSupportShape = Shapes.join(pipeEntryShape, supportingShape, BooleanOp.AND);
+				isEntrySupported = pipeAndSupportShape.toAabbs().equals(pipeEntryShape.toAabbs());
+			} else {
+				isEntrySupported = !oppositeState.getCollisionShape(level, oppositePos).isEmpty();
+			}
+		}
 
-		this.canDispense = (pipeAndSupportShape.toAabbs().equals(pipeEntryShape.toAabbs()) || backConnected) && pipeAndFacingShape.isEmpty();
+		// EXIT
+		boolean isExitBlocked;
+		final boolean checkExitSupportShape = facingState.is(SimpleCopperPipesBlockTags.COPPER_PIPE_CHECKS_SUPPORT_SHAPE);
+		if (checkExitSupportShape) {
+			final VoxelShape pipeExitShape = pipeShape.getFaceShape(facing);
+			final VoxelShape facingShape = facingState.getBlockSupportShape(level, facingPos).getFaceShape(opposite);
+			final VoxelShape pipeAndFacingShape = Shapes.join(pipeExitShape, facingShape, BooleanOp.AND);
+			isExitBlocked = !pipeAndFacingShape.isEmpty();
+		} else {
+			isExitBlocked = !facingState.getCollisionShape(level, facingPos).isEmpty();
+		}
+
+		this.canDispense = isEntrySupported && !isExitBlocked;
 		this.dispenseType = oppositeBlock == Blocks.DROPPER ? DispenseType.DROPPER : oppositeBlock == Blocks.DISPENSER ? DispenseType.DISPENSER : DispenseType.NONE;
-		this.canAcceptGameEvents = !backConnected && pipeAndSupportShape.isEmpty();
-		this.canWater = config.carryWater && (oppositeState.getFluidState().is(FluidTags.WATER) || state.getValue(BlockStateProperties.WATERLOGGED) || oppositeState.getValueOrElse(BlockStateProperties.WATERLOGGED, false));
-		this.canLava =  config.carryLava && oppositeState.getFluidState().is(FluidTags.LAVA);
+		this.canAcceptGameEvents = !isEntrySupported;
+		this.canWater = config.carryWater && (oppositeFluidState.is(FluidTags.WATER) || state.getValue(BlockStateProperties.WATERLOGGED) || oppositeState.getValueOrElse(BlockStateProperties.WATERLOGGED, false));
+		this.canLava =  config.carryLava && oppositeFluidState.is(FluidTags.LAVA);
 		final boolean canWaterAndLava = this.canWater && this.canLava;
 		this.canSmoke = config.carrySmoke && (oppositeBlock instanceof CampfireBlock && !this.canWater && !this.canLava ? oppositeState.getValue(BlockStateProperties.LIT) : canWaterAndLava);
 		if (canWaterAndLava) {
@@ -207,7 +227,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		}
 	}
 
-	public void pipeMove(Level level, BlockPos pos, @NotNull BlockState state) {
+	public void pipeMove(Level level, BlockPos pos, @NotNull BlockState state, SimpleCopperPipesConfig config) {
 		final Direction facing = state.getValue(BlockStateProperties.FACING);
 		final boolean movedOut = this.moveOut(level, pos, facing);
 		final int movedIn = this.moveIn(level, pos, state, facing);
@@ -215,7 +235,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 			setCooldown(state);
 			setChanged(level, pos, state);
 			if (movedIn == 3) {
-				if (!SimpleCopperPipesConfig.get().suctionSounds) return;
+				if (!config.suctionSounds) return;
 				level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_IN, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
 			}
 		}
@@ -238,7 +258,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 				final long inserted = addItem(resource, pipeInventory, transaction);
 				if (inserted > 0) { // successfully inserted item
 					transaction.commit(); // applies the changes
-					if (state.is(SimpleCopperPipesBlockTags.SILENT_PIPES)) return 2;
+					if (state.is(SimpleCopperPipesBlockTags.SILENT_COPPER_PIPES)) return 2;
 
 					final Block block = level.getBlockState(facingAwayPos).getBlock();
 					if (!(block instanceof CopperPipeBlock) && !(block instanceof CopperFittingBlock)) return 3;
@@ -280,7 +300,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		return false;
 	}
 
-	private boolean dispense(ServerLevel level, BlockPos pos, @NotNull BlockState state) {
+	private boolean dispense(ServerLevel level, BlockPos pos, @NotNull BlockState state, SimpleCopperPipesConfig config) {
 		if (!this.canDispense) return false;
 
 		final int slot = this.chooseNonEmptySlot(level.random);
@@ -291,7 +311,6 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 
 		ItemStack shotItem;
 		int shotPower = 4;
-		final SimpleCopperPipesConfig config = SimpleCopperPipesConfig.get();
 		if (this.dispenseType == DispenseType.DROPPER) { //If Dropper
 			shotPower = 10;
 			if (config.dispenseSounds) {
@@ -309,11 +328,11 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		}
 
 		final Direction facing = state.getValue(BlockStateProperties.FACING);
-		final boolean silent = state.is(SimpleCopperPipesBlockTags.SILENT_PIPES);
+		final boolean silent = state.is(SimpleCopperPipesBlockTags.SILENT_COPPER_PIPES);
 		if (level.getBlockState(pos.relative(facing.getOpposite())).getBlock() instanceof CopperFittingBlock) {
-			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, true, silent);
+			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, true, silent, config);
 		} else {
-			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, false, silent);
+			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, false, silent, config);
 			level.levelEvent(LevelEvent.PARTICLES_SHOOT_WHITE_SMOKE, pos, facing.get3DDataValue());
 		}
 		this.setItem(slot, shotItem);
@@ -328,11 +347,11 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		Direction facing,
 		int shotPower,
 		boolean fitting,
-		boolean silent
+		boolean silent,
+		SimpleCopperPipesConfig config
 	) {
-		final Vec3 output = pos.getCenter().relative(facing, 0.7D);;
+		final Vec3 output = pos.getCenter().relative(facing, 0.7D);
 		ItemStack usableStack = stack;
-		final SimpleCopperPipesConfig config = SimpleCopperPipesConfig.get();
 
 		if (state.getValue(CopperPipeBlock.POWERED)) { //Special Behavior When Powered
 			CopperPipeDispenseBehaviors.PoweredDispense poweredDispense = CopperPipeDispenseBehaviors.getDispense(usableStack.getItem());

@@ -1,0 +1,24 @@
+{
+  "values": [
+    {
+      "id": "#minecraft:trapdoors",
+      "required": false
+    },
+    {
+      "id": "#minecraft:doors",
+      "required": false
+    },
+    {
+      "id": "#minecraft:climbable",
+      "required": false
+    },
+    {
+      "id": "#minecraft:leaves",
+      "required": false
+    },
+    {
+      "id": "#c:glass_blocks",
+      "required": false
+    }
+  ]
+}

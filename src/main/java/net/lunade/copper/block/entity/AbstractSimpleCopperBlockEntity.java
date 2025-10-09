@@ -1,17 +1,16 @@
 package net.lunade.copper.block.entity;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Optional;
-import com.google.common.collect.ImmutableList;
 import net.lunade.copper.SimpleCopperPipes;
 import net.lunade.copper.SimpleCopperPipesConstants;
 import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.block.entity.data.TransferablePipeDataHandler;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
-import net.lunade.copper.registry.TransferablePipeData;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
-import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
+import net.lunade.copper.registry.TransferablePipeData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -78,14 +77,13 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		}
 	}
 
-	public void serverTick(@NotNull Level level, BlockPos pos, BlockState originalState) {
+	public void serverTick(@NotNull Level level, BlockPos pos, BlockState originalState, SimpleCopperPipesConfig config) {
 		if (level.isClientSide()) return;
 
 		BlockState state = originalState;
-		final SimpleCopperPipesConfig config = SimpleCopperPipesConfig.get();
 
 		if (this.lastFixVersion < SimpleCopperPipesConstants.CURRENT_FIX_VERSION || SimpleCopperPipes.REFRESH_VALUES) {
-			this.updateBlockEntityValues(level, pos, originalState);
+			this.updateBlockEntityValues(level, pos, originalState, config);
 			this.lastFixVersion = SimpleCopperPipesConstants.CURRENT_FIX_VERSION;
 		}
 
@@ -134,7 +132,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		if (this.electricityCooldown == -1 && state.getValue(SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY)) {
 			this.electricityCooldown = 80;
 			final Optional<Block> previous = WeatheringCopper.getPrevious(state.getBlock());
-			if (previous.isPresent() && !state.is(SimpleCopperPipesBlockTags.WAXED)) state = previous.get().withPropertiesOf(state);
+			if (previous.isPresent()) state = previous.get().withPropertiesOf(state);
 
 		}
 		if (this.electricityCooldown == 79) sendElectricity(level, pos);
@@ -150,7 +148,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		return false;
 	}
 
-	public void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state) {
+	public void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state, SimpleCopperPipesConfig config) {
 	}
 
 	public boolean canAcceptTransferableData(MoveType moveType, Direction moveDirection, BlockState fromState) {

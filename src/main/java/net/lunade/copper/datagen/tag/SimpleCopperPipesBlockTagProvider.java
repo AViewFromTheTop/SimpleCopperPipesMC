@@ -3,6 +3,7 @@ package net.lunade.copper.datagen.tag;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
 import net.minecraft.core.HolderLookup;
@@ -13,6 +14,7 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 
 public final class SimpleCopperPipesBlockTagProvider extends FabricTagProvider.BlockTagProvider {
+
 	public SimpleCopperPipesBlockTagProvider(@NotNull FabricDataOutput output, @NotNull CompletableFuture<HolderLookup.Provider> registries) {
 		super(output, registries);
 	}
@@ -43,17 +45,14 @@ public final class SimpleCopperPipesBlockTagProvider extends FabricTagProvider.B
 			.add(SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_FITTING)
 			.add(SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_FITTING);
 
-		this.valueLookupBuilder(SimpleCopperPipesBlockTags.WAXED)
-			.add(SimpleCopperPipesBlocks.WAXED_COPPER_PIPE)
-			.add(SimpleCopperPipesBlocks.WAXED_EXPOSED_COPPER_PIPE)
-			.add(SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_PIPE)
-			.add(SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_PIPE)
-			.add(SimpleCopperPipesBlocks.WAXED_COPPER_FITTING)
-			.add(SimpleCopperPipesBlocks.WAXED_EXPOSED_COPPER_FITTING)
-			.add(SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_FITTING)
-			.add(SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_FITTING);
+		this.valueLookupBuilder(SimpleCopperPipesBlockTags.SILENT_COPPER_PIPES);
 
-		this.valueLookupBuilder(SimpleCopperPipesBlockTags.SILENT_PIPES);
+		this.valueLookupBuilder(SimpleCopperPipesBlockTags.COPPER_PIPE_CHECKS_SUPPORT_SHAPE)
+			.addOptionalTag(BlockTags.TRAPDOORS)
+			.addOptionalTag(BlockTags.DOORS)
+			.addOptionalTag(BlockTags.CLIMBABLE)
+			.addOptionalTag(BlockTags.LEAVES)
+			.addOptionalTag(ConventionalBlockTags.GLASS_BLOCKS);
 
 		this.valueLookupBuilder(TagKey.create(Registries.BLOCK, ResourceLocation.tryBuild("create", "wrench_pickup")))
 			.addOptionalTag(SimpleCopperPipesBlockTags.COPPER_PIPES)

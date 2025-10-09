@@ -3,9 +3,11 @@ package net.lunade.copper.block;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Map;
 import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.block.entity.leaking.LeakingPipeDripBehaviors;
 import net.lunade.copper.block.properties.PipeFluid;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.lunade.copper.registry.SimpleCopperPipesStats;
@@ -59,7 +61,6 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import java.util.Map;
 
 public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 	private static final VoxelShape SHAPE = Shapes.or(Block.box(4D, 4D, 2D, 12D, 12D, 16D), Block.box(3D, 3D, 0.D, 13D, 13D, 2D));
@@ -102,7 +103,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	public static void updateBlockEntityValues(@NotNull LevelReader level, BlockPos pos, @NotNull BlockState state) {
-		if (level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe) pipe.updateBlockEntityValues(level, pos, state);
+		if (level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe) pipe.updateBlockEntityValues(level, pos, state, SimpleCopperPipesConfig.get());
 	}
 
 	public static boolean canConnectFront(@NotNull LevelReader level, @NotNull BlockPos pos, Direction direction) {
@@ -228,7 +229,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 		return createTickerHelper(
 			blockEntityType,
 			SimpleCopperPipesBlockEntityTypes.COPPER_PIPE,
-			(levelx, posx, statex, copperPipeEntity) -> copperPipeEntity.serverTick(levelx, posx, statex)
+			(level1, pos1, state1, blockEntity) -> blockEntity.serverTick(level1, pos1, state1, SimpleCopperPipesConfig.get())
 		);
 	}
 

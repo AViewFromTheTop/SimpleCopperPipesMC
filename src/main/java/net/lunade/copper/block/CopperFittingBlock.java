@@ -62,7 +62,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final EnumProperty<PipeFluid> FLUID = SimpleCopperPipesBlockStateProperties.FLUID;
 	public static final BooleanProperty HAS_ELECTRICITY = SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY;
-	private static final VoxelShape FITTING_SHAPE = Block.box(2.5D, 2.5D, 2.5D, 13.5D, 13.5D, 13.5D);
+	private static final VoxelShape FITTING_SHAPE = Block.box(3D, 3D, 3D, 13D, 13D, 13D);
 
 	public CopperFittingBlock(Properties settings) {
 		super(settings);

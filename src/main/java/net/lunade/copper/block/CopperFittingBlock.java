@@ -8,6 +8,7 @@ import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.lunade.copper.registry.SimpleCopperPipesStats;
+import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
 import net.lunade.copper.tag.SimpleCopperPipesItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -61,7 +62,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final EnumProperty<PipeFluid> FLUID = SimpleCopperPipesBlockStateProperties.FLUID;
 	public static final BooleanProperty HAS_ELECTRICITY = SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY;
-	private static final VoxelShape FITTING_SHAPE = Block.box(2.5D, 2.5D, 2.5D, 13.5D, 13.5D, 13.5D);
+	private static final VoxelShape FITTING_SHAPE = Block.box(3D, 3D, 3D, 13D, 13D, 13D);
 
 	public CopperFittingBlock(Properties settings) {
 		super(settings);
@@ -214,14 +215,19 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	protected void affectNeighborsAfterRemoval(BlockState blockState, ServerLevel level, BlockPos blockPos, boolean bl) {
-		updateBlockEntityValues(level, blockPos, blockState);
-		Containers.updateNeighboursAfterDestroy(blockState, level, blockPos);
+	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean bl) {
+		updateBlockEntityValues(level, pos, state);
+		Containers.updateNeighboursAfterDestroy(state, level, pos);
 	}
 
 	@Override
 	public void animateTick(@NotNull BlockState blockState, Level level, BlockPos blockPos, RandomSource random) {
 		if (blockState.getValue(HAS_ELECTRICITY)) ParticleUtils.spawnParticlesAlongAxis(Direction.UP.getAxis(), level, blockPos, 0.55D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
+	}
+
+	@Override
+	public boolean shouldChangedStateKeepBlockEntity(BlockState state) {
+		return state.is(SimpleCopperPipesBlockTags.COPPER_FITTINGS);
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.lunade.copper.registry.SimpleCopperPipesStats;
+import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
 import net.lunade.copper.tag.SimpleCopperPipesItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -214,14 +215,19 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	protected void affectNeighborsAfterRemoval(BlockState blockState, ServerLevel level, BlockPos blockPos, boolean bl) {
-		updateBlockEntityValues(level, blockPos, blockState);
-		Containers.updateNeighboursAfterDestroy(blockState, level, blockPos);
+	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean bl) {
+		updateBlockEntityValues(level, pos, state);
+		Containers.updateNeighboursAfterDestroy(state, level, pos);
 	}
 
 	@Override
 	public void animateTick(@NotNull BlockState blockState, Level level, BlockPos blockPos, RandomSource random) {
 		if (blockState.getValue(HAS_ELECTRICITY)) ParticleUtils.spawnParticlesAlongAxis(Direction.UP.getAxis(), level, blockPos, 0.55D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
+	}
+
+	@Override
+	public boolean shouldChangedStateKeepBlockEntity(BlockState state) {
+		return state.is(SimpleCopperPipesBlockTags.COPPER_FITTINGS);
 	}
 
 	@Override

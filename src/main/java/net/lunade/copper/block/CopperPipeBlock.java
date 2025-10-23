@@ -11,6 +11,7 @@ import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.lunade.copper.registry.SimpleCopperPipesStats;
+import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
 import net.lunade.copper.tag.SimpleCopperPipesItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -440,9 +441,14 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	protected void affectNeighborsAfterRemoval(BlockState blockState, ServerLevel level, BlockPos blockPos, boolean bl) {
-		updateBlockEntityValues(level, blockPos, blockState);
-		Containers.updateNeighboursAfterDestroy(blockState, level, blockPos);
+	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean bl) {
+		updateBlockEntityValues(level, pos, state);
+		Containers.updateNeighboursAfterDestroy(state, level, pos);
+	}
+
+	@Override
+	public boolean shouldChangedStateKeepBlockEntity(BlockState state) {
+		return state.is(SimpleCopperPipesBlockTags.COPPER_PIPES);
 	}
 
 	@Override

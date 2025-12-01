@@ -26,14 +26,8 @@ public interface VibrationTickerMixin {
 		if (pipeEntity.inputGameEventPos == null || pipeEntity.gameEventNbtVec3 == null || pipeEntity.noteBlockCooldown > 0) return;
 		level.sendParticles(
 			new VibrationParticleOption(new BlockPositionSource(pipeEntity.inputGameEventPos), 5),
-			pipeEntity.gameEventNbtVec3.x(),
-			pipeEntity.gameEventNbtVec3.y(),
-			pipeEntity.gameEventNbtVec3.z(),
-			1,
-			0D,
-			0D,
-			0D,
-			0D
+			pipeEntity.gameEventNbtVec3.x(), pipeEntity.gameEventNbtVec3.y(), pipeEntity.gameEventNbtVec3.z(),
+			1, 0D, 0D, 0D, 0D
 		);
 		pipeEntity.inputGameEventPos = null;
 		pipeEntity.gameEventNbtVec3 = null;

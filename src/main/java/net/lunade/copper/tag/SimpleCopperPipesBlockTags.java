@@ -4,7 +4,6 @@ import net.lunade.copper.SimpleCopperPipesConstants;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
-import org.jetbrains.annotations.NotNull;
 
 public class SimpleCopperPipesBlockTags {
 	public static final TagKey<Block> COPPER_PIPES = bind("copper_pipes");
@@ -12,8 +11,7 @@ public class SimpleCopperPipesBlockTags {
 	public static final TagKey<Block> SILENT_COPPER_PIPES = bind("silent_copper_pipes");
 	public static final TagKey<Block> COPPER_PIPE_CHECKS_SUPPORT_SHAPE = bind("copper_pipe_checks_support_shape");
 
-	@NotNull
-	private static TagKey<Block> bind(@NotNull String path) {
+	private static TagKey<Block> bind(String path) {
 		return TagKey.create(Registries.BLOCK, SimpleCopperPipesConstants.id(path));
 	}
 }

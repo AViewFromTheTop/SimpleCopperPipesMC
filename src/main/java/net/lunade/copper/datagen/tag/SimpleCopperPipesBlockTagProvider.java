@@ -8,19 +8,18 @@ import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
-import org.jetbrains.annotations.NotNull;
 
 public final class SimpleCopperPipesBlockTagProvider extends FabricTagProvider.BlockTagProvider {
 
-	public SimpleCopperPipesBlockTagProvider(@NotNull FabricDataOutput output, @NotNull CompletableFuture<HolderLookup.Provider> registries) {
+	public SimpleCopperPipesBlockTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) {
 		super(output, registries);
 	}
 
 	@Override
-	protected void addTags(@NotNull HolderLookup.Provider provider) {
+	protected void addTags(HolderLookup.Provider provider) {
 		this.builder(BlockTags.MINEABLE_WITH_PICKAXE)
 			.addOptionalTag(SimpleCopperPipesBlockTags.COPPER_PIPES)
 			.addOptionalTag(SimpleCopperPipesBlockTags.COPPER_FITTINGS);
@@ -54,7 +53,7 @@ public final class SimpleCopperPipesBlockTagProvider extends FabricTagProvider.B
 			.addOptionalTag(BlockTags.LEAVES)
 			.addOptionalTag(ConventionalBlockTags.GLASS_BLOCKS);
 
-		this.valueLookupBuilder(TagKey.create(Registries.BLOCK, ResourceLocation.tryBuild("create", "wrench_pickup")))
+		this.valueLookupBuilder(TagKey.create(Registries.BLOCK, Identifier.tryBuild("create", "wrench_pickup")))
 			.addOptionalTag(SimpleCopperPipesBlockTags.COPPER_PIPES)
 			.addOptionalTag(SimpleCopperPipesBlockTags.COPPER_FITTINGS);
 	}

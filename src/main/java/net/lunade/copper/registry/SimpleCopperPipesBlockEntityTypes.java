@@ -9,10 +9,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import org.jetbrains.annotations.NotNull;
 
 public final class SimpleCopperPipesBlockEntityTypes {
-
 	public static final BlockEntityType<CopperPipeBlockEntity> COPPER_PIPE = register(
 		"copper_pipe",
 		CopperPipeBlockEntity::new,
@@ -42,9 +40,12 @@ public final class SimpleCopperPipesBlockEntityTypes {
 	public static void init() {
 	}
 
-	@NotNull
-	private static <T extends BlockEntity> BlockEntityType<T> register(@NotNull String path, @NotNull FabricBlockEntityTypeBuilder.Factory<T> blockEntity, @NotNull Block... blocks) {
-		return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, SimpleCopperPipesConstants.id(path), FabricBlockEntityTypeBuilder.create(blockEntity, blocks).build());
+	private static <T extends BlockEntity> BlockEntityType<T> register(String path, FabricBlockEntityTypeBuilder.Factory<T> blockEntity, Block... blocks) {
+		return Registry.register(
+			BuiltInRegistries.BLOCK_ENTITY_TYPE,
+			SimpleCopperPipesConstants.id(path),
+			FabricBlockEntityTypeBuilder.create(blockEntity, blocks).build()
+		);
 	}
 
 }

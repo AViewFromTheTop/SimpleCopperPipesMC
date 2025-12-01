@@ -13,7 +13,6 @@ import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public final class SimpleCopperPipesConfigGui {
@@ -30,7 +29,7 @@ public final class SimpleCopperPipesConfigGui {
 		return configBuilder.build();
 	}
 
-	private static void setupEntries(@NotNull ConfigCategory category, @NotNull ConfigEntryBuilder entryBuilder) {
+	private static void setupEntries(ConfigCategory category, ConfigEntryBuilder builder) {
 		var config = SimpleCopperPipesConfig.get(true);
 		var modifiedConfig = SimpleCopperPipesConfig.getWithSync();
 		Class<? extends SimpleCopperPipesConfig> clazz = config.getClass();
@@ -39,7 +38,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				entryBuilder.startBooleanToggle(text("openable_fittings"), modifiedConfig.openableFittings)
+				builder.startBooleanToggle(text("openable_fittings"), modifiedConfig.openableFittings)
 					.setDefaultValue(defaultConfig.openableFittings)
 					.setSaveConsumer(newValue -> config.openableFittings = newValue)
 					.setTooltip(tooltip("openable_fittings"))
@@ -53,7 +52,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				entryBuilder.startBooleanToggle(text("dispensing"), modifiedConfig.dispensing)
+				builder.startBooleanToggle(text("dispensing"), modifiedConfig.dispensing)
 					.setDefaultValue(defaultConfig.dispensing)
 					.setSaveConsumer(newValue -> config.dispensing = newValue)
 					.setTooltip(tooltip("dispensing"))
@@ -67,7 +66,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				entryBuilder.startBooleanToggle(text("dispense_sounds"), modifiedConfig.dispenseSounds)
+				builder.startBooleanToggle(text("dispense_sounds"), modifiedConfig.dispenseSounds)
 					.setDefaultValue(defaultConfig.dispenseSounds)
 					.setSaveConsumer(newValue -> config.dispenseSounds = newValue)
 					.setTooltip(tooltip("dispense_sounds"))
@@ -81,7 +80,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				entryBuilder.startBooleanToggle(text("suction_sounds"), modifiedConfig.suctionSounds)
+				builder.startBooleanToggle(text("suction_sounds"), modifiedConfig.suctionSounds)
 					.setDefaultValue(defaultConfig.suctionSounds)
 					.setSaveConsumer(newValue -> config.suctionSounds = newValue)
 					.setTooltip(tooltip("suction_sounds"))
@@ -95,7 +94,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				entryBuilder.startBooleanToggle(text("sense_game_events"), modifiedConfig.senseGameEvents)
+				builder.startBooleanToggle(text("sense_game_events"), modifiedConfig.senseGameEvents)
 					.setDefaultValue(defaultConfig.senseGameEvents)
 					.setSaveConsumer(newValue -> config.senseGameEvents = newValue)
 					.setTooltip(tooltip("sense_game_events"))
@@ -109,7 +108,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				entryBuilder.startBooleanToggle(text("carry_water"), modifiedConfig.carryWater)
+				builder.startBooleanToggle(text("carry_water"), modifiedConfig.carryWater)
 					.setDefaultValue(defaultConfig.carryWater)
 					.setSaveConsumer(newValue -> {
 						config.carryWater = newValue;
@@ -126,7 +125,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				entryBuilder.startBooleanToggle(text("carry_lava"), modifiedConfig.carryLava)
+				builder.startBooleanToggle(text("carry_lava"), modifiedConfig.carryLava)
 					.setDefaultValue(defaultConfig.carryLava)
 					.setSaveConsumer(newValue -> {
 						config.carryLava = newValue;
@@ -143,7 +142,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				entryBuilder.startBooleanToggle(text("carry_smoke"), modifiedConfig.carrySmoke)
+				builder.startBooleanToggle(text("carry_smoke"), modifiedConfig.carrySmoke)
 					.setDefaultValue(defaultConfig.carrySmoke)
 					.setSaveConsumer(newValue -> {
 						config.carrySmoke = newValue;
@@ -159,13 +158,11 @@ public final class SimpleCopperPipesConfigGui {
 		);
 	}
 
-	@NotNull
 	@Contract(value = "_ -> new", pure = true)
 	private static Component text(String key) {
 		return Component.translatable("option." + SimpleCopperPipesConstants.NAMESPACE + "." + key);
 	}
 
-	@NotNull
 	@Contract(value = "_ -> new", pure = true)
 	private static Component tooltip(String key) {
 		return Component.translatable("tooltip." + SimpleCopperPipesConstants.NAMESPACE + "." + key);

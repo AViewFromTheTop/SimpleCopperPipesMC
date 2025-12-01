@@ -14,7 +14,6 @@ import net.lunade.copper.networking.SimpleCopperPipesNetworking;
 import net.lunade.copper.registry.CopperPipeDispenseBehaviors;
 import net.lunade.copper.registry.PipeMovementRestrictions;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
-import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.lunade.copper.registry.SimpleCopperPipesCreativeInventorySorting;
 import net.lunade.copper.registry.SimpleCopperPipesSoundEvents;
@@ -38,7 +37,6 @@ public class SimpleCopperPipes extends FrozenModInitializer {
 	@Override
 	public void onInitialize(String modId, ModContainer container) {
 		SimpleCopperPipesDataFixer.applyDataFixes(container);
-		SimpleCopperPipesBlockStateProperties.init();
 		SimpleCopperPipesConfig.get();
 		SimpleCopperPipesBlocks.init();
 		SimpleCopperPipesBlockEntityTypes.init();
@@ -51,7 +49,6 @@ public class SimpleCopperPipes extends FrozenModInitializer {
 		LeakingPipeDripBehaviors.init();
 
 		SimpleCopperPipesNetworking.init();
-
 		SimpleCopperPipesCreativeInventorySorting.init();
 
 		VibrationParticleVisibilityApi.registerVisibilityTest((data, user) -> !(user instanceof CopperPipeBlockEntity.VibrationUser));

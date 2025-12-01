@@ -11,9 +11,9 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(CoralBlock.class)
 public class CoralBlockBlockMixin {
 
-	@ModifyReturnValue(at = @At("TAIL"), method = "scanForWater")
-	protected boolean simpleCopperPipes$isInWater(boolean original, BlockGetter blockView, BlockPos blockPos) {
-		return original || LeakingPipeManager.isWaterPipeNearbyBlockGetter(blockView, blockPos, 2);
+	@ModifyReturnValue(method = "scanForWater", at = @At("TAIL"))
+	protected boolean simpleCopperPipes$isInWater(boolean original, BlockGetter level, BlockPos pos) {
+		return original || LeakingPipeManager.isWaterPipeNearbyBlockGetter(level, pos, 2);
 	}
 
 }

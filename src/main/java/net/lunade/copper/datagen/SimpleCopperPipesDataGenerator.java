@@ -8,12 +8,11 @@ import net.lunade.copper.datagen.recipe.SimpleCopperPipesRecipeProvider;
 import net.lunade.copper.datagen.tag.SimpleCopperPipesBlockTagProvider;
 import net.lunade.copper.datagen.tag.SimpleCopperPipesItemTagProvider;
 import net.minecraft.core.RegistrySetBuilder;
-import org.jetbrains.annotations.NotNull;
 
 public final class SimpleCopperPipesDataGenerator implements DataGeneratorEntrypoint {
 
 	@Override
-	public void onInitializeDataGenerator(@NotNull FabricDataGenerator dataGenerator) {
+	public void onInitializeDataGenerator(FabricDataGenerator dataGenerator) {
 		final FabricDataGenerator.Pack pack = dataGenerator.createPack();
 
 		// ASSETS
@@ -27,7 +26,7 @@ public final class SimpleCopperPipesDataGenerator implements DataGeneratorEntryp
 	}
 
 	@Override
-	public void buildRegistry(@NotNull RegistrySetBuilder registryBuilder) {
+	public void buildRegistry(RegistrySetBuilder registryBuilder) {
 	}
 
 }

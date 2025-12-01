@@ -32,7 +32,7 @@ public class DataFixersMixin {
 		)
 	)
 	private static Schema simpleCopperPipes$addFixers3807(DataFixerBuilder builder, int version, BiFunction<Integer, Schema, Schema> factory, Operation<Schema> original) {
-		Schema schema = original.call(builder, version, factory);
+		final Schema schema = original.call(builder, version, factory);
 		builder.addFixer(new AddNewChoices(schema, SimpleCopperPipesConstants.id("copper_pipe").toString(), References.BLOCK_ENTITY));
 		builder.addFixer(new AddNewChoices(schema, SimpleCopperPipesConstants.id("copper_fitting").toString(), References.BLOCK_ENTITY));
 		return schema;

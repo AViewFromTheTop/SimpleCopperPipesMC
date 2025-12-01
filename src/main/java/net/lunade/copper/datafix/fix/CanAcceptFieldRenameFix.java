@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import net.minecraft.util.datafix.fixes.References;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 public final class CanAcceptFieldRenameFix extends DataFix {
 	private final String blockEntity;
@@ -23,8 +22,7 @@ public final class CanAcceptFieldRenameFix extends DataFix {
 		this.blockEntity = blockEntity;
 	}
 
-	@NotNull
-	private static Dynamic<?> fixOccupants(@NotNull Dynamic<?> dynamic) {
+	private static Dynamic<?> fixOccupants(Dynamic<?> dynamic) {
 		List<Dynamic<?>> oldDynamics = dynamic.get("canAccept").orElseEmptyList().asStream().collect(Collectors.toCollection(ArrayList::new));
 		dynamic = dynamic.remove("canAccept");
 
@@ -45,7 +43,7 @@ public final class CanAcceptFieldRenameFix extends DataFix {
 	}
 
 	@Contract("_ -> new")
-	private @NotNull Typed<?> fix(@NotNull Typed<?> typed) {
+	private Typed<?> fix(Typed<?> typed) {
 		return typed.update(
 			DSL.remainderFinder(),
 			CanAcceptFieldRenameFix::fixOccupants

@@ -1,5 +1,5 @@
 plugins {
-	id("fabric-loom") version("1.11-SNAPSHOT")
+	id("fabric-loom") version("1.13-SNAPSHOT")
 	id("org.quiltmc.gradle.licenser") version("+")
 	id("org.ajoberstar.grgit") version("+")
 	id("com.modrinth.minotaur") version("+")
@@ -8,6 +8,7 @@ plugins {
 	idea
 	`java-library`
 	java
+    checkstyle
 }
 
 val minecraft_version: String by project
@@ -57,6 +58,11 @@ loom {
 		// When enabled, injected interfaces from dependencies will be applied.
 		enableDependencyInterfaceInjection = true
 	}
+}
+
+checkstyle {
+    configFile = rootProject.file("checkstyle.xml")
+    toolVersion = "10.20.2"
 }
 
 loom {
@@ -128,6 +134,9 @@ repositories {
 			includeGroup("com.jamieswhiteshirt")
 		}
 	}
+    maven("https://maven.frozenblock.net/release") {
+        name = "FrozenBlock"
+    }
 
 	flatDir {
 		dirs("libs")

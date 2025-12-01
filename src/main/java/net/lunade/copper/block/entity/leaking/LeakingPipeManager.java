@@ -7,7 +7,7 @@ import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
@@ -16,19 +16,18 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 
 public class LeakingPipeManager {
 	private static final ArrayList<LeakingPipePos> LEAK_POSES_A = new ArrayList<>();
 	private static final ArrayList<LeakingPipePos> LEAK_POSES_B = new ArrayList<>();
 	private static boolean IS_ALT_LIST;
 
-	public static boolean isWaterPipeNearby(@NotNull Entity entity, int i) {
+	public static boolean isWaterPipeNearby(Entity entity, int i) {
 		final int x = entity.getBlockX();
 		final int y = entity.getBlockY();
 		final int z = entity.getBlockZ();
 		final Vec3 entityPos = entity.getEyePosition();
-		final ResourceLocation dimension = entity.level().dimension().location();
+		final Identifier dimension = entity.level().dimension().identifier();
 
 		BlockPos leakPos;
 		for (LeakingPipePos leakingPos : ImmutableList.copyOf(getPoses())) {
@@ -56,7 +55,7 @@ public class LeakingPipeManager {
 		return false;
 	}
 
-	public static boolean isWaterPipeNearbyBlockGetter(BlockGetter blockGetter, @NotNull BlockPos blockPos, int i) {
+	public static boolean isWaterPipeNearbyBlockGetter(BlockGetter blockGetter, BlockPos blockPos, int i) {
 		final int x = blockPos.getX();
 		final int y = blockPos.getY();
 		final int z = blockPos.getZ();
@@ -101,11 +100,11 @@ public class LeakingPipeManager {
 		IS_ALT_LIST = !IS_ALT_LIST;
 	}
 
-	public static void addPos(@NotNull Level level, BlockPos pos) {
-		getAltList().add(new LeakingPipePos(pos, level.dimension().location()));
+	public static void addPos(Level level, BlockPos pos) {
+		getAltList().add(new LeakingPipePos(pos, level.dimension().identifier()));
 	}
 
-	public record LeakingPipePos(BlockPos pos, ResourceLocation dimension) {
+	public record LeakingPipePos(BlockPos pos, Identifier dimension) {
 	}
 
 }

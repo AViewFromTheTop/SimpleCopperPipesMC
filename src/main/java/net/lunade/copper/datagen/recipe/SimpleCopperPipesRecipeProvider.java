@@ -9,15 +9,15 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
 
 public class SimpleCopperPipesRecipeProvider extends FabricRecipeProvider {
+
 	public SimpleCopperPipesRecipeProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) {
 		super(output, registries);
 	}
 
 	@Override
-	protected @NotNull RecipeProvider createRecipeProvider(HolderLookup.Provider registryLookup, RecipeOutput exporter) {
+	protected RecipeProvider createRecipeProvider(HolderLookup.Provider registryLookup, RecipeOutput exporter) {
 		return new RecipeProvider(registryLookup, exporter) {
 			@Override
 			public void buildRecipes() {
@@ -91,7 +91,7 @@ public class SimpleCopperPipesRecipeProvider extends FabricRecipeProvider {
 	}
 
 	@Override
-	public @NotNull String getName() {
+	public String getName() {
 		return "Simple Copper Pipes recipes";
 	}
 }

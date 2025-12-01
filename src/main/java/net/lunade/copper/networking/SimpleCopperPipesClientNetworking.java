@@ -25,9 +25,7 @@ public class SimpleCopperPipesClientNetworking {
 			final Vec3 pos = packet.blockPos().getCenter().relative(direction, 0.6D);
 			level.addParticle(
 				ParticleTypes.NOTE,
-				pos.x(),
-				pos.y(),
-				pos.z(),
+				pos.x(), pos.y(), pos.z(),
 				(double) packet.pitch() / 24D,
 				0D,
 				0D

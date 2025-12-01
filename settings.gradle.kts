@@ -27,7 +27,7 @@ pluginManagement {
 
 rootProject.name = "Simple Copper Pipes"
 
-localRepository("FrozenLib", "maven.modrinth:frozenlib", true, false)
+localRepository("FrozenLib", "maven.modrinth:frozenlib", true, true)
 
 fun localRepository(repo: String, dependencySub: String, kotlin: Boolean, enabled: Boolean) {
     if (!enabled) return

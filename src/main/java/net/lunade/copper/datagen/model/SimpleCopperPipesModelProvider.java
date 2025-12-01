@@ -14,9 +14,8 @@ import net.minecraft.client.data.models.model.ModelLocationUtils;
 import net.minecraft.client.data.models.model.ModelTemplate;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
-import org.jetbrains.annotations.NotNull;
 
 public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 	private static final ModelTemplate PIPE_MODEL = new ModelTemplate(
@@ -86,15 +85,15 @@ public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 	}
 
 	@Override
-	public void generateItemModels(@NotNull ItemModelGenerators generators) {
+	public void generateItemModels(ItemModelGenerators generators) {
 
 	}
 
-	public static void createPipe(@NotNull BlockModelGenerators generators, Block pipeBlock, Block outputPipeBlock) {
+	public static void createPipe(BlockModelGenerators generators, Block pipeBlock, Block outputPipeBlock) {
 		if (pipeBlock == outputPipeBlock) {
-			TextureMapping pipeTextureMapping = new TextureMapping();
-			pipeTextureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(pipeBlock));
-			pipeTextureMapping.put(TextureSlot.FRONT, TextureMapping.getBlockTexture(pipeBlock, "_front"));
+			final TextureMapping pipeTextureMapping = new TextureMapping()
+				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(pipeBlock))
+				.put(TextureSlot.FRONT, TextureMapping.getBlockTexture(pipeBlock, "_front"));
 
 			PIPE_MODEL.create(pipeBlock, pipeTextureMapping, generators.modelOutput);
 			PIPE_MODEL_BACK.createWithSuffix(pipeBlock, "_back_extension", pipeTextureMapping, generators.modelOutput);
@@ -104,12 +103,12 @@ public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 			PIPE_MODEL_SMOOTH.createWithSuffix(pipeBlock, "_smooth", pipeTextureMapping, generators.modelOutput);
 		}
 
-		ResourceLocation model = ModelLocationUtils.getModelLocation(pipeBlock);
-		ResourceLocation frontExtensionModel = ModelLocationUtils.getModelLocation(pipeBlock, "_front_extension");
-		ResourceLocation doubleExtensionModel = ModelLocationUtils.getModelLocation(pipeBlock, "_double_extension");
-		ResourceLocation backExtensionModel = ModelLocationUtils.getModelLocation(pipeBlock, "_back_extension");
-		ResourceLocation smoothModel = ModelLocationUtils.getModelLocation(pipeBlock, "_smooth");
-		ResourceLocation backSmoothModel = ModelLocationUtils.getModelLocation(pipeBlock, "_back_smooth");
+		final Identifier model = ModelLocationUtils.getModelLocation(pipeBlock);
+		final Identifier frontExtensionModel = ModelLocationUtils.getModelLocation(pipeBlock, "_front_extension");
+		final Identifier doubleExtensionModel = ModelLocationUtils.getModelLocation(pipeBlock, "_double_extension");
+		final Identifier backExtensionModel = ModelLocationUtils.getModelLocation(pipeBlock, "_back_extension");
+		final Identifier smoothModel = ModelLocationUtils.getModelLocation(pipeBlock, "_smooth");
+		final Identifier backSmoothModel = ModelLocationUtils.getModelLocation(pipeBlock, "_back_smooth");
 		generators.registerSimpleItemModel(outputPipeBlock, model);
 		generators.blockStateOutput
 			.accept(
@@ -129,15 +128,15 @@ public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 			);
 	}
 
-	public static void createFitting(@NotNull BlockModelGenerators generators, Block fittingBlock, Block outputFittingBlock) {
+	public static void createFitting(BlockModelGenerators generators, Block fittingBlock, Block outputFittingBlock) {
 		if (fittingBlock == outputFittingBlock) {
-			TextureMapping fittingTextureMapping = new TextureMapping();
-			fittingTextureMapping.put(TextureSlot.TEXTURE, TextureMapping.getBlockTexture(fittingBlock));
+			final TextureMapping fittingTextureMapping = new TextureMapping()
+				.put(TextureSlot.TEXTURE, TextureMapping.getBlockTexture(fittingBlock));
 
 			FITTING_MODEL.create(fittingBlock, fittingTextureMapping, generators.modelOutput);
 		}
 
-		ResourceLocation model = ModelLocationUtils.getModelLocation(fittingBlock);
+		final Identifier model = ModelLocationUtils.getModelLocation(fittingBlock);
 		generators.registerSimpleItemModel(outputFittingBlock, model);
 		generators.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(outputFittingBlock, BlockModelGenerators.plainVariant(model)));
 	}

@@ -7,17 +7,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
 
 public class WeatheringCopperFittingBlock extends CopperFittingBlock implements WeatheringCopper {
-	public static final MapCodec<WeatheringCopperFittingBlock> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
-		WeatherState.CODEC.fieldOf("weather_state").forGetter((copperPipe -> copperPipe.weatherState)),
+	public static final MapCodec<WeatheringCopperFittingBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+		WeatherState.CODEC.fieldOf("weather_state").forGetter(copperPipe -> copperPipe.weatherState),
 		propertiesCodec()
 	).apply(instance, WeatheringCopperFittingBlock::new));
 	private final WeatherState weatherState;
 
-	public WeatheringCopperFittingBlock(WeatherState weatherState, Properties settings) {
-		super(settings);
+	public WeatheringCopperFittingBlock(WeatherState weatherState, Properties properties) {
+		super(properties);
 		this.weatherState = weatherState;
 	}
 
@@ -27,23 +26,23 @@ public class WeatheringCopperFittingBlock extends CopperFittingBlock implements 
 	}
 
 	@Override
-	public void randomTick(@NotNull BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+	public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		super.randomTick(state, level, pos, random);
 		this.changeOverTime(state, level, pos, random);
 	}
 
 	@Override
-	public boolean isRandomlyTicking(@NotNull BlockState state) {
+	public boolean isRandomlyTicking(BlockState state) {
 		return WeatheringCopper.getNext(state.getBlock()).isPresent() || super.isRandomlyTicking(state);
 	}
 
 	@Override
-	public @NotNull WeatherState getAge() {
+	public WeatherState getAge() {
 		return this.weatherState;
 	}
 
 	@Override
-	protected @NotNull MapCodec<? extends WeatheringCopperFittingBlock> codec() {
+	protected MapCodec<? extends WeatheringCopperFittingBlock> codec() {
 		return CODEC;
 	}
 }

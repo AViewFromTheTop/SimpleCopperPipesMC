@@ -2,7 +2,6 @@ package net.lunade.copper.mixin.plugin;
 
 import java.util.List;
 import java.util.Set;
-import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -19,7 +18,7 @@ public class SimpleCopperPipesMixinPlugin implements IMixinConfigPlugin {
 	}
 
 	@Override
-	public boolean shouldApplyMixin(@NotNull String targetClassName, @NotNull String mixinClassName) {
+	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		return true;
 	}
 

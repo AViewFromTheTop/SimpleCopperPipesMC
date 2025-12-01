@@ -14,8 +14,6 @@ import net.minecraft.world.item.ProjectileItem;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class CopperPipeDispenseBehaviors {
 	private static final Map<ItemLike, PoweredDispense> ITEMS_TO_DISPENSES = new Object2ObjectLinkedOpenHashMap<>();
@@ -44,7 +42,6 @@ public class CopperPipeDispenseBehaviors {
 		);
 	};
 
-	@Nullable
 	public static PoweredDispense getDispense(ItemLike item) {
 		if (ITEMS_TO_DISPENSES.containsKey(item)) return ITEMS_TO_DISPENSES.get(item);
 		if (item instanceof ProjectileItem) return PROJECTILE_ITEM_DISPENSE;
@@ -56,7 +53,7 @@ public class CopperPipeDispenseBehaviors {
 		return y - 0.15625D;
 	}
 
-	public static double getRandom(@NotNull RandomSource random) {
+	public static double getRandom(RandomSource random) {
 		return (random.nextDouble() * 0.6D) - 0.3D;
 	}
 

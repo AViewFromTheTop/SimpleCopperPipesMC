@@ -1,8 +1,7 @@
 package net.lunade.copper;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 public class SimpleCopperPipesConstants {
 	public static final int CURRENT_FIX_VERSION = 6;
@@ -11,12 +10,12 @@ public class SimpleCopperPipesConstants {
 	public static final String NAMESPACE = MOD_ID;
 
 	@Contract("_ -> new")
-	public static @NotNull ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(NAMESPACE, path);
+	public static Identifier id(String path) {
+		return Identifier.fromNamespaceAndPath(NAMESPACE, path);
 	}
 
 	@Contract("_ -> new")
-	public static @NotNull ResourceLocation legacyId(String path) {
-		return ResourceLocation.fromNamespaceAndPath(LEGACY_NAMESPACE, path);
+	public static Identifier legacyId(String path) {
+		return Identifier.fromNamespaceAndPath(LEGACY_NAMESPACE, path);
 	}
 }

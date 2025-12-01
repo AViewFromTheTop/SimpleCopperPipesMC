@@ -33,7 +33,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -60,7 +59,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
@@ -84,14 +82,14 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final EnumProperty<PipeFluid> FLUID = SimpleCopperPipesBlockStateProperties.FLUID;
 	public static final BooleanProperty HAS_ELECTRICITY = SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY;
-	public static final MapCodec<CopperPipeBlock> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
+	public static final MapCodec<CopperPipeBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		propertiesCodec(),
-		Codec.INT.fieldOf("dispense_shot_power").forGetter((copperPipe) -> copperPipe.dispenseShotPower)
+		Codec.INT.fieldOf("dispense_shot_power").forGetter(copperPipe -> copperPipe.dispenseShotPower)
 	).apply(instance, CopperPipeBlock::new));
 	public final int dispenseShotPower;
 
-	public CopperPipeBlock(Properties settings, int dispenseShotPower) {
-		super(settings);
+	public CopperPipeBlock(Properties properties, int dispenseShotPower) {
+		super(properties);
 		this.dispenseShotPower = dispenseShotPower;
 		this.registerDefaultState(this.stateDefinition.any()
 			.setValue(FACING, Direction.DOWN)
@@ -103,47 +101,29 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 		);
 	}
 
-	public static void updateBlockEntityValues(@NotNull LevelReader level, BlockPos pos, @NotNull BlockState state) {
+	public static void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state) {
 		if (level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe) pipe.updateBlockEntityValues(level, pos, state, SimpleCopperPipesConfig.get());
 	}
 
-	public static boolean canConnectFront(@NotNull LevelReader level, @NotNull BlockPos pos, Direction direction) {
+	public static boolean canConnectFront(LevelReader level, BlockPos pos, Direction direction) {
 		final BlockState state = level.getBlockState(pos.relative(direction));
-		if (state.getBlock() instanceof CopperPipeBlock) return state.getValue(CopperPipeBlock.FACING) != direction.getOpposite() && state.getValue(CopperPipeBlock.FACING) != direction;
+		if (state.getBlock() instanceof CopperPipeBlock) return state.getValue(CopperPipeBlock.FACING).getAxis() != direction.getAxis();
 		return state.getBlock() instanceof CopperFittingBlock;
 	}
 
-	public static boolean canConnectBack(@NotNull LevelReader level, @NotNull BlockPos pos, @NotNull Direction direction) {
+	public static boolean canConnectBack(LevelReader level, BlockPos pos, Direction direction) {
 		final BlockState state = level.getBlockState(pos.relative(direction.getOpposite()));
-		if (state.getBlock() instanceof CopperPipeBlock) return state.getValue(CopperPipeBlock.FACING) != direction.getOpposite() && state.getValue(CopperPipeBlock.FACING) != direction;
+		if (state.getBlock() instanceof CopperPipeBlock) return state.getValue(CopperPipeBlock.FACING).getAxis() != direction.getAxis();
 		return state.getBlock() instanceof CopperFittingBlock;
 	}
 
-	public static boolean isSmooth(@NotNull LevelReader level, @NotNull BlockPos pos, Direction direction) {
+	public static boolean isSmooth(LevelReader level, BlockPos pos, Direction direction) {
 		final BlockState state = level.getBlockState(pos.relative(direction));
 		if (state.getBlock() instanceof CopperPipeBlock) return state.getValue(CopperPipeBlock.FACING) == direction && !canConnectFront(level, pos, direction);
 		return false;
 	}
 
-	public static boolean canConnectFront(@NotNull LevelAccessor level, @NotNull BlockPos pos, Direction direction) {
-		final BlockState state = level.getBlockState(pos.relative(direction));
-		if (state.getBlock() instanceof CopperPipeBlock) return state.getValue(CopperPipeBlock.FACING) != direction.getOpposite() && state.getValue(CopperPipeBlock.FACING) != direction;
-		return state.getBlock() instanceof CopperFittingBlock;
-	}
-
-	public static boolean canConnectBack(@NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull Direction direction) {
-		final BlockState state = level.getBlockState(pos.relative(direction.getOpposite()));
-		if (state.getBlock() instanceof CopperPipeBlock) return state.getValue(CopperPipeBlock.FACING) != direction.getOpposite() && state.getValue(CopperPipeBlock.FACING) != direction;
-		return state.getBlock() instanceof CopperFittingBlock;
-	}
-
-	public static boolean isSmooth(@NotNull LevelAccessor level, @NotNull BlockPos pos, Direction direction) {
-		final BlockState state = level.getBlockState(pos.relative(direction));
-		if (state.getBlock() instanceof CopperPipeBlock) return state.getValue(CopperPipeBlock.FACING) == direction && !canConnectFront(level, pos, direction);
-		return false;
-	}
-
-	public VoxelShape getPipeShape(@NotNull BlockState state) {
+	public VoxelShape getPipeShape(BlockState state) {
 		final boolean front = state.getValue(FRONT_CONNECTED);
 		final boolean back = state.getValue(BACK_CONNECTED);
 		final boolean smooth = state.getValue(SMOOTH);
@@ -157,41 +137,39 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	@NotNull
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos, CollisionContext shapeContext) {
-		return getPipeShape(blockState);
+	public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+		return getPipeShape(state);
 	}
 
 	@Override
-	@NotNull
-	public VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockView, BlockPos blockPos) {
-		return getPipeShape(blockState);
+	public VoxelShape getInteractionShape(BlockState state, BlockGetter level, BlockPos pos) {
+		return getPipeShape(state);
 	}
 
 	@Override
-	public BlockState getStateForPlacement(@NotNull BlockPlaceContext itemPlacementContext) {
-		Direction direction = itemPlacementContext.getClickedFace();
-		BlockPos blockPos = itemPlacementContext.getClickedPos();
+	public BlockState getStateForPlacement(BlockPlaceContext context) {
+		final Direction direction = context.getClickedFace();
+		final BlockPos pos = context.getClickedPos();
 		return this.defaultBlockState()
 			.setValue(FACING, direction)
-			.setValue(FRONT_CONNECTED, canConnectFront(itemPlacementContext.getLevel(), blockPos, direction))
-			.setValue(BACK_CONNECTED, canConnectBack(itemPlacementContext.getLevel(), blockPos, direction))
-			.setValue(SMOOTH, isSmooth(itemPlacementContext.getLevel(), blockPos, direction))
-			.setValue(WATERLOGGED, itemPlacementContext.getLevel().getFluidState(blockPos).getType() == Fluids.WATER);
+			.setValue(FRONT_CONNECTED, canConnectFront(context.getLevel(), pos, direction))
+			.setValue(BACK_CONNECTED, canConnectBack(context.getLevel(), pos, direction))
+			.setValue(SMOOTH, isSmooth(context.getLevel(), pos, direction))
+			.setValue(WATERLOGGED, context.getLevel().getFluidState(pos).getType() == Fluids.WATER);
 	}
 
 	@Override
-	protected @NotNull BlockState updateShape(
-		@NotNull BlockState state,
+	protected BlockState updateShape(
+		BlockState state,
 		LevelReader level,
-		ScheduledTickAccess scheduledTickAccess,
+		ScheduledTickAccess tickAccess,
 		BlockPos pos,
 		Direction direction,
 		BlockPos neighborPos,
 		BlockState neighborState,
 		RandomSource random
 	) {
-		if (state.getValue(WATERLOGGED)) scheduledTickAccess.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+		if (state.getValue(WATERLOGGED)) tickAccess.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 
 		boolean electricity = state.getValue(HAS_ELECTRICITY);
 		if (neighborState.getBlock() instanceof LightningRodBlock && neighborState.getValue(POWERED)) electricity = true;
@@ -207,25 +185,25 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	protected void neighborChanged(@NotNull BlockState state, @NotNull Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean bl) {
+	protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean bl) {
 		final boolean powered = level.hasNeighborSignal(pos);
 		if (powered != state.getValue(POWERED)) level.setBlockAndUpdate(pos, state.setValue(POWERED, powered));
 		updateBlockEntityValues(level, pos, state);
 	}
 
 	@Override
-	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-		return new CopperPipeBlockEntity(blockPos, blockState);
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+		return new CopperPipeBlockEntity(pos, state);
 	}
 
 	@Override
-	protected boolean propagatesSkylightDown(@NotNull BlockState blockState) {
-		return blockState.getFluidState().isEmpty();
+	protected boolean propagatesSkylightDown(BlockState state) {
+		return state.getFluidState().isEmpty();
 	}
 
 	@Nullable
 	@Override
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, BlockState state, BlockEntityType<T> blockEntityType) {
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
 		if (level.isClientSide()) return null;
 		return createTickerHelper(
 			blockEntityType,
@@ -242,20 +220,19 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity livingEntity, @NotNull ItemStack stack) {
-		super.setPlacedBy(level, pos, state, livingEntity, stack);
+	public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity entity, ItemStack stack) {
+		super.setPlacedBy(level, pos, state, entity, stack);
 		updateBlockEntityValues(level, pos, state);
 	}
 
 	@Override
-	@NotNull
-	public FluidState getFluidState(@NotNull BlockState state) {
+	public FluidState getFluidState(BlockState state) {
 		if (state.getValue(WATERLOGGED)) return Fluids.WATER.getSource(false);
 		return super.getFluidState(state);
 	}
 
 	@Override
-	protected @NotNull InteractionResult useWithoutItem(BlockState state, @NotNull Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
 		if (!(level.getBlockEntity(pos) instanceof CopperPipeBlockEntity copperPipeBlockEntity)) return InteractionResult.PASS;
 		player.openMenu(copperPipeBlockEntity);
 		player.awardStat(Stats.CUSTOM.get(SimpleCopperPipesStats.INSPECT_PIPE));
@@ -263,15 +240,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	protected @NotNull InteractionResult useItemOn(
-		@NotNull ItemStack stack,
-		BlockState state,
-		Level level,
-		BlockPos pos,
-		Player player,
-		InteractionHand hand,
-		BlockHitResult hitResult
-	) {
+	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
 		if (stack.is(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)) return InteractionResult.PASS;
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
@@ -281,101 +250,95 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	@NotNull
-	public RenderShape getRenderShape(BlockState blockState) {
+	public RenderShape getRenderShape(BlockState state) {
 		return RenderShape.MODEL;
 	}
 
 	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
+	public boolean hasAnalogOutputSignal(BlockState state) {
 		return true;
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, @NotNull Level level, BlockPos blockPos, Direction direction) {
-		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(blockPos));
+	public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
+		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
 	}
 
 	@Override
-	@NotNull
-	public BlockState rotate(@NotNull BlockState blockState, @NotNull Rotation blockRotation) {
-		return blockState.setValue(FACING, blockRotation.rotate(blockState.getValue(FACING)));
+	public BlockState rotate(BlockState state, Rotation rotation) {
+		return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
 	}
 
 	@Override
-	@NotNull
-	public BlockState mirror(@NotNull BlockState blockState, @NotNull Mirror blockMirror) {
-		return blockState.rotate(blockMirror.getRotation(blockState.getValue(FACING)));
+	public BlockState mirror(BlockState state, Mirror mirror) {
+		return state.rotate(mirror.getRotation(state.getValue(FACING)));
 	}
 
 	@Override
-	protected void createBlockStateDefinition(@NotNull StateDefinition.Builder<Block, BlockState> builder) {
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(FACING, FRONT_CONNECTED, BACK_CONNECTED, SMOOTH, WATERLOGGED, FLUID, HAS_ELECTRICITY, POWERED);
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState state, PathComputationType type) {
 		return false;
 	}
 
 	@Override
-	public void randomTick(@NotNull BlockState blockState, ServerLevel level, BlockPos blockPos, RandomSource random) {
-		final Direction direction = blockState.getValue(FACING);
-		final boolean isLava = blockState.getValue(FLUID) == PipeFluid.LAVA;
-		if (blockState.getValue(FLUID) == PipeFluid.WATER || isLava && direction != Direction.UP) {
-			if (random.nextFloat() > (isLava ? 0.05859375F : 0.17578125F) * 2) return;
+	public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		final Direction direction = state.getValue(FACING);
+		final boolean isLava = state.getValue(FLUID) == PipeFluid.LAVA;
+		if (!(state.getValue(FLUID) == PipeFluid.WATER || isLava && direction != Direction.UP)) return;
+		if (random.nextFloat() > (isLava ? 0.05859375F : 0.17578125F) * 2F) return;
 
-			final BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-			boolean hasOffset = false;
-			for (int i = 0; i < 12; i++) { //Searches for 12 blocks
-				if (direction != Direction.DOWN && !hasOffset) {
-					mutableBlockPos.move(direction);
-					hasOffset = true;
-				}
-				mutableBlockPos.move(Direction.DOWN);
-				final BlockState state = level.getBlockState(mutableBlockPos);
-				if (level.getFluidState(mutableBlockPos).isEmpty()) {
-					final LeakingPipeDripBehaviors.DripOn dripOn = LeakingPipeDripBehaviors.getDrip(state.getBlock());
-					if (dripOn != null) {
-						dripOn.dripOn(isLava, level, mutableBlockPos, state);
-						break;
-					}
-					if (state.getCollisionShape(level, mutableBlockPos) != Shapes.empty()) break;
-				} else {
-					break;
-				}
+		final BlockPos.MutableBlockPos mutable = pos.mutable();
+		boolean hasOffset = false;
+		for (int i = 0; i < 12; i++) { //Searches for 12 blocks
+			if (direction != Direction.DOWN && !hasOffset) {
+				mutable.move(direction);
+				hasOffset = true;
 			}
+			mutable.move(Direction.DOWN);
+			final BlockState searchingState = level.getBlockState(mutable);
+			if (!level.getFluidState(mutable).isEmpty()) break;
+
+			final LeakingPipeDripBehaviors.DripOn dripOn = LeakingPipeDripBehaviors.getDrip(searchingState.getBlock());
+			if (dripOn != null) {
+				dripOn.dripOn(isLava, level, mutable, searchingState);
+				break;
+			}
+			if (searchingState.getCollisionShape(level, mutable) != Shapes.empty()) break;
 		}
 	}
 
 	@Override
-	public boolean isRandomlyTicking(@NotNull BlockState blockState) {
-		return blockState.getValue(FLUID) == PipeFluid.WATER || blockState.getValue(FLUID) == PipeFluid.LAVA;
+	public boolean isRandomlyTicking(BlockState state) {
+		return state.getValue(FLUID) == PipeFluid.WATER || state.getValue(FLUID) == PipeFluid.LAVA;
 	}
 
 	@Override
-	public void animateTick(@NotNull BlockState blockState, @NotNull Level level, @NotNull BlockPos blockPos, RandomSource random) {
-		final Direction facing = blockState.getValue(FACING);
-		final BlockPos facingPos = blockPos.relative(facing);
+	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+		final Direction facing = state.getValue(FACING);
+		final BlockPos facingPos = pos.relative(facing);
 		final BlockState facingState = level.getBlockState(facingPos);
 		final FluidState fluidState = facingState.getFluidState();
-		boolean canWater = blockState.getValue(FLUID) == PipeFluid.WATER && facing != Direction.UP;
-		boolean canLava = blockState.getValue(FLUID) == PipeFluid.LAVA && random.nextInt(2) == 0 && facing != Direction.UP;
-		boolean canSmoke = blockState.getValue(FLUID) == PipeFluid.SMOKE && random.nextInt(5) == 0;
+		boolean canWater = state.getValue(FLUID) == PipeFluid.WATER && facing != Direction.UP;
+		boolean canLava = state.getValue(FLUID) == PipeFluid.LAVA && random.nextInt(2) == 0 && facing != Direction.UP;
+		boolean canSmoke = state.getValue(FLUID) == PipeFluid.SMOKE && random.nextInt(5) == 0;
 		boolean canWaterOrLava = canWater || canLava;
 		boolean hasSmokeOrWaterOrLava = canWaterOrLava || canSmoke;
 		if (hasSmokeOrWaterOrLava) {
-			final double outX = blockPos.getX() + getDripX(facing, random);
-			final double outY = blockPos.getY() + getDripY(facing, random);
-			final double outZ = blockPos.getZ() + getDripZ(facing, random);
+			final double outX = pos.getX() + getDripX(facing, random);
+			final double outY = pos.getY() + getDripY(facing, random);
+			final double outZ = pos.getZ() + getDripZ(facing, random);
 			if (canWaterOrLava && (fluidState.isEmpty() || ((fluidState.getHeight(level, facingPos)) + (double) facingPos.getY()) < outY)) {
 				level.addParticle(canWater ? ParticleTypes.DRIPPING_WATER : ParticleTypes.DRIPPING_LAVA, outX, outY, outZ, 0, 0, 0);
 			}
 			if (canSmoke) level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, outX, outY, outZ, 0, 0.07D, 0);
 			if ((!facingState.isAir() && fluidState.isEmpty())) {
-				final double x = blockPos.getX() + getDripX(facing, random);
-				final double y = blockPos.getY() + getDripY(facing, random);
-				final double z = blockPos.getZ() + getDripZ(facing, random);
+				final double x = pos.getX() + getDripX(facing, random);
+				final double y = pos.getY() + getDripY(facing, random);
+				final double z = pos.getZ() + getDripZ(facing, random);
 				if (canWaterOrLava && facing == Direction.DOWN) {
 					level.addParticle(canWater ? ParticleTypes.DRIPPING_WATER : ParticleTypes.DRIPPING_LAVA, x, outY, z, 0, 0, 0);
 				}
@@ -383,15 +346,16 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 			}
 		}
 
-		if (blockState.getValue(HAS_ELECTRICITY)) {
-			ParticleUtils.spawnParticlesAlongAxis(facing.getAxis(), level, blockPos, 0.4D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
+		if (state.getValue(HAS_ELECTRICITY)) {
+			ParticleUtils.spawnParticlesAlongAxis(facing.getAxis(), level, pos, 0.4D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
 		}
+
 		if (fluidState.is(FluidTags.WATER) && (random.nextFloat() <= 0.1F || facingState.getCollisionShape(level, facingPos).isEmpty())) {
 			level.addParticle(
 				ParticleTypes.BUBBLE,
-				blockPos.getX() + getDripX(facing, random),
-				blockPos.getY() + getDripY(facing, random),
-				blockPos.getZ() + getDripZ(facing, random),
+				pos.getX() + getDripX(facing, random),
+				pos.getY() + getDripY(facing, random),
+				pos.getZ() + getDripZ(facing, random),
 				facing.getStepX() * 0.7D,
 				facing.getStepY() * 0.7D,
 				facing.getStepZ() * 0.7D
@@ -399,9 +363,9 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 			if ((canLava || canSmoke) && random.nextInt(2) == 0) {
 				level.addParticle(
 					ParticleTypes.SMOKE,
-					blockPos.getX() + getDripX(facing, random),
-					blockPos.getY() + getDripY(facing, random),
-					blockPos.getZ() + getDripZ(facing, random),
+					pos.getX() + getDripX(facing, random),
+					pos.getY() + getDripY(facing, random),
+					pos.getZ() + getDripZ(facing, random),
 					facing.getStepX() * 0.05D,
 					facing.getStepY() * 0.05D,
 					facing.getStepZ() * 0.05D
@@ -414,7 +378,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 		return UniformInt.of(-25, 25).sample(random) * 0.01;
 	}
 
-	public double getDripX(@NotNull Direction direction, RandomSource random) {
+	public double getDripX(Direction direction, RandomSource random) {
 		return switch (direction) {
 			case DOWN, SOUTH, NORTH -> 0.5 + getRan(random);
 			case UP -> 0.5;
@@ -423,7 +387,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 		};
 	}
 
-	public double getDripY(@NotNull Direction direction, RandomSource random) {
+	public double getDripY(Direction direction, RandomSource random) {
 		return switch (direction) {
 			case DOWN -> -0.05;
 			case UP -> 1.05;
@@ -431,7 +395,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 		};
 	}
 
-	public double getDripZ(@NotNull Direction direction, RandomSource random) {
+	public double getDripZ(Direction direction, RandomSource random) {
 		return switch (direction) {
 			case DOWN, EAST, WEST -> 0.5 + getRan(random);
 			case UP -> 0.5;
@@ -452,7 +416,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	protected @NotNull MapCodec<? extends CopperPipeBlock> codec() {
+	protected MapCodec<? extends CopperPipeBlock> codec() {
 		return CODEC;
 	}
 }

@@ -7,18 +7,17 @@ import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.lunade.copper.tag.SimpleCopperPipesItemTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 
 public final class SimpleCopperPipesItemTagProvider extends FabricTagProvider.ItemTagProvider {
 
-	public SimpleCopperPipesItemTagProvider(@NotNull FabricDataOutput output, @NotNull CompletableFuture<HolderLookup.Provider> registries) {
+	public SimpleCopperPipesItemTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) {
 		super(output, registries);
 	}
 
 	@Override
-	protected void addTags(@NotNull HolderLookup.Provider provider) {
+	protected void addTags(HolderLookup.Provider provider) {
 		this.valueLookupBuilder(SimpleCopperPipesItemTags.COPPER_PIPES)
 			.add(SimpleCopperPipesBlocks.COPPER_PIPE.asItem())
 			.add(SimpleCopperPipesBlocks.EXPOSED_COPPER_PIPE.asItem())
@@ -42,7 +41,7 @@ public final class SimpleCopperPipesItemTagProvider extends FabricTagProvider.It
 		this.builder(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)
 			.addOptionalTag(SimpleCopperPipesItemTags.COPPER_PIPES)
 			.addOptionalTag(SimpleCopperPipesItemTags.COPPER_FITTINGS)
-			.addOptional(ResourceKey.create(Registries.ITEM, ResourceLocation.tryBuild("thecopperierage", "wrench")))
-			.addOptional(ResourceKey.create(Registries.ITEM, ResourceLocation.tryBuild("create", "wrench")));
+			.addOptional(ResourceKey.create(Registries.ITEM, Identifier.tryBuild("thecopperierage", "wrench")))
+			.addOptional(ResourceKey.create(Registries.ITEM, Identifier.tryBuild("create", "wrench")));
 	}
 }

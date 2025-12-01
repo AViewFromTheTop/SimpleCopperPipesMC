@@ -10,8 +10,8 @@ import net.lunade.copper.block.WeatheringCopperPipeBlock;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -108,47 +108,47 @@ public final class SimpleCopperPipesBlocks {
 		OxidizableBlocksRegistry.registerWaxableBlockPair(OXIDIZED_COPPER_FITTING, WAXED_OXIDIZED_COPPER_FITTING);
 	}
 
-	public static ResourceLocation id(String path) {
-		return ResourceLocation.tryBuild(SimpleCopperPipesConstants.NAMESPACE, path);
+	public static Identifier id(String path) {
+		return Identifier.tryBuild(SimpleCopperPipesConstants.NAMESPACE, path);
 	}
 
-	public static ResourceLocation legacyId(String path) {
-		return ResourceLocation.tryBuild(SimpleCopperPipesConstants.LEGACY_NAMESPACE, path);
+	public static Identifier legacyId(String path) {
+		return Identifier.tryBuild(SimpleCopperPipesConstants.LEGACY_NAMESPACE, path);
 	}
 
-	public static ResourceLocation legacyColoredPipe(String colour) {
+	public static Identifier legacyColoredPipe(String colour) {
 		return legacyId(colour + "_pipe");
 	}
 
-	public static ResourceLocation legacyGlowingPipe(String colour) {
+	public static Identifier legacyGlowingPipe(String colour) {
 		return legacyId("glowing_" + colour + "_pipe");
 	}
 
-	public static ResourceLocation legacyColoredFitting(String colour) {
+	public static Identifier legacyColoredFitting(String colour) {
 		return legacyId(colour + "_fitting");
 	}
 
-	public static ResourceLocation legacyGlowingFitting(String colour) {
+	public static Identifier legacyGlowingFitting(String colour) {
 		return legacyId("glowing_" + colour + "_fitting");
 	}
 
 	private static <T extends Block> T registerWithoutItem(String path, Function<BlockBehaviour.Properties, T> block, BlockBehaviour.Properties properties) {
-		ResourceLocation id = SimpleCopperPipesConstants.id(path);
+		final Identifier id = SimpleCopperPipesConstants.id(path);
 		return doRegister(id, makeBlock(block, properties, id));
 	}
 
 	private static <T extends Block> T register(String path, Function<BlockBehaviour.Properties, T> block, BlockBehaviour.Properties properties) {
-		T registered = registerWithoutItem(path, block, properties);
+		final T registered = registerWithoutItem(path, block, properties);
 		Items.registerBlock(registered);
 		return registered;
 	}
 
-	private static <T extends Block> T doRegister(ResourceLocation id, T block) {
+	private static <T extends Block> T doRegister(Identifier id, T block) {
 		if (BuiltInRegistries.BLOCK.getOptional(id).isEmpty()) return Registry.register(BuiltInRegistries.BLOCK, id, block);
 		throw new IllegalArgumentException("Block with id " + id + " is already in the block registry.");
 	}
 
-	private static <T extends Block> T makeBlock(Function<BlockBehaviour.Properties, T> function, BlockBehaviour.Properties properties, ResourceLocation id) {
+	private static <T extends Block> T makeBlock(Function<BlockBehaviour.Properties, T> function, BlockBehaviour.Properties properties, Identifier id) {
 		return function.apply(properties.setId(ResourceKey.create(Registries.BLOCK, id)));
 	}
 }

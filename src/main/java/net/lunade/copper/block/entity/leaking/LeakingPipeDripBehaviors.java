@@ -23,32 +23,31 @@ public class LeakingPipeDripBehaviors {
 	}
 
 	public static void init() {
-		register(Blocks.CAULDRON, ((lava, world, pos, state) -> {
+		register(Blocks.CAULDRON, ((lava, level, pos, state) -> {
 			if (!lava) {
-				world.setBlockAndUpdate(pos, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 1));
+				level.setBlockAndUpdate(pos, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 1));
 			} else {
-				world.setBlockAndUpdate(pos, Blocks.LAVA_CAULDRON.defaultBlockState());
+				level.setBlockAndUpdate(pos, Blocks.LAVA_CAULDRON.defaultBlockState());
 			}
 		}));
 
-		register(Blocks.WATER_CAULDRON, ((lava, world, pos, state) -> {
+		register(Blocks.WATER_CAULDRON, ((lava, level, pos, state) -> {
 			if (state.getValue(BlockStateProperties.LEVEL_CAULDRON) != 3 && !lava) {
-				world.setBlockAndUpdate(pos, state.cycle(BlockStateProperties.LEVEL_CAULDRON));
+				level.setBlockAndUpdate(pos, state.cycle(BlockStateProperties.LEVEL_CAULDRON));
 			}
 		}));
 
-		register(Blocks.DIRT, ((lava, world, pos, state) -> {
-			if (!lava) world.setBlockAndUpdate(pos, Blocks.MUD.defaultBlockState());
+		register(Blocks.DIRT, ((lava, level, pos, state) -> {
+			if (!lava) level.setBlockAndUpdate(pos, Blocks.MUD.defaultBlockState());
 		}));
 
-		register(Blocks.FIRE, ((lava, world, pos, state) -> {
-			if (!lava) world.destroyBlock(pos, true);
+		register(Blocks.FIRE, ((lava, level, pos, state) -> {
+			if (!lava) level.destroyBlock(pos, true);
 		}));
 	}
 
 	@FunctionalInterface
 	public interface DripOn {
-		void dripOn(boolean lava, ServerLevel world, BlockPos pos, BlockState state);
+		void dripOn(boolean lava, ServerLevel level, BlockPos pos, BlockState state);
 	}
-
 }

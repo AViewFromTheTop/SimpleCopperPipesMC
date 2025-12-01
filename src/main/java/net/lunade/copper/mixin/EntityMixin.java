@@ -17,12 +17,12 @@ public class EntityMixin {
 	@Unique
 	private boolean simpleCopperPipes$hadWaterPipeNearby;
 
-	@Inject(at = @At("HEAD"), method = "updateInWaterStateAndDoFluidPushing")
+	@Inject(method = "updateInWaterStateAndDoFluidPushing", at = @At("HEAD"))
 	public void simpleCopperPipes$updateInWaterStateAndDoFluidPushing(CallbackInfoReturnable<Boolean> info) {
 		if (!this.level().isClientSide()) this.simpleCopperPipes$hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(Entity.class.cast(this), 2);
 	}
 
-	@ModifyReturnValue(at = @At("RETURN"), method = "isInRain")
+	@ModifyReturnValue(method = "isInRain", at = @At("RETURN"))
 	public boolean simpleCopperPipes$isInRain(boolean original) {
 		return original || this.simpleCopperPipes$hadWaterPipeNearby;
 	}

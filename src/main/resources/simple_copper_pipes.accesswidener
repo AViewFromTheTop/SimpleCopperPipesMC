@@ -1,4 +1,4 @@
 accessWidener    v2    named
-accessible method net/minecraft/world/entity/projectile/Arrow setPotionContents (Lnet/minecraft/world/item/alchemy/PotionContents;)V
+accessible method net/minecraft/world/entity/projectile/arrow/Arrow setPotionContents (Lnet/minecraft/world/item/alchemy/PotionContents;)V
 accessible method net/minecraft/util/datafix/DataFixers createRenamer (Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/UnaryOperator;
 accessible field net/minecraft/client/data/models/BlockModelGenerators ROTATION_FACING Lnet/minecraft/client/data/models/blockstates/PropertyDispatch;

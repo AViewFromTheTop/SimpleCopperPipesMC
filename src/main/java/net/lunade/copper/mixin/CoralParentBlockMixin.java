@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(BaseCoralPlantTypeBlock.class)
 public class CoralParentBlockMixin {
 
-	@ModifyReturnValue(at = @At("TAIL"), method = "scanForWater")
-	private static boolean simpleCopperPipes$isInWater(boolean original, BlockState blockState, BlockGetter blockView, BlockPos blockPos) {
-		return original || LeakingPipeManager.isWaterPipeNearbyBlockGetter(blockView, blockPos, 2);
+	@ModifyReturnValue(method = "scanForWater", at = @At("TAIL"))
+	private static boolean simpleCopperPipes$isInWater(boolean original, BlockState state, BlockGetter level, BlockPos pos) {
+		return original || LeakingPipeManager.isWaterPipeNearbyBlockGetter(level, pos, 2);
 	}
 
 }

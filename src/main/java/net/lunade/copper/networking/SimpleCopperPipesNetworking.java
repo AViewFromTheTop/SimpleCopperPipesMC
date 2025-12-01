@@ -7,7 +7,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 public class SimpleCopperPipesNetworking {
 
 	public static void init() {
-		PayloadTypeRegistry<RegistryFriendlyByteBuf> registry = PayloadTypeRegistry.playS2C();
+		final PayloadTypeRegistry<RegistryFriendlyByteBuf> registry = PayloadTypeRegistry.playS2C();
 		registry.register(SimpleCopperPipesNoteParticlePacket.PACKET_TYPE, SimpleCopperPipesNoteParticlePacket.CODEC);
 	}
 

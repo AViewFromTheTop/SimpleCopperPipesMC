@@ -16,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Util;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
@@ -34,9 +35,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import net.minecraft.Util;
 
 public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockEntity implements Container {
 	public final MoveType moveType;
@@ -77,7 +76,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		}
 	}
 
-	public void serverTick(@NotNull Level level, BlockPos pos, BlockState originalState, SimpleCopperPipesConfig config) {
+	public void serverTick(Level level, BlockPos pos, BlockState originalState, SimpleCopperPipesConfig config) {
 		if (level.isClientSide()) return;
 
 		BlockState state = originalState;
@@ -227,7 +226,6 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 	}
 
 	@Override
-	@NotNull
 	protected NonNullList<ItemStack> getItems() {
 		return this.inventory;
 	}
@@ -238,13 +236,11 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 	}
 
 	@Override
-	@NotNull
 	protected Component getDefaultName() {
 		return Component.translatable(this.getBlockState().getBlock().getDescriptionId());
 	}
 
 	@Override
-	@NotNull
 	protected AbstractContainerMenu createMenu(int i, Inventory playerInventory) {
 		return new HopperMenu(i, playerInventory, this);
 	}

@@ -51,11 +51,10 @@ import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
-	public static final MapCodec<CopperFittingBlock> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
+	public static final MapCodec<CopperFittingBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		propertiesCodec()
 	).apply(instance, CopperFittingBlock::new));
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -64,8 +63,8 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	public static final BooleanProperty HAS_ELECTRICITY = SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY;
 	private static final VoxelShape FITTING_SHAPE = Block.box(3D, 3D, 3D, 13D, 13D, 13D);
 
-	public CopperFittingBlock(Properties settings) {
-		super(settings);
+	public CopperFittingBlock(Properties properties) {
+		super(properties);
 		this.registerDefaultState(this.stateDefinition.any()
 			.setValue(POWERED, false)
 			.setValue(WATERLOGGED, false)
@@ -74,43 +73,41 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 		);
 	}
 
-	public static void updateBlockEntityValues(Level level, BlockPos pos, @NotNull BlockState state) {
+	public static void updateBlockEntityValues(Level level, BlockPos pos, BlockState state) {
 		if (!(state.getBlock() instanceof CopperFittingBlock)) return;
 		if (!(level.getBlockEntity(pos) instanceof CopperFittingBlockEntity fitting)) return;
 		fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
 	}
 
 	@Override
-	@NotNull
-	public VoxelShape getShape(BlockState state, BlockGetter blockView, BlockPos pos, CollisionContext shapeContext) {
+	public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		return FITTING_SHAPE;
 	}
 
 	@Override
-	@NotNull
-	public VoxelShape getInteractionShape(BlockState state, BlockGetter blockView, BlockPos pos) {
+	public VoxelShape getInteractionShape(BlockState state, BlockGetter level, BlockPos pos) {
 		return FITTING_SHAPE;
 	}
 
 	@Override
-	public BlockState getStateForPlacement(@NotNull BlockPlaceContext itemPlacementContext) {
+	public BlockState getStateForPlacement(BlockPlaceContext context) {
 		return this.defaultBlockState()
-			.setValue(WATERLOGGED, itemPlacementContext.getLevel().getFluidState(itemPlacementContext.getClickedPos()).getType() == Fluids.WATER)
-			.setValue(POWERED, itemPlacementContext.getLevel().hasNeighborSignal(itemPlacementContext.getClickedPos()));
+			.setValue(WATERLOGGED, context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER)
+			.setValue(POWERED, context.getLevel().hasNeighborSignal(context.getClickedPos()));
 	}
 
 	@Override
-	protected @NotNull BlockState updateShape(
-		@NotNull BlockState state,
+	protected BlockState updateShape(
+		BlockState state,
 		LevelReader level,
-		ScheduledTickAccess scheduledTickAccess,
+		ScheduledTickAccess tickAccess,
 		BlockPos pos,
 		Direction direction,
 		BlockPos neighborPos,
 		BlockState neighborState,
 		RandomSource random
 	) {
-		if (state.getValue(WATERLOGGED)) scheduledTickAccess.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+		if (state.getValue(WATERLOGGED)) tickAccess.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 
 		boolean electricity = state.getValue(HAS_ELECTRICITY);
 		if (neighborState.getBlock() instanceof LightningRodBlock && neighborState.getValue(POWERED)) electricity = true;
@@ -118,23 +115,23 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	protected void neighborChanged(@NotNull BlockState blockState, @NotNull Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
-		level.setBlockAndUpdate(blockPos, blockState.setValue(CopperFittingBlock.POWERED, level.hasNeighborSignal(blockPos)));
-		updateBlockEntityValues(level, blockPos, blockState);
+	protected void neighborChanged(BlockState state, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
+		level.setBlockAndUpdate(blockPos, state.setValue(CopperFittingBlock.POWERED, level.hasNeighborSignal(blockPos)));
+		updateBlockEntityValues(level, blockPos, state);
 	}
 
 	@Override
-	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-		return new CopperFittingBlockEntity(blockPos, blockState);
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+		return new CopperFittingBlockEntity(pos, state);
 	}
 
 	@Override
-	protected boolean propagatesSkylightDown(@NotNull BlockState blockState) {
-		return blockState.getFluidState().isEmpty();
+	protected boolean propagatesSkylightDown(BlockState state) {
+		return state.getFluidState().isEmpty();
 	}
 
 	@Nullable
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, BlockState state, BlockEntityType<T> blockEntityType) {
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
 		if (level.isClientSide()) return null;
 		return createTickerHelper(
 			blockEntityType,
@@ -144,20 +141,19 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	public void setPlacedBy(@NotNull Level level, @NotNull BlockPos blockPos, @NotNull BlockState blockState, LivingEntity livingEntity, @NotNull ItemStack itemStack) {
-		super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
-		updateBlockEntityValues(level, blockPos, blockState);
+	public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity entity, ItemStack stack) {
+		super.setPlacedBy(level, pos, state, entity, stack);
+		updateBlockEntityValues(level, pos, state);
 	}
 
 	@Override
-	@NotNull
-	public FluidState getFluidState(@NotNull BlockState blockState) {
-		if (blockState.getValue(WATERLOGGED)) return Fluids.WATER.getSource(false);
-		return super.getFluidState(blockState);
+	public FluidState getFluidState(BlockState state) {
+		if (state.getValue(WATERLOGGED)) return Fluids.WATER.getSource(false);
+		return super.getFluidState(state);
 	}
 
 	@Override
-	protected @NotNull InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
 		if (!SimpleCopperPipesConfig.get().openableFittings) return super.useWithoutItem(state, level, pos, player, hitResult);
 		if (!(level.getBlockEntity(pos) instanceof CopperFittingBlockEntity fittingEntity)) return InteractionResult.PASS;
 		player.openMenu(fittingEntity);
@@ -166,15 +162,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	protected @NotNull InteractionResult useItemOn(
-		@NotNull ItemStack stack,
-		BlockState state,
-		Level level,
-		BlockPos pos,
-		Player player,
-		InteractionHand hand,
-		BlockHitResult hitResult
-	) {
+	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
 		if (stack.is(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)) return InteractionResult.PASS;
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
@@ -184,34 +172,33 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	@NotNull
-	public RenderShape getRenderShape(BlockState blockState) {
+	public RenderShape getRenderShape(BlockState state) {
 		return RenderShape.MODEL;
 	}
 
 	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
+	public boolean hasAnalogOutputSignal(BlockState state) {
 		return true;
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, @NotNull Level level, BlockPos blockPos, Direction direction) {
-		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(blockPos));
+	public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
+		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
 	}
 
 	@Override
-	protected void createBlockStateDefinition(@NotNull StateDefinition.Builder<Block, BlockState> builder) {
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(WATERLOGGED, POWERED, FLUID, HAS_ELECTRICITY);
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState state, PathComputationType type) {
 		return false;
 	}
 
 	@Override
-	public boolean isRandomlyTicking(@NotNull BlockState blockState) {
-		return WeatheringCopper.getNext(blockState.getBlock()).isPresent();
+	public boolean isRandomlyTicking(BlockState state) {
+		return WeatheringCopper.getNext(state.getBlock()).isPresent();
 	}
 
 	@Override
@@ -221,7 +208,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	public void animateTick(@NotNull BlockState blockState, Level level, BlockPos blockPos, RandomSource random) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource random) {
 		if (blockState.getValue(HAS_ELECTRICITY)) ParticleUtils.spawnParticlesAlongAxis(Direction.UP.getAxis(), level, blockPos, 0.55D, ParticleTypes.ELECTRIC_SPARK, UniformInt.of(1, 2));
 	}
 
@@ -231,7 +218,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	protected @NotNull MapCodec<? extends CopperFittingBlock> codec() {
+	protected MapCodec<? extends CopperFittingBlock> codec() {
 		return CODEC;
 	}
 }

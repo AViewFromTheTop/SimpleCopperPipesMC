@@ -12,6 +12,7 @@ import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -19,8 +20,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import org.jetbrains.annotations.NotNull;
-import net.minecraft.Util;
 
 public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 
@@ -28,11 +27,11 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 
 	public int transferCooldown;
 
-	public CopperFittingBlockEntity(BlockPos blockPos, BlockState blockState) {
-		super(SimpleCopperPipesBlockEntityTypes.COPPER_FITTING, blockPos, blockState, MoveType.FROM_FITTING);
+	public CopperFittingBlockEntity(BlockPos pos, BlockState state) {
+		super(SimpleCopperPipesBlockEntityTypes.COPPER_FITTING, pos, state, MoveType.FROM_FITTING);
 	}
 
-	public static boolean canTransfer(@NotNull Level level, BlockPos pos, Direction direction, boolean to) {
+	public static boolean canTransfer(Level level, BlockPos pos, Direction direction, boolean to) {
 		if (!(level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe)) return false;
 
 		final BlockState state = level.getBlockState(pos);
@@ -40,16 +39,16 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 	}
 
 	@Override
-	public void setItem(int i, ItemStack itemStack) {
+	public void setItem(int i, ItemStack stack) {
 		this.unpackLootTable(null);
-		if (itemStack == null) return;
+		if (stack == null) return;
 
-		this.getItems().set(i, itemStack);
-		if (itemStack.getCount() > this.getMaxStackSize()) itemStack.setCount(this.getMaxStackSize());
+		this.getItems().set(i, stack);
+		if (stack.getCount() > this.getMaxStackSize()) stack.setCount(this.getMaxStackSize());
 	}
 
 	@Override
-	public void serverTick(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, SimpleCopperPipesConfig config) {
+	public void serverTick(Level level, BlockPos pos, BlockState state, SimpleCopperPipesConfig config) {
 		super.serverTick(level, pos, state, config);
 		if (level.isClientSide()) return;
 
@@ -60,16 +59,16 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 		}
 	}
 
-	public void fittingMove(@NotNull Level level, BlockPos pos, @NotNull BlockState state) {
+	public void fittingMove(Level level, BlockPos pos, BlockState state) {
 		final boolean movedOut = state.hasProperty(BlockStateProperties.POWERED) && !state.getValue(BlockStateProperties.POWERED) && this.moveOut(level, pos, level.random);
 		final boolean movedIn = this.moveIn(level, pos, level.random);
-		if (movedOut || movedIn) {
-			setCooldown(state);
-			setChanged(level, pos, state);
-		}
+		if (!movedOut && !movedIn) return;
+
+		setCooldown(state);
+		setChanged(level, pos, state);
 	}
 
-	private boolean moveIn(Level level, @NotNull BlockPos pos, RandomSource random) {
+	private boolean moveIn(Level level, BlockPos pos, RandomSource random) {
 		boolean result = false;
 		for (Direction direction : Util.shuffledCopy(Direction.values(), random)) {
 			final Direction opposite = direction.getOpposite();
@@ -98,7 +97,7 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 		return result;
 	}
 
-	private boolean moveOut(Level level, @NotNull BlockPos pos, RandomSource random) {
+	private boolean moveOut(Level level, BlockPos pos, RandomSource random) {
 		boolean result = false;
 		for (Direction direction : Util.shuffledCopy(Direction.values(), random)) {
 			final BlockPos offsetPos = pos.relative(direction);
@@ -127,7 +126,7 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 		return result;
 	}
 
-	public void setCooldown(@NotNull BlockState state) {
+	public void setCooldown(BlockState state) {
 		this.transferCooldown = state.getBlock() instanceof CopperFittingBlock fitting ? fitting.getCooldown() : 2;
 	}
 
@@ -137,18 +136,18 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 	}
 
 	@Override
-	public void updateBlockEntityValues(LevelReader level, BlockPos pos, @NotNull BlockState state, SimpleCopperPipesConfig config) {
+	public void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state, SimpleCopperPipesConfig config) {
 		if (state.getBlock() instanceof CopperFittingBlock) this.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && config.carryWater;
 	}
 
 	@Override
-	public void loadAdditional(@NotNull ValueInput input) {
+	public void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
 		this.transferCooldown = input.getIntOr("transferCooldown", 0);
 	}
 
 	@Override
-	protected void saveAdditional(@NotNull ValueOutput output) {
+	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
 		output.putInt("transferCooldown", this.transferCooldown);
 	}

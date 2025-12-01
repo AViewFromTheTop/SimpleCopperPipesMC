@@ -5,11 +5,10 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.minecraft.core.HolderLookup;
-import org.jetbrains.annotations.NotNull;
 
 public final class SimpleCopperPipesBlockLootProvider extends FabricBlockLootTableProvider {
 
-	public SimpleCopperPipesBlockLootProvider(@NotNull FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registries) {
+	public SimpleCopperPipesBlockLootProvider(FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registries) {
 		super(dataOutput, registries);
 	}
 

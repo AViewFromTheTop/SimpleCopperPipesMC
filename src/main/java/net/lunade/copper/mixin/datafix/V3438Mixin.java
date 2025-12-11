@@ -1,7 +1,6 @@
 package net.lunade.copper.mixin.datafix;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.templates.TypeTemplate;
@@ -12,20 +11,17 @@ import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.schemas.V3438;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(V3438.class)
 public class V3438Mixin {
 
-	@WrapOperation(
-		method = "registerBlockEntities",
-		at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/util/datafix/schemas/NamespacedSchema;registerBlockEntities(Lcom/mojang/datafixers/schemas/Schema;)Ljava/util/Map;",
-			ordinal = 0
-		)
-	)
-	public Map<String, Supplier<TypeTemplate>> simpleCopperPipes$registerBlockEntities(V3438 instance, Schema schema, Operation<Map<String, Supplier<TypeTemplate>>> original) {
-		final Map<String, Supplier<TypeTemplate>> map = original.call(instance, schema);
+	@Inject(method = "registerBlockEntities", at = @At("RETURN"))
+	public void simpleCopperPipes$registerBlockEntities(
+		Schema schema, CallbackInfoReturnable<Map<String, Supplier<TypeTemplate>>> info,
+		@Local Map<String, Supplier<TypeTemplate>> map
+	) {
 		schema.register(
 			map,
 			SimpleCopperPipesConstants.legacyId("copper_pipe").toString(),
@@ -47,6 +43,5 @@ public class V3438Mixin {
 			SimpleCopperPipesConstants.id("copper_fitting").toString(),
 			() -> DSL.optionalFields("Items", DSL.list(References.ITEM_STACK.in(schema)))
 		);
-		return map;
 	}
 }

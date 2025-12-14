@@ -24,7 +24,7 @@
     "option.simple_copper_pipes.false": "Wyłączone",
     "option.simple_copper_pipes.true": "Włączone",
     "option.simple_copper_pipes.openable_fittings": "Otwieralne złączki",
-    "tooltip.simple_copper_pipes.openable_fittings": "Czy miedziane złączki powinny mieć ekran ekwipunku",
+    "tooltip.simple_copper_pipes.openable_fittings": "Czy miedziane złączki powinny mieć ekran ekwipunku.",
     "option.simple_copper_pipes.dispensing": "Wyrzucanie przedmiotów",
     "tooltip.simple_copper_pipes.dispensing": "Czy miedziane rury powninny wyrzucać przedmioty jak dozowniki.",
     "option.simple_copper_pipes.dispense_sounds": "Dźwięki wyrzucania",

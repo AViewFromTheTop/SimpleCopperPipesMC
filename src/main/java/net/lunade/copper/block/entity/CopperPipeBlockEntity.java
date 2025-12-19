@@ -236,7 +236,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		setChanged(level, pos, state);
 		if (movedIn == 3) {
 			if (!config.suctionSounds) return;
-			level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_IN, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
+			level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_IN, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 		}
 	}
 
@@ -302,7 +302,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 	private boolean dispense(ServerLevel level, BlockPos pos, BlockState state, SimpleCopperPipesConfig config) {
 		if (!this.canDispense) return false;
 
-		final int slot = this.chooseNonEmptySlot(level.random);
+		final int slot = this.chooseNonEmptySlot(level.getRandom());
 		if (slot < 0) return false;
 
 		final ItemStack stack = this.getItem(slot);
@@ -313,13 +313,13 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		if (this.dispenseType == DispenseType.DROPPER) { //If Dropper
 			shotPower = 10;
 			if (config.dispenseSounds) {
-				level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
+				level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 			}
 		} else if (this.dispenseType == DispenseType.DISPENSER) { //If Dispenser, Use Pipe-Specific Launch Length
 			if (state.getBlock() instanceof CopperPipeBlock pipe) {
 				shotPower = pipe.dispenseShotPower;
 				if (config.dispenseSounds) {
-					level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
+					level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 				}
 			} else {
 				shotPower = 12;
@@ -358,7 +358,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 				usableStack = stack.split(1);
 				poweredDispense.dispense(level, usableStack, shotPower, facing, output, state, pos, this);
 				if (!fitting && !silent) {
-					if (config.dispenseSounds) level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
+					if (config.dispenseSounds) level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 					level.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
 				}
 				return stack;
@@ -372,7 +372,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 			if (!silent) {
 				level.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
 				if (config.dispenseSounds) {
-					level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (level.random.nextFloat() * 0.25F) + 0.8F);
+					level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 				}
 			}
 		}

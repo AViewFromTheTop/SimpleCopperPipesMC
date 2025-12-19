@@ -60,8 +60,8 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 	}
 
 	public void fittingMove(Level level, BlockPos pos, BlockState state) {
-		final boolean movedOut = state.hasProperty(BlockStateProperties.POWERED) && !state.getValue(BlockStateProperties.POWERED) && this.moveOut(level, pos, level.random);
-		final boolean movedIn = this.moveIn(level, pos, level.random);
+		final boolean movedOut = state.hasProperty(BlockStateProperties.POWERED) && !state.getValue(BlockStateProperties.POWERED) && this.moveOut(level, pos, level.getRandom());
+		final boolean movedIn = this.moveIn(level, pos, level.getRandom());
 		if (!movedOut && !movedIn) return;
 
 		setCooldown(state);

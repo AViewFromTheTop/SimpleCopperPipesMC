@@ -76,7 +76,14 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		this.vibrationListener = new VibrationSystem.Listener(this);
 	}
 
-	public static boolean canTransfer(Level level, BlockPos pos, boolean to, CopperPipeBlockEntity copperPipe, @Nullable Storage<ItemVariant> inventory, @Nullable Storage<ItemVariant> pipeInventory) {
+	public static boolean canTransfer(
+		Level level,
+		BlockPos pos,
+		boolean to,
+		CopperPipeBlockEntity copperPipe,
+		@Nullable Storage<ItemVariant> inventory,
+		@Nullable Storage<ItemVariant> pipeInventory
+	) {
 		if (copperPipe.transferCooldown > 0) return false;
 
 		boolean transferApiCheck = true;
@@ -124,37 +131,37 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		level.addFreshEntity(itemEntity);
 	}
 
-	public static void setCooldown(Level level, BlockPos blockPos) {
-		if (level.getBlockEntity(blockPos) instanceof CopperPipeBlockEntity pipe) pipe.setCooldown(level.getBlockState(blockPos));
+	public static void setCooldown(Level level, BlockPos pos) {
+		if (level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe) pipe.setCooldown(level.getBlockState(pos));
 	}
 
-	public static Storage<ItemVariant> getStorageAt(Level level, BlockPos blockPos, Direction direction) {
-		return ItemStorage.SIDED.find(level, blockPos, level.getBlockState(blockPos), level.getBlockEntity(blockPos), direction);
+	public static Storage<ItemVariant> getStorageAt(Level level, BlockPos pos, Direction direction) {
+		return ItemStorage.SIDED.find(level, pos, level.getBlockState(pos), level.getBlockEntity(pos), direction);
 	}
 
 	@Override
-	public void setItem(int i, ItemStack stack) {
+	public void setItem(int slot, ItemStack stack) {
 		this.unpackLootTable(null);
 		if (stack == null) return;
 
-		this.getItems().set(i, stack);
+		this.getItems().set(slot, stack);
 		if (stack.getCount() > this.getMaxStackSize()) stack.setCount(this.getMaxStackSize());
 	}
 
 	@Override
-	public void serverTick(Level level, BlockPos blockPos, BlockState state, SimpleCopperPipesConfig config) {
+	public void serverTick(Level level, BlockPos pos, BlockState state, SimpleCopperPipesConfig config) {
 		if (level.isClientSide()) return;
 
 		VibrationSystem.Ticker.tick(this.level, this.getVibrationData(), this.createVibrationUser());
-		super.serverTick(level, blockPos, state, config);
+		super.serverTick(level, pos, state, config);
 
 		if (this.noteBlockCooldown > 0) --this.noteBlockCooldown;
 		if (this.dispenseCooldown > 0) {
 			--this.dispenseCooldown;
 		} else {
-			this.dispense((ServerLevel) level, blockPos, state, config);
+			this.dispense((ServerLevel) level, pos, state, config);
 			int cooldown = 0;
-			if (level.getBlockState(blockPos.relative(state.getValue(CopperPipeBlock.FACING).getOpposite())).getBlock() instanceof CopperFittingBlock fitting) {
+			if (level.getBlockState(pos.relative(state.getValue(CopperPipeBlock.FACING).getOpposite())).getBlock() instanceof CopperFittingBlock fitting) {
 				cooldown = fitting.getCooldown();
 			} else {
 				if (state.getBlock() instanceof CopperPipeBlock pipe) cooldown = Mth.floor(pipe.getCooldown() * 0.5D);
@@ -165,11 +172,11 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		if (this.transferCooldown > 0) {
 			--this.transferCooldown;
 		} else {
-			this.pipeMove(level, blockPos, state, config);
+			this.pipeMove(level, pos, state, config);
 		}
 
 		if (state.getValue(CopperPipeBlock.FLUID) == PipeFluid.WATER && state.getValue(CopperPipeBlock.FACING) != Direction.UP) {
-			LeakingPipeManager.addPos(level, blockPos);
+			LeakingPipeManager.addPos(level, pos);
 		}
 	}
 
@@ -483,21 +490,18 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		@Override
 		public boolean canReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, @Nullable GameEvent.Context context) {
 			if (!SimpleCopperPipesConfig.get().senseGameEvents) return false;
-			if (pos == this.blockPos && (gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE)) return false;
+			if (pos == this.blockPos && (gameEvent.is(GameEvent.BLOCK_DESTROY) || gameEvent.is(GameEvent.BLOCK_PLACE))) return false;
+			if (!CopperPipeBlockEntity.this.canAcceptGameEvents) return false;
 
-			if (CopperPipeBlockEntity.this.canAcceptGameEvents) {
-				CopperPipeBlockEntity.this.transferableDataHandler.addSaveableMoveablePipeNbt(
-					new TransferablePipeDataHandler.SaveableTransferablePipeData(
-						gameEvent.value(),
-						pos.getCenter(),
-						context,
-						this.blockPos
-					).withShouldMove(true).withShouldSave(true)
-				);
-				return true;
-			}
-
-			return false;
+			CopperPipeBlockEntity.this.transferableDataHandler.addSaveableMoveablePipeNbt(
+				new TransferablePipeDataHandler.SaveableTransferablePipeData(
+					gameEvent.value(),
+					pos.getCenter(),
+					context,
+					this.blockPos
+				).withShouldMove(true).withShouldSave(true)
+			);
+			return true;
 		}
 
 		@Override

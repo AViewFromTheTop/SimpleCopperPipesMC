@@ -1,0 +1,51 @@
+{
+  "block.simple_copper_pipes.copper_pipe": "Медная труба",
+  "block.simple_copper_pipes.exposed_copper_pipe": "Потемневшая медная труба",
+  "block.simple_copper_pipes.weathered_copper_pipe": "Состаренная медная труба",
+  "block.simple_copper_pipes.oxidized_copper_pipe": "Окисленная медная труба",
+  "block.simple_copper_pipes.waxed_copper_pipe": "Вощёная медная труба",
+  "block.simple_copper_pipes.waxed_exposed_copper_pipe": "Вощёная потемневшая медная труба",
+  "block.simple_copper_pipes.waxed_weathered_copper_pipe": "Вощёная состаренная медная труба",
+  "block.simple_copper_pipes.waxed_oxidized_copper_pipe": "Вощёная окисленная медная труба",
+
+  "block.simple_copper_pipes.copper_fitting": "Медный фитинг",
+  "block.simple_copper_pipes.exposed_copper_fitting": "Потемневший медный фитинг",
+  "block.simple_copper_pipes.weathered_copper_fitting": "Состаренный медный фитинг",
+  "block.simple_copper_pipes.oxidized_copper_fitting": "Окисленный медный фитинг",
+  "block.simple_copper_pipes.waxed_copper_fitting": "Вощёный медный фитинг",
+  "block.simple_copper_pipes.waxed_exposed_copper_fitting": "Вощёный потемневший медный фитинг",
+  "block.simple_copper_pipes.waxed_weathered_copper_fitting": "Вощёный состаренный медный фитинг",
+  "block.simple_copper_pipes.waxed_oxidized_copper_fitting": "Вощёный окисленный медный фитинг",
+
+  "subtitles.block.copper_pipe.item_in": "Предмет входит в трубу",
+  "subtitles.block.copper_pipe.item_out": "Предмет выходит из трубы",
+  "subtitles.block.copper_pipe.launch": "Предмет выпущен из трубы",
+
+  "stat.simple_copper_pipes.inspect_copper_pipe": "Взаимодействий с медной трубой",
+  "stat.simple_copper_pipes.inspect_copper_fitting": "Взаимодействий с медным фитингом",
+
+  "option.simple_copper_pipes.component.title": "Настройки Simple Copper Pipes",
+  "option.simple_copper_pipes.false": "§cВыкл",
+  "option.simple_copper_pipes.true": "§aВкл",
+
+  "option.simple_copper_pipes.openable_fittings": "Открываемые фитинги",
+  "tooltip.simple_copper_pipes.openable_fittings": "Определяет наличие интерфейса у фитингов.",
+
+  "option.simple_copper_pipes.dispensing": "Раздача предметов",
+  "tooltip.simple_copper_pipes.dispensing": "Определяет возможность труб раздавать предметы.",
+  "option.simple_copper_pipes.dispense_sounds": "Звуки выплёвывания",
+  "tooltip.simple_copper_pipes.dispense_sounds": "Отвечает за то, должны ли трубы проигрывать\nзвук при выплёвывании предмета.",
+  "option.simple_copper_pipes.suction_sounds": "Звуки всасывания",
+  "tooltip.simple_copper_pipes.suction_sounds": "Отвечает за то, должны ли трубы проигрывать\nзвук при всасывании предмета.",
+  "option.simple_copper_pipes.sense_game_events": "Отслеживание игровых событий",
+  "tooltip.simple_copper_pipes.sense_game_events": "Отвечает за то, должны ли трубы отслеживать\nигровые события (вибрации).",
+
+  "option.simple_copper_pipes.carry_water": "Перенос воды",
+  "tooltip.simple_copper_pipes.carry_water": "Отвечает за возможность труб переносить воду.",
+  "option.simple_copper_pipes.carry_lava": "Перенос лавы",
+  "tooltip.simple_copper_pipes.carry_lava": "Отвечает за возможность труб переносить лаву.",
+  "option.simple_copper_pipes.carry_smoke": "Перенос дыма",
+  "tooltip.simple_copper_pipes.carry_smoke": "Отвечает за возможность труб переносить дым.",
+
+  "modmenu.descriptionTranslation.simple_copper_pipes": "Мод добавляет в Minecraft простые для понимания медные трубы."
+}

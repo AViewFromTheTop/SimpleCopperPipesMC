@@ -1,42 +1,28 @@
 package net.lunade.copper.config;
 
-import net.frozenblock.lib.config.api.instance.Config;
-import net.frozenblock.lib.config.api.instance.json.JsonConfig;
-import net.frozenblock.lib.config.api.instance.json.JsonType;
-import net.frozenblock.lib.config.api.registry.ConfigRegistry;
+import net.frozenblock.lib.config.v2.config.ConfigData;
+import net.frozenblock.lib.config.v2.config.ConfigSettings;
+import net.frozenblock.lib.config.v2.entry.ConfigEntry;
+import net.frozenblock.lib.config.v2.entry.EntryType;
+import net.frozenblock.lib.config.v2.registry.ID;
 import net.lunade.copper.SimpleCopperPipesConstants;
 
 public final class SimpleCopperPipesConfig {
-	public static final Config<SimpleCopperPipesConfig> INSTANCE = ConfigRegistry.register(
-		new JsonConfig<>(
-			SimpleCopperPipesConstants.MOD_ID,
-			SimpleCopperPipesConfig.class,
-			JsonType.JSON5
-		)
-	);
+	public static final ConfigData<?> CONFIG = ConfigData.createAndRegister(ID.of(SimpleCopperPipesConstants.id("main")), ConfigSettings.JSON5);
 
-	public boolean openableFittings = false;
+	public static final ConfigEntry<Boolean> OPENABLE_FITTINGS = CONFIG.entry("openableFittings", EntryType.BOOL, false);
 
-	public boolean dispensing = true;
+	public static final ConfigEntry<Boolean> DISPENSING = CONFIG.entry("dispensing", EntryType.BOOL, true);
 
-	public boolean dispenseSounds = true;
+	public static final ConfigEntry<Boolean> DISPENSE_SOUNDS = CONFIG.entry("dispenseSounds", EntryType.BOOL, true);
 
-	public boolean suctionSounds = true;
+	public static final ConfigEntry<Boolean> SUCTION_SOUNDS = CONFIG.entry("suctionSounds", EntryType.BOOL, true);
 
-	public boolean senseGameEvents = true;
+	public static final ConfigEntry<Boolean> SENSE_GAME_EVENTS = CONFIG.entry("senseGameEvents", EntryType.BOOL, true);
 
-	public boolean carryWater = true;
+	public static final ConfigEntry<Boolean> CARRY_WATER = CONFIG.entry("carryWater", EntryType.BOOL, true);
 
-	public boolean carryLava = true;
+	public static final ConfigEntry<Boolean> CARRY_LAVA = CONFIG.entry("carryLava", EntryType.BOOL, true);
 
-	public boolean carrySmoke = true;
-
-	public static SimpleCopperPipesConfig get() {
-		return INSTANCE.config();
-	}
-
-	public static SimpleCopperPipesConfig get(boolean real) {
-		if (real) return INSTANCE.instance();
-		return INSTANCE.config();
-	}
+	public static final ConfigEntry<Boolean> CARRY_SMOKE = CONFIG.entry("carrySmoke", EntryType.BOOL, true);
 }

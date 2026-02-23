@@ -142,17 +142,17 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 	}
 
 	@Override
-	public void serverTick(Level level, BlockPos blockPos, BlockState state, SimpleCopperPipesConfig config) {
+	public void serverTick(Level level, BlockPos blockPos, BlockState state) {
 		if (level.isClientSide()) return;
 
 		VibrationSystem.Ticker.tick(this.level, this.getVibrationData(), this.createVibrationUser());
-		super.serverTick(level, blockPos, state, config);
+		super.serverTick(level, blockPos, state);
 
 		if (this.noteBlockCooldown > 0) --this.noteBlockCooldown;
 		if (this.dispenseCooldown > 0) {
 			--this.dispenseCooldown;
 		} else {
-			this.dispense((ServerLevel) level, blockPos, state, config);
+			this.dispense((ServerLevel) level, blockPos, state);
 			int cooldown = 0;
 			if (level.getBlockState(blockPos.relative(state.getValue(CopperPipeBlock.FACING).getOpposite())).getBlock() instanceof CopperFittingBlock fitting) {
 				cooldown = fitting.getCooldown();
@@ -165,7 +165,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		if (this.transferCooldown > 0) {
 			--this.transferCooldown;
 		} else {
-			this.pipeMove(level, blockPos, state, config);
+			this.pipeMove(level, blockPos, state);
 		}
 
 		if (state.getValue(CopperPipeBlock.FLUID) == PipeFluid.WATER && state.getValue(CopperPipeBlock.FACING) != Direction.UP) {
@@ -174,7 +174,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 	}
 
 	@Override
-	public void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state, SimpleCopperPipesConfig config) {
+	public void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state) {
 		if (!(state.getBlock() instanceof CopperPipeBlock)) return;
 
 		final Direction facing = state.getValue(BlockStateProperties.FACING);
@@ -216,17 +216,17 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		this.canDispense = isEntrySupported && !isExitBlocked;
 		this.dispenseType = oppositeBlock == Blocks.DROPPER ? DispenseType.DROPPER : oppositeBlock == Blocks.DISPENSER ? DispenseType.DISPENSER : DispenseType.NONE;
 		this.canAcceptGameEvents = !isEntrySupported;
-		this.canWater = config.carryWater && (oppositeFluidState.is(FluidTags.WATER) || state.getValue(BlockStateProperties.WATERLOGGED) || oppositeState.getValueOrElse(BlockStateProperties.WATERLOGGED, false));
-		this.canLava =  config.carryLava && oppositeFluidState.is(FluidTags.LAVA);
+		this.canWater = SimpleCopperPipesConfig.CARRY_WATER.get() && (oppositeFluidState.is(FluidTags.WATER) || state.getValue(BlockStateProperties.WATERLOGGED) || oppositeState.getValueOrElse(BlockStateProperties.WATERLOGGED, false));
+		this.canLava =  SimpleCopperPipesConfig.CARRY_LAVA.get() && oppositeFluidState.is(FluidTags.LAVA);
 		final boolean canWaterAndLava = this.canWater && this.canLava;
-		this.canSmoke = config.carrySmoke && (oppositeBlock instanceof CampfireBlock && !this.canWater && !this.canLava ? oppositeState.getValue(BlockStateProperties.LIT) : canWaterAndLava);
+		this.canSmoke = SimpleCopperPipesConfig.CARRY_SMOKE.get() && (oppositeBlock instanceof CampfireBlock && !this.canWater && !this.canLava ? oppositeState.getValue(BlockStateProperties.LIT) : canWaterAndLava);
 		if (canWaterAndLava) {
 			this.canWater = false;
 			this.canLava = false;
 		}
 	}
 
-	public void pipeMove(Level level, BlockPos pos, BlockState state, SimpleCopperPipesConfig config) {
+	public void pipeMove(Level level, BlockPos pos, BlockState state) {
 		final Direction facing = state.getValue(BlockStateProperties.FACING);
 		final boolean movedOut = this.moveOut(level, pos, facing);
 		final int movedIn = this.moveIn(level, pos, state, facing);
@@ -235,7 +235,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		setCooldown(state);
 		setChanged(level, pos, state);
 		if (movedIn == 3) {
-			if (!config.suctionSounds) return;
+			if (!SimpleCopperPipesConfig.SUCTION_SOUNDS.get()) return;
 			level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_IN, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 		}
 	}
@@ -299,7 +299,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		return false;
 	}
 
-	private boolean dispense(ServerLevel level, BlockPos pos, BlockState state, SimpleCopperPipesConfig config) {
+	private boolean dispense(ServerLevel level, BlockPos pos, BlockState state) {
 		if (!this.canDispense) return false;
 
 		final int slot = this.chooseNonEmptySlot(level.getRandom());
@@ -312,13 +312,13 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		int shotPower = 4;
 		if (this.dispenseType == DispenseType.DROPPER) { //If Dropper
 			shotPower = 10;
-			if (config.dispenseSounds) {
+			if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) {
 				level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 			}
 		} else if (this.dispenseType == DispenseType.DISPENSER) { //If Dispenser, Use Pipe-Specific Launch Length
 			if (state.getBlock() instanceof CopperPipeBlock pipe) {
 				shotPower = pipe.dispenseShotPower;
-				if (config.dispenseSounds) {
+				if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) {
 					level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 				}
 			} else {
@@ -329,9 +329,9 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		final Direction facing = state.getValue(BlockStateProperties.FACING);
 		final boolean silent = state.is(SimpleCopperPipesBlockTags.SILENT_COPPER_PIPES);
 		if (level.getBlockState(pos.relative(facing.getOpposite())).getBlock() instanceof CopperFittingBlock) {
-			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, true, silent, config);
+			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, true, silent);
 		} else {
-			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, false, silent, config);
+			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, false, silent);
 			level.levelEvent(LevelEvent.PARTICLES_SHOOT_WHITE_SMOKE, pos, facing.get3DDataValue());
 		}
 		this.setItem(slot, shotItem);
@@ -346,8 +346,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		Direction facing,
 		int shotPower,
 		boolean fitting,
-		boolean silent,
-		SimpleCopperPipesConfig config
+		boolean silent
 	) {
 		final Vec3 output = pos.getCenter().relative(facing, 0.7D);
 		ItemStack usableStack = stack;
@@ -358,20 +357,20 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 				usableStack = stack.split(1);
 				poweredDispense.dispense(level, usableStack, shotPower, facing, output, state, pos, this);
 				if (!fitting && !silent) {
-					if (config.dispenseSounds) level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+					if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 					level.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
 				}
 				return stack;
 			}
 		}
 
-		if (config.dispensing) {
+		if (SimpleCopperPipesConfig.DISPENSING.get()) {
 			usableStack = stack.split(1);
 			level.levelEvent(LevelEvent.PARTICLES_SHOOT_SMOKE, pos, facing.get3DDataValue());
 			spawnItem(level, usableStack, shotPower, facing, output, facing);
 			if (!silent) {
 				level.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
-				if (config.dispenseSounds) {
+				if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) {
 					level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 				}
 			}
@@ -482,7 +481,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 
 		@Override
 		public boolean canReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, @Nullable GameEvent.Context context) {
-			if (!SimpleCopperPipesConfig.get().senseGameEvents) return false;
+			if (!SimpleCopperPipesConfig.SENSE_GAME_EVENTS.get()) return false;
 			if (pos == this.blockPos && (gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE)) return false;
 
 			if (CopperPipeBlockEntity.this.canAcceptGameEvents) {

@@ -5,7 +5,6 @@ import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.frozenblock.lib.config.api.instance.Config;
 import net.frozenblock.lib.config.clothconfig.FrozenClothConfig;
 import net.lunade.copper.SimpleCopperPipes;
 import net.lunade.copper.SimpleCopperPipesConstants;
@@ -21,7 +20,7 @@ public final class SimpleCopperPipesConfigGui {
 		var configBuilder = ConfigBuilder.create().setParentScreen(parent).setTitle(text("component.title"));
 		var entryBuilder = configBuilder.entryBuilder();
 
-		configBuilder.setSavingRunnable(SimpleCopperPipesConfig.INSTANCE::save);
+		configBuilder.setSavingRunnable(SimpleCopperPipesConfig.CONFIG::save);
 
 		var main = configBuilder.getOrCreateCategory(text("main"));
 		setupEntries(main, entryBuilder);
@@ -30,130 +29,87 @@ public final class SimpleCopperPipesConfigGui {
 	}
 
 	private static void setupEntries(ConfigCategory category, ConfigEntryBuilder builder) {
-		var config = SimpleCopperPipesConfig.get(true);
-		var modifiedConfig = SimpleCopperPipesConfig.get(); // with sync
-		Class<? extends SimpleCopperPipesConfig> clazz = config.getClass();
-		Config<?> configInstance = SimpleCopperPipesConfig.INSTANCE;
-		var defaultConfig = SimpleCopperPipesConfig.INSTANCE.defaultInstance();
-
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("openable_fittings"), modifiedConfig.openableFittings)
-					.setDefaultValue(defaultConfig.openableFittings)
-					.setSaveConsumer(newValue -> config.openableFittings = newValue)
+				builder.startBooleanToggle(text("openable_fittings"), SimpleCopperPipesConfig.OPENABLE_FITTINGS.getWithSync())
 					.setTooltip(tooltip("openable_fittings"))
-					.setYesNoTextSupplier(bool -> text(bool.toString()))
-					.build(),
-				clazz,
-				"openableFittings",
-				configInstance
+					.setYesNoTextSupplier(bool -> text(bool.toString())),
+				SimpleCopperPipesConfig.OPENABLE_FITTINGS
 			)
 		);
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("dispensing"), modifiedConfig.dispensing)
-					.setDefaultValue(defaultConfig.dispensing)
-					.setSaveConsumer(newValue -> config.dispensing = newValue)
+				builder.startBooleanToggle(text("dispensing"), SimpleCopperPipesConfig.DISPENSING.getWithSync())
 					.setTooltip(tooltip("dispensing"))
-					.setYesNoTextSupplier(bool -> text(bool.toString()))
-					.build(),
-				clazz,
-				"dispensing",
-				configInstance
+					.setYesNoTextSupplier(bool -> text(bool.toString())),
+				SimpleCopperPipesConfig.DISPENSING
 			)
 		);
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("dispense_sounds"), modifiedConfig.dispenseSounds)
-					.setDefaultValue(defaultConfig.dispenseSounds)
-					.setSaveConsumer(newValue -> config.dispenseSounds = newValue)
+				builder.startBooleanToggle(text("dispense_sounds"), SimpleCopperPipesConfig.DISPENSE_SOUNDS.getWithSync())
 					.setTooltip(tooltip("dispense_sounds"))
-					.setYesNoTextSupplier(bool -> text(bool.toString()))
-					.build(),
-				clazz,
-				"dispenseSounds",
-				configInstance
+					.setYesNoTextSupplier(bool -> text(bool.toString())),
+				SimpleCopperPipesConfig.DISPENSE_SOUNDS
 			)
 		);
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("suction_sounds"), modifiedConfig.suctionSounds)
-					.setDefaultValue(defaultConfig.suctionSounds)
-					.setSaveConsumer(newValue -> config.suctionSounds = newValue)
+				builder.startBooleanToggle(text("suction_sounds"), SimpleCopperPipesConfig.SUCTION_SOUNDS.getWithSync())
 					.setTooltip(tooltip("suction_sounds"))
-					.setYesNoTextSupplier(bool -> text(bool.toString()))
-					.build(),
-				clazz,
-				"suctionSounds",
-				configInstance
+					.setYesNoTextSupplier(bool -> text(bool.toString())),
+				SimpleCopperPipesConfig.SUCTION_SOUNDS
 			)
 		);
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("sense_game_events"), modifiedConfig.senseGameEvents)
-					.setDefaultValue(defaultConfig.senseGameEvents)
-					.setSaveConsumer(newValue -> config.senseGameEvents = newValue)
+				builder.startBooleanToggle(text("sense_game_events"), SimpleCopperPipesConfig.SENSE_GAME_EVENTS.getWithSync())
 					.setTooltip(tooltip("sense_game_events"))
-					.setYesNoTextSupplier(bool -> text(bool.toString()))
-					.build(),
-				clazz,
-				"senseGameEvents",
-				configInstance
+					.setYesNoTextSupplier(bool -> text(bool.toString())),
+				SimpleCopperPipesConfig.SENSE_GAME_EVENTS
 			)
 		);
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("carry_water"), modifiedConfig.carryWater)
-					.setDefaultValue(defaultConfig.carryWater)
+				builder.startBooleanToggle(text("carry_water"), SimpleCopperPipesConfig.CARRY_WATER.getWithSync())
 					.setSaveConsumer(newValue -> {
-						config.carryWater = newValue;
+						SimpleCopperPipesConfig.CARRY_WATER.setValue(newValue);
 						SimpleCopperPipes.REFRESH_VALUES = true;
 					})
 					.setTooltip(tooltip("carry_water"))
-					.setYesNoTextSupplier(bool -> text(bool.toString()))
-					.build(),
-				clazz,
-				"carryWater",
-				configInstance
+					.setYesNoTextSupplier(bool -> text(bool.toString())),
+				SimpleCopperPipesConfig.CARRY_WATER
 			)
 		);
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("carry_lava"), modifiedConfig.carryLava)
-					.setDefaultValue(defaultConfig.carryLava)
+				builder.startBooleanToggle(text("carry_lava"), SimpleCopperPipesConfig.CARRY_LAVA.getWithSync())
 					.setSaveConsumer(newValue -> {
-						config.carryLava = newValue;
+						SimpleCopperPipesConfig.CARRY_LAVA.setValue(newValue);
 						SimpleCopperPipes.REFRESH_VALUES = true;
 					})
 					.setTooltip(tooltip("carry_lava"))
-					.setYesNoTextSupplier(bool -> text(bool.toString()))
-					.build(),
-				clazz,
-				"carryLava",
-				configInstance
+					.setYesNoTextSupplier(bool -> text(bool.toString())),
+				SimpleCopperPipesConfig.CARRY_LAVA
 			)
 		);
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("carry_smoke"), modifiedConfig.carrySmoke)
-					.setDefaultValue(defaultConfig.carrySmoke)
+				builder.startBooleanToggle(text("carry_smoke"), SimpleCopperPipesConfig.CARRY_SMOKE.getWithSync())
 					.setSaveConsumer(newValue -> {
-						config.carrySmoke = newValue;
+						SimpleCopperPipesConfig.CARRY_SMOKE.setValue(newValue);
 						SimpleCopperPipes.REFRESH_VALUES = true;
 					})
 					.setTooltip(tooltip("carry_smoke"))
-					.setYesNoTextSupplier(bool -> text(bool.toString()))
-					.build(),
-				clazz,
-				"carrySmoke",
-				configInstance
+					.setYesNoTextSupplier(bool -> text(bool.toString())),
+				SimpleCopperPipesConfig.CARRY_SMOKE
 			)
 		);
 	}

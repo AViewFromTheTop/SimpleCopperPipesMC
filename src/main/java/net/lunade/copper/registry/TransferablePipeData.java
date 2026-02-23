@@ -124,7 +124,7 @@ public class TransferablePipeData {
 		}, (data, level, pos, state, blockEntity) -> {
 
 		}, (data, level, pos, state, blockEntity) -> {
-			if (!SimpleCopperPipesConfig.get().carryWater) return false;
+			if (!SimpleCopperPipesConfig.CARRY_WATER.get()) return false;
 			TransferablePipeDataHandler.SaveableTransferablePipeData waterData = blockEntity.transferableDataHandler.getTransferablePipeData(WATER);
 			if (waterData != null) return waterData.getVec3d() == null || waterData.getVec3d().x() <= data.getVec3d().x() - 1;
 			return true;
@@ -176,7 +176,7 @@ public class TransferablePipeData {
 				}
 			}
 		}, (data, level, pos, state, blockEntity) -> {
-			if (!SimpleCopperPipesConfig.get().carryLava) return false;
+			if (!SimpleCopperPipesConfig.CARRY_LAVA.get()) return false;
 			final TransferablePipeDataHandler.SaveableTransferablePipeData lavaData = blockEntity.transferableDataHandler.getTransferablePipeData(LAVA);
 			if (lavaData != null) return lavaData.getVec3d() == null || lavaData.getVec3d().x() <= data.getVec3d().x() - 1;
 			return true;
@@ -200,7 +200,7 @@ public class TransferablePipeData {
 		}, (data, level, pos, state, blockEntity) -> {
 
 		}, (data, level, pos, state, blockEntity) -> {
-			if (!SimpleCopperPipesConfig.get().carrySmoke) return false;
+			if (!SimpleCopperPipesConfig.CARRY_SMOKE.get()) return false;
 			final TransferablePipeDataHandler.SaveableTransferablePipeData smokeData = blockEntity.transferableDataHandler.getTransferablePipeData(SMOKE);
 			if (smokeData != null) return smokeData.getVec3d() == null || smokeData.getVec3d().x() <= data.getVec3d().x() - 1;
 			return true;

@@ -37,7 +37,6 @@ public class SimpleCopperPipes extends FrozenModInitializer {
 	@Override
 	public void onInitialize(String modId, ModContainer container) {
 		SimpleCopperPipesDataFixer.applyDataFixes(container);
-		SimpleCopperPipesConfig.get();
 		SimpleCopperPipesBlocks.init();
 		SimpleCopperPipesBlockEntityTypes.init();
 		SimpleCopperPipesSoundEvents.init();

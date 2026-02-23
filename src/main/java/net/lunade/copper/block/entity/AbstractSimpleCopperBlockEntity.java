@@ -76,27 +76,27 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		}
 	}
 
-	public void serverTick(Level level, BlockPos pos, BlockState originalState, SimpleCopperPipesConfig config) {
+	public void serverTick(Level level, BlockPos pos, BlockState originalState) {
 		if (level.isClientSide()) return;
 
 		BlockState state = originalState;
 
 		if (this.lastFixVersion < SimpleCopperPipesConstants.CURRENT_FIX_VERSION || SimpleCopperPipes.REFRESH_VALUES) {
-			this.updateBlockEntityValues(level, pos, originalState, config);
+			this.updateBlockEntityValues(level, pos, originalState);
 			this.lastFixVersion = SimpleCopperPipesConstants.CURRENT_FIX_VERSION;
 		}
 
-		if (this.canWater && !this.canLava && config.carryWater) {
+		if (this.canWater && !this.canLava && SimpleCopperPipesConfig.CARRY_WATER.get()) {
 			this.transferableDataHandler.setTransferablePipeData(TransferablePipeData.WATER, new TransferablePipeDataHandler.SaveableTransferablePipeData()
 				.withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withID(TransferablePipeData.WATER));
 		}
 
-		if (this.canLava && !this.canWater && config.carryLava) {
+		if (this.canLava && !this.canWater && SimpleCopperPipesConfig.CARRY_LAVA.get()) {
 			this.transferableDataHandler.setTransferablePipeData(TransferablePipeData.LAVA, new TransferablePipeDataHandler.SaveableTransferablePipeData()
 				.withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withID(TransferablePipeData.LAVA));
 		}
 
-		if ((this.canSmoke && !this.canWater && !this.canLava) || (this.canWater && this.canLava) && config.carrySmoke) {
+		if ((this.canSmoke && !this.canWater && !this.canLava) || (this.canWater && this.canLava) && SimpleCopperPipesConfig.CARRY_SMOKE.get()) {
 			this.transferableDataHandler.setTransferablePipeData(TransferablePipeData.SMOKE, new TransferablePipeDataHandler.SaveableTransferablePipeData()
 				.withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withID(TransferablePipeData.SMOKE));
 		}
@@ -104,12 +104,12 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		final TransferablePipeDataHandler.SaveableTransferablePipeData waterData = this.transferableDataHandler.getTransferablePipeData(TransferablePipeData.WATER);
 		final TransferablePipeDataHandler.SaveableTransferablePipeData lavaData = this.transferableDataHandler.getTransferablePipeData(TransferablePipeData.LAVA);
 		final TransferablePipeDataHandler.SaveableTransferablePipeData smokeData = this.transferableDataHandler.getTransferablePipeData(TransferablePipeData.SMOKE);
-		boolean validWater = isValidFluidNBT(waterData) && config.carryWater;
-		boolean validLava = isValidFluidNBT(lavaData) && config.carryLava;
-		boolean validSmoke = isValidFluidNBT(smokeData) && config.carrySmoke;
+		boolean validWater = isValidFluidNBT(waterData) && SimpleCopperPipesConfig.CARRY_WATER.get();
+		boolean validLava = isValidFluidNBT(lavaData) && SimpleCopperPipesConfig.CARRY_LAVA.get();
+		boolean validSmoke = isValidFluidNBT(smokeData) && SimpleCopperPipesConfig.CARRY_SMOKE.get();
 		if (this.canSmoke && ((this.canLava && !this.canWater) || (this.canWater && !this.canLava))) validSmoke = false;
 		if (this.canWater && this.canLava) {
-			validSmoke = config.carrySmoke;
+			validSmoke = SimpleCopperPipesConfig.CARRY_SMOKE.get();
 			validWater = false;
 			validLava = false;
 		}
@@ -147,7 +147,7 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		return false;
 	}
 
-	public void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state, SimpleCopperPipesConfig config) {
+	public void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state) {
 	}
 
 	public boolean canAcceptTransferableData(MoveType moveType, Direction moveDirection, BlockState fromState) {

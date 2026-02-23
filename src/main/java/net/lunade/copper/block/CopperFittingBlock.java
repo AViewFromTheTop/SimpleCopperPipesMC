@@ -76,7 +76,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	public static void updateBlockEntityValues(Level level, BlockPos pos, BlockState state) {
 		if (!(state.getBlock() instanceof CopperFittingBlock)) return;
 		if (!(level.getBlockEntity(pos) instanceof CopperFittingBlockEntity fitting)) return;
-		fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.get().carryWater;
+		fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.CARRY_WATER.get();
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 		return createTickerHelper(
 			blockEntityType,
 			SimpleCopperPipesBlockEntityTypes.COPPER_FITTING,
-			(level1, pos1, state1, blockEntity) -> blockEntity.serverTick(level1, pos1, state1, SimpleCopperPipesConfig.get())
+			(level1, pos1, state1, blockEntity) -> blockEntity.serverTick(level1, pos1, state1)
 		);
 	}
 
@@ -154,7 +154,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-		if (!SimpleCopperPipesConfig.get().openableFittings) return super.useWithoutItem(state, level, pos, player, hitResult);
+		if (!SimpleCopperPipesConfig.OPENABLE_FITTINGS.get()) return super.useWithoutItem(state, level, pos, player, hitResult);
 		if (!(level.getBlockEntity(pos) instanceof CopperFittingBlockEntity fittingEntity)) return InteractionResult.PASS;
 		player.openMenu(fittingEntity);
 		player.awardStat(Stats.CUSTOM.get(SimpleCopperPipesStats.INSPECT_FITTING));

@@ -102,7 +102,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	public static void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state) {
-		if (level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe) pipe.updateBlockEntityValues(level, pos, state, SimpleCopperPipesConfig.get());
+		if (level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe) pipe.updateBlockEntityValues(level, pos, state);
 	}
 
 	public static boolean canConnectFront(LevelReader level, BlockPos pos, Direction direction) {
@@ -208,7 +208,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 		return createTickerHelper(
 			blockEntityType,
 			SimpleCopperPipesBlockEntityTypes.COPPER_PIPE,
-			(level1, pos1, state1, blockEntity) -> blockEntity.serverTick(level1, pos1, state1, SimpleCopperPipesConfig.get())
+			(level1, pos1, state1, blockEntity) -> blockEntity.serverTick(level1, pos1, state1)
 		);
 	}
 

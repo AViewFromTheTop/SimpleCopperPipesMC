@@ -2,7 +2,7 @@ package net.lunade.copper.datagen.model;
 
 import java.util.Optional;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.lunade.copper.SimpleCopperPipesConstants;
 import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
@@ -57,7 +57,7 @@ public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 		Optional.empty(),
 		TextureSlot.TEXTURE
 	);
-	public SimpleCopperPipesModelProvider(FabricDataOutput output) {
+	public SimpleCopperPipesModelProvider(FabricPackOutput output) {
 		super(output);
 	}
 

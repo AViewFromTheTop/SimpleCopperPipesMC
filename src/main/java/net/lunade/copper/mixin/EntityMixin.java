@@ -17,7 +17,7 @@ public class EntityMixin {
 	@Unique
 	private boolean simpleCopperPipes$hadWaterPipeNearby;
 
-	@Inject(method = "updateInWaterStateAndDoFluidPushing", at = @At("HEAD"))
+	@Inject(method = "updateFluidInteraction", at = @At("HEAD"))
 	public void simpleCopperPipes$updateInWaterStateAndDoFluidPushing(CallbackInfoReturnable<Boolean> info) {
 		if (!this.level().isClientSide()) this.simpleCopperPipes$hadWaterPipeNearby = LeakingPipeManager.isWaterPipeNearby(Entity.class.cast(this), 2);
 	}

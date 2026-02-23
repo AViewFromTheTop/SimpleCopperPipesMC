@@ -1,5 +1,6 @@
 package net.lunade.copper.registry;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.frozenblock.lib.item.api.FrozenCreativeTabs;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Items;
@@ -8,6 +9,12 @@ import net.minecraft.world.level.ItemLike;
 public class SimpleCopperPipesCreativeInventorySorting {
 
 	public static void init() {
+		CommonLifecycleEvents.TAGS_LOADED.register((registryAccess, client) -> {
+			run();
+		});
+	}
+
+	private static void run() {
 		addInBuildingBlocksAfter(Items.COPPER_BULB, SimpleCopperPipesBlocks.COPPER_PIPE);
 		addInBuildingBlocksAfter(Items.EXPOSED_COPPER_BULB, SimpleCopperPipesBlocks.EXPOSED_COPPER_PIPE);
 		addInBuildingBlocksAfter(Items.WEATHERED_COPPER_BULB, SimpleCopperPipesBlocks.WEATHERED_COPPER_PIPE);
@@ -40,10 +47,10 @@ public class SimpleCopperPipesCreativeInventorySorting {
 	}
 
 	private static void addInRedstoneAfter(ItemLike comparedItem, ItemLike item) {
-		FrozenCreativeTabs.addAfter(comparedItem, item, CreativeModeTabs.REDSTONE_BLOCKS);
+		FrozenCreativeTabs.insertAfter(comparedItem, item, CreativeModeTabs.REDSTONE_BLOCKS);
 	}
 
 	private static void addInBuildingBlocksAfter(ItemLike comparedItem, ItemLike item) {
-		FrozenCreativeTabs.addAfter(comparedItem, item, CreativeModeTabs.BUILDING_BLOCKS);
+		FrozenCreativeTabs.insertAfter(comparedItem, item, CreativeModeTabs.BUILDING_BLOCKS);
 	}
 }

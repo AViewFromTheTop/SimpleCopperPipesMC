@@ -89,23 +89,23 @@ public final class SimpleCopperPipesBlocks {
 	);
 
 	public static void init() {
-		OxidizableBlocksRegistry.registerOxidizableBlockPair(COPPER_PIPE, EXPOSED_COPPER_PIPE);
-		OxidizableBlocksRegistry.registerOxidizableBlockPair(EXPOSED_COPPER_PIPE, WEATHERED_COPPER_PIPE);
-		OxidizableBlocksRegistry.registerOxidizableBlockPair(WEATHERED_COPPER_PIPE, OXIDIZED_COPPER_PIPE);
+		OxidizableBlocksRegistry.registerNextStage(COPPER_PIPE, EXPOSED_COPPER_PIPE);
+		OxidizableBlocksRegistry.registerNextStage(EXPOSED_COPPER_PIPE, WEATHERED_COPPER_PIPE);
+		OxidizableBlocksRegistry.registerNextStage(WEATHERED_COPPER_PIPE, OXIDIZED_COPPER_PIPE);
 
-		OxidizableBlocksRegistry.registerOxidizableBlockPair(COPPER_FITTING, EXPOSED_COPPER_FITTING);
-		OxidizableBlocksRegistry.registerOxidizableBlockPair(EXPOSED_COPPER_FITTING, WEATHERED_COPPER_FITTING);
-		OxidizableBlocksRegistry.registerOxidizableBlockPair(WEATHERED_COPPER_FITTING, OXIDIZED_COPPER_FITTING);
+		OxidizableBlocksRegistry.registerNextStage(COPPER_FITTING, EXPOSED_COPPER_FITTING);
+		OxidizableBlocksRegistry.registerNextStage(EXPOSED_COPPER_FITTING, WEATHERED_COPPER_FITTING);
+		OxidizableBlocksRegistry.registerNextStage(WEATHERED_COPPER_FITTING, OXIDIZED_COPPER_FITTING);
 
-		OxidizableBlocksRegistry.registerWaxableBlockPair(COPPER_PIPE, WAXED_COPPER_PIPE);
-		OxidizableBlocksRegistry.registerWaxableBlockPair(EXPOSED_COPPER_PIPE, WAXED_EXPOSED_COPPER_PIPE);
-		OxidizableBlocksRegistry.registerWaxableBlockPair(WEATHERED_COPPER_PIPE, WAXED_WEATHERED_COPPER_PIPE);
-		OxidizableBlocksRegistry.registerWaxableBlockPair(OXIDIZED_COPPER_PIPE, WAXED_OXIDIZED_COPPER_PIPE);
+		OxidizableBlocksRegistry.registerWaxable(COPPER_PIPE, WAXED_COPPER_PIPE);
+		OxidizableBlocksRegistry.registerWaxable(EXPOSED_COPPER_PIPE, WAXED_EXPOSED_COPPER_PIPE);
+		OxidizableBlocksRegistry.registerWaxable(WEATHERED_COPPER_PIPE, WAXED_WEATHERED_COPPER_PIPE);
+		OxidizableBlocksRegistry.registerWaxable(OXIDIZED_COPPER_PIPE, WAXED_OXIDIZED_COPPER_PIPE);
 
-		OxidizableBlocksRegistry.registerWaxableBlockPair(COPPER_FITTING, WAXED_COPPER_FITTING);
-		OxidizableBlocksRegistry.registerWaxableBlockPair(EXPOSED_COPPER_FITTING, WAXED_EXPOSED_COPPER_FITTING);
-		OxidizableBlocksRegistry.registerWaxableBlockPair(WEATHERED_COPPER_FITTING, WAXED_WEATHERED_COPPER_FITTING);
-		OxidizableBlocksRegistry.registerWaxableBlockPair(OXIDIZED_COPPER_FITTING, WAXED_OXIDIZED_COPPER_FITTING);
+		OxidizableBlocksRegistry.registerWaxable(COPPER_FITTING, WAXED_COPPER_FITTING);
+		OxidizableBlocksRegistry.registerWaxable(EXPOSED_COPPER_FITTING, WAXED_EXPOSED_COPPER_FITTING);
+		OxidizableBlocksRegistry.registerWaxable(WEATHERED_COPPER_FITTING, WAXED_WEATHERED_COPPER_FITTING);
+		OxidizableBlocksRegistry.registerWaxable(OXIDIZED_COPPER_FITTING, WAXED_OXIDIZED_COPPER_FITTING);
 	}
 
 	public static Identifier id(String path) {

@@ -4,11 +4,11 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(FarmBlock.class)
+@Mixin(FarmlandBlock.class)
 public class FarmlandBlockMixin {
 
 	@ModifyReturnValue(method = "isNearWater", at = @At("RETURN"))

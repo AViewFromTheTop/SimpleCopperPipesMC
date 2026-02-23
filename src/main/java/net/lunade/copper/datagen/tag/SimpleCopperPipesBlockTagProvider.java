@@ -1,8 +1,8 @@
 package net.lunade.copper.datagen.tag;
 
 import java.util.concurrent.CompletableFuture;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
@@ -12,9 +12,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 
-public final class SimpleCopperPipesBlockTagProvider extends FabricTagProvider.BlockTagProvider {
+public final class SimpleCopperPipesBlockTagProvider extends FabricTagsProvider.BlockTagsProvider {
 
-	public SimpleCopperPipesBlockTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+	public SimpleCopperPipesBlockTagProvider(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
 		super(output, registries);
 	}
 

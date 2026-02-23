@@ -1,7 +1,6 @@
 package net.lunade.copper.config.gui;
 
-// TODO: re-enable when cloth-config is unobfuscated
-/*import me.shedaniel.clothconfig2.api.ConfigBuilder;
+import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.fabricmc.api.EnvType;
@@ -32,7 +31,7 @@ public final class SimpleCopperPipesConfigGui {
 
 	private static void setupEntries(ConfigCategory category, ConfigEntryBuilder builder) {
 		var config = SimpleCopperPipesConfig.get(true);
-		var modifiedConfig = SimpleCopperPipesConfig.getWithSync();
+		var modifiedConfig = SimpleCopperPipesConfig.get(); // with sync
 		Class<? extends SimpleCopperPipesConfig> clazz = config.getClass();
 		Config<?> configInstance = SimpleCopperPipesConfig.INSTANCE;
 		var defaultConfig = SimpleCopperPipesConfig.INSTANCE.defaultInstance();
@@ -169,4 +168,3 @@ public final class SimpleCopperPipesConfigGui {
 		return Component.translatable("tooltip." + SimpleCopperPipesConstants.NAMESPACE + "." + key);
 	}
 }
-*/

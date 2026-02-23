@@ -17,10 +17,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(VibrationSystem.Ticker.class)
 public interface VibrationTickerMixin {
 
-	@Inject(method = "method_51408", at = @At("TAIL"))
+	@Inject(method = "lambda$trySelectAndScheduleVibration$0", at = @At("TAIL"))
 	private static void simpleCopperPipes$trySelectAndScheduleVibration(
 		VibrationSystem.Data data, VibrationSystem.User user, ServerLevel level, VibrationInfo vibrationInfo, CallbackInfo info,
-		@Local Vec3 pos
+		@Local(name = "origin") Vec3 pos
 	) {
 		if (!(level.getBlockEntity(BlockPos.containing(pos)) instanceof CopperPipeBlockEntity pipeEntity)) return;
 		if (pipeEntity.inputGameEventPos == null || pipeEntity.gameEventNbtVec3 == null || pipeEntity.noteBlockCooldown > 0) return;

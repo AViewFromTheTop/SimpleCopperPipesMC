@@ -144,14 +144,14 @@ dependencies {
     // The Copperier Age
     implementation("maven.modrinth:the-copperier-age:$thecopperierage_version")
 
-	// Cloth Config
-    //compileOnly("me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version") {
-	//	exclude(group = "net.fabricmc.fabric-api")
-	//	exclude(group = "com.terraformersmc")
-	//}
+    // ModMenu
+    compileOnly("maven.modrinth:modmenu:${modmenu_version}")
 
-	// ModMenu
-	//compileOnly("maven.modrinth:modmenu:$modmenu_version")
+	// Cloth Config
+    compileOnly("me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version") {
+		exclude(group = "net.fabricmc.fabric-api")
+		exclude(group = "com.terraformersmc")
+	}
 
 	"datagenImplementation"(sourceSets.main.get().output)
 }

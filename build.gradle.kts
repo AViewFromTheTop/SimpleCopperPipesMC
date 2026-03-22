@@ -142,7 +142,7 @@ dependencies {
     api("maven.modrinth:frozenlib:$frozenlib_version")
 
     // The Copperier Age
-    implementation("maven.modrinth:the-copperier-age:$thecopperierage_version")
+    compileOnly("maven.modrinth:the-copperier-age:$thecopperierage_version")
 
     // ModMenu
     compileOnly("maven.modrinth:modmenu:${modmenu_version}")

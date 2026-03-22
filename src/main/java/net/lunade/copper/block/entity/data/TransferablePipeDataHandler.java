@@ -287,14 +287,14 @@ public class TransferablePipeDataHandler {
 		}
 
 		@Nullable
-		public Entity getEntity(Level world) {
+		public Entity getEntity(Level level) {
 			if (this.string.equals("noEntity")) return null;
 			if (this.foundEntity != null) {
 				if (this.foundEntity.getUUID().toString().equals(this.string)) return this.foundEntity;
 				this.foundEntity = null;
 			}
 			final AABB box = new AABB(this.vec3d2.add(-32, -32, -32), this.vec3d2.add(32, 32, 32));
-			final List<Entity> entities = world.getEntitiesOfClass(Entity.class, box);
+			final List<Entity> entities = level.getEntitiesOfClass(Entity.class, box);
 			for (Entity entity : entities) {
 				if (!entity.getUUID().toString().equals(this.string)) continue;
 				this.foundEntity = entity;

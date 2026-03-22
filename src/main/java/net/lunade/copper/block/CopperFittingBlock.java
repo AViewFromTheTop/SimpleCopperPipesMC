@@ -54,9 +54,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
-	public static final MapCodec<CopperFittingBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-		propertiesCodec()
-	).apply(instance, CopperFittingBlock::new));
+	public static final MapCodec<CopperFittingBlock> CODEC = simpleCodec(CopperFittingBlock::new);
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final EnumProperty<PipeFluid> FLUID = SimpleCopperPipesBlockStateProperties.FLUID;

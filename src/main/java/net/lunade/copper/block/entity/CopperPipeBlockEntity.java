@@ -124,8 +124,8 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		level.addFreshEntity(itemEntity);
 	}
 
-	public static void setCooldown(Level level, BlockPos blockPos) {
-		if (level.getBlockEntity(blockPos) instanceof CopperPipeBlockEntity pipe) pipe.setCooldown(level.getBlockState(blockPos));
+	public static void setCooldown(Level level, BlockPos pos) {
+		if (level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe) pipe.setCooldown(level.getBlockState(pos));
 	}
 
 	public static Storage<ItemVariant> getStorageAt(Level level, BlockPos blockPos, Direction direction) {
@@ -485,6 +485,10 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 			if (pos == this.blockPos && (gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE)) return false;
 
 			if (CopperPipeBlockEntity.this.canAcceptGameEvents) {
+				if (context.affectedState().is(SimpleCopperPipesBlockTags.COPPER_PIPES)
+					&& level.getBlockEntity(pos) instanceof CopperPipeBlockEntity copperPipe
+					&& copperPipe.canDispense
+				) return false;
 				CopperPipeBlockEntity.this.transferableDataHandler.addSaveableMoveablePipeNbt(
 					new TransferablePipeDataHandler.SaveableTransferablePipeData(
 						gameEvent.value(),
@@ -500,7 +504,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		}
 
 		@Override
-		public void onReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, Entity entity, Entity entity2, float f) {
+		public void onReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, Entity sourceEntity, Entity projectileOwner, float receivingDistance) {
 		}
 
 		@Override

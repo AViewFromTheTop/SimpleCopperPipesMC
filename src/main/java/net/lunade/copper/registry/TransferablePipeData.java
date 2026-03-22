@@ -91,7 +91,7 @@ public class TransferablePipeData {
 				}
 			}
 
-			level.gameEvent(data.getEntity(level), optionalGameEvent.orElse(GameEvent.BLOCK_CHANGE), pos);
+			level.gameEvent(optionalGameEvent.orElse(GameEvent.BLOCK_CHANGE), pos, GameEvent.Context.of(data.getEntity(level), level.getBlockState(pos)));
 
 			if ((noteBlock || pipe.noteBlockCooldown > 0) && data.useCount == 0) {
 				level.sendParticles(

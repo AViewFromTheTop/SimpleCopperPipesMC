@@ -49,8 +49,8 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 	public int lastFixVersion;
 	public TransferablePipeDataHandler transferableDataHandler;
 
-	public AbstractSimpleCopperBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState, MoveType moveType) {
-		super(blockEntityType, blockPos, blockState);
+	public AbstractSimpleCopperBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, MoveType moveType) {
+		super(type, pos, state);
 		this.inventory = NonNullList.withSize(5, ItemStack.EMPTY);
 		this.waterCooldown = -1;
 		this.electricityCooldown = -1;

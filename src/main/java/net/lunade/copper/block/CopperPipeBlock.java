@@ -162,14 +162,14 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	protected BlockState updateShape(
 		BlockState state,
 		LevelReader level,
-		ScheduledTickAccess tickAccess,
+		ScheduledTickAccess ticks,
 		BlockPos pos,
 		Direction direction,
 		BlockPos neighborPos,
 		BlockState neighborState,
 		RandomSource random
 	) {
-		if (state.getValue(WATERLOGGED)) tickAccess.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+		if (state.getValue(WATERLOGGED)) ticks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 
 		boolean electricity = state.getValue(HAS_ELECTRICITY);
 		if (neighborState.getBlock() instanceof LightningRodBlock && neighborState.getValue(POWERED)) electricity = true;
@@ -185,7 +185,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean bl) {
+	protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
 		final boolean powered = level.hasNeighborSignal(pos);
 		if (powered != state.getValue(POWERED)) level.setBlockAndUpdate(pos, state.setValue(POWERED, powered));
 		updateBlockEntityValues(level, pos, state);

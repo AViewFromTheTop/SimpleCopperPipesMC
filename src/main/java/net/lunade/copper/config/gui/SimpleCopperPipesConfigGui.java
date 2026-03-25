@@ -31,7 +31,7 @@ public final class SimpleCopperPipesConfigGui {
 	private static void setupEntries(ConfigCategory category, ConfigEntryBuilder builder) {
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("openable_fittings"), SimpleCopperPipesConfig.OPENABLE_FITTINGS.getWithSync())
+				builder.startBooleanToggle(text("openable_fittings"), SimpleCopperPipesConfig.OPENABLE_FITTINGS.get())
 					.setTooltip(tooltip("openable_fittings"))
 					.setYesNoTextSupplier(bool -> text(bool.toString())),
 				SimpleCopperPipesConfig.OPENABLE_FITTINGS
@@ -40,7 +40,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("dispensing"), SimpleCopperPipesConfig.DISPENSING.getWithSync())
+				builder.startBooleanToggle(text("dispensing"), SimpleCopperPipesConfig.DISPENSING.get())
 					.setTooltip(tooltip("dispensing"))
 					.setYesNoTextSupplier(bool -> text(bool.toString())),
 				SimpleCopperPipesConfig.DISPENSING
@@ -49,7 +49,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("dispense_sounds"), SimpleCopperPipesConfig.DISPENSE_SOUNDS.getWithSync())
+				builder.startBooleanToggle(text("dispense_sounds"), SimpleCopperPipesConfig.DISPENSE_SOUNDS.get())
 					.setTooltip(tooltip("dispense_sounds"))
 					.setYesNoTextSupplier(bool -> text(bool.toString())),
 				SimpleCopperPipesConfig.DISPENSE_SOUNDS
@@ -58,7 +58,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("suction_sounds"), SimpleCopperPipesConfig.SUCTION_SOUNDS.getWithSync())
+				builder.startBooleanToggle(text("suction_sounds"), SimpleCopperPipesConfig.SUCTION_SOUNDS.get())
 					.setTooltip(tooltip("suction_sounds"))
 					.setYesNoTextSupplier(bool -> text(bool.toString())),
 				SimpleCopperPipesConfig.SUCTION_SOUNDS
@@ -67,7 +67,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("sense_game_events"), SimpleCopperPipesConfig.SENSE_GAME_EVENTS.getWithSync())
+				builder.startBooleanToggle(text("sense_game_events"), SimpleCopperPipesConfig.SENSE_GAME_EVENTS.get())
 					.setTooltip(tooltip("sense_game_events"))
 					.setYesNoTextSupplier(bool -> text(bool.toString())),
 				SimpleCopperPipesConfig.SENSE_GAME_EVENTS
@@ -76,7 +76,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("carry_water"), SimpleCopperPipesConfig.CARRY_WATER.getWithSync())
+				builder.startBooleanToggle(text("carry_water"), SimpleCopperPipesConfig.CARRY_WATER.get())
 					.setSaveConsumer(newValue -> {
 						SimpleCopperPipesConfig.CARRY_WATER.setValue(newValue);
 						SimpleCopperPipes.REFRESH_VALUES = true;
@@ -89,7 +89,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("carry_lava"), SimpleCopperPipesConfig.CARRY_LAVA.getWithSync())
+				builder.startBooleanToggle(text("carry_lava"), SimpleCopperPipesConfig.CARRY_LAVA.get())
 					.setSaveConsumer(newValue -> {
 						SimpleCopperPipesConfig.CARRY_LAVA.setValue(newValue);
 						SimpleCopperPipes.REFRESH_VALUES = true;
@@ -102,7 +102,7 @@ public final class SimpleCopperPipesConfigGui {
 
 		category.addEntry(
 			FrozenClothConfig.syncedEntry(
-				builder.startBooleanToggle(text("carry_smoke"), SimpleCopperPipesConfig.CARRY_SMOKE.getWithSync())
+				builder.startBooleanToggle(text("carry_smoke"), SimpleCopperPipesConfig.CARRY_SMOKE.get())
 					.setSaveConsumer(newValue -> {
 						SimpleCopperPipesConfig.CARRY_SMOKE.setValue(newValue);
 						SimpleCopperPipes.REFRESH_VALUES = true;

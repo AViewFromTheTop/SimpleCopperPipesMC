@@ -1,7 +1,6 @@
 package net.lunade.copper.block;
 
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.lunade.copper.block.entity.CopperFittingBlockEntity;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.config.SimpleCopperPipesConfig;

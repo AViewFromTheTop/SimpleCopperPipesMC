@@ -358,7 +358,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 				poweredDispense.dispense(level, usableStack, shotPower, facing, output, state, pos, this);
 				if (!fitting && !silent) {
 					if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
-					level.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
+					level.gameEvent(GameEvent.ENTITY_PLACE, pos, new GameEvent.Context(null, state));
 				}
 				return stack;
 			}
@@ -369,7 +369,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 			level.levelEvent(LevelEvent.PARTICLES_SHOOT_SMOKE, pos, facing.get3DDataValue());
 			spawnItem(level, usableStack, shotPower, facing, output, facing);
 			if (!silent) {
-				level.gameEvent(null, GameEvent.ENTITY_PLACE, pos);
+				level.gameEvent(GameEvent.ENTITY_PLACE, pos, new GameEvent.Context(null, state));
 				if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) {
 					level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT, SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 				}
@@ -485,10 +485,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 			if (pos == this.blockPos && (gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE)) return false;
 
 			if (CopperPipeBlockEntity.this.canAcceptGameEvents) {
-				if (context.affectedState().is(SimpleCopperPipesBlockTags.COPPER_PIPES)
-					&& level.getBlockEntity(pos) instanceof CopperPipeBlockEntity copperPipe
-					&& copperPipe.canDispense
-				) return false;
+				if (context != null && context.affectedState() != null && context.affectedState().is(SimpleCopperPipesBlockTags.COPPER_PIPES)) return false;
 				CopperPipeBlockEntity.this.transferableDataHandler.addSaveableMoveablePipeNbt(
 					new TransferablePipeDataHandler.SaveableTransferablePipeData(
 						gameEvent.value(),

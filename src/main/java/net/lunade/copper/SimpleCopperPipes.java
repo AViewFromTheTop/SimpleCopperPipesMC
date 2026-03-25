@@ -8,7 +8,6 @@ import net.frozenblock.lib.particle.api.VibrationParticleVisibilityApi;
 import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.block.entity.leaking.LeakingPipeDripBehaviors;
 import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
-import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.datafix.SimpleCopperPipesDataFixer;
 import net.lunade.copper.networking.SimpleCopperPipesNetworking;
 import net.lunade.copper.registry.CopperPipeDispenseBehaviors;

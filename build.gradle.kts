@@ -142,13 +142,13 @@ dependencies {
     api("maven.modrinth:frozenlib:$frozenlib_version")
 
     // The Copperier Age
-    compileOnly("maven.modrinth:the-copperier-age:$thecopperierage_version")
+    implementation("maven.modrinth:the-copperier-age:$thecopperierage_version")
 
     // ModMenu
-    compileOnly("maven.modrinth:modmenu:${modmenu_version}")
+    implementation("maven.modrinth:modmenu:${modmenu_version}")
 
 	// Cloth Config
-    compileOnly("me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version") {
+    implementation("me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version") {
 		exclude(group = "net.fabricmc.fabric-api")
 		exclude(group = "com.terraformersmc")
 	}

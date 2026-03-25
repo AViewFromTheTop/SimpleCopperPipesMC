@@ -28,8 +28,8 @@ pluginManagement {
 rootProject.name = "Simple Copper Pipes"
 
 localRepository("FrozenLib", "maven.modrinth:frozenlib", true, false)
-localRepository("The-Copperier-Age", "maven.modrinth:the-copperier-age", true, true)
-localRepository("cloth-config", "me.shedaniel.cloth:cloth-config-fabric", kotlin = false, enabled = true)
+localRepository("The-Copperier-Age", "maven.modrinth:the-copperier-age", true, false)
+localRepository("cloth-config", "me.shedaniel.cloth:cloth-config-fabric", kotlin = true, enabled = true)
 
 fun localRepository(repo: String, dependencySub: String, kotlin: Boolean, enabled: Boolean) {
     if (!enabled) return

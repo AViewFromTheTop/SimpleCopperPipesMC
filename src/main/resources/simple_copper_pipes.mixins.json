@@ -12,6 +12,7 @@
     "FarmlandBlockMixin",
     "SugarCaneBlockMixin",
     "VibrationTickerMixin",
+    "create.CopperPipeBlockMixin",
     "datafix.DataFixersMixin",
     "datafix.V3438Mixin"
   ],

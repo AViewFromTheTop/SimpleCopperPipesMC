@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "redstone",
+  "category": "building",
+  "group": "waxed_oxidized_copper_fitting",
   "ingredients": [
     "simple_copper_pipes:oxidized_copper_fitting",
     "minecraft:honeycomb"

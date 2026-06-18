@@ -7,7 +7,7 @@ import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.lunade.copper.registry.SimpleCopperPipesStats;
-import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
+import net.lunade.copper.tag.SimpleCopperPipesBlockItemTags;
 import net.lunade.copper.tag.SimpleCopperPipesItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -211,7 +211,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 
 	@Override
 	public boolean shouldChangedStateKeepBlockEntity(BlockState state) {
-		return state.is(SimpleCopperPipesBlockTags.COPPER_FITTINGS);
+		return state.is(SimpleCopperPipesBlockItemTags.COPPER_FITTINGS.block());
 	}
 
 	@Override

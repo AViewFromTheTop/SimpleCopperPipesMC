@@ -6,11 +6,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
 public class SimpleCopperPipesItemTags {
-	public static final TagKey<Item> COPPER_PIPES = bind("copper_pipes");
-	public static final TagKey<Item> COPPER_FITTINGS = bind("copper_fittings");
 	public static final TagKey<Item> IGNORES_COPPER_PIPE_MENU = bind("ignores_copper_pipe_menu");
 
-	private static TagKey<Item> bind(String path) {
-		return TagKey.create(Registries.ITEM, SimpleCopperPipesConstants.id(path));
+	private static TagKey<Item> bind(String name) {
+		return TagKey.create(Registries.ITEM, SimpleCopperPipesConstants.id(name));
 	}
 }

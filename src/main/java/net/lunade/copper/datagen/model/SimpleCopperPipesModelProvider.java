@@ -1,6 +1,7 @@
 package net.lunade.copper.datagen.model;
 
 import java.util.Optional;
+import java.util.function.Function;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.lunade.copper.SimpleCopperPipesConstants;
@@ -8,6 +9,7 @@ import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.blockstates.BlockModelDefinitionGenerator;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.blockstates.PropertyDispatch;
 import net.minecraft.client.data.models.model.ModelLocationUtils;
@@ -63,45 +65,23 @@ public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 
 	@Override
 	public void generateBlockStateModels(BlockModelGenerators generators) {
-		createPipe(generators, SimpleCopperPipesBlocks.COPPER_PIPE, SimpleCopperPipesBlocks.COPPER_PIPE);
-		createPipe(generators, SimpleCopperPipesBlocks.EXPOSED_COPPER_PIPE, SimpleCopperPipesBlocks.EXPOSED_COPPER_PIPE);
-		createPipe(generators, SimpleCopperPipesBlocks.WEATHERED_COPPER_PIPE, SimpleCopperPipesBlocks.WEATHERED_COPPER_PIPE);
-		createPipe(generators, SimpleCopperPipesBlocks.OXIDIZED_COPPER_PIPE, SimpleCopperPipesBlocks.OXIDIZED_COPPER_PIPE);
-
-		createPipe(generators, SimpleCopperPipesBlocks.COPPER_PIPE, SimpleCopperPipesBlocks.WAXED_COPPER_PIPE);
-		createPipe(generators, SimpleCopperPipesBlocks.EXPOSED_COPPER_PIPE, SimpleCopperPipesBlocks.WAXED_EXPOSED_COPPER_PIPE);
-		createPipe(generators, SimpleCopperPipesBlocks.WEATHERED_COPPER_PIPE, SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_PIPE);
-		createPipe(generators, SimpleCopperPipesBlocks.OXIDIZED_COPPER_PIPE, SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_PIPE);
-
-		createFitting(generators, SimpleCopperPipesBlocks.COPPER_FITTING, SimpleCopperPipesBlocks.COPPER_FITTING);
-		createFitting(generators, SimpleCopperPipesBlocks.EXPOSED_COPPER_FITTING, SimpleCopperPipesBlocks.EXPOSED_COPPER_FITTING);
-		createFitting(generators, SimpleCopperPipesBlocks.WEATHERED_COPPER_FITTING, SimpleCopperPipesBlocks.WEATHERED_COPPER_FITTING);
-		createFitting(generators, SimpleCopperPipesBlocks.OXIDIZED_COPPER_FITTING, SimpleCopperPipesBlocks.OXIDIZED_COPPER_FITTING);
-
-		createFitting(generators, SimpleCopperPipesBlocks.COPPER_FITTING, SimpleCopperPipesBlocks.WAXED_COPPER_FITTING);
-		createFitting(generators, SimpleCopperPipesBlocks.EXPOSED_COPPER_FITTING, SimpleCopperPipesBlocks.WAXED_EXPOSED_COPPER_FITTING);
-		createFitting(generators, SimpleCopperPipesBlocks.WEATHERED_COPPER_FITTING, SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_FITTING);
-		createFitting(generators, SimpleCopperPipesBlocks.OXIDIZED_COPPER_FITTING, SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_FITTING);
+		SimpleCopperPipesBlocks.COPPER_PIPE.zipUnwaxedWaxed((block, waxedBlock) -> createPipe(generators, block, waxedBlock));
+		SimpleCopperPipesBlocks.COPPER_FITTING.zipUnwaxedWaxed((block, waxedBlock) -> createFitting(generators, block, waxedBlock));
 	}
 
 	@Override
-	public void generateItemModels(ItemModelGenerators generators) {
+	public void generateItemModels(ItemModelGenerators generators) {}
 
-	}
-
-	public static void createPipe(BlockModelGenerators generators, Block pipeBlock, Block outputPipeBlock) {
-		if (pipeBlock == outputPipeBlock) {
-			final TextureMapping pipeTextureMapping = new TextureMapping()
-				.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(pipeBlock))
-				.put(TextureSlot.FRONT, TextureMapping.getBlockTexture(pipeBlock, "_front"));
-
-			PIPE_MODEL.create(pipeBlock, pipeTextureMapping, generators.modelOutput);
-			PIPE_MODEL_BACK.createWithSuffix(pipeBlock, "_back_extension", pipeTextureMapping, generators.modelOutput);
-			PIPE_MODEL_BACK_SMOOTH.createWithSuffix(pipeBlock, "_back_smooth", pipeTextureMapping, generators.modelOutput);
-			PIPE_MODEL_DOUBLE_EXTENSION.createWithSuffix(pipeBlock, "_double_extension", pipeTextureMapping, generators.modelOutput);
-			PIPE_MODEL_FRONT_EXTENSION.createWithSuffix(pipeBlock, "_front_extension", pipeTextureMapping, generators.modelOutput);
-			PIPE_MODEL_SMOOTH.createWithSuffix(pipeBlock, "_smooth", pipeTextureMapping, generators.modelOutput);
-		}
+	public static void createPipe(BlockModelGenerators generators, Block pipeBlock, Block waaxedPipeBlock) {
+		final TextureMapping pipeTextureMapping = new TextureMapping()
+			.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(pipeBlock))
+			.put(TextureSlot.FRONT, TextureMapping.getBlockTexture(pipeBlock, "_front"));
+		PIPE_MODEL.create(pipeBlock, pipeTextureMapping, generators.modelOutput);
+		PIPE_MODEL_BACK.createWithSuffix(pipeBlock, "_back_extension", pipeTextureMapping, generators.modelOutput);
+		PIPE_MODEL_BACK_SMOOTH.createWithSuffix(pipeBlock, "_back_smooth", pipeTextureMapping, generators.modelOutput);
+		PIPE_MODEL_DOUBLE_EXTENSION.createWithSuffix(pipeBlock, "_double_extension", pipeTextureMapping, generators.modelOutput);
+		PIPE_MODEL_FRONT_EXTENSION.createWithSuffix(pipeBlock, "_front_extension", pipeTextureMapping, generators.modelOutput);
+		PIPE_MODEL_SMOOTH.createWithSuffix(pipeBlock, "_smooth", pipeTextureMapping, generators.modelOutput);
 
 		final Identifier model = ModelLocationUtils.getModelLocation(pipeBlock);
 		final Identifier frontExtensionModel = ModelLocationUtils.getModelLocation(pipeBlock, "_front_extension");
@@ -109,35 +89,37 @@ public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 		final Identifier backExtensionModel = ModelLocationUtils.getModelLocation(pipeBlock, "_back_extension");
 		final Identifier smoothModel = ModelLocationUtils.getModelLocation(pipeBlock, "_smooth");
 		final Identifier backSmoothModel = ModelLocationUtils.getModelLocation(pipeBlock, "_back_smooth");
-		generators.registerSimpleItemModel(outputPipeBlock, model);
-		generators.blockStateOutput
-			.accept(
-				MultiVariantGenerator.dispatch(outputPipeBlock)
-					.with(
-						PropertyDispatch.initial(CopperPipeBlock.FRONT_CONNECTED, CopperPipeBlock.BACK_CONNECTED, CopperPipeBlock.SMOOTH)
-							.select(false, false, false, BlockModelGenerators.plainVariant(model))
-							.select(true, false, false, BlockModelGenerators.plainVariant(frontExtensionModel))
-							.select(true, true, false, BlockModelGenerators.plainVariant(doubleExtensionModel))
-							.select(true, true, true, BlockModelGenerators.plainVariant(doubleExtensionModel))
-							.select(true, false, true, BlockModelGenerators.plainVariant(frontExtensionModel))
-							.select(false, false, true, BlockModelGenerators.plainVariant(smoothModel))
-							.select(false, true, false, BlockModelGenerators.plainVariant(backExtensionModel))
-							.select(false, true, true, BlockModelGenerators.plainVariant(backSmoothModel))
-					)
-					.with(BlockModelGenerators.ROTATION_FACING)
-			);
+
+		generators.registerSimpleItemModel(pipeBlock, model);
+		generators.itemModelOutput.copy(pipeBlock.asItem(), waaxedPipeBlock.asItem());
+
+		final Function<MultiVariantGenerator.Empty, BlockModelDefinitionGenerator> dispatcher = dispatch -> dispatch.with(
+				PropertyDispatch.initial(CopperPipeBlock.FRONT_CONNECTED, CopperPipeBlock.BACK_CONNECTED, CopperPipeBlock.SMOOTH)
+					.select(false, false, false, BlockModelGenerators.plainVariant(model))
+					.select(true, false, false, BlockModelGenerators.plainVariant(frontExtensionModel))
+					.select(true, true, false, BlockModelGenerators.plainVariant(doubleExtensionModel))
+					.select(true, true, true, BlockModelGenerators.plainVariant(doubleExtensionModel))
+					.select(true, false, true, BlockModelGenerators.plainVariant(frontExtensionModel))
+					.select(false, false, true, BlockModelGenerators.plainVariant(smoothModel))
+					.select(false, true, false, BlockModelGenerators.plainVariant(backExtensionModel))
+					.select(false, true, true, BlockModelGenerators.plainVariant(backSmoothModel))
+			)
+			.with(BlockModelGenerators.ROTATION_FACING);
+
+		generators.blockStateOutput.accept(dispatcher.apply(MultiVariantGenerator.dispatch(pipeBlock)));
+		generators.blockStateOutput.accept(dispatcher.apply(MultiVariantGenerator.dispatch(waaxedPipeBlock)));
 	}
 
-	public static void createFitting(BlockModelGenerators generators, Block fittingBlock, Block outputFittingBlock) {
-		if (fittingBlock == outputFittingBlock) {
-			final TextureMapping fittingTextureMapping = new TextureMapping()
-				.put(TextureSlot.TEXTURE, TextureMapping.getBlockTexture(fittingBlock));
-
-			FITTING_MODEL.create(fittingBlock, fittingTextureMapping, generators.modelOutput);
-		}
+	public static void createFitting(BlockModelGenerators generators, Block fittingBlock, Block waxedFittingBlock) {
+		final TextureMapping fittingTextureMapping = new TextureMapping()
+			.put(TextureSlot.TEXTURE, TextureMapping.getBlockTexture(fittingBlock));
+		FITTING_MODEL.create(fittingBlock, fittingTextureMapping, generators.modelOutput);
 
 		final Identifier model = ModelLocationUtils.getModelLocation(fittingBlock);
-		generators.registerSimpleItemModel(outputFittingBlock, model);
-		generators.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(outputFittingBlock, BlockModelGenerators.plainVariant(model)));
+		generators.registerSimpleItemModel(fittingBlock, model);
+		generators.itemModelOutput.copy(fittingBlock.asItem(), waxedFittingBlock.asItem());
+
+		generators.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(fittingBlock, BlockModelGenerators.plainVariant(model)));
+		generators.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(waxedFittingBlock, BlockModelGenerators.plainVariant(model)));
 	}
 }

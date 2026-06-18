@@ -17,6 +17,7 @@ import net.lunade.copper.registry.CopperPipeDispenseBehaviors;
 import net.lunade.copper.registry.PipeMovementRestrictions;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.lunade.copper.registry.SimpleCopperPipesSoundEvents;
+import net.lunade.copper.tag.SimpleCopperPipesBlockItemTags;
 import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -348,7 +349,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		boolean fitting,
 		boolean silent
 	) {
-		final Vec3 output = pos.getCenter().relative(facing, 0.7D);
+		final Vec3 output = Vec3.atCenterOf(pos).relative(facing, 0.7D);
 		ItemStack usableStack = stack;
 
 		if (state.getValue(CopperPipeBlock.POWERED)) { //Special Behavior When Powered
@@ -485,11 +486,11 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 			if (pos == this.blockPos && (gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE)) return false;
 
 			if (CopperPipeBlockEntity.this.canAcceptGameEvents) {
-				if (context != null && context.affectedState() != null && context.affectedState().is(SimpleCopperPipesBlockTags.COPPER_PIPES)) return false;
+				if (context != null && context.affectedState() != null && context.affectedState().is(SimpleCopperPipesBlockItemTags.COPPER_PIPES.block())) return false;
 				CopperPipeBlockEntity.this.transferableDataHandler.addSaveableMoveablePipeNbt(
 					new TransferablePipeDataHandler.SaveableTransferablePipeData(
 						gameEvent.value(),
-						pos.getCenter(),
+						Vec3.atCenterOf(pos),
 						context,
 						this.blockPos
 					).withShouldMove(true).withShouldSave(true)

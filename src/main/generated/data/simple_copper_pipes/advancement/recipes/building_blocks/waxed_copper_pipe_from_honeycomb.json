@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_exposed_copper_fitting": {
+    "has_copper_pipe": {
       "conditions": {
         "items": [
           {
-            "items": "simple_copper_pipes:exposed_copper_fitting"
+            "items": "simple_copper_pipes:copper_pipe"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "simple_copper_pipes:waxed_exposed_copper_fitting"
+        "recipe": "simple_copper_pipes:waxed_copper_pipe_from_honeycomb"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_exposed_copper_fitting"
+      "has_copper_pipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "simple_copper_pipes:waxed_exposed_copper_fitting"
+      "simple_copper_pipes:waxed_copper_pipe_from_honeycomb"
     ]
   }
 }

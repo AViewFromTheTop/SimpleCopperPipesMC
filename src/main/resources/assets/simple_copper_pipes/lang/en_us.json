@@ -25,8 +25,6 @@
   "stat.simple_copper_pipes.inspect_copper_fitting": "Copper Fittings Searched",
 
   "option.simple_copper_pipes.component.title": "Simple Copper Pipes Config",
-  "option.simple_copper_pipes.false": "§cDisabled",
-  "option.simple_copper_pipes.true": "§aEnabled",
 
   "option.simple_copper_pipes.openable_fittings": "Openable Fittings",
   "tooltip.simple_copper_pipes.openable_fittings": "Whether Copper Fittings should have an interactable GUI.",

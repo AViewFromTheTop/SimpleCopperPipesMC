@@ -10,7 +10,7 @@ import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
 import net.lunade.copper.registry.SimpleCopperPipesStats;
-import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
+import net.lunade.copper.tag.SimpleCopperPipesBlockItemTags;
 import net.lunade.copper.tag.SimpleCopperPipesItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -98,6 +99,15 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 			.setValue(HAS_ELECTRICITY, false)
 			.setValue(POWERED, false)
 		);
+	}
+
+	public static int dispenseShotPowerForWeatherState(WeatheringCopper.WeatherState weatherState) {
+		return switch (weatherState) {
+			case UNAFFECTED -> 20;
+			case EXPOSED -> 18;
+			case WEATHERED -> 15;
+			case OXIDIZED -> 12;
+		};
 	}
 
 	public static void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state) {
@@ -411,7 +421,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 
 	@Override
 	public boolean shouldChangedStateKeepBlockEntity(BlockState state) {
-		return state.is(SimpleCopperPipesBlockTags.COPPER_PIPES);
+		return state.is(SimpleCopperPipesBlockItemTags.COPPER_PIPES.block());
 	}
 
 	@Override

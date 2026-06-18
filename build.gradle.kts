@@ -1,5 +1,5 @@
 plugins {
-	id("net.fabricmc.fabric-loom") version("1.14-SNAPSHOT")
+	id("net.fabricmc.fabric-loom") version("1.17-SNAPSHOT")
 	id("org.quiltmc.gradle.licenser") version("+")
 	id("org.ajoberstar.grgit") version("+")
 	id("com.modrinth.minotaur") version("+")
@@ -162,7 +162,7 @@ tasks {
             "mod_id" to mod_id,
             "version" to version,
             "protocol_version" to protocol_version,
-            "minecraft_version" to "~26.1-",//minecraft_version,
+            "minecraft_version" to "~26.2-",//minecraft_version,
 
             "fabric_api_version" to ">=$fabric_api_version",
             "frozenlib_version" to ">=${frozenlib_version.split('-').firstOrNull()}-"

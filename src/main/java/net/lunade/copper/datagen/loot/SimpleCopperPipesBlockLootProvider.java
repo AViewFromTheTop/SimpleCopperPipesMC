@@ -14,25 +14,7 @@ public final class SimpleCopperPipesBlockLootProvider extends FabricBlockLootSub
 
 	@Override
 	public void generate() {
-		this.dropSelf(SimpleCopperPipesBlocks.COPPER_PIPE);
-		this.dropSelf(SimpleCopperPipesBlocks.EXPOSED_COPPER_PIPE);
-		this.dropSelf(SimpleCopperPipesBlocks.WEATHERED_COPPER_PIPE);
-		this.dropSelf(SimpleCopperPipesBlocks.OXIDIZED_COPPER_PIPE);
-
-		this.dropSelf(SimpleCopperPipesBlocks.WAXED_COPPER_PIPE);
-		this.dropSelf(SimpleCopperPipesBlocks.WAXED_EXPOSED_COPPER_PIPE);
-		this.dropSelf(SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_PIPE);
-		this.dropSelf(SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_PIPE);
-
-		this.dropSelf(SimpleCopperPipesBlocks.COPPER_FITTING);
-		this.dropSelf(SimpleCopperPipesBlocks.EXPOSED_COPPER_FITTING);
-		this.dropSelf(SimpleCopperPipesBlocks.WEATHERED_COPPER_FITTING);
-		this.dropSelf(SimpleCopperPipesBlocks.OXIDIZED_COPPER_FITTING);
-
-		this.dropSelf(SimpleCopperPipesBlocks.WAXED_COPPER_FITTING);
-		this.dropSelf(SimpleCopperPipesBlocks.WAXED_EXPOSED_COPPER_FITTING);
-		this.dropSelf(SimpleCopperPipesBlocks.WAXED_WEATHERED_COPPER_FITTING);
-		this.dropSelf(SimpleCopperPipesBlocks.WAXED_OXIDIZED_COPPER_FITTING);
+		SimpleCopperPipesBlocks.COPPER_PIPE.forEach(this::dropSelf);
+		SimpleCopperPipesBlocks.COPPER_FITTING.forEach(this::dropSelf);
 	}
-
 }

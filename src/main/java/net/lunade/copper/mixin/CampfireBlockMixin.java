@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
-import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
+import net.lunade.copper.tag.SimpleCopperPipesBlockItemTags;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,9 +20,10 @@ public class CampfireBlockMixin {
 			target = "Lnet/minecraft/world/level/block/CampfireBlock;isLitCampfire(Lnet/minecraft/world/level/block/state/BlockState;)Z"
 		)
 	)
-	private static boolean simpleCopperPipes$isSmokeyPos(BlockState state, Operation<Boolean> operation) {
-		return operation.call(state)
-			|| (state.is(SimpleCopperPipesBlockTags.COPPER_PIPES) && state.getValueOrElse(SimpleCopperPipesBlockStateProperties.FLUID, PipeFluid.NONE) == PipeFluid.SMOKE);
+	private static boolean simpleCopperPipes$isSmokeyPos(BlockState blockState, Operation<Boolean> operation) {
+		return operation.call(blockState)
+			|| (blockState.is(SimpleCopperPipesBlockItemTags.COPPER_PIPES.block()) && blockState.getValueOrElse(SimpleCopperPipesBlockStateProperties.FLUID, PipeFluid.NONE) == PipeFluid.SMOKE
+		);
 	}
 
 }

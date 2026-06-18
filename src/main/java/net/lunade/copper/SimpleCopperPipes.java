@@ -4,18 +4,19 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.ModContainer;
 import net.frozenblock.lib.entrypoint.api.FrozenModInitializer;
+import net.frozenblock.lib.feature_flag.api.FeatureFlagApi;
 import net.frozenblock.lib.particle.api.VibrationParticleVisibilityApi;
 import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.block.entity.leaking.LeakingPipeDripBehaviors;
 import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
 import net.lunade.copper.datafix.SimpleCopperPipesDataFixer;
-import net.lunade.copper.networking.SimpleCopperPipesNetworking;
 import net.lunade.copper.registry.CopperPipeDispenseBehaviors;
 import net.lunade.copper.registry.PipeMovementRestrictions;
 import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
 import net.lunade.copper.registry.SimpleCopperPipesBlocks;
 import net.lunade.copper.registry.SimpleCopperPipesCreativeInventorySorting;
+import net.lunade.copper.registry.SimpleCopperPipesItems;
 import net.lunade.copper.registry.SimpleCopperPipesSoundEvents;
 import net.lunade.copper.registry.SimpleCopperPipesStats;
 import net.lunade.copper.registry.TransferablePipeData;
@@ -37,8 +38,12 @@ public class SimpleCopperPipes extends FrozenModInitializer {
 	@Override
 	public void onInitialize(String modId, ModContainer container) {
 		SimpleCopperPipesDataFixer.applyDataFixes(container);
+		SimpleCopperPipesFeatureFlags.init();
+		FeatureFlagApi.rebuild();
+
 		SimpleCopperPipesBlocks.init();
 		SimpleCopperPipesBlockEntityTypes.init();
+		SimpleCopperPipesItems.init();
 		SimpleCopperPipesSoundEvents.init();
 		SimpleCopperPipesStats.init();
 
@@ -47,7 +52,6 @@ public class SimpleCopperPipes extends FrozenModInitializer {
 		PipeMovementRestrictions.init();
 		LeakingPipeDripBehaviors.init();
 
-		SimpleCopperPipesNetworking.init();
 		SimpleCopperPipesCreativeInventorySorting.init();
 
 		SimpleCopperPipesConfig.CONFIG.load(true);

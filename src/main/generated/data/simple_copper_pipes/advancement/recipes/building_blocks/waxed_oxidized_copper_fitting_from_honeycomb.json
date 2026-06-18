@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "simple_copper_pipes:waxed_oxidized_copper_fitting"
+        "recipe": "simple_copper_pipes:waxed_oxidized_copper_fitting_from_honeycomb"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "simple_copper_pipes:waxed_oxidized_copper_fitting"
+      "simple_copper_pipes:waxed_oxidized_copper_fitting_from_honeycomb"
     ]
   }
 }

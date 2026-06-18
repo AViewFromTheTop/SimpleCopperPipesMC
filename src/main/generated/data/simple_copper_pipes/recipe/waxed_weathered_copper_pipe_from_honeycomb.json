@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "redstone",
+  "category": "building",
+  "group": "waxed_weathered_copper_pipe",
   "ingredients": [
     "simple_copper_pipes:weathered_copper_pipe",
     "minecraft:honeycomb"

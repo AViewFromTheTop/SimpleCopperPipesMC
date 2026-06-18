@@ -3,13 +3,13 @@ package net.lunade.copper.registry;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import java.util.Map;
 import java.util.Optional;
+import net.frozenblock.lib.particle.options.ControlledNoteParticleOptions;
 import net.lunade.copper.SimpleCopperPipesConstants;
 import net.lunade.copper.block.entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block.entity.CopperFittingBlockEntity;
 import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.block.entity.data.TransferablePipeDataHandler;
 import net.lunade.copper.config.SimpleCopperPipesConfig;
-import net.lunade.copper.networking.packet.SimpleCopperPipesNoteParticlePacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.VibrationParticleOption;
@@ -71,7 +71,7 @@ public class TransferablePipeData {
 	}
 
 	public static void init() {
-		register(Identifier.tryBuild(SimpleCopperPipesConstants.MOD_ID, "default"), (data, level, pos, state, pipe) -> {
+		register(SimpleCopperPipesConstants.id("default"), (data, level, pos, state, pipe) -> {
             pipe.inputGameEventPos = data.blockPos();
             pipe.gameEventNbtVec3 = data.getVec3d();
             boolean noteBlock = false;
@@ -86,8 +86,15 @@ public class TransferablePipeData {
 					final int note = originState.getValue(NOTE);
 					final float pitch = (float) Math.pow(2D, (note - 12D) / 12D);
 					level.playSound(null, pos, originState.getValue(INSTRUMENT).getSoundEvent().value(), SoundSource.RECORDS, 3F, pitch);
-					//Send NoteBlock Particle Packet To Client
-					SimpleCopperPipesNoteParticlePacket.sendToAll(level, pos, note, level.getBlockState(pos).getValue(FACING));
+
+					final Vec3 notePos = Vec3.atCenterOf(pos).relative(level.getBlockState(pos).getValue(FACING), 0.6D);
+					level.sendParticles(
+						new ControlledNoteParticleOptions(note),
+						notePos.x(), notePos.y() + 0.2D, notePos.z(),
+						1,
+						0D, 0D, 0D,
+						0D
+					);
 				}
 			}
 

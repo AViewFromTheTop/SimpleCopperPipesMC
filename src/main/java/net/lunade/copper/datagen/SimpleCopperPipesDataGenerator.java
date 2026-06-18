@@ -6,7 +6,7 @@ import net.lunade.copper.datagen.loot.SimpleCopperPipesBlockLootProvider;
 import net.lunade.copper.datagen.model.SimpleCopperPipesModelProvider;
 import net.lunade.copper.datagen.recipe.SimpleCopperPipesRecipeProvider;
 import net.lunade.copper.datagen.tag.SimpleCopperPipesBlockTagProvider;
-import net.lunade.copper.datagen.tag.SimpleCopperPipesItemTagProvider;
+import net.lunade.copper.datagen.tag.SimpleCopperPipesItemTagsProvider;
 import net.minecraft.core.RegistrySetBuilder;
 
 public final class SimpleCopperPipesDataGenerator implements DataGeneratorEntrypoint {
@@ -21,7 +21,7 @@ public final class SimpleCopperPipesDataGenerator implements DataGeneratorEntryp
 		// DATA
 		pack.addProvider(SimpleCopperPipesBlockLootProvider::new);
 		pack.addProvider(SimpleCopperPipesBlockTagProvider::new);
-		pack.addProvider(SimpleCopperPipesItemTagProvider::new);
+		pack.addProvider(SimpleCopperPipesItemTagsProvider::new);
 		pack.addProvider(SimpleCopperPipesRecipeProvider::new);
 	}
 

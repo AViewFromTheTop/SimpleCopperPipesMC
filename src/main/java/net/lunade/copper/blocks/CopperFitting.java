@@ -1,7 +1,6 @@
 package net.lunade.copper.blocks;
 
 import net.lunade.copper.CopperPipeMain;
-import net.lunade.copper.block_entity.CopperFittingEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -10,25 +9,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.Containers;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.ChangeOverTimeBlock;
-import net.minecraft.world.level.block.LightningRodBlock;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.WeatheringCopper;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -40,9 +26,8 @@ import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.Nullable;
 
-public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedBlock, Copyable {
+public class CopperFitting extends Block implements SimpleWaterloggedBlock, Copyable {
 
     public ParticleOptions ink;
     public int cooldown;
@@ -83,30 +68,10 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
     public void neighborChanged(BlockState blockState, Level world, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
         if (world.hasNeighborSignal(blockPos)) { world.setBlockAndUpdate(blockPos, blockState.setValue(CopperFitting.POWERED, true));}
         else { world.setBlockAndUpdate(blockPos, blockState.setValue(CopperFitting.POWERED, false)); }
-        updateBlockEntityValues(world, blockPos, blockState);
     }
-
-    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) { return new CopperFittingEntity(blockPos, blockState); }
 
     @Override
     public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockView, BlockPos blockPos) { return blockState.getFluidState().isEmpty(); }
-
-    @Nullable
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState blockState, BlockEntityType<T> blockEntityType) {
-        if (!world.isClientSide) {
-            return createTickerHelper(blockEntityType, CopperPipeMain.COPPER_FITTING_ENTITY, (world1, blockPos, blockState1, copperFittingEntity) -> copperFittingEntity.serverTick(world1, blockPos, blockState1));
-        } return null;
-    }
-
-    public void setPlacedBy(Level world, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-        if (itemStack.hasCustomHoverName()) {
-            BlockEntity blockEntity = world.getBlockEntity(blockPos);
-            if (blockEntity instanceof CopperFittingEntity) {
-                ((CopperFittingEntity) blockEntity).setCustomName(itemStack.getHoverName());
-            }
-        }
-        updateBlockEntityValues(world, blockPos, blockState);
-    }
 
     @Override
     public FluidState getFluidState(BlockState blockState) {
@@ -176,30 +141,9 @@ public class CopperFitting extends BaseEntityBlock implements SimpleWaterloggedB
         }
     }
 
-    public static void updateBlockEntityValues(Level world, BlockPos pos, BlockState state) {
-        if (state.getBlock() instanceof CopperFitting) {
-            BlockEntity entity = world.getBlockEntity(pos);
-            if (entity instanceof CopperFittingEntity fitting) {
-                fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED);
-            }
-        }
-    }
-
     public boolean isRandomlyTicking(BlockState blockState) {
         Block block = blockState.getBlock();
         return block == CopperFitting.COPPER_FITTING || block == CopperFitting.EXPOSED_FITTING || block == CopperFitting.WEATHERED_FITTING;
-    }
-
-    public void onRemove(BlockState blockState, Level world, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        updateBlockEntityValues(world, blockPos, blockState);
-        if (blockState.hasBlockEntity() && !(blockState2.getBlock() instanceof CopperFitting)) {
-            BlockEntity blockEntity = world.getBlockEntity(blockPos);
-            if (blockEntity instanceof CopperFittingEntity) {
-                Containers.dropContents(world, blockPos, (CopperFittingEntity) blockEntity);
-                world.updateNeighbourForOutputSignal(blockPos, this);
-            }
-            world.removeBlockEntity(blockPos);
-        }
     }
 
     @Override

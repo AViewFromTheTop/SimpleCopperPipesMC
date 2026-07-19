@@ -1,68 +1,36 @@
 package net.lunade.copper.blocks;
 
 import net.lunade.copper.CopperPipeMain;
-import net.lunade.copper.block_entity.CopperPipeEntity;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Position;
-import net.minecraft.core.PositionImpl;
+import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.stats.Stats;
-import net.minecraft.util.*;
+import net.minecraft.util.ParticleUtils;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.ChangeOverTimeBlock;
-import net.minecraft.world.level.block.LightningRodBlock;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.WeatheringCopper;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.pathfinder.PathComputationType;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
-
-import static net.lunade.copper.CopperPipeMain.INSPECT_PIPE;
-
-public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBlock, Copyable {
+public class CopperPipe extends Block implements SimpleWaterloggedBlock, Copyable {
 
     public int cooldown;
     public int dispenserShotLength;
@@ -226,49 +194,11 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             BlockState oppState = world.getBlockState(pos.relative(directionOpp));
             Block oppBlock = oppState.getBlock();
             BlockEntity entity = world.getBlockEntity(pos);
-            if (entity instanceof CopperPipeEntity pipe) {
-                pipe.canDispense = (dirBlock == Blocks.AIR || dirBlock == Blocks.WATER) && (oppBlock != Blocks.AIR && oppBlock != Blocks.WATER);
-                pipe.corroded = oppBlock == CopperFitting.CORRODED_FITTING || state.getBlock() == CopperPipe.CORRODED_PIPE;
-                pipe.shootsControlled = oppBlock == Blocks.DROPPER;
-                pipe.shootsSpecial = oppBlock == Blocks.DISPENSER;
-                pipe.canAccept = !(oppBlock instanceof CopperPipe) && !(oppBlock instanceof CopperFitting) && !oppState.isRedstoneConductor(world, pos);
-                pipe.canSmoke = oppBlock instanceof CampfireBlock ? oppState.getValue(BlockStateProperties.LIT) : false;
-                pipe.canWater = oppBlock == Blocks.WATER || state.getValue(BlockStateProperties.WATERLOGGED) || (oppState.hasProperty(BlockStateProperties.WATERLOGGED) ? oppState.getValue(BlockStateProperties.WATERLOGGED) : false);
-            }
         }
-    }
-
-    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new CopperPipeEntity(blockPos, blockState);
     }
 
     @Override
     public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockView, BlockPos blockPos) { return blockState.getFluidState().isEmpty();}
-
-    @Nullable
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState blockState, BlockEntityType<T> blockEntityType) {
-        if (!world.isClientSide) {
-            return createTickerHelper(blockEntityType, CopperPipeMain.COPPER_PIPE_ENTITY, (world1, blockPos, blockState1, copperPipeEntity) -> copperPipeEntity.serverTick(world1, blockPos, blockState1));
-        } return null;
-    }
-
-    @Nullable
-    public <T extends BlockEntity> GameEventListener getListener(ServerLevel world, T blockEntity) {
-        if (blockEntity instanceof CopperPipeEntity pipeEntity) {
-            return pipeEntity.getGameEventListener();
-        }
-        return null;
-    }
-
-    public void setPlacedBy(Level world, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-        updateBlockEntityValues(world, blockPos, blockState);
-        if (itemStack.hasCustomHoverName()) {
-            BlockEntity blockEntity = world.getBlockEntity(blockPos);
-            if (blockEntity instanceof CopperPipeEntity) {
-                ((CopperPipeEntity)blockEntity).setCustomName(itemStack.getHoverName());
-            }
-        }
-    }
 
     @Override
     public FluidState getFluidState(BlockState blockState) {
@@ -276,24 +206,6 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             return Fluids.WATER.getSource(false);
         }
         return super.getFluidState(blockState);
-    }
-
-    public InteractionResult use(BlockState blockState, Level world, BlockPos blockPos, Player playerEntity, InteractionHand hand, BlockHitResult blockHitResult) {
-        if (playerEntity.getItemInHand(hand).getItem() instanceof BlockItem blockItem) {
-            if (blockItem.getBlock() instanceof CopperPipe || blockItem.getBlock() instanceof CopperFitting) {
-                return  InteractionResult.PASS;
-            }
-        }
-        if (world.isClientSide) {
-            return InteractionResult.SUCCESS;
-        } else {
-            BlockEntity blockEntity = world.getBlockEntity(blockPos);
-            if (blockEntity instanceof CopperPipeEntity) {
-                playerEntity.openMenu((CopperPipeEntity) blockEntity);
-                playerEntity.awardStat(Stats.CUSTOM.get(INSPECT_PIPE));
-            }
-            return InteractionResult.CONSUME;
-        }
     }
 
     public RenderShape getRenderShape(BlockState blockState) { return RenderShape.MODEL; }
@@ -564,18 +476,6 @@ public class CopperPipe extends BaseEntityBlock implements SimpleWaterloggedBloc
             }
         }
         return 1;
-    }
-
-    public void onRemove(BlockState blockState, Level world, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        updateBlockEntityValues(world, blockPos, blockState);
-        if (blockState.hasBlockEntity() && !(blockState2.getBlock() instanceof CopperPipe)) {
-            BlockEntity blockEntity = world.getBlockEntity(blockPos);
-            if (blockEntity instanceof CopperPipeEntity) {
-                Containers.dropContents(world, blockPos, (CopperPipeEntity)blockEntity);
-                world.updateNeighbourForOutputSignal(blockPos, this);
-            }
-            world.removeBlockEntity(blockPos);
-        }
     }
 
     public static boolean isReceivingRedstonePower(BlockPos blockPos, Level world) {

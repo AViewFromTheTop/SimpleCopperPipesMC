@@ -5,19 +5,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.lunade.copper.RegisterPipeNbtMethods;
-import net.lunade.copper.block_entity.AbstractSimpleCopperBlockEntity;
-import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -301,36 +296,6 @@ public class MoveablePipeDataHandler {
         public SaveableMovablePipeNbt withNBTID(ResourceLocation id) {
             this.setNbtID(id);
             return this;
-        }
-
-        public void dispense(ServerLevel world, BlockPos pos, BlockState state, CopperPipeEntity pipeEntity) {
-            RegisterPipeNbtMethods.DispenseMethod method = RegisterPipeNbtMethods.getDispense(this.getNbtID());
-            if (method != null) {
-                method.dispense(this, world, pos, state, pipeEntity);
-            }
-        }
-
-        public void onMove(ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) {
-            RegisterPipeNbtMethods.OnMoveMethod method = RegisterPipeNbtMethods.getMove(this.getNbtID());
-            if (method != null) {
-                method.onMove(this, world, pos, state, blockEntity);
-            }
-        }
-
-        public void tick(ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) { //Will be called at the CURRENT location, not the Pipe/Fitting it moves to on that tick - it can run this method and be dispensed on the same tick.
-            RegisterPipeNbtMethods.TickMethod method = RegisterPipeNbtMethods.getTick(this.getNbtID());
-            if (method != null) {
-                method.tick(this, world, pos, state, blockEntity);
-            }
-        }
-
-        public boolean canMove(ServerLevel world, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity) {
-            RegisterPipeNbtMethods.CanMoveMethod method = RegisterPipeNbtMethods.getCanMove(this.getNbtID());
-            if (method != null) {
-                return method.canMove(this, world, pos, state, blockEntity);
-            } else {
-                return true;
-            }
         }
 
         @Nullable

@@ -2,19 +2,12 @@ package net.lunade.copper;
 
 import it.unimi.dsi.fastutil.objects.*;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.loader.api.FabricLoader;
-import net.lunade.copper.block_entity.CopperFittingEntity;
-import net.lunade.copper.block_entity.CopperPipeEntity;
 import net.lunade.copper.blocks.CopperFitting;
 import net.lunade.copper.blocks.CopperPipe;
 import net.lunade.copper.blocks.CopperPipeProperties;
-import net.lunade.copper.leaking_pipes.LeakingPipeManager;
-import net.lunade.copper.registry.SimpleCopperRegistries;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -29,9 +22,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -46,9 +36,6 @@ public class CopperPipeMain implements ModInitializer {
 	public static final ResourceLocation WATER = id("water");
 	public static final ResourceLocation SMOKE = id("smoke");
 
-	public static BlockEntityType<CopperPipeEntity> COPPER_PIPE_ENTITY;
-
-	public static BlockEntityType<CopperFittingEntity> COPPER_FITTING_ENTITY;
 	public static final TagKey<Block> BLOCK_LISTENERS = TagKey.create(Registry.BLOCK_REGISTRY, id("block_event_listeners"));
 	public static final TagKey<Block> UNSCRAPEABLE = TagKey.create(Registry.BLOCK_REGISTRY, id("unscrapeable"));
 	public static final TagKey<Block> WAXED = TagKey.create(Registry.BLOCK_REGISTRY, id("waxed"));
@@ -90,7 +77,6 @@ public class CopperPipeMain implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		CopperPipeProperties.init();
-		SimpleCopperRegistries.initRegistry();
 
 		Registry.register(Registry.CUSTOM_STAT, INSPECT_PIPE, INSPECT_PIPE);
 		Stats.CUSTOM.get(INSPECT_PIPE, StatFormatter.DEFAULT);
@@ -127,9 +113,6 @@ public class CopperPipeMain implements ModInitializer {
 		//CORRODED
 		registerBlock(CopperPipe.CORRODED_PIPE, id("corroded_pipe"));
 
-		COPPER_PIPE_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "lunade:copper_pipe", FabricBlockEntityTypeBuilder.create(CopperPipeEntity::new, CopperPipe.COPPER_PIPE, CopperPipe.EXPOSED_PIPE, CopperPipe.WEATHERED_PIPE, CopperPipe.OXIDIZED_PIPE, CopperPipe.WAXED_COPPER_PIPE, CopperPipe.WAXED_EXPOSED_PIPE, CopperPipe.WAXED_WEATHERED_PIPE, CopperPipe.WAXED_OXIDIZED_PIPE,
-		CopperPipe.CORRODED_PIPE).build(null));
-
 		//FITTINGS
 		registerBlock(CopperFitting.COPPER_FITTING, id("copper_fitting"));
 		registerBlock(CopperFitting.EXPOSED_FITTING, id("exposed_copper_fitting"));
@@ -144,10 +127,6 @@ public class CopperPipeMain implements ModInitializer {
 		//CORRODED
 		registerBlock(CopperFitting.CORRODED_FITTING, id("corroded_fitting"));
 
-
-		COPPER_FITTING_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "lunade:copper_fitting", FabricBlockEntityTypeBuilder.create(CopperFittingEntity::new, CopperFitting.COPPER_FITTING, CopperFitting.EXPOSED_FITTING, CopperFitting.WEATHERED_FITTING, CopperFitting.OXIDIZED_FITTING, CopperFitting.WAXED_COPPER_FITTING, CopperFitting.WAXED_EXPOSED_FITTING, CopperFitting.WAXED_WEATHERED_FITTING, CopperFitting.WAXED_OXIDIZED_FITTING,
-		CopperFitting.CORRODED_FITTING).build(null));
-
 		//SOUND
 		Registry.register(Registry.SOUND_EVENT, ITEM_IN.getLocation(), ITEM_IN);
 		Registry.register(Registry.SOUND_EVENT, ITEM_OUT.getLocation(), ITEM_OUT);
@@ -159,15 +138,6 @@ public class CopperPipeMain implements ModInitializer {
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_BREAK.getLocation(), CORRODED_COPPER_BREAK);
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_FALL.getLocation(), CORRODED_COPPER_FALL);
 		Registry.register(Registry.SOUND_EVENT, CORRODED_COPPER_HIT.getLocation(), CORRODED_COPPER_HIT);
-
-		RegisterPipeNbtMethods.init();
-		PoweredPipeDispenses.init();
-		FittingPipeDispenses.init();
-		PipeMovementRestrictions.init();
-
-		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> LeakingPipeManager.clearAll());
-
-		ServerTickEvents.START_SERVER_TICK.register((listener) -> LeakingPipeManager.clearAndSwitch());
 
 		FabricLoader.getInstance().getEntrypointContainers("simplecopperpipes", CopperPipeEntrypoint.class).forEach(entrypoint -> {
 			try {
@@ -249,24 +219,6 @@ public class CopperPipeMain implements ModInitializer {
 	public static ResourceLocation id(String path) {
 		return new ResourceLocation(BLOCK_ID, path);
 	}
-
-	public static ResourceLocation colourPipe(String colour) {
-		return id(colour + "_pipe");
-	}
-
-	public static ResourceLocation glowingPipe(String colour) {
-		return id("glowing_" + colour + "_pipe");
-	}
-
-	public static ResourceLocation colourFitting(String colour) {
-		return id(colour + "_fitting");
-	}
-
-	public static ResourceLocation glowingFitting(String colour) {
-		return id("glowing_" + colour + "_fitting");
-	}
-
-	public static final Logger LOGGER = LoggerFactory.getLogger("COPPER_PIPES");
 
 	public static void registerBlock(Block block, ResourceLocation resourceLocation) {
 		Registry.register(Registry.BLOCK, resourceLocation, block);

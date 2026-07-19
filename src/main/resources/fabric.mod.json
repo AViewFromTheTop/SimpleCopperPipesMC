@@ -29,7 +29,6 @@
     ]
   },
   "mixins": [
-    "copper_pipes.mixins.json"
   ],
 
   "accessWidener": "copper_pipes.accesswidener",

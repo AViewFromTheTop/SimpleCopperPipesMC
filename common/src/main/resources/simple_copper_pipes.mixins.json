@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "net.lunade.copper.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "CampfireBlockMixin",
+    "CoralBlockBlockMixin",
+    "CoralParentBlockMixin",
+    "EntityMixin",
+    "FarmlandBlockMixin",
+    "SugarCaneBlockMixin",
+    "VibrationTickerMixin",
+    "datafix.DataFixersMixin",
+    "datafix.V3438Mixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,59 +1,11 @@
 plugins {
-	id("net.fabricmc.fabric-loom") version("1.17-SNAPSHOT")
-	id("org.quiltmc.gradle.licenser") version("+")
-	id("org.ajoberstar.grgit") version("+")
-	id("com.modrinth.minotaur") version("+")
-	`maven-publish`
-	eclipse
-	idea
-	`java-library`
-	java
+    id("net.frozenblock.triangle.core") version("+")
+    id("net.frozenblock.triangle.common") version("+") apply(false)
+    id("net.frozenblock.triangle.fabric") version("+") apply(false)
+    id("net.frozenblock.candlelight") version("+") apply(false)
+
+    id("org.quiltmc.gradle.licenser") version("+") apply(false)
     checkstyle
-}
-
-val minecraft_version: String by project
-val loader_version: String by project
-
-val mod_version: String by project
-val mod_id: String by project
-val protocol_version: String by project
-val maven_group: String by project
-val archives_base_name: String by project
-
-val fabric_api_version: String by project
-val frozenlib_version: String by project
-val thecopperierage_version: String by project
-val modmenu_version: String by project
-val cloth_config_version: String by project
-
-base {
-	archivesName = archives_base_name
-}
-
-version = mod_version
-group = maven_group
-
-val datagen by sourceSets.registering {
-	compileClasspath += sourceSets.main.get().compileClasspath
-	runtimeClasspath += sourceSets.main.get().runtimeClasspath
-}
-
-sourceSets {
-	main {
-		resources {
-			srcDirs("src/main/generated")
-		}
-	}
-}
-
-loom {
-	runtimeOnlyLog4j = true
-
-	accessWidenerPath = file("src/main/resources/simple_copper_pipes.accesswidener")
-	interfaceInjection {
-		// When enabled, injected interfaces from dependencies will be applied.
-		enableDependencyInterfaceInjection = true
-	}
 }
 
 checkstyle {
@@ -61,200 +13,113 @@ checkstyle {
     toolVersion = "10.20.2"
 }
 
-loom {
-	runs {
-		register("datagen") {
-			client()
-			name("Data Generation")
-			source(datagen.get())
-			vmArg("-Dfabric-api.datagen")
-			vmArg("-Dfabric-api.datagen.output-dir=${file("src/main/generated")}")
-			//vmArg("-Dfabric-api.datagen.strict-validation")
-			vmArg("-Dfabric-api.datagen.modid=$mod_id")
+val frozenlib_version: String by project
 
-			ideConfigGenerated(true)
-			runDir = "build/datagen"
-		}
-
-		named("client") {
-			ideConfigGenerated(true)
-		}
-		named("server") {
-			ideConfigGenerated(true)
-		}
-	}
+mod {
+    additional.add("frozenlib_version", ">=${frozenlib_version.split('-').firstOrNull()}-")
+    additional.add("protocol_version")
+    additional.add("mod_description")
+    additional.add("mod_credits")
+    additional.add("mod_license")
+    additional.add("mod_homepage")
+    additional.add("mod_authors")
+    additional.add("mod_github")
 }
 
-val includeImplementation by configurations.creating
+subprojects {
+    apply(plugin = "net.frozenblock.triangle.core")
+    apply(plugin = "net.frozenblock.candlelight")
 
-configurations {
-	include {
-		extendsFrom(includeImplementation)
-	}
-	implementation {
-		extendsFrom(includeImplementation)
-	}
-}
+    val mavenUrl = env["MAVEN_URL"]
+    val mavenUsername = env["MAVEN_USERNAME"]
+    val mavenPassword = env["MAVEN_PASSWORD"]
 
-repositories {
-	maven("https://jitpack.io")
-	exclusiveContent {
-		forRepository {
-			maven("https://api.modrinth.com/maven") {
-				name = "Modrinth"
-			}
-		}
-		filter {
-			includeGroup("maven.modrinth")
-		}
-	}
-	maven("https://maven.terraformersmc.com") {
-		content {
-			includeGroup("com.terraformersmc")
-		}
-	}
-
-	maven("https://maven.shedaniel.me/")
-	maven("https://maven.minecraftforge.net/")
-	maven("https://maven.jamieswhiteshirt.com/libs-release") {
-		content {
-			includeGroup("com.jamieswhiteshirt")
-		}
-	}
-    maven("https://maven.frozenblock.net/release") {
-        name = "FrozenBlock"
-    }
-
-	flatDir {
-		dirs("libs")
-	}
-	mavenCentral()
-}
-
-
-dependencies {
-	minecraft("com.mojang:minecraft:$minecraft_version")
-
-	implementation("net.fabricmc:fabric-loader:$loader_version")
-	implementation("net.fabricmc.fabric-api:fabric-api:$fabric_api_version")
-
-    // FrozenLib
-    api("maven.modrinth:frozenlib:$frozenlib_version")
-
-    // The Copperier Age
-    implementation("maven.modrinth:the-copperier-age:$thecopperierage_version")
-
-    // ModMenu
-    implementation("maven.modrinth:modmenu:${modmenu_version}")
-
-	// Cloth Config
-    implementation("me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version") {
-		exclude(group = "net.fabricmc.fabric-api")
-		exclude(group = "com.terraformersmc")
-	}
-
-	"datagenImplementation"(sourceSets.main.get().output)
-}
-
-tasks {
-    processResources {
-        val properties = mapOf(
-            "mod_id" to mod_id,
-            "version" to version,
-            "protocol_version" to protocol_version,
-            "minecraft_version" to "~26.2-",//minecraft_version,
-
-            "fabric_api_version" to ">=$fabric_api_version",
-            "frozenlib_version" to ">=${frozenlib_version.split('-').firstOrNull()}-"
-        )
-
-        properties.forEach { (a, b) -> inputs.property(a, b) }
-
-        filesNotMatching(
-            listOf(
-                "**/*.java",
-                "**/sounds.json",
-                "**/lang/*.json",
-                "**/.cache/*",
-                "**/*.accesswidener",
-                "**/*.nbt",
-                "**/*.png",
-                "**/*.ogg",
-                "**/*.mixins.json",
-                "**/*.zip"
-            )
-        ) {
-            expand(properties)
+    if (mavenUrl != null && mavenUsername != null && mavenPassword != null) {
+        upload {
+            maven {
+                repositories {
+                    maven(mavenUrl) {
+                        name = "FrozenBlock"
+                        credentials {
+                            username = mavenUsername
+                            password = mavenPassword
+                        }
+                    }
+                }
+            }
         }
     }
 
-	register("javadocJar", Jar::class) {
-		dependsOn(javadoc)
-		archiveClassifier.set("javadoc")
-		from(javadoc.get().destinationDir)
-	}
+    tasks.withType<JavaCompile> {
+        options.compilerArgs.addAll(listOf("-Xmaxerrs", "4000"))
+        options.release.set(25)
+    }
 
-	register("sourcesJar", Jar::class) {
-		dependsOn(classes)
-		archiveClassifier.set("sources")
-		from(sourceSets.main.get().allSource)
-	}
+    configure<JavaPluginExtension> {
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
+    }
 
-	withType(JavaCompile::class) {
-		options.encoding = "UTF-8"
-		// Minecraft 26.1 (26.1-snapshot-1) upwards uses Java 25.
-		options.release.set(25)
-		options.isFork = true
-		options.isIncremental = true
-	}
+    dependencies {
+        compileOnly("net.frozenblock:candlelight:+")
+        compileOnly("net.frozenblock:frozenlib-common:${frozenlib_version}")
+    }
 
-	withType(Test::class) {
-		maxParallelForks = Runtime.getRuntime().availableProcessors().div(2)
-	}
-}
+    repositories {
+        maven("https://maven.frozenblock.net/release") {
+            name = "FrozenBlock"
+        }
+        maven("https://maven.frozenblock.net/snapshot") {
+            name = "FrozenBlock Snapshot"
+        }
+        maven("https://maven.terraformersmc.com") {
+            name = "TerraformersMC"
+            content {
+                includeGroup("com.terraformersmc")
+            }
+        }
+        maven("https://registry.somethingcatchy.net/repository/maven-releases/") { // Candlelight & Triangle
+            name = "SomethingCatchy (MehVahdJukaar)"
+        }
+        maven("https://maven.quiltmc.org/repository/release") {
+            name = "Quilt"
+        }
+        maven("https://maven.shedaniel.me/") {
+            name = "Shedaniel"
+        }
+        maven("https://maven.jamieswhiteshirt.com/libs-release") {
+            name = "JamiesWhiteShirt"
+            content {
+                includeGroup("com.jamieswhiteshirt")
+            }
+        }
 
-val applyLicenses: Task by tasks
-val test: Task by tasks
-val runClient: Task by tasks
-val runDatagen: Task by tasks
+        exclusiveContent {
+            forRepository {
+                maven("https://api.modrinth.com/maven") {
+                    name = "Modrinth"
+                }
+            }
+            filter {
+                includeGroup("maven.modrinth")
+            }
+        }
+        maven("https://jitpack.io") {
+            name = "Jitpack"
+        }
+        mavenCentral()
+    }
 
-val jar: Jar by tasks
-val sourcesJar: Jar by tasks
-val javadocJar: Jar by tasks
+    tasks {
+        withType(JavaCompile::class) {
+            options.encoding = "UTF-8"
+            options.release.set(25)
+            options.isFork = true
+            options.isIncremental = true
+        }
 
-tasks.withType(JavaCompile::class) {
-	options.encoding = "UTF-8"
-	// Minecraft 26.1 (26.1-snapshot-1) upwards uses Java 25.
-	options.release = 25
-	options.isFork = true
-	options.isIncremental = true
-}
-
-tasks.withType(Test::class) {
-	maxParallelForks = Runtime.getRuntime().availableProcessors().div(2)
-}
-
-java {
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
-
-	withSourcesJar()
-}
-
-tasks.jar {
-	from("LICENSE") {
-		rename { "${it}_${base.archivesName}"}
-	}
-}
-
-publishing {
-	publications {
-		create<MavenPublication>("mavenJava") {
-			from(components["java"])
-		}
-	}
-
-	repositories {
-
-	}
+        withType(Test::class) {
+            maxParallelForks = Runtime.getRuntime().availableProcessors().div(2)
+        }
+    }
 }

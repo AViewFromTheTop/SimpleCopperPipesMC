@@ -1,0 +1,486 @@
+package net.lunade.copper.block.entity;
+
+import com.mojang.serialization.Codec;
+import java.util.ArrayList;
+import net.frozenblock.lib.transfer.api.TransferApi;
+import net.lunade.copper.block.CopperFittingBlock;
+import net.lunade.copper.block.CopperPipeBlock;
+import net.lunade.copper.block.entity.data.TransferablePipeDataHandler;
+import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
+import net.lunade.copper.block.properties.PipeFluid;
+import net.lunade.copper.config.SimpleCopperPipesConfig;
+import net.lunade.copper.registry.CopperPipeDispenseBehaviors;
+import net.lunade.copper.registry.PipeMovementRestrictions;
+import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
+import net.lunade.copper.registry.SimpleCopperPipesSoundEvents;
+import net.lunade.copper.tag.SimpleCopperPipesBlockItemTags;
+import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.LevelEvent;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.gameevent.BlockPositionSource;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.level.gameevent.PositionSource;
+import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
+
+public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity implements GameEventListener.Provider<VibrationSystem.Listener>, VibrationSystem {
+	private static final int VIBRATION_RANGE = 8;
+	private static final int MAX_TRANSFER_AMOUNT = 1;
+	private final VibrationSystem.Listener vibrationListener;
+	private final VibrationSystem.User vibrationUser;
+	public int transferCooldown;
+	public int dispenseCooldown;
+	public int noteBlockCooldown;
+	public boolean canDispense;
+	public DispenseType dispenseType;
+	public boolean canAcceptGameEvents;
+	public BlockPos inputGameEventPos;
+	public Vec3 gameEventNbtVec3;
+	private VibrationSystem.Data vibrationData;
+
+	public CopperPipeBlockEntity(BlockPos pos, BlockState state) {
+		super(SimpleCopperPipesBlockEntityTypes.COPPER_PIPE.get(), pos, state, MoveType.FROM_PIPE);
+		this.noteBlockCooldown = 0;
+		this.vibrationUser = this.createVibrationUser();
+		this.vibrationData = new VibrationSystem.Data();
+		this.vibrationListener = new VibrationSystem.Listener(this);
+	}
+
+	public static boolean canTransfer(Level level, BlockPos pos, boolean to, CopperPipeBlockEntity copperPipe, Direction direction, Direction pipeDirection) {
+		if (copperPipe.transferCooldown > 0) return false;
+
+		final boolean transferApiCheck = to
+			? TransferApi.supportsItemInsertion(level, pos, direction) && TransferApi.supportsItemExtraction(level, copperPipe.getBlockPos(), pipeDirection)
+			: TransferApi.supportsItemExtraction(level, pos, direction) && TransferApi.supportsItemInsertion(level, copperPipe.getBlockPos(), pipeDirection);
+
+		final BlockEntity blockEntity = level.getBlockEntity(pos);
+		if (blockEntity != null) {
+			if (blockEntity instanceof CopperPipeBlockEntity pipe) return (to || pipe.transferCooldown <= 0) && transferApiCheck;
+			if (blockEntity instanceof CopperFittingBlockEntity) return false;
+
+			if (to) {
+				final PipeMovementRestrictions.CanTransferTo<BlockEntity> canTransfer = PipeMovementRestrictions.getCanTransferTo(blockEntity);
+				if (canTransfer != null) return canTransfer.canTransfer((ServerLevel) level, pos, level.getBlockState(pos), copperPipe, blockEntity) && transferApiCheck;
+			} else {
+				final PipeMovementRestrictions.CanTakeFrom<BlockEntity> canTake = PipeMovementRestrictions.getCanTakeFrom(blockEntity);
+				if (canTake != null) return canTake.canTake((ServerLevel) level, pos, level.getBlockState(pos), copperPipe, blockEntity) && transferApiCheck;
+			}
+		}
+		return transferApiCheck;
+	}
+
+	public static void spawnItem(Level level, ItemStack stack, int shotPower, Direction direction, Vec3 pos, Direction facing) { //Simply Spawn An Item
+		final double x = pos.x();
+		final double y = pos.y() - (direction.getAxis() == Direction.Axis.Y ? 0.125D : 0.15625D);
+		final double z = pos.z();
+
+		final Direction.Axis axis = facing.getAxis();
+		final double xd = axis == Direction.Axis.X ? (shotPower * facing.getStepX()) * 0.1 : 0D;
+		final double yd = axis == Direction.Axis.Y ? (shotPower * facing.getStepY()) * 0.1 : 0D;
+		final double zd = axis == Direction.Axis.Z ? (shotPower * facing.getStepZ()) * 0.1 : 0D;
+
+		ItemEntity itemEntity = new ItemEntity(level, x, y, z, stack);
+		itemEntity.setDeltaMovement(xd, yd, zd);
+		level.addFreshEntity(itemEntity);
+	}
+
+	public static void setCooldown(Level level, BlockPos pos) {
+		if (level.getBlockEntity(pos) instanceof CopperPipeBlockEntity pipe) pipe.setCooldown(level.getBlockState(pos));
+	}
+
+	@Override
+	public void setItem(int i, ItemStack stack) {
+		this.unpackLootTable(null);
+		if (stack == null) return;
+
+		this.getItems().set(i, stack);
+		if (stack.getCount() > this.getMaxStackSize()) stack.setCount(this.getMaxStackSize());
+	}
+
+	@Override
+	public void serverTick(Level level, BlockPos blockPos, BlockState state) {
+		if (level.isClientSide()) return;
+
+		VibrationSystem.Ticker.tick(this.level, this.getVibrationData(), this.createVibrationUser());
+		super.serverTick(level, blockPos, state);
+
+		if (this.noteBlockCooldown > 0) --this.noteBlockCooldown;
+		if (this.dispenseCooldown > 0) {
+			--this.dispenseCooldown;
+		} else {
+			this.dispense((ServerLevel) level, blockPos, state);
+			int cooldown = 0;
+			if (level.getBlockState(blockPos.relative(state.getValue(CopperPipeBlock.FACING).getOpposite())).getBlock() instanceof CopperFittingBlock fitting) {
+				cooldown = fitting.getCooldown();
+			} else {
+				if (state.getBlock() instanceof CopperPipeBlock pipe) cooldown = Mth.floor(pipe.getCooldown() * 0.5D);
+			}
+			this.dispenseCooldown = cooldown;
+		}
+
+		if (this.transferCooldown > 0) {
+			--this.transferCooldown;
+		} else {
+			this.pipeMove(level, blockPos, state);
+		}
+
+		if (state.getValue(CopperPipeBlock.FLUID) == PipeFluid.WATER && state.getValue(CopperPipeBlock.FACING) != Direction.UP) {
+			LeakingPipeManager.addPos(level, blockPos);
+		}
+	}
+
+	@Override
+	public void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state) {
+		if (!(state.getBlock() instanceof CopperPipeBlock)) return;
+
+		final Direction facing = state.getValue(BlockStateProperties.FACING);
+		final BlockPos facingPos = pos.relative(facing);
+		final BlockState facingState = level.getBlockState(facingPos);
+		final Direction opposite = facing.getOpposite();
+		final BlockPos oppositePos = pos.relative(opposite);
+		final BlockState oppositeState = level.getBlockState(oppositePos);
+		final FluidState oppositeFluidState = oppositeState.getFluidState();
+		final Block oppositeBlock = oppositeState.getBlock();
+		final VoxelShape pipeShape = state.getBlockSupportShape(level, pos);
+
+		// ENTRY
+		boolean isEntrySupported = state.getValue(CopperPipeBlock.BACK_CONNECTED);
+		if (!isEntrySupported) {
+			final boolean checkEntrySupportShape = oppositeState.is(SimpleCopperPipesBlockTags.COPPER_PIPE_CHECKS_SUPPORT_SHAPE);
+			if (checkEntrySupportShape) {
+				final VoxelShape pipeEntryShape = pipeShape.getFaceShape(opposite);
+				final VoxelShape supportingShape = oppositeState.getBlockSupportShape(level, oppositePos).getFaceShape(facing);
+				final VoxelShape pipeAndSupportShape = Shapes.join(pipeEntryShape, supportingShape, BooleanOp.AND);
+				isEntrySupported = pipeAndSupportShape.toAabbs().equals(pipeEntryShape.toAabbs());
+			} else {
+				isEntrySupported = !oppositeState.getCollisionShape(level, oppositePos).isEmpty();
+			}
+		}
+
+		// EXIT
+		boolean isExitBlocked;
+		final boolean checkExitSupportShape = facingState.is(SimpleCopperPipesBlockTags.COPPER_PIPE_CHECKS_SUPPORT_SHAPE);
+		if (checkExitSupportShape) {
+			final VoxelShape pipeExitShape = pipeShape.getFaceShape(facing);
+			final VoxelShape facingShape = facingState.getBlockSupportShape(level, facingPos).getFaceShape(opposite);
+			final VoxelShape pipeAndFacingShape = Shapes.join(pipeExitShape, facingShape, BooleanOp.AND);
+			isExitBlocked = !pipeAndFacingShape.isEmpty();
+		} else {
+			isExitBlocked = !facingState.getCollisionShape(level, facingPos).isEmpty();
+		}
+
+		this.canDispense = isEntrySupported && !isExitBlocked;
+		this.dispenseType = oppositeBlock == Blocks.DROPPER ? DispenseType.DROPPER : oppositeBlock == Blocks.DISPENSER ? DispenseType.DISPENSER : DispenseType.NONE;
+		this.canAcceptGameEvents = !isEntrySupported;
+		this.canWater = SimpleCopperPipesConfig.CARRY_WATER.get() && (oppositeFluidState.is(FluidTags.WATER) || state.getValue(BlockStateProperties.WATERLOGGED) || oppositeState.getValueOrElse(BlockStateProperties.WATERLOGGED, false));
+		this.canLava =  SimpleCopperPipesConfig.CARRY_LAVA.get() && oppositeFluidState.is(FluidTags.LAVA);
+		final boolean canWaterAndLava = this.canWater && this.canLava;
+		this.canSmoke = SimpleCopperPipesConfig.CARRY_SMOKE.get() && (oppositeBlock instanceof CampfireBlock && !this.canWater && !this.canLava ? oppositeState.getValue(BlockStateProperties.LIT) : canWaterAndLava);
+		if (canWaterAndLava) {
+			this.canWater = false;
+			this.canLava = false;
+		}
+	}
+
+	public void pipeMove(Level level, BlockPos pos, BlockState state) {
+		final Direction facing = state.getValue(BlockStateProperties.FACING);
+		final boolean movedOut = this.moveOut(level, pos, facing);
+		final int movedIn = this.moveIn(level, pos, state, facing);
+		if (!movedOut && movedIn < 2) return;
+
+		setCooldown(state);
+		setChanged(level, pos, state);
+		if (movedIn == 3) {
+			if (!SimpleCopperPipesConfig.SUCTION_SOUNDS.get()) return;
+			level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_IN.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+		}
+	}
+
+	private int moveIn(Level level, BlockPos pos, BlockState state, Direction facing) {
+		final Direction facingAway = facing.getOpposite();
+		final BlockPos facingAwayPos = pos.relative(facingAway);
+		if (!canTransfer(level, facingAwayPos, false, this, facing, facingAway)) return 0;
+
+		final int moved = TransferApi.moveItems(level, facingAwayPos, facing, pos, facingAway, null, MAX_TRANSFER_AMOUNT);
+		if (moved <= 0) return 0;
+
+		if (state.is(SimpleCopperPipesBlockTags.SILENT_COPPER_PIPES)) return 2;
+
+		final Block block = level.getBlockState(facingAwayPos).getBlock();
+		if (!(block instanceof CopperPipeBlock) && !(block instanceof CopperFittingBlock)) return 3;
+		return 2;
+	}
+
+	private boolean moveOut(Level level, BlockPos pos, Direction facing) {
+		final BlockPos facingPos = pos.relative(facing);
+		final Direction opposite = facing.getOpposite();
+		if (!canTransfer(level, facingPos, true, this, opposite, facing)) return false;
+
+		final BlockState facingState = level.getBlockState(facingPos);
+		final boolean canMove = !(facingState.getBlock() instanceof CopperPipeBlock) || facingState.getValue(CopperPipeBlock.FACING) != facing;
+		if (!canMove) return false;
+
+		return TransferApi.moveItems(level, pos, facing, facingPos, opposite, null, MAX_TRANSFER_AMOUNT) > 0;
+	}
+
+	private boolean dispense(ServerLevel level, BlockPos pos, BlockState state) {
+		if (!this.canDispense) return false;
+
+		final int slot = this.chooseNonEmptySlot(level.getRandom());
+		if (slot < 0) return false;
+
+		final ItemStack stack = this.getItem(slot);
+		if (stack.isEmpty()) return false;
+
+		ItemStack shotItem;
+		int shotPower = 4;
+		if (this.dispenseType == DispenseType.DROPPER) { //If Dropper
+			shotPower = 10;
+			if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) {
+				level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+			}
+		} else if (this.dispenseType == DispenseType.DISPENSER) { //If Dispenser, Use Pipe-Specific Launch Length
+			if (state.getBlock() instanceof CopperPipeBlock pipe) {
+				shotPower = pipe.dispenseShotPower;
+				if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) {
+					level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+				}
+			} else {
+				shotPower = 12;
+			}
+		}
+
+		final Direction facing = state.getValue(BlockStateProperties.FACING);
+		final boolean silent = state.is(SimpleCopperPipesBlockTags.SILENT_COPPER_PIPES);
+		if (level.getBlockState(pos.relative(facing.getOpposite())).getBlock() instanceof CopperFittingBlock) {
+			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, true, silent);
+		} else {
+			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, false, silent);
+			level.levelEvent(LevelEvent.PARTICLES_SHOOT_WHITE_SMOKE, pos, facing.get3DDataValue());
+		}
+		this.setItem(slot, shotItem);
+		return true;
+	}
+
+	private ItemStack canonShoot(
+		ServerLevel level,
+		BlockPos pos,
+		ItemStack stack,
+		BlockState state,
+		Direction facing,
+		int shotPower,
+		boolean fitting,
+		boolean silent
+	) {
+		final Vec3 output = Vec3.atCenterOf(pos).relative(facing, 0.7D);
+		ItemStack usableStack = stack;
+
+		if (state.getValue(CopperPipeBlock.POWERED)) { //Special Behavior When Powered
+			CopperPipeDispenseBehaviors.PoweredDispense poweredDispense = CopperPipeDispenseBehaviors.getDispense(usableStack.getItem());
+			if (poweredDispense != null) {
+				usableStack = stack.split(1);
+				poweredDispense.dispense(level, usableStack, shotPower, facing, output, state, pos, this);
+				if (!fitting && !silent) {
+					if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+					level.gameEvent(GameEvent.ENTITY_PLACE, pos, new GameEvent.Context(null, state));
+				}
+				return stack;
+			}
+		}
+
+		if (SimpleCopperPipesConfig.DISPENSING.get()) {
+			usableStack = stack.split(1);
+			level.levelEvent(LevelEvent.PARTICLES_SHOOT_SMOKE, pos, facing.get3DDataValue());
+			spawnItem(level, usableStack, shotPower, facing, output, facing);
+			if (!silent) {
+				level.gameEvent(GameEvent.ENTITY_PLACE, pos, new GameEvent.Context(null, state));
+				if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) {
+					level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+				}
+			}
+		}
+
+		return stack;
+	}
+
+	public int chooseNonEmptySlot(RandomSource random) {
+		this.unpackLootTable(null);
+		int i = -1;
+		int j = 1;
+		for (int k = 0; k < this.inventory.size(); ++k) {
+			if (!this.inventory.get(k).isEmpty() && random.nextInt(j++) == 0) i = k;
+		}
+		return i;
+	}
+
+	public void setCooldown(BlockState state) {
+		this.transferCooldown = state.getBlock() instanceof CopperPipeBlock pipe ? pipe.getCooldown() : 2;
+	}
+
+	@Override
+	public void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		this.transferCooldown = input.getIntOr("transferCooldown", 0);
+		this.dispenseCooldown = input.getIntOr("dispenseCooldown", 0);
+		this.noteBlockCooldown = input.getIntOr("noteBlockCooldown", 0);
+		this.canDispense = input.getBooleanOr("canDispense", false);
+		this.dispenseType = input.read("dispenseType", DispenseType.CODEC).orElse(DispenseType.NONE);
+		this.canAcceptGameEvents = input.getBooleanOr("canAcceptGameEvents", false);
+		this.vibrationData = input.read("listener", Data.CODEC).orElseGet(VibrationSystem.Data::new);
+	}
+
+	@Override
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
+		output.putInt("transferCooldown", this.transferCooldown);
+		output.putInt("dispenseCooldown", this.dispenseCooldown);
+		output.putInt("noteBlockCooldown", this.noteBlockCooldown);
+		output.putBoolean("canDispense", this.canDispense);
+		output.store("dispenseType", DispenseType.CODEC, this.dispenseType);
+		output.putBoolean("canAcceptGameEvents", this.canAcceptGameEvents);
+		output.store("listener", Data.CODEC, this.vibrationData);
+	}
+
+	public VibrationSystem.User createVibrationUser() {
+		return new VibrationUser(this.getBlockPos());
+	}
+
+	@Override
+	public VibrationSystem.Data getVibrationData() {
+		return this.vibrationData;
+	}
+
+	@Override
+	public VibrationSystem.User getVibrationUser() {
+		return this.vibrationUser;
+	}
+
+	@Override
+	public VibrationSystem.Listener getListener() {
+		return this.vibrationListener;
+	}
+
+	@Override
+	public boolean canAcceptTransferableData(MoveType moveType, Direction moveDirection, BlockState fromState) {
+		if (moveType == MoveType.FROM_FITTING) return this.getBlockState().getValue(BlockStateProperties.FACING) == moveDirection;
+		return this.getBlockState().getValue(BlockStateProperties.FACING) == moveDirection || moveDirection == fromState.getValue(BlockStateProperties.FACING);
+	}
+
+	@Override
+	public boolean canTransferDataInDirection(Direction direction, BlockState state) {
+		return direction != state.getValue(BlockStateProperties.FACING).getOpposite();
+	}
+
+	@Override
+	public void dispenseTransferableData(ServerLevel level, BlockPos pos, BlockState state) {
+		if (!this.canDispense) return;
+
+		final ArrayList<TransferablePipeDataHandler.SaveableTransferablePipeData> list = this.transferableDataHandler.getSavedDataList();
+		if (list.isEmpty()) return;
+
+		for (TransferablePipeDataHandler.SaveableTransferablePipeData data : list) {
+			if (data.shouldMove()) data.dispense(level, pos, state, this);
+		}
+		this.moveTransferableData(level, pos, state);
+	}
+
+	public class VibrationUser implements VibrationSystem.User {
+		protected final BlockPos blockPos;
+		private final PositionSource positionSource;
+
+		public VibrationUser(BlockPos blockPos) {
+			this.blockPos = blockPos;
+			this.positionSource = new BlockPositionSource(blockPos);
+		}
+
+		@Override
+		public int getListenerRadius() {
+			return VIBRATION_RANGE;
+		}
+
+		@Override
+		public PositionSource getPositionSource() {
+			return this.positionSource;
+		}
+
+		@Override
+		public boolean canReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, @Nullable GameEvent.Context context) {
+			if (!SimpleCopperPipesConfig.SENSE_GAME_EVENTS.get()) return false;
+			if (pos == this.blockPos && (gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE)) return false;
+
+			if (CopperPipeBlockEntity.this.canAcceptGameEvents) {
+				if (context != null && context.affectedState() != null && context.affectedState().is(SimpleCopperPipesBlockItemTags.COPPER_PIPES.block())) return false;
+				CopperPipeBlockEntity.this.transferableDataHandler.addSaveableMoveablePipeNbt(
+					new TransferablePipeDataHandler.SaveableTransferablePipeData(
+						gameEvent.value(),
+						Vec3.atCenterOf(pos),
+						context,
+						this.blockPos
+					).withShouldMove(true).withShouldSave(true)
+				);
+				return true;
+			}
+
+			return false;
+		}
+
+		@Override
+		public void onReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, Entity sourceEntity, Entity projectileOwner, float receivingDistance) {
+		}
+
+		@Override
+		public void onDataChanged() {
+			CopperPipeBlockEntity.this.setChanged();
+		}
+
+		@Override
+		public boolean requiresAdjacentChunksToBeTicking() {
+			return true;
+		}
+	}
+
+	public enum DispenseType implements StringRepresentable {
+		NONE("none"),
+		DROPPER("dropper"),
+		DISPENSER("dispenser");
+		static final Codec<DispenseType> CODEC = StringRepresentable.fromEnum(DispenseType::values);
+		private final String name;
+
+		DispenseType(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return this.name;
+		}
+	}
+
+}

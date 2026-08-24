@@ -1,0 +1,57 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+issueTrackerURL="https://github.com/AViewFromTheTop/SimpleCopperPipesMC/issues"
+
+[[mods]]
+    modId="simple_copper_pipes"
+    version="${mod_version}"
+    displayName="Simple Copper Pipes"
+    displayURL="https://modrinth.com/mod/simple-copper-pipes"
+    logoFile="assets/simple_copper_pipes/icon.png"
+    authors="Luna/AViewFromTheTop"
+    description='''
+Adds intuitive and simple-to-understand Copper Pipes to Minecraft.
+    '''
+
+[[mixins]]
+config="simple_copper_pipes.mixins.json"
+
+[[mixins]]
+config="simple_copper_pipes.create.mixins.json"
+requiredMods=["create"]
+
+[[ dependencies.simple_copper_pipes ]]
+    modId="neoforge"
+    type="required"
+    versionRange="[~26.2-,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[ dependencies.simple_copper_pipes ]]
+    modId="minecraft"
+    type="required"
+    versionRange="[~26.2-,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[ dependencies.simple_copper_pipes ]]
+    modId="frozenlib"
+    type="required"
+    versionRange="[2.5.1-mc26.2,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[ dependencies.simple_copper_pipes ]]
+    modId="thecopperierage"
+    type="optional"
+    versionRange="*"
+    ordering="NONE"
+    side="BOTH"
+
+[[ dependencies.simple_copper_pipes ]]
+    modId="cloth-config"
+    type="optional"
+    versionRange="*"
+    ordering="NONE"
+    side="BOTH"

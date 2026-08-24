@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "net.lunade.copper.compat.create.mixin",
+  "plugin": "net.lunade.copper.compat.create.SimpleCopperPipesMixinPlugin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "CopperPipeBlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

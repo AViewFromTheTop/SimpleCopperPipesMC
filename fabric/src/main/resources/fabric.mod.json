@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "simple_copper_pipes",
+  "version": "${version}",
+  "provides": [
+    "copper_pipe"
+  ],
+
+  "name": "Simple Copper Pipes",
+  "description": "Adds intuitive and simple-to-understand Copper Pipes to Minecraft.",
+
+  "authors": [
+    "Luna/AViewFromTheTop"
+  ],
+  "contributors": [
+    "Ethan Stokes"
+  ],
+
+  "contact": {
+    "homepage": "https://modrinth.com/mod/simple-copper-pipes",
+    "issues": "https://github.com/AViewFromTheTop/SimpleCopperPipesMC/issues",
+    "sources": "https://github.com/AViewFromTheTop/SimpleCopperPipesMC"
+  },
+
+  "license": "MIT",
+  "icon": "assets/simple_copper_pipes/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.lunade.copper.SimpleCopperPipesFabric"
+    ],
+    "client": [
+      "net.lunade.copper.SimpleCopperPipesClientFabric"
+    ],
+    "fabric-datagen": [
+      "net.lunade.copper.datagen.SimpleCopperPipesDataGenerator"
+    ],
+    "modmenu": [
+      "net.lunade.copper.config.gui.ModMenuIntegration"
+    ]
+  },
+
+  "mixins": [
+    "simple_copper_pipes.mixins.json",
+    "simple_copper_pipes.create.mixins.json"
+  ],
+
+  "accessWidener": "simple_copper_pipes.classtweaker",
+
+  "depends": {
+    "frozenlib": "${frozenlib_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "java": ">=25"
+  },
+
+  "suggests": {
+    "cloth-config": "*",
+    "modmenu": "*",
+    "thecopperierage": "*"
+  },
+
+  "custom": {
+    "modmenu": {
+      "links": {
+        "X": "https://x.com/FB_Oasis",
+        "Bluesky": "https://bsky.app/profile/frozenblock.bsky.social",
+        "modmenu.discord": "https://discord.gg/frozenblock",
+        "modmenu.modrinth": "https://modrinth.com/organization/frozenblock",
+        "modmenu.youtube": "https://www.youtube.com/@frozenblockmoddingoasismod",
+        "modmenu.kofi": "https://ko-fi.com/frozenblock"
+      }
+    },
+    "frozenlib_registry": {
+      "mod_protocol": $protocol_version
+    }
+  }
+}

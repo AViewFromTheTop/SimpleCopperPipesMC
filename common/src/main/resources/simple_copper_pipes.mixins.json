@@ -10,9 +10,7 @@
     "EntityMixin",
     "FarmlandBlockMixin",
     "SugarCaneBlockMixin",
-    "VibrationTickerMixin",
-    "datafix.DataFixersMixin",
-    "datafix.V3438Mixin"
+    "VibrationTickerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

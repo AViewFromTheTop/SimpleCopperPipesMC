@@ -7,9 +7,9 @@ import net.lunade.copper.datafix.fix.TransferableDataFieldRenameFix;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.BlockEntityRenameFix;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
-import org.quiltmc.qsl.frozenblock.misc.datafixerupper.api.QuiltDataFixerBuilder;
-import org.quiltmc.qsl.frozenblock.misc.datafixerupper.api.QuiltDataFixes;
-import org.quiltmc.qsl.frozenblock.misc.datafixerupper.api.SimpleFixes;
+import net.fabricmc.frozenblock.datafixer.api.FabricDataFixerBuilder;
+import net.fabricmc.frozenblock.datafixer.api.FabricDataFixes;
+import net.fabricmc.frozenblock.datafixer.api.SimpleFixes;
 
 public class SimpleCopperPipesDataFixer {
 	private static final String COPPER_PIPE = SimpleCopperPipesConstants.id("copper_pipe").toString();
@@ -17,8 +17,8 @@ public class SimpleCopperPipesDataFixer {
 	public static final int DATA_VERSION = 3;
 
 	public static void applyDataFixes(String modId) {
-		final QuiltDataFixerBuilder builder = new QuiltDataFixerBuilder(DATA_VERSION);
-		builder.addSchema(0, QuiltDataFixes.BASE_SCHEMA);
+		final FabricDataFixerBuilder builder = new FabricDataFixerBuilder(DATA_VERSION);
+		builder.addSchema(0, FabricDataFixes.BASE_SCHEMA);
 
 		final var normalPipe = SimpleCopperPipesConstants.id("copper_pipe");
 		final var normalFitting = SimpleCopperPipesConstants.id("copper_fitting");
@@ -256,6 +256,6 @@ public class SimpleCopperPipesDataFixer {
 		builder.addFixer(new TransferableDataFieldRenameFix(COPPER_FITTING, schemaV3));
 		builder.addFixer(new CanAcceptFieldRenameFix(COPPER_PIPE, schemaV3));
 
-		QuiltDataFixes.buildAndRegisterFixer(modId, builder);
+		FabricDataFixes.buildAndRegisterFixer(modId, builder);
 	}
 }

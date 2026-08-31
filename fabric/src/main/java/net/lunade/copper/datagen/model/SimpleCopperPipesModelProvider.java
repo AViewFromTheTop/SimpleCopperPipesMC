@@ -65,8 +65,8 @@ public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
 
 	@Override
 	public void generateBlockStateModels(BlockModelGenerators generators) {
-		SimpleCopperPipesBlocks.COPPER_PIPE.get().zipUnwaxedWaxed((block, waxedBlock) -> createPipe(generators, block, waxedBlock));
-		SimpleCopperPipesBlocks.COPPER_FITTING.get().zipUnwaxedWaxed((block, waxedBlock) -> createFitting(generators, block, waxedBlock));
+		SimpleCopperPipesBlocks.COPPER_PIPE.zipUnwaxedWaxed((block, waxedBlock) -> createPipe(generators, block.get(), waxedBlock.get()));
+		SimpleCopperPipesBlocks.COPPER_FITTING.zipUnwaxedWaxed((block, waxedBlock) -> createFitting(generators, block.get(), waxedBlock.get()));
 	}
 
 	@Override

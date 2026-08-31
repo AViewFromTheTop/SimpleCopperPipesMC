@@ -19,8 +19,6 @@ public class SimpleCopperPipesStats {
 	}
 
 	public static void setup() {
-
-
 		Stats.CUSTOM.get(INSPECT_PIPE, StatFormatter.DEFAULT);
 		Stats.CUSTOM.get(INSPECT_FITTING, StatFormatter.DEFAULT);
 	}

@@ -22,7 +22,7 @@ public class SimpleCopperPipesRecipeProvider extends FabricRecipeProvider {
 		return new RecipeProvider(registryLookup, exporter) {
 			@Override
 			public void buildRecipes() {
-				this.shaped(RecipeCategory.REDSTONE, SimpleCopperPipesBlocks.COPPER_PIPE.get().weathering().unaffected(), 3)
+				this.shaped(RecipeCategory.REDSTONE, SimpleCopperPipesBlocks.COPPER_PIPE.weathering().unaffected(), 3)
 					.define('#', Items.COPPER_INGOT)
 					.pattern("###")
 					.pattern("   ")
@@ -30,7 +30,7 @@ public class SimpleCopperPipesRecipeProvider extends FabricRecipeProvider {
 					.unlockedBy(getHasName(Items.COPPER_INGOT), has(Items.COPPER_INGOT))
 					.save(exporter);
 
-				this.shaped(RecipeCategory.REDSTONE, SimpleCopperPipesBlocks.COPPER_FITTING.get().weathering().unaffected(), 4)
+				this.shaped(RecipeCategory.REDSTONE, SimpleCopperPipesBlocks.COPPER_FITTING.weathering().unaffected(), 4)
 					.define('#', Items.COPPER_INGOT)
 					.pattern("###")
 					.pattern("# #")

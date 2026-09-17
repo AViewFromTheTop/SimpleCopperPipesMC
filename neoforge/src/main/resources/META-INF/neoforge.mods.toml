@@ -8,7 +8,7 @@ issueTrackerURL="https://github.com/AViewFromTheTop/SimpleCopperPipesMC/issues"
     version="${mod_version}"
     displayName="Simple Copper Pipes"
     displayURL="https://modrinth.com/mod/simple-copper-pipes"
-    logoFile="assets/simple_copper_pipes/icon.png"
+    iconFile="assets/simple_copper_pipes/icon.png"
     authors="Luna/AViewFromTheTop"
     description='''
 Adds intuitive and simple-to-understand Copper Pipes to Minecraft.

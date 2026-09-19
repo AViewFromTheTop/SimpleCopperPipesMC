@@ -9,15 +9,13 @@ checkstyle {
     toolVersion = "10.20.2"
 }
 
-val fabric_loader_version: String by project
-val min_fabric_loader_version: String by project
-
 val mod_id: String by project
 val mod_version: String by project
+val subproject_prefix: String by project
 val minecraft_version: String by project
-val protocol_version: String by project
 val maven_group: String by project
 val archives_base_name: String by project
+val fabric_loader_version: String by project
 
 val fabric_api_version: String by project
 val frozenlib_version: String by project
@@ -30,7 +28,7 @@ base {
     archivesName = archives_base_name
 }
 
-version = mod_version
+version = getModVersion()
 group = maven_group
 
 tasks.jar {
@@ -38,10 +36,10 @@ tasks.jar {
 }
 
 fabric {
-    dependOn(project(":scp-common"))
-    accessWidener(project(":scp-common"))
+    dependOn(project(":$subproject_prefix-common"))
+    accessWidener(project(":$subproject_prefix-common"))
     dataGen {
-        owner = project(":scp-common")
+        owner = project(":$subproject_prefix-common")
         splitSourceSet("datagen")
     }
 }
@@ -59,34 +57,16 @@ repositories {
     }
 }
 
-val loaderAttribute = Attribute.of("io.github.mcgradleconventions.loader", String::class.java)
-val loaderVariants = setOf("apiElements", "runtimeElements", "sourcesElements", "javadocElements", "includeInternal", "modCompileClasspath")
-configurations.all {
-    if (name in loaderVariants) {
-        attributes {
-            attribute(loaderAttribute, "fabric")
-        }
-    }
-}
-sourceSets.configureEach {
-    listOf(compileClasspathConfigurationName, runtimeClasspathConfigurationName).forEach { variant ->
-        configurations.named(variant) {
-            attributes {
-                attribute(loaderAttribute, "fabric")
-            }
-        }
-    }
-}
-
 dependencies {
+    // Fabric
     implementation("net.fabricmc:fabric-loader:$fabric_loader_version")
     implementation("net.fabricmc.fabric-api:fabric-api:$fabric_api_version")
-
+    
     // FrozenLib
-    api("net.frozenblock:frozenlib-fabric:${frozenlib_version}")
+    api("net.frozenblock:frozenlib-fabric:$frozenlib_version")
 
     // The Copperier Age
-    implementation("net.frozenblock:the-copperier-age-fabric:${thecopperierage_version}")
+    implementation("net.frozenblock:the-copperier-age-fabric:$thecopperierage_version")
 
     // Mod Menu
     implementation("com.terraformersmc:modmenu:$modmenu_version")
@@ -98,38 +78,15 @@ dependencies {
     }
 }
 
+val githubActions: Boolean = System.getenv("GITHUB_ACTIONS") == "true"
+val licenseChecks: Boolean = githubActions
+
 tasks {
-    processResources {
-        val properties = mapOf(
-            "mod_id" to mod_id,
-            "version" to version,
-            "protocol_version" to protocol_version,
-            "minecraft_version" to "~26.2-",
+    license {
+        if (licenseChecks) {
+            rule(rootProject.file("codeformat/HEADER"))
 
-            "fabric_loader_version" to ">=$min_fabric_loader_version",
-            "fabric_api_version" to ">=$fabric_api_version",
-            "frozenlib_version" to ">=${frozenlib_version.split('-').firstOrNull()}-"
-        )
-
-        properties.forEach { (a, b) -> inputs.property(a, b) }
-
-        filesNotMatching(
-            listOf(
-                "**/*.java",
-                "**/sounds.json",
-                "**/lang/*.json",
-                "**/.cache/*",
-                "**/*.accesswidener",
-                "**/*.classtweaker",
-                "**/*.cfg",
-                "**/*.nbt",
-                "**/*.png",
-                "**/*.ogg",
-                "**/*.mixins.json",
-                "**/*.zip"
-            )
-        ) {
-            expand(properties)
+            include("**/*.java")
         }
     }
 }
@@ -147,6 +104,50 @@ artifacts {
     archives(javadocJar)
 }
 
-upload.maven {
-    name.set("simplecopperpipes-fabric")
+val release = findProperty("releaseType") == "stable"
+
+fun getModVersion(): String {
+    var version = "$mod_version-mc$minecraft_version"
+
+    if (!release) {
+        version += "-unstable"
+    }
+
+    return version
+}
+
+val changelogText = run {
+    val split = rootProject.file("CHANGELOG.md").readText().split("-----------------")
+    check(split.size == 2) { "Malformed changelog" }
+    split[1].trim()
+}
+
+upload {
+    maven {
+        name.set("$mod_id-fabric")
+    }
+
+    forEach {
+        changelog = changelogText
+    }
+
+    curseforge {
+        dependencies {
+            required("fabric-api")
+            required("frozenlib")
+            optional("modmenu")
+            optional("cloth-config")
+            optional("the-copperier-age")
+        }
+    }
+
+    modrinth {
+        dependencies {
+            required("fabric-api")
+            required("frozenlib")
+            optional("modmenu")
+            optional("cloth-config")
+            optional("the-copperier-age")
+        }
+    }
 }

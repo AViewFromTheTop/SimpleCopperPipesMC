@@ -28,10 +28,30 @@ bin/
 
 *.DS_Store
 
+# maven
+
+target/
+
 # fabric
 
 run/
+runclient/
+runserver/
 /fabric/run
 /neoforge/runs
 /remappedSrc/
+/src/main/generated/.cache
 /common/src/generated/resources/.cache
+
+# java
+
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+
+# kotlin
+.kotlin/
+
+# Git
+/FrozenLib/

@@ -37,6 +37,7 @@ if (!neoforgeSnapshotMaven.isNullOrBlank()) {
 }
 
 plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version("+")
     id("net.frozenblock.triangle.helper") version("+")
 }
 

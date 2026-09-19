@@ -9,6 +9,7 @@ checkstyle {
     toolVersion = "10.20.2"
 }
 
+val mod_id: String by project
 val frozenlib_version: String by project
 val cloth_config_version: String by project
 
@@ -21,12 +22,27 @@ neoForge {
 }
 
 dependencies {
-    compileOnly("net.frozenblock:frozenlib-common:${frozenlib_version}")?.let {
+    // FrozenLib
+    compileOnly("net.frozenblock:frozenlib-common:$frozenlib_version")?.let {
         accessTransformers(it)
         interfaceInjectionData(it)
     }
 
-    compileOnly("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
+    // Cloth Config
+    compileOnly("me.shedaniel.cloth:cloth-config:$cloth_config_version")
+}
+
+val githubActions: Boolean = System.getenv("GITHUB_ACTIONS") == "true"
+val licenseChecks: Boolean = githubActions
+
+tasks {
+    license {
+        if (licenseChecks) {
+            rule(rootProject.file("codeformat/HEADER"))
+
+            include("**/*.java")
+        }
+    }
 }
 
 configurations {
@@ -41,5 +57,5 @@ configurations {
 }
 
 upload.maven {
-    name.set("simplecopperpipes-common")
+    name.set("$mod_id-common")
 }

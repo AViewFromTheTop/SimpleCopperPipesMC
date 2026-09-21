@@ -1,11 +1,10 @@
 package net.lunade.copper;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.mehvahdjukaar.candlelight.api.ClientOnly;
 
-@Environment(EnvType.CLIENT)
-public class SimpleCopperPipesFabricClient implements ClientModInitializer {
+@ClientOnly
+public final class SimpleCopperPipesFabricClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {

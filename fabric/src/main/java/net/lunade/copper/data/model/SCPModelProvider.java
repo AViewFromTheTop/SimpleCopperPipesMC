@@ -1,4 +1,4 @@
-package net.lunade.copper.datagen.model;
+package net.lunade.copper.data.model;
 
 import java.util.Optional;
 import java.util.function.Function;

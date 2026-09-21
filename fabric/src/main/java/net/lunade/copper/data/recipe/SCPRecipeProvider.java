@@ -1,4 +1,4 @@
-package net.lunade.copper.datagen.recipe;
+package net.lunade.copper.data.recipe;
 
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;

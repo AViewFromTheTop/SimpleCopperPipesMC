@@ -26,7 +26,7 @@
       "net.lunade.copper.SimpleCopperPipesFabricClient"
     ],
     "fabric-datagen": [
-      "net.lunade.copper.datagen.SCPDataGenerator"
+      "net.lunade.copper.data.SCPDataGenerator"
     ],
     "modmenu": [
       "net.lunade.copper.config.gui.ModMenuIntegration"

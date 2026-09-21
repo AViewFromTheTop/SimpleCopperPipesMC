@@ -1,4 +1,4 @@
-package net.lunade.copper.datagen.tag;
+package net.lunade.copper.data.tag;
 
 import java.util.function.Function;
 import net.lunade.copper.references.SCPBlockItemIDs;
@@ -18,6 +18,6 @@ public final class SCPBlockItemTagsProvider extends BlockItemTagsProvider {
 			.addAll(SCPBlockItemIDs.COPPER_PIPE.asList());
 
 		this.tag(SCPBlockItemTags.COPPER_FITTINGS)
-			.addAll(SCPBlockItemIDs.COPPER_PIPE.asList());
+			.addAll(SCPBlockItemIDs.COPPER_FITTING.asList());
 	}
 }

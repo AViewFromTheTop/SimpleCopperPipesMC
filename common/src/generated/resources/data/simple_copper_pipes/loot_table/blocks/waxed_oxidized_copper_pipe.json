@@ -2,18 +2,16 @@
   "type": "minecraft:block",
   "pools": [
     {
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
       "entries": [
         {
           "type": "minecraft:item",
           "name": "simple_copper_pipes:waxed_oxidized_copper_pipe"
         }
       ],
-      "rolls": 1.0
+      "rolls": 1
     }
   ]
 }

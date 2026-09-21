@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "simple_copper_pipes:copper_fitting"
+        "recipes": "simple_copper_pipes:copper_fitting"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

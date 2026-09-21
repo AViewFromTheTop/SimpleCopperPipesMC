@@ -17,7 +17,6 @@
 
 package net.lunade.copper.block.entity;
 
-import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import net.frozenblock.lib.transfer.api.TransferApi;
 import net.lunade.copper.block.CopperFittingBlock;
@@ -76,7 +75,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 	public int dispenseCooldown;
 	public int noteBlockCooldown;
 	public boolean canDispense;
-	public DispenseType dispenseType;
+	public DispenseType dispenseType = DispenseType.NONE;
 	public boolean canAcceptGameEvents;
 	public BlockPos inputGameEventPos;
 	public Vec3 gameEventNbtVec3;
@@ -487,7 +486,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		NONE("none"),
 		DROPPER("dropper"),
 		DISPENSER("dispenser");
-		static final Codec<DispenseType> CODEC = StringRepresentable.fromEnum(DispenseType::values);
+		public static final StringRepresentable.EnumCodec<DispenseType> CODEC = StringRepresentable.fromEnum(DispenseType::values);
 		private final String name;
 
 		DispenseType(String name) {
@@ -499,5 +498,4 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 			return this.name;
 		}
 	}
-
 }

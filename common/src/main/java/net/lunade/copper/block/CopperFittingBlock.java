@@ -17,7 +17,6 @@
 
 package net.lunade.copper.block;
 
-import com.mojang.serialization.MapCodec;
 import net.lunade.copper.block.entity.CopperFittingBlockEntity;
 import net.lunade.copper.block.properties.PipeFluid;
 import net.lunade.copper.config.SCPConfig;
@@ -70,7 +69,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
-	public static final MapCodec<CopperFittingBlock> CODEC = simpleCodec(CopperFittingBlock::new);
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final EnumProperty<PipeFluid> FLUID = SCPBlockStateProperties.FLUID;
@@ -216,7 +214,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean bl) {
+	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
 		updateBlockEntityValues(level, pos, state);
 		Containers.updateNeighboursAfterDestroy(state, level, pos);
 	}
@@ -229,10 +227,5 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	@Override
 	public boolean shouldChangedStateKeepBlockEntity(BlockState state) {
 		return state.is(SCPBlockItemTags.COPPER_FITTINGS.block());
-	}
-
-	@Override
-	protected MapCodec<? extends CopperFittingBlock> codec() {
-		return CODEC;
 	}
 }

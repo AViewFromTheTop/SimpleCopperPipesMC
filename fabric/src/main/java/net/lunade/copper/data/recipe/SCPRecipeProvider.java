@@ -20,42 +20,50 @@ package net.lunade.copper.data.recipe;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
+import net.frozenblock.lib.item.api.recipe.RecipeExportNamespaceFix;
+import net.lunade.copper.SCPConstants;
 import net.lunade.copper.SCPFeatureFlags;
 import net.lunade.copper.registry.SCPBlocks;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Recipe;
 
-public class SCPRecipeProvider extends FabricRecipeProvider {
+public final class SCPRecipeProvider extends FabricRecipeProvider {
 
 	public SCPRecipeProvider(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
 		super(output, registries);
 	}
 
 	@Override
-	protected RecipeProvider createRecipeProvider(HolderLookup.Provider registryLookup, RecipeOutput exporter) {
-		return new RecipeProvider(registryLookup, exporter) {
+	protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, BootstrapContext<Recipe<?>> recipeOutput, BootstrapContext<Advancement> advancementOutput) {
+		return new RecipeProvider(recipeOutput, advancementOutput) {
 			@Override
 			public void buildRecipes() {
+				RecipeExportNamespaceFix.setCurrentGeneratingModId(SCPConstants.MOD_ID);
+
+				this.waxRecipes(SCPFeatureFlags.SIMPLER_COPPER_PIPES_FLAG_SET);
+
 				this.shaped(RecipeCategory.REDSTONE, SCPBlocks.COPPER_PIPE.weathering().unaffected(), 3)
 					.define('#', Items.COPPER_INGOT)
 					.pattern("###")
 					.pattern("   ")
 					.pattern("###")
-					.unlockedBy(getHasName(Items.COPPER_INGOT), has(Items.COPPER_INGOT))
-					.save(exporter);
+					.unlockedBy(getHasName(Items.COPPER_INGOT), this.has(Items.COPPER_INGOT))
+					.save(this.output);
 
 				this.shaped(RecipeCategory.REDSTONE, SCPBlocks.COPPER_FITTING.weathering().unaffected(), 4)
 					.define('#', Items.COPPER_INGOT)
 					.pattern("###")
 					.pattern("# #")
 					.pattern("###")
-					.unlockedBy(getHasName(Items.COPPER_INGOT), has(Items.COPPER_INGOT))
-					.save(exporter);
+					.unlockedBy(getHasName(Items.COPPER_INGOT), this.has(Items.COPPER_INGOT))
+					.save(this.output);
 
-				this.waxRecipes(SCPFeatureFlags.SIMPLER_COPPER_PIPES_FLAG_SET);
+				RecipeExportNamespaceFix.clearCurrentGeneratingModId();
 			}
 		};
 	}

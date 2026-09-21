@@ -17,7 +17,7 @@
 
 package net.lunade.copper;
 
-import net.frozenblock.lib.FrozenBools;
+import net.frozenblock.lib.FrozenLibEarlyConstants;
 import net.lunade.copper.config.gui.SCPConfigGui;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -37,7 +37,7 @@ public final class SimpleCopperPipesNeoForgeClient {
 			SimpleCopperPipesClient.setup();
 		});
 
-		if (FrozenBools.HAS_CLOTH_CONFIG) {
+		if (FrozenLibEarlyConstants.HAS_CLOTH_CONFIG) {
 			ModLoadingContext.get().registerExtensionPoint(
 				IConfigScreenFactory.class,
 				() -> (container, parent) -> SCPConfigGui.buildScreen(parent)

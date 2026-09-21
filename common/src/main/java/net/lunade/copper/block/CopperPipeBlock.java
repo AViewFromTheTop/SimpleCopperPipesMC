@@ -17,9 +17,6 @@
 
 package net.lunade.copper.block;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
 import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.block.entity.leaking.LeakingPipeDripBehaviors;
@@ -99,10 +96,6 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final EnumProperty<PipeFluid> FLUID = SCPBlockStateProperties.FLUID;
 	public static final BooleanProperty HAS_ELECTRICITY = SCPBlockStateProperties.HAS_ELECTRICITY;
-	public static final MapCodec<CopperPipeBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-		propertiesCodec(),
-		Codec.INT.fieldOf("dispense_shot_power").forGetter(copperPipe -> copperPipe.dispenseShotPower)
-	).apply(instance, CopperPipeBlock::new));
 	public final int dispenseShotPower;
 
 	public CopperPipeBlock(Properties properties, int dispenseShotPower) {
@@ -431,7 +424,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean bl) {
+	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
 		updateBlockEntityValues(level, pos, state);
 		Containers.updateNeighboursAfterDestroy(state, level, pos);
 	}
@@ -439,10 +432,5 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	@Override
 	public boolean shouldChangedStateKeepBlockEntity(BlockState state) {
 		return state.is(SCPBlockItemTags.COPPER_PIPES.block());
-	}
-
-	@Override
-	protected MapCodec<? extends CopperPipeBlock> codec() {
-		return CODEC;
 	}
 }

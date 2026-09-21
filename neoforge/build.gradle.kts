@@ -59,7 +59,7 @@ dependencies {
     }
 
     // The Copperier Age
-    implementation("net.frozenblock:the-copperier-age-neoforge:$thecopperierage_version")
+    implementation("net.frozenblock:thecopperierage-neoforge:$thecopperierage_version")
 
     // Cloth Config
     implementation("me.shedaniel.cloth:cloth-config-neoforge:$cloth_config_version")

@@ -2,22 +2,22 @@ package net.lunade.copper.registry;
 
 import net.frozenblock.lib.platform.api.registry.DeferredItem;
 import net.frozenblock.lib.platform.api.registry.DeferredRegister;
-import net.lunade.copper.SimpleCopperPipesConstants;
-import net.lunade.copper.references.SimpleCopperPipesBlockItemIDs;
+import net.lunade.copper.SCPConstants;
+import net.lunade.copper.references.SCPBlockItemIDs;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.WeatheringCopperCollection;
 
-public final class SimpleCopperPipesItems {
-	private static final DeferredRegister.Items REGISTER = DeferredRegister.createItems(SimpleCopperPipesConstants.MOD_ID);
+public final class SCPItems {
+	private static final DeferredRegister.Items REGISTER = DeferredRegister.createItems(SCPConstants.MOD_ID);
 
 	public static final WeatheringCopperCollection<DeferredItem<BlockItem>> COPPER_PIPE = REGISTER.registerSimpleWeatheringCopperCollection(
-		SimpleCopperPipesBlockItemIDs.COPPER_PIPE,
-		SimpleCopperPipesBlocks.COPPER_PIPE
+		SCPBlockItemIDs.COPPER_PIPE,
+		SCPBlocks.COPPER_PIPE
 	);
 
 	public static final WeatheringCopperCollection<DeferredItem<BlockItem>> COPPER_FITTING = REGISTER.registerSimpleWeatheringCopperCollection(
-		SimpleCopperPipesBlockItemIDs.COPPER_FITTING,
-		SimpleCopperPipesBlocks.COPPER_FITTING
+		SCPBlockItemIDs.COPPER_FITTING,
+		SCPBlocks.COPPER_FITTING
 	);
 
 	static {
@@ -25,4 +25,6 @@ public final class SimpleCopperPipesItems {
 	}
 
 	public static void init() {}
+
+	private SCPItems() {}
 }

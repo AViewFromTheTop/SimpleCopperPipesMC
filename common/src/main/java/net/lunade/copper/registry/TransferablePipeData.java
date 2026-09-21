@@ -4,12 +4,12 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import java.util.Map;
 import java.util.Optional;
 import net.frozenblock.lib.particle.options.ControlledNoteParticleOptions;
-import net.lunade.copper.SimpleCopperPipesConstants;
+import net.lunade.copper.SCPConstants;
 import net.lunade.copper.block.entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block.entity.CopperFittingBlockEntity;
 import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.block.entity.data.TransferablePipeDataHandler;
-import net.lunade.copper.config.SimpleCopperPipesConfig;
+import net.lunade.copper.config.SCPConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.VibrationParticleOption;
@@ -27,10 +27,10 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class TransferablePipeData {
-	public static final Identifier WATER = SimpleCopperPipesConstants.id("water");
-	public static final Identifier LAVA = SimpleCopperPipesConstants.id("lava");
-	public static final Identifier SMOKE = SimpleCopperPipesConstants.id("smoke");
+public final class TransferablePipeData {
+	public static final Identifier WATER = SCPConstants.id("water");
+	public static final Identifier LAVA = SCPConstants.id("lava");
+	public static final Identifier SMOKE = SCPConstants.id("smoke");
 	private static final Map<Identifier, Data> PIPE_DATA = new Object2ObjectLinkedOpenHashMap<>();
 
 	public static void register(Identifier id, Dispense dispense, Move move, Tick tick, CanMove canMove) {
@@ -71,7 +71,7 @@ public class TransferablePipeData {
 	}
 
 	public static void init() {
-		register(SimpleCopperPipesConstants.id("default"), (data, level, pos, state, pipe) -> {
+		register(SCPConstants.id("default"), (data, level, pos, state, pipe) -> {
             pipe.inputGameEventPos = data.blockPos();
             pipe.gameEventNbtVec3 = data.getVec3d();
             boolean noteBlock = false;
@@ -131,7 +131,7 @@ public class TransferablePipeData {
 		}, (data, level, pos, state, blockEntity) -> {
 
 		}, (data, level, pos, state, blockEntity) -> {
-			if (!SimpleCopperPipesConfig.CARRY_WATER.get()) return false;
+			if (!SCPConfig.CARRY_WATER.get()) return false;
 			TransferablePipeDataHandler.SaveableTransferablePipeData waterData = blockEntity.transferableDataHandler.getTransferablePipeData(WATER);
 			if (waterData != null) return waterData.getVec3d() == null || waterData.getVec3d().x() <= data.getVec3d().x() - 1;
 			return true;
@@ -183,7 +183,7 @@ public class TransferablePipeData {
 				}
 			}
 		}, (data, level, pos, state, blockEntity) -> {
-			if (!SimpleCopperPipesConfig.CARRY_LAVA.get()) return false;
+			if (!SCPConfig.CARRY_LAVA.get()) return false;
 			final TransferablePipeDataHandler.SaveableTransferablePipeData lavaData = blockEntity.transferableDataHandler.getTransferablePipeData(LAVA);
 			if (lavaData != null) return lavaData.getVec3d() == null || lavaData.getVec3d().x() <= data.getVec3d().x() - 1;
 			return true;
@@ -207,7 +207,7 @@ public class TransferablePipeData {
 		}, (data, level, pos, state, blockEntity) -> {
 
 		}, (data, level, pos, state, blockEntity) -> {
-			if (!SimpleCopperPipesConfig.CARRY_SMOKE.get()) return false;
+			if (!SCPConfig.CARRY_SMOKE.get()) return false;
 			final TransferablePipeDataHandler.SaveableTransferablePipeData smokeData = blockEntity.transferableDataHandler.getTransferablePipeData(SMOKE);
 			if (smokeData != null) return smokeData.getVec3d() == null || smokeData.getVec3d().x() <= data.getVec3d().x() - 1;
 			return true;
@@ -235,6 +235,7 @@ public class TransferablePipeData {
 		boolean canMove(TransferablePipeDataHandler.SaveableTransferablePipeData data, ServerLevel level, BlockPos pos, BlockState state, AbstractSimpleCopperBlockEntity blockEntity);
 	}
 
-	public record Data(Dispense dispense, Move move, Tick tick, CanMove canMove) {
-	}
+	public record Data(Dispense dispense, Move move, Tick tick, CanMove canMove) {}
+
+	private TransferablePipeData() {}
 }

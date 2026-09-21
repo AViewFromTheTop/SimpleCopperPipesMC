@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "entrypoints": {
     "frozenlib:data_fixer": [
-      "net.lunade.copper.datafix.SimpleCopperPipesDataFixerEntrypoint"
+      "net.lunade.copper.datafix.SCPDataFixerEntrypoint"
     ]
   }
 }

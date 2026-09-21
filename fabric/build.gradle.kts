@@ -61,12 +61,12 @@ dependencies {
     // Fabric
     implementation("net.fabricmc:fabric-loader:$fabric_loader_version")
     implementation("net.fabricmc.fabric-api:fabric-api:$fabric_api_version")
-    
+
     // FrozenLib
     api("net.frozenblock:frozenlib-fabric:$frozenlib_version")
 
     // The Copperier Age
-    implementation("net.frozenblock:the-copperier-age-fabric:$thecopperierage_version")
+    implementation("net.frozenblock:thecopperierage-fabric:$thecopperierage_version")
 
     // Mod Menu
     implementation("com.terraformersmc:modmenu:$modmenu_version")

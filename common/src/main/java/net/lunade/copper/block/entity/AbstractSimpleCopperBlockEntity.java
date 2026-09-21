@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Optional;
 import net.lunade.copper.SimpleCopperPipes;
-import net.lunade.copper.SimpleCopperPipesConstants;
+import net.lunade.copper.SCPConstants;
 import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.block.entity.data.TransferablePipeDataHandler;
 import net.lunade.copper.block.properties.PipeFluid;
-import net.lunade.copper.config.SimpleCopperPipesConfig;
-import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
+import net.lunade.copper.config.SCPConfig;
+import net.lunade.copper.registry.SCPBlockStateProperties;
 import net.lunade.copper.registry.TransferablePipeData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -64,14 +64,14 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 			if (!level.hasChunkAt(offsetPos)) continue;
 
 			final BlockState state = level.getBlockState(offsetPos);
-			if (!state.hasProperty(SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY)) continue;
+			if (!state.hasProperty(SCPBlockStateProperties.HAS_ELECTRICITY)) continue;
 
 			if (!(level.getBlockEntity(offsetPos) instanceof AbstractSimpleCopperBlockEntity copperBlockEntity)) continue;
 
 			if (copperBlockEntity.electricityCooldown == -1) {
 				final int axis = state.hasProperty(CopperPipeBlock.FACING) ? state.getValue(CopperPipeBlock.FACING).getAxis().ordinal() : direction.getAxis().ordinal();
 				level.levelEvent(LevelEvent.PARTICLES_ELECTRIC_SPARK, offsetPos, axis);
-				level.setBlockAndUpdate(offsetPos, state.setValue(SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY, true));
+				level.setBlockAndUpdate(offsetPos, state.setValue(SCPBlockStateProperties.HAS_ELECTRICITY, true));
 			}
 		}
 	}
@@ -81,22 +81,22 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 
 		BlockState state = originalState;
 
-		if (this.lastFixVersion < SimpleCopperPipesConstants.CURRENT_FIX_VERSION || SimpleCopperPipes.REFRESH_VALUES) {
+		if (this.lastFixVersion < SCPConstants.CURRENT_FIX_VERSION || SimpleCopperPipes.REFRESH_VALUES) {
 			this.updateBlockEntityValues(level, pos, originalState);
-			this.lastFixVersion = SimpleCopperPipesConstants.CURRENT_FIX_VERSION;
+			this.lastFixVersion = SCPConstants.CURRENT_FIX_VERSION;
 		}
 
-		if (this.canWater && !this.canLava && SimpleCopperPipesConfig.CARRY_WATER.get()) {
+		if (this.canWater && !this.canLava && SCPConfig.CARRY_WATER.get()) {
 			this.transferableDataHandler.setTransferablePipeData(TransferablePipeData.WATER, new TransferablePipeDataHandler.SaveableTransferablePipeData()
 				.withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withID(TransferablePipeData.WATER));
 		}
 
-		if (this.canLava && !this.canWater && SimpleCopperPipesConfig.CARRY_LAVA.get()) {
+		if (this.canLava && !this.canWater && SCPConfig.CARRY_LAVA.get()) {
 			this.transferableDataHandler.setTransferablePipeData(TransferablePipeData.LAVA, new TransferablePipeDataHandler.SaveableTransferablePipeData()
 				.withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withID(TransferablePipeData.LAVA));
 		}
 
-		if ((this.canSmoke && !this.canWater && !this.canLava) || (this.canWater && this.canLava) && SimpleCopperPipesConfig.CARRY_SMOKE.get()) {
+		if ((this.canSmoke && !this.canWater && !this.canLava) || (this.canWater && this.canLava) && SCPConfig.CARRY_SMOKE.get()) {
 			this.transferableDataHandler.setTransferablePipeData(TransferablePipeData.SMOKE, new TransferablePipeDataHandler.SaveableTransferablePipeData()
 				.withVec3d(new Vec3(11, 0, 0)).withShouldCopy(true).withID(TransferablePipeData.SMOKE));
 		}
@@ -104,18 +104,18 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		final TransferablePipeDataHandler.SaveableTransferablePipeData waterData = this.transferableDataHandler.getTransferablePipeData(TransferablePipeData.WATER);
 		final TransferablePipeDataHandler.SaveableTransferablePipeData lavaData = this.transferableDataHandler.getTransferablePipeData(TransferablePipeData.LAVA);
 		final TransferablePipeDataHandler.SaveableTransferablePipeData smokeData = this.transferableDataHandler.getTransferablePipeData(TransferablePipeData.SMOKE);
-		boolean validWater = isValidFluidNBT(waterData) && SimpleCopperPipesConfig.CARRY_WATER.get();
-		boolean validLava = isValidFluidNBT(lavaData) && SimpleCopperPipesConfig.CARRY_LAVA.get();
-		boolean validSmoke = isValidFluidNBT(smokeData) && SimpleCopperPipesConfig.CARRY_SMOKE.get();
+		boolean validWater = isValidFluidNBT(waterData) && SCPConfig.CARRY_WATER.get();
+		boolean validLava = isValidFluidNBT(lavaData) && SCPConfig.CARRY_LAVA.get();
+		boolean validSmoke = isValidFluidNBT(smokeData) && SCPConfig.CARRY_SMOKE.get();
 		if (this.canSmoke && ((this.canLava && !this.canWater) || (this.canWater && !this.canLava))) validSmoke = false;
 		if (this.canWater && this.canLava) {
-			validSmoke = SimpleCopperPipesConfig.CARRY_SMOKE.get();
+			validSmoke = SCPConfig.CARRY_SMOKE.get();
 			validWater = false;
 			validLava = false;
 		}
-		if (state.hasProperty(SimpleCopperPipesBlockStateProperties.FLUID)) {
+		if (state.hasProperty(SCPBlockStateProperties.FLUID)) {
 			state = state.setValue(
-				SimpleCopperPipesBlockStateProperties.FLUID,
+				SCPBlockStateProperties.FLUID,
 				validWater ? PipeFluid.WATER
 					: validLava ? PipeFluid.LAVA
 					: validSmoke ? PipeFluid.SMOKE
@@ -128,15 +128,15 @@ public class AbstractSimpleCopperBlockEntity extends RandomizableContainerBlockE
 		this.moveTransferableData((ServerLevel) level, pos, originalState);
 
 		if (this.electricityCooldown >= 0) --this.electricityCooldown;
-		if (this.electricityCooldown == -1 && state.getValue(SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY)) {
+		if (this.electricityCooldown == -1 && state.getValue(SCPBlockStateProperties.HAS_ELECTRICITY)) {
 			this.electricityCooldown = 80;
 			final Optional<Block> previous = WeatheringCopper.getPrevious(state.getBlock());
 			if (previous.isPresent()) state = previous.get().withPropertiesOf(state);
 
 		}
 		if (this.electricityCooldown == 79) sendElectricity(level, pos);
-		if (this.electricityCooldown == 0 && state.hasProperty(SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY)) {
-			state = state.setValue(SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY, false);
+		if (this.electricityCooldown == 0 && state.hasProperty(SCPBlockStateProperties.HAS_ELECTRICITY)) {
+			state = state.setValue(SCPBlockStateProperties.HAS_ELECTRICITY, false);
 		}
 
 		if (state != originalState) level.setBlockAndUpdate(pos, state);

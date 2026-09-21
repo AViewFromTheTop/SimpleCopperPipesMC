@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.minecraft.util.datafix.fixes.References;
-import org.jetbrains.annotations.Contract;
 
 public final class TransferableDataFieldRenameFix extends DataFix {
 	private final String blockEntity;
@@ -42,7 +41,6 @@ public final class TransferableDataFieldRenameFix extends DataFix {
 		);
 	}
 
-	@Contract("_ -> new")
 	private Typed<?> fix(Typed<?> typed) {
 		return typed.update(
 			DSL.remainderFinder(),

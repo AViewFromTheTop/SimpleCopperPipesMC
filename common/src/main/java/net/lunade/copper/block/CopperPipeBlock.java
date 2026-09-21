@@ -7,11 +7,11 @@ import java.util.Map;
 import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.block.entity.leaking.LeakingPipeDripBehaviors;
 import net.lunade.copper.block.properties.PipeFluid;
-import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
-import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
-import net.lunade.copper.registry.SimpleCopperPipesStats;
-import net.lunade.copper.tag.SimpleCopperPipesBlockItemTags;
-import net.lunade.copper.tag.SimpleCopperPipesItemTags;
+import net.lunade.copper.registry.SCPBlockEntityTypes;
+import net.lunade.copper.registry.SCPBlockStateProperties;
+import net.lunade.copper.registry.SCPStats;
+import net.lunade.copper.tag.SCPBlockItemTags;
+import net.lunade.copper.tag.SCPItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -75,13 +75,13 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	private static final VoxelShape BACK_SMOOTH_SHAPE = Block.box(4D, 4D, 0D, 12D, 12D, 20D);
 	private static final Map<Direction, VoxelShape> BACK_SMOOTH_SHAPES = Shapes.rotateAll(BACK_SMOOTH_SHAPE);
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
-	public static final BooleanProperty FRONT_CONNECTED = SimpleCopperPipesBlockStateProperties.FRONT_CONNECTED;
-	public static final BooleanProperty BACK_CONNECTED = SimpleCopperPipesBlockStateProperties.BACK_CONNECTED;
-	public static final BooleanProperty SMOOTH = SimpleCopperPipesBlockStateProperties.SMOOTH;
+	public static final BooleanProperty FRONT_CONNECTED = SCPBlockStateProperties.FRONT_CONNECTED;
+	public static final BooleanProperty BACK_CONNECTED = SCPBlockStateProperties.BACK_CONNECTED;
+	public static final BooleanProperty SMOOTH = SCPBlockStateProperties.SMOOTH;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-	public static final EnumProperty<PipeFluid> FLUID = SimpleCopperPipesBlockStateProperties.FLUID;
-	public static final BooleanProperty HAS_ELECTRICITY = SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY;
+	public static final EnumProperty<PipeFluid> FLUID = SCPBlockStateProperties.FLUID;
+	public static final BooleanProperty HAS_ELECTRICITY = SCPBlockStateProperties.HAS_ELECTRICITY;
 	public static final MapCodec<CopperPipeBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		propertiesCodec(),
 		Codec.INT.fieldOf("dispense_shot_power").forGetter(copperPipe -> copperPipe.dispenseShotPower)
@@ -216,7 +216,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 		if (level.isClientSide()) return null;
 		return createTickerHelper(
 			blockEntityType,
-			SimpleCopperPipesBlockEntityTypes.COPPER_PIPE.get(),
+			SCPBlockEntityTypes.COPPER_PIPE.get(),
 			(level1, pos1, state1, blockEntity) -> blockEntity.serverTick(level1, pos1, state1)
 		);
 	}
@@ -244,13 +244,13 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
 		if (!(level.getBlockEntity(pos) instanceof CopperPipeBlockEntity copperPipeBlockEntity)) return InteractionResult.PASS;
 		player.openMenu(copperPipeBlockEntity);
-		player.awardStat(Stats.CUSTOM.get(SimpleCopperPipesStats.INSPECT_PIPE));
+		player.awardStat(Stats.CUSTOM.get(SCPStats.INSPECT_PIPE));
 		return InteractionResult.SUCCESS;
 	}
 
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-		if (stack.is(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)) return InteractionResult.PASS;
+		if (stack.is(SCPItemTags.IGNORES_COPPER_PIPE_MENU)) return InteractionResult.PASS;
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
@@ -421,7 +421,7 @@ public class CopperPipeBlock extends BaseEntityBlock implements SimpleWaterlogge
 
 	@Override
 	public boolean shouldChangedStateKeepBlockEntity(BlockState state) {
-		return state.is(SimpleCopperPipesBlockItemTags.COPPER_PIPES.block());
+		return state.is(SCPBlockItemTags.COPPER_PIPES.block());
 	}
 
 	@Override

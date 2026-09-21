@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import net.lunade.copper.SimpleCopperPipesConstants;
+import net.lunade.copper.SCPConstants;
 import net.lunade.copper.block.entity.AbstractSimpleCopperBlockEntity;
 import net.lunade.copper.block.entity.CopperPipeBlockEntity;
 import net.lunade.copper.registry.TransferablePipeData;
@@ -26,8 +26,7 @@ public class TransferablePipeDataHandler {
 	public ArrayList<SaveableTransferablePipeData> savedData = new ArrayList<>();
 	public ArrayList<Identifier> savedIds = new ArrayList<>();
 
-	public TransferablePipeDataHandler() {
-	}
+	public TransferablePipeDataHandler() {}
 
 	public void load(ValueInput input) {
 		input.read("transferablePipeData", SaveableTransferablePipeData.CODEC.listOf()).ifPresent(list -> {
@@ -162,7 +161,7 @@ public class TransferablePipeDataHandler {
 				this.string = "noEntity";
 			}
 			this.blockPos = pipePos;
-			this.ID = Identifier.tryBuild(SimpleCopperPipesConstants.MOD_ID, "default");
+			this.ID = Identifier.tryBuild(SCPConstants.MOD_ID, "default");
 			this.useCount = 0;
 			this.canOnlyGoThroughOnePipe = false;
 			this.canOnlyBeUsedOnce = false;
@@ -181,7 +180,7 @@ public class TransferablePipeDataHandler {
 				this.string = "noEntity";
 			}
 			this.blockPos = pipePos;
-			this.ID = Identifier.tryBuild(SimpleCopperPipesConstants.MOD_ID, "default");
+			this.ID = Identifier.tryBuild(SCPConstants.MOD_ID, "default");
 			this.useCount = 0;
 			this.canOnlyGoThroughOnePipe = false;
 			this.canOnlyBeUsedOnce = false;
@@ -191,12 +190,12 @@ public class TransferablePipeDataHandler {
 		}
 
 		public SaveableTransferablePipeData() {
-			this.savedID = Identifier.tryBuild(SimpleCopperPipesConstants.MOD_ID, "none");
+			this.savedID = Identifier.tryBuild(SCPConstants.MOD_ID, "none");
 			this.vec3d = new Vec3(0, -64, 0);
 			this.vec3d2 = new Vec3(0, -64, 0);
 			this.string = "none";
 			this.blockPos = new BlockPos(0, -64, 0);
-			this.ID = Identifier.tryBuild(SimpleCopperPipesConstants.MOD_ID, "none");
+			this.ID = Identifier.tryBuild(SCPConstants.MOD_ID, "none");
 			this.useCount = 0;
 			this.canOnlyGoThroughOnePipe = false;
 			this.canOnlyBeUsedOnce = false;

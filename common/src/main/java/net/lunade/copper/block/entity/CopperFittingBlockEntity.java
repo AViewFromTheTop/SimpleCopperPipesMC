@@ -3,8 +3,8 @@ package net.lunade.copper.block.entity;
 import net.frozenblock.lib.transfer.api.TransferApi;
 import net.lunade.copper.block.CopperFittingBlock;
 import net.lunade.copper.block.CopperPipeBlock;
-import net.lunade.copper.config.SimpleCopperPipesConfig;
-import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
+import net.lunade.copper.config.SCPConfig;
+import net.lunade.copper.registry.SCPBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -24,7 +24,7 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 	public int transferCooldown;
 
 	public CopperFittingBlockEntity(BlockPos pos, BlockState state) {
-		super(SimpleCopperPipesBlockEntityTypes.COPPER_FITTING.get(), pos, state, MoveType.FROM_FITTING);
+		super(SCPBlockEntityTypes.COPPER_FITTING.get(), pos, state, MoveType.FROM_FITTING);
 	}
 
 	public static boolean canTransfer(Level level, BlockPos pos, Direction direction, boolean to) {
@@ -99,7 +99,7 @@ public class CopperFittingBlockEntity extends AbstractSimpleCopperBlockEntity {
 
 	@Override
 	public void updateBlockEntityValues(LevelReader level, BlockPos pos, BlockState state) {
-		if (state.getBlock() instanceof CopperFittingBlock) this.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.CARRY_WATER.get();
+		if (state.getBlock() instanceof CopperFittingBlock) this.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SCPConfig.CARRY_WATER.get();
 	}
 
 	@Override

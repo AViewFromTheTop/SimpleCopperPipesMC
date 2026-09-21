@@ -3,12 +3,12 @@ package net.lunade.copper.block;
 import com.mojang.serialization.MapCodec;
 import net.lunade.copper.block.entity.CopperFittingBlockEntity;
 import net.lunade.copper.block.properties.PipeFluid;
-import net.lunade.copper.config.SimpleCopperPipesConfig;
-import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
-import net.lunade.copper.registry.SimpleCopperPipesBlockStateProperties;
-import net.lunade.copper.registry.SimpleCopperPipesStats;
-import net.lunade.copper.tag.SimpleCopperPipesBlockItemTags;
-import net.lunade.copper.tag.SimpleCopperPipesItemTags;
+import net.lunade.copper.config.SCPConfig;
+import net.lunade.copper.registry.SCPBlockEntityTypes;
+import net.lunade.copper.registry.SCPBlockStateProperties;
+import net.lunade.copper.registry.SCPStats;
+import net.lunade.copper.tag.SCPBlockItemTags;
+import net.lunade.copper.tag.SCPItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -56,8 +56,8 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	public static final MapCodec<CopperFittingBlock> CODEC = simpleCodec(CopperFittingBlock::new);
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
-	public static final EnumProperty<PipeFluid> FLUID = SimpleCopperPipesBlockStateProperties.FLUID;
-	public static final BooleanProperty HAS_ELECTRICITY = SimpleCopperPipesBlockStateProperties.HAS_ELECTRICITY;
+	public static final EnumProperty<PipeFluid> FLUID = SCPBlockStateProperties.FLUID;
+	public static final BooleanProperty HAS_ELECTRICITY = SCPBlockStateProperties.HAS_ELECTRICITY;
 	private static final VoxelShape FITTING_SHAPE = Block.box(3D, 3D, 3D, 13D, 13D, 13D);
 
 	public CopperFittingBlock(Properties properties) {
@@ -73,7 +73,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 	public static void updateBlockEntityValues(Level level, BlockPos pos, BlockState state) {
 		if (!(state.getBlock() instanceof CopperFittingBlock)) return;
 		if (!(level.getBlockEntity(pos) instanceof CopperFittingBlockEntity fitting)) return;
-		fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SimpleCopperPipesConfig.CARRY_WATER.get();
+		fitting.canWater = state.getValue(BlockStateProperties.WATERLOGGED) && SCPConfig.CARRY_WATER.get();
 	}
 
 	@Override
@@ -132,7 +132,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 		if (level.isClientSide()) return null;
 		return createTickerHelper(
 			blockEntityType,
-			SimpleCopperPipesBlockEntityTypes.COPPER_FITTING.get(),
+			SCPBlockEntityTypes.COPPER_FITTING.get(),
 			(level1, pos1, state1, blockEntity) -> blockEntity.serverTick(level1, pos1, state1)
 		);
 	}
@@ -151,16 +151,16 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-		if (!SimpleCopperPipesConfig.OPENABLE_FITTINGS.get()) return super.useWithoutItem(state, level, pos, player, hitResult);
+		if (!SCPConfig.OPENABLE_FITTINGS.get()) return super.useWithoutItem(state, level, pos, player, hitResult);
 		if (!(level.getBlockEntity(pos) instanceof CopperFittingBlockEntity fittingEntity)) return InteractionResult.PASS;
 		player.openMenu(fittingEntity);
-		player.awardStat(Stats.CUSTOM.get(SimpleCopperPipesStats.INSPECT_FITTING));
+		player.awardStat(Stats.CUSTOM.get(SCPStats.INSPECT_FITTING));
 		return InteractionResult.SUCCESS;
 	}
 
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-		if (stack.is(SimpleCopperPipesItemTags.IGNORES_COPPER_PIPE_MENU)) return InteractionResult.PASS;
+		if (stack.is(SCPItemTags.IGNORES_COPPER_PIPE_MENU)) return InteractionResult.PASS;
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
@@ -211,7 +211,7 @@ public class CopperFittingBlock extends BaseEntityBlock implements SimpleWaterlo
 
 	@Override
 	public boolean shouldChangedStateKeepBlockEntity(BlockState state) {
-		return state.is(SimpleCopperPipesBlockItemTags.COPPER_FITTINGS.block());
+		return state.is(SCPBlockItemTags.COPPER_FITTINGS.block());
 	}
 
 	@Override

@@ -4,12 +4,13 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
-@Mod(SimpleCopperPipesConstants.MOD_ID)
-public class SimpleCopperPipesNeoForge {
+@Mod(SCPConstants.MOD_ID)
+public final class SimpleCopperPipesNeoForge {
 
 	public SimpleCopperPipesNeoForge(IEventBus modBus) {
 		SimpleCopperPipes.init();
 
+		// AFTER register event
 		modBus.addListener(FMLCommonSetupEvent.class, event -> {
 			SimpleCopperPipes.setup();
 		});

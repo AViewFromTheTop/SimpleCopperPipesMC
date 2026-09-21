@@ -8,13 +8,13 @@ import net.lunade.copper.block.CopperPipeBlock;
 import net.lunade.copper.block.entity.data.TransferablePipeDataHandler;
 import net.lunade.copper.block.entity.leaking.LeakingPipeManager;
 import net.lunade.copper.block.properties.PipeFluid;
-import net.lunade.copper.config.SimpleCopperPipesConfig;
+import net.lunade.copper.config.SCPConfig;
 import net.lunade.copper.registry.CopperPipeDispenseBehaviors;
 import net.lunade.copper.registry.PipeMovementRestrictions;
-import net.lunade.copper.registry.SimpleCopperPipesBlockEntityTypes;
-import net.lunade.copper.registry.SimpleCopperPipesSoundEvents;
-import net.lunade.copper.tag.SimpleCopperPipesBlockItemTags;
-import net.lunade.copper.tag.SimpleCopperPipesBlockTags;
+import net.lunade.copper.registry.SCPBlockEntityTypes;
+import net.lunade.copper.registry.SCPSoundEvents;
+import net.lunade.copper.tag.SCPBlockItemTags;
+import net.lunade.copper.tag.SCPBlockTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -66,7 +66,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 	private VibrationSystem.Data vibrationData;
 
 	public CopperPipeBlockEntity(BlockPos pos, BlockState state) {
-		super(SimpleCopperPipesBlockEntityTypes.COPPER_PIPE.get(), pos, state, MoveType.FROM_PIPE);
+		super(SCPBlockEntityTypes.COPPER_PIPE.get(), pos, state, MoveType.FROM_PIPE);
 		this.noteBlockCooldown = 0;
 		this.vibrationUser = this.createVibrationUser();
 		this.vibrationData = new VibrationSystem.Data();
@@ -173,7 +173,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		// ENTRY
 		boolean isEntrySupported = state.getValue(CopperPipeBlock.BACK_CONNECTED);
 		if (!isEntrySupported) {
-			final boolean checkEntrySupportShape = oppositeState.is(SimpleCopperPipesBlockTags.COPPER_PIPE_CHECKS_SUPPORT_SHAPE);
+			final boolean checkEntrySupportShape = oppositeState.is(SCPBlockTags.COPPER_PIPE_CHECKS_SUPPORT_SHAPE);
 			if (checkEntrySupportShape) {
 				final VoxelShape pipeEntryShape = pipeShape.getFaceShape(opposite);
 				final VoxelShape supportingShape = oppositeState.getBlockSupportShape(level, oppositePos).getFaceShape(facing);
@@ -186,7 +186,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 
 		// EXIT
 		boolean isExitBlocked;
-		final boolean checkExitSupportShape = facingState.is(SimpleCopperPipesBlockTags.COPPER_PIPE_CHECKS_SUPPORT_SHAPE);
+		final boolean checkExitSupportShape = facingState.is(SCPBlockTags.COPPER_PIPE_CHECKS_SUPPORT_SHAPE);
 		if (checkExitSupportShape) {
 			final VoxelShape pipeExitShape = pipeShape.getFaceShape(facing);
 			final VoxelShape facingShape = facingState.getBlockSupportShape(level, facingPos).getFaceShape(opposite);
@@ -199,10 +199,10 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		this.canDispense = isEntrySupported && !isExitBlocked;
 		this.dispenseType = oppositeBlock == Blocks.DROPPER ? DispenseType.DROPPER : oppositeBlock == Blocks.DISPENSER ? DispenseType.DISPENSER : DispenseType.NONE;
 		this.canAcceptGameEvents = !isEntrySupported;
-		this.canWater = SimpleCopperPipesConfig.CARRY_WATER.get() && (oppositeFluidState.is(FluidTags.WATER) || state.getValue(BlockStateProperties.WATERLOGGED) || oppositeState.getValueOrElse(BlockStateProperties.WATERLOGGED, false));
-		this.canLava =  SimpleCopperPipesConfig.CARRY_LAVA.get() && oppositeFluidState.is(FluidTags.LAVA);
+		this.canWater = SCPConfig.CARRY_WATER.get() && (oppositeFluidState.is(FluidTags.WATER) || state.getValue(BlockStateProperties.WATERLOGGED) || oppositeState.getValueOrElse(BlockStateProperties.WATERLOGGED, false));
+		this.canLava =  SCPConfig.CARRY_LAVA.get() && oppositeFluidState.is(FluidTags.LAVA);
 		final boolean canWaterAndLava = this.canWater && this.canLava;
-		this.canSmoke = SimpleCopperPipesConfig.CARRY_SMOKE.get() && (oppositeBlock instanceof CampfireBlock && !this.canWater && !this.canLava ? oppositeState.getValue(BlockStateProperties.LIT) : canWaterAndLava);
+		this.canSmoke = SCPConfig.CARRY_SMOKE.get() && (oppositeBlock instanceof CampfireBlock && !this.canWater && !this.canLava ? oppositeState.getValue(BlockStateProperties.LIT) : canWaterAndLava);
 		if (canWaterAndLava) {
 			this.canWater = false;
 			this.canLava = false;
@@ -218,8 +218,8 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		setCooldown(state);
 		setChanged(level, pos, state);
 		if (movedIn == 3) {
-			if (!SimpleCopperPipesConfig.SUCTION_SOUNDS.get()) return;
-			level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_IN.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+			if (!SCPConfig.SUCTION_SOUNDS.get()) return;
+			level.playSound(null, pos, SCPSoundEvents.ITEM_IN.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 		}
 	}
 
@@ -231,7 +231,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		final int moved = TransferApi.moveItems(level, facingAwayPos, facing, pos, facingAway, null, MAX_TRANSFER_AMOUNT);
 		if (moved <= 0) return 0;
 
-		if (state.is(SimpleCopperPipesBlockTags.SILENT_COPPER_PIPES)) return 2;
+		if (state.is(SCPBlockTags.SILENT_COPPER_PIPES)) return 2;
 
 		final Block block = level.getBlockState(facingAwayPos).getBlock();
 		if (!(block instanceof CopperPipeBlock) && !(block instanceof CopperFittingBlock)) return 3;
@@ -263,14 +263,14 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		int shotPower = 4;
 		if (this.dispenseType == DispenseType.DROPPER) { //If Dropper
 			shotPower = 10;
-			if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) {
-				level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+			if (SCPConfig.DISPENSE_SOUNDS.get()) {
+				level.playSound(null, pos, SCPSoundEvents.LAUNCH.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 			}
 		} else if (this.dispenseType == DispenseType.DISPENSER) { //If Dispenser, Use Pipe-Specific Launch Length
 			if (state.getBlock() instanceof CopperPipeBlock pipe) {
 				shotPower = pipe.dispenseShotPower;
-				if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) {
-					level.playSound(null, pos, SimpleCopperPipesSoundEvents.LAUNCH.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+				if (SCPConfig.DISPENSE_SOUNDS.get()) {
+					level.playSound(null, pos, SCPSoundEvents.LAUNCH.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 				}
 			} else {
 				shotPower = 12;
@@ -278,7 +278,7 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 		}
 
 		final Direction facing = state.getValue(BlockStateProperties.FACING);
-		final boolean silent = state.is(SimpleCopperPipesBlockTags.SILENT_COPPER_PIPES);
+		final boolean silent = state.is(SCPBlockTags.SILENT_COPPER_PIPES);
 		if (level.getBlockState(pos.relative(facing.getOpposite())).getBlock() instanceof CopperFittingBlock) {
 			shotItem = canonShoot(level, pos, stack, state, facing, shotPower, true, silent);
 		} else {
@@ -308,21 +308,21 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 				usableStack = stack.split(1);
 				poweredDispense.dispense(level, usableStack, shotPower, facing, output, state, pos, this);
 				if (!fitting && !silent) {
-					if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+					if (SCPConfig.DISPENSE_SOUNDS.get()) level.playSound(null, pos, SCPSoundEvents.ITEM_OUT.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 					level.gameEvent(GameEvent.ENTITY_PLACE, pos, new GameEvent.Context(null, state));
 				}
 				return stack;
 			}
 		}
 
-		if (SimpleCopperPipesConfig.DISPENSING.get()) {
+		if (SCPConfig.DISPENSING.get()) {
 			usableStack = stack.split(1);
 			level.levelEvent(LevelEvent.PARTICLES_SHOOT_SMOKE, pos, facing.get3DDataValue());
 			spawnItem(level, usableStack, shotPower, facing, output, facing);
 			if (!silent) {
 				level.gameEvent(GameEvent.ENTITY_PLACE, pos, new GameEvent.Context(null, state));
-				if (SimpleCopperPipesConfig.DISPENSE_SOUNDS.get()) {
-					level.playSound(null, pos, SimpleCopperPipesSoundEvents.ITEM_OUT.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
+				if (SCPConfig.DISPENSE_SOUNDS.get()) {
+					level.playSound(null, pos, SCPSoundEvents.ITEM_OUT.get(), SoundSource.BLOCKS, 0.2F, (level.getRandom().nextFloat() * 0.25F) + 0.8F);
 				}
 			}
 		}
@@ -432,11 +432,11 @@ public class CopperPipeBlockEntity extends AbstractSimpleCopperBlockEntity imple
 
 		@Override
 		public boolean canReceiveVibration(ServerLevel level, BlockPos pos, Holder<GameEvent> gameEvent, @Nullable GameEvent.Context context) {
-			if (!SimpleCopperPipesConfig.SENSE_GAME_EVENTS.get()) return false;
+			if (!SCPConfig.SENSE_GAME_EVENTS.get()) return false;
 			if (pos == this.blockPos && (gameEvent == GameEvent.BLOCK_DESTROY || gameEvent == GameEvent.BLOCK_PLACE)) return false;
 
 			if (CopperPipeBlockEntity.this.canAcceptGameEvents) {
-				if (context != null && context.affectedState() != null && context.affectedState().is(SimpleCopperPipesBlockItemTags.COPPER_PIPES.block())) return false;
+				if (context != null && context.affectedState() != null && context.affectedState().is(SCPBlockItemTags.COPPER_PIPES.block())) return false;
 				CopperPipeBlockEntity.this.transferableDataHandler.addSaveableMoveablePipeNbt(
 					new TransferablePipeDataHandler.SaveableTransferablePipeData(
 						gameEvent.value(),

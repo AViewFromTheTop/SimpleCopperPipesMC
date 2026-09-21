@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class PipeMovementRestrictions {
+public final class PipeMovementRestrictions {
 	public static Map<Identifier, PipeMovementRestriction> PIPE_MOVEMENT_RESTRICTIONS = new Object2ObjectLinkedOpenHashMap<>();
 
 	public static <T extends BlockEntity> void register(Identifier id, CanTransferTo<T> canTransferTo, CanTakeFrom<T> canTakeFrom) {
@@ -55,6 +55,7 @@ public class PipeMovementRestrictions {
 		boolean canTake(ServerLevel level, BlockPos pos, BlockState state, CopperPipeBlockEntity pipe, T toEntity);
 	}
 
-	public record PipeMovementRestriction<T extends BlockEntity>(CanTransferTo<T> canTransferTo, CanTakeFrom<T> canTakeFrom) {
-	}
+	public record PipeMovementRestriction<T extends BlockEntity>(CanTransferTo<T> canTransferTo, CanTakeFrom<T> canTakeFrom) {}
+
+	private PipeMovementRestrictions() {}
 }

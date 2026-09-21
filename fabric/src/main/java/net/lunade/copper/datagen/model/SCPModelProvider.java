@@ -4,9 +4,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
-import net.lunade.copper.SimpleCopperPipesConstants;
+import net.lunade.copper.SCPConstants;
 import net.lunade.copper.block.CopperPipeBlock;
-import net.lunade.copper.registry.SimpleCopperPipesBlocks;
+import net.lunade.copper.registry.SCPBlocks;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.blockstates.BlockModelDefinitionGenerator;
@@ -19,54 +19,54 @@ import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 
-public final class SimpleCopperPipesModelProvider extends FabricModelProvider {
+public final class SCPModelProvider extends FabricModelProvider {
 	private static final ModelTemplate PIPE_MODEL = new ModelTemplate(
-		Optional.of(SimpleCopperPipesConstants.id("block/template_pipe")),
+		Optional.of(SCPConstants.id("block/template_pipe")),
 		Optional.empty(),
 		TextureSlot.SIDE,
 		TextureSlot.FRONT
 	);
 	private static final ModelTemplate PIPE_MODEL_BACK = new ModelTemplate(
-		Optional.of(SimpleCopperPipesConstants.id("block/template_pipe_back_extension")),
+		Optional.of(SCPConstants.id("block/template_pipe_back_extension")),
 		Optional.empty(),
 		TextureSlot.SIDE,
 		TextureSlot.FRONT
 	);
 	private static final ModelTemplate PIPE_MODEL_BACK_SMOOTH = new ModelTemplate(
-		Optional.of(SimpleCopperPipesConstants.id("block/template_pipe_back_smooth")),
+		Optional.of(SCPConstants.id("block/template_pipe_back_smooth")),
 		Optional.empty(),
 		TextureSlot.SIDE
 	);
 	private static final ModelTemplate PIPE_MODEL_DOUBLE_EXTENSION = new ModelTemplate(
-		Optional.of(SimpleCopperPipesConstants.id("block/template_pipe_double_extension")),
+		Optional.of(SCPConstants.id("block/template_pipe_double_extension")),
 		Optional.empty(),
 		TextureSlot.SIDE
 	);
 	private static final ModelTemplate PIPE_MODEL_FRONT_EXTENSION = new ModelTemplate(
-		Optional.of(SimpleCopperPipesConstants.id("block/template_pipe_front_extension")),
+		Optional.of(SCPConstants.id("block/template_pipe_front_extension")),
 		Optional.empty(),
 		TextureSlot.SIDE,
 		TextureSlot.FRONT
 	);
 	private static final ModelTemplate PIPE_MODEL_SMOOTH = new ModelTemplate(
-		Optional.of(SimpleCopperPipesConstants.id("block/template_pipe_smooth")),
+		Optional.of(SCPConstants.id("block/template_pipe_smooth")),
 		Optional.empty(),
 		TextureSlot.SIDE,
 		TextureSlot.FRONT
 	);
 	private static final ModelTemplate FITTING_MODEL = new ModelTemplate(
-		Optional.of(SimpleCopperPipesConstants.id("block/template_fitting")),
+		Optional.of(SCPConstants.id("block/template_fitting")),
 		Optional.empty(),
 		TextureSlot.TEXTURE
 	);
-	public SimpleCopperPipesModelProvider(FabricPackOutput output) {
+	public SCPModelProvider(FabricPackOutput output) {
 		super(output);
 	}
 
 	@Override
 	public void generateBlockStateModels(BlockModelGenerators generators) {
-		SimpleCopperPipesBlocks.COPPER_PIPE.zipUnwaxedWaxed((block, waxedBlock) -> createPipe(generators, block.get(), waxedBlock.get()));
-		SimpleCopperPipesBlocks.COPPER_FITTING.zipUnwaxedWaxed((block, waxedBlock) -> createFitting(generators, block.get(), waxedBlock.get()));
+		SCPBlocks.COPPER_PIPE.zipUnwaxedWaxed((block, waxedBlock) -> createPipe(generators, block.get(), waxedBlock.get()));
+		SCPBlocks.COPPER_FITTING.zipUnwaxedWaxed((block, waxedBlock) -> createFitting(generators, block.get(), waxedBlock.get()));
 	}
 
 	@Override

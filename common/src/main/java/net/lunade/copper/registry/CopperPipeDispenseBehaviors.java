@@ -15,7 +15,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class CopperPipeDispenseBehaviors {
+public final class CopperPipeDispenseBehaviors {
 	private static final Map<ItemLike, PoweredDispense> ITEMS_TO_DISPENSES = new Object2ObjectLinkedOpenHashMap<>();
 
 	public static void register(ItemLike item, PoweredDispense dispense) {
@@ -77,4 +77,5 @@ public class CopperPipeDispenseBehaviors {
 		void dispense(ServerLevel level, ItemStack stack, int shotPower, Direction direction, Position position, BlockState state, BlockPos pos, CopperPipeBlockEntity pipe);
 	}
 
+	private CopperPipeDispenseBehaviors() {}
 }

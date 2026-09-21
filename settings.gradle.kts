@@ -70,14 +70,14 @@ localRepository("The-Copperier-Age",
     "net.frozenblock:the-copperier-age",
     prefix = "tca",
     multi = true,
-    enabled = true
+    enabled = false
 )
 
 localRepository("FrozenLib",
     "net.frozenblock:frozenlib",
     prefix = "flib",
     multi = true,
-    enabled = true
+    enabled = false
 )
 
 localPluginRepository(

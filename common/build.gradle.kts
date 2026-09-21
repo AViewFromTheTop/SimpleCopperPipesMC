@@ -12,6 +12,7 @@ checkstyle {
 val mod_id: String by project
 val frozenlib_version: String by project
 val cloth_config_version: String by project
+val thecopperierage_version: String by project
 
 common {
     accessWidener()
@@ -27,6 +28,9 @@ dependencies {
         accessTransformers(it)
         interfaceInjectionData(it)
     }
+
+    // The Copperier Age
+    implementation("net.frozenblock:thecopperierage-common:$thecopperierage_version")
 
     // Cloth Config
     compileOnly("me.shedaniel.cloth:cloth-config:$cloth_config_version")
